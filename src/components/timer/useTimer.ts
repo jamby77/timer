@@ -18,7 +18,9 @@ const useTimer = create<TimerState>()((set, get) => {
     phase: undefined,
     pause: () => {
       set((state) => {
-        clearInterval(state.timerId);
+        if (state.timerId) {
+          clearInterval(state.timerId);
+        }
         return {
           timerId: -1,
           running: TimerStateEnum.paused,
@@ -36,16 +38,22 @@ const useTimer = create<TimerState>()((set, get) => {
           if (state.endTime && time > state.endTime) {
             get().stop();
           }
-          const stateUpdate = { time, currentTime, currentInterval: undefined, phase: undefined };
+          const stateUpdate: Partial<TimerState> = {
+            time,
+            currentTime,
+            currentRound: undefined,
+            phase: undefined,
+          };
           if (state.intervals?.intervals && state.intervals?.intervals?.length > 0) {
             // we have intervals
-            const { currentInterval, phase } = getCurrentIntervalAndPhase(time, state.intervals);
-            // @ts-ignore
-            stateUpdate.currentInterval = currentInterval;
-            // @ts-ignore
+            const { currentRound, phase, totalRounds } = getCurrentIntervalAndPhase(
+              time,
+              state.intervals,
+            );
+            stateUpdate.currentRound = currentRound;
+            stateUpdate.totalRounds = totalRounds;
             stateUpdate.phase = phase;
           } else {
-            // @ts-ignore
             stateUpdate.phase = "work";
           }
           return stateUpdate;
@@ -73,7 +81,9 @@ const useTimer = create<TimerState>()((set, get) => {
     },
     stop: () => {
       set((state) => {
-        clearInterval(state.timerId);
+        if (state.timerId) {
+          clearInterval(state.timerId);
+        }
         return {
           timerId: -1,
           running: TimerStateEnum.stopped,

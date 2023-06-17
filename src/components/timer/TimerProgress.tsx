@@ -1,24 +1,43 @@
 import cn from "clsx";
 
+import { IntervalPhase } from "@/components/timer/index";
+
 interface TimerProgressProps {
-  currentInterval?: number;
+  currentRound?: number;
+  totalRounds?: number;
   phase?: IntervalPhase;
 }
-export default function TimerProgress({ currentInterval, phase = "work" }: TimerProgressProps) {
-  if (!currentInterval) {
+export default function TimerProgress({
+  currentRound,
+  totalRounds,
+  phase = "work",
+}: TimerProgressProps) {
+  if (!currentRound) {
     return null;
   }
   return (
-    <div className="flex items-baseline gap-1">
-      <span className="text-gray-md text-lg">Round: </span>
+    <div className="flex flex-col items-center gap-1">
       <div
-        className={cn("text-3xl", {
-          "text-green": phase === "rest",
-          "text-yellow": phase === "work",
+        className={cn("flex items-baseline whitespace-nowrap text-3xl", {
+          "text-green-500": phase === "rest",
+          "text-yellow-700 ": phase === "work",
+          after: phase === "work",
         })}
       >
-        {currentInterval}&nbsp;
-        {phase}
+        {currentRound} / {totalRounds}
+      </div>
+      <div className="text-6xl ">
+        <span
+          className={cn("block transition-all", {
+            "animation-none collapse opacity-0": phase === "rest",
+            "animate-pulse": phase === "work",
+          })}
+        >
+          🚴‍♂️🏋️‍♂️🏊‍♂️🤸‍♂️🏃‍♂️
+        </span>
+        <span className={cn("block transition-all", { "collapse opacity-0": phase === "work" })}>
+          🩴🏖🌊
+        </span>
       </div>
     </div>
   );

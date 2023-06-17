@@ -17,7 +17,8 @@ export function Timer({ config }: { config?: Omit<TimerState, "stop" | "start" |
   const start = useTimer((state) => state.start);
   const stop = useTimer((state) => state.stop);
   const pause = useTimer((state) => state.pause);
-  const currentInterval = useTimer((state) => state.currentInterval);
+  const currentRound = useTimer((state) => state.currentRound);
+  const totalRounds = useTimer((state) => state.totalRounds);
   const intervals = useTimer((state) => state.intervals);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function Timer({ config }: { config?: Omit<TimerState, "stop" | "start" |
         <TimerControls running={running} onStart={start} onPause={pause} onStop={stop} />
         <TimerDisplay time={time} phase={phase} />
 
-        <TimerProgress currentInterval={currentInterval} phase={phase} />
+        <TimerProgress currentRound={currentRound} phase={phase} totalRounds={totalRounds} />
         <IntervalDescription intervals={intervals} />
         <div className="text-sm uppercase text-slate-400">
           {running === TimerStateEnum.running && "running"}

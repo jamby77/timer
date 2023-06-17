@@ -5,8 +5,9 @@ interface TimerState {
   running: TimerStateEnum;
   currentTime: number;
   time: number;
-  timerId: number;
-  currentInterval?: number;
+  timerId?: number | null;
+  currentRound?: number;
+  totalRounds?: number;
   phase?: IntervalPhase;
   intervals?: IntervalsInterface;
   endTime?: number;

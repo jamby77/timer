@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { IntervalsInterface } from "@/components/timer/index";
+import { TimerStateEnum } from "@/components/timer/utilities";
 import { Timer } from "./Timer";
 
 const meta: Meta<typeof Timer> = {
@@ -21,3 +22,14 @@ const intervals: IntervalsInterface = {
   ],
 };
 export const TimerDefault: Story = {};
+export const TimerInterval: Story = {
+  args: {
+    config: {
+      currentTime: 0,
+      startTime: 0,
+      time: 0,
+      running: TimerStateEnum.initial,
+      intervals,
+    },
+  },
+};

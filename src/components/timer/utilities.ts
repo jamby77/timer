@@ -8,21 +8,20 @@ export enum TimerStateEnum {
 }
 
 export function timeToString(time: TimeStruct): string {
-  let res = "";
+  let res: string[] = [];
   if (time.hours > 0) {
-    res += `${time.hours} hr,`;
+    res.push(`${time.hours} hr`);
   }
   if (time.minutes) {
-    res += `${time.minutes} min,`;
+    res.push(`${time.minutes} min`);
   }
   if (time.seconds) {
-    res += `${time.seconds} sec,`;
+    res.push(`${time.seconds} sec`);
   }
   if (time.milliseconds) {
-    res += `${time.milliseconds} ms`;
+    res.push(`${time.milliseconds} ms`);
   }
-  res = res.replace(/,$/, "");
-  return res;
+  return res.join(", ");
 }
 
 export function msToTime(time?: number): TimeStruct {
@@ -78,35 +77,33 @@ export const getIntervalDuration = (intervalsConfig?: IntervalsInterface) => {
 export const getCurrentIntervalAndPhase = (time: number, intervalsConfig: IntervalsInterface) => {
   const { intervals } = intervalsConfig;
   const result: {
-    currentInterval: number;
+    currentRound: number;
+    totalRounds: number;
     phase: IntervalPhase;
   } = {
-    currentInterval: 0,
+    currentRound: 0,
+    totalRounds: 0,
     phase: "work",
   };
   let intervalTime = 0;
 
   intsLoop: for (let int of intervals) {
     const { work, rest, rounds } = int;
-    // if (time < intervalTime) {
-    //   result.currentInterval = 1;
-    //   result.phase = time <= work ? "work" : "rest";
-    //   break;
-    // }
-    // we're beyond 1st round
     for (let i = 1; i <= rounds; i++) {
       // loop over rounds and add time until work + rest
       intervalTime += work;
       if (time < intervalTime) {
-        result.currentInterval = i;
+        result.currentRound = i;
         result.phase = "work";
+        result.totalRounds = rounds;
         break intsLoop;
       }
 
       intervalTime += rest;
       if (time < intervalTime) {
-        result.currentInterval = i;
+        result.currentRound = i;
         result.phase = "rest";
+        result.totalRounds = rounds;
         break intsLoop;
       }
     }
