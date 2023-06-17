@@ -26,16 +26,20 @@ export default function TimerProgress({
       >
         {currentRound} / {totalRounds}
       </div>
-      <div className="text-6xl ">
+      <div className="relative h-16 w-80 text-6xl">
         <span
-          className={cn("block transition-all", {
+          className={cn("absolute top-0 mx-auto block whitespace-nowrap transition-all", {
             "animation-none collapse opacity-0": phase === "rest",
             "animate-pulse": phase === "work",
           })}
         >
-          🚴‍♂️🏋️‍♂️🏊‍♂️🤸‍♂️🏃‍♂️
+          🚴‍️🏋️‍♂️🏊‍🤸🏃
         </span>
-        <span className={cn("block transition-all", { "collapse opacity-0": phase === "work" })}>
+        <span
+          className={cn("absolute top-0 mx-auto block whitespace-nowrap transition-all", {
+            "collapse opacity-0": phase === "work",
+          })}
+        >
           🩴🏖🌊
         </span>
       </div>
