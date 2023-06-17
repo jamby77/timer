@@ -1,0 +1,21 @@
+{
+  "printWidth": 100,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": false,
+  "endOfLine": "lf",
+  "importOrder": [
+    "^react$",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^@/components/*",
+    "^@/utilities/*",
+    "^[./]",
+    ""
+  ],
+  "importOrderBuiltinModulesToTop": true,
+  "importOrderParserPlugins": ["typescript", "jsx"],
+  "tailwindFunctions": ["clsx", "cn"],
+  "plugins": ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"]
+}
