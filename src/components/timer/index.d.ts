@@ -1,3 +1,5 @@
+import { TimerStateEnum } from "@/components/timer/utilities";
+
 interface TimerState {
   startTime: number;
   running: TimerStateEnum;
@@ -12,6 +14,7 @@ interface TimerState {
   stop: () => void;
   pause: () => void;
 }
+
 type IntervalPhase = "work" | "rest";
 type Interval = {
   work: number;

@@ -1,5 +1,6 @@
 import cn from "clsx";
 
+import { IntervalPhase } from "@/components/timer/index";
 import { msToTime, toFixedDigits } from "@/components/timer/utilities";
 
 /**
@@ -8,25 +9,19 @@ import { msToTime, toFixedDigits } from "@/components/timer/utilities";
  * @param phase {IntervalPhase} are we working or resting
  */
 const TimerDisplay = ({ time, phase }: { time: number; phase?: IntervalPhase }) => {
-  // if (time > 3000) {
-  //   debugger;
-  // }
-  const { hours: hrs, minutes, seconds, milliseconds: ms } = msToTime(time);
+  const { hours: hrs = 0, minutes = 0, seconds = 0, milliseconds: ms = 0 } = msToTime(time);
 
   return (
     <div
       className={cn(
-        "timer-container flex flex-row items-baseline gap-1 whitespace-nowrap font-mono text-2xl font-normal",
+        "timer-container flex h-10 flex-row items-baseline gap-1 whitespace-nowrap font-mono text-2xl font-normal",
         {
-          "text-green": phase === "rest",
-          "text-yellow": phase === "work",
+          "text-green-500": phase === "rest",
+          "text-yellow-700": phase === "work",
         },
       )}
     >
-      <div className={cn("hrs", { "text-ref text-3xl font-bold": hrs > 0 })}>
-        {toFixedDigits(hrs)}
-      </div>
-      :
+      <div className={cn("hrs", { "text-3xl font-bold": hrs > 0 })}>{toFixedDigits(hrs)}</div>:
       <div className={cn("min", { "text-3xl font-bold": minutes > 0 })}>
         {toFixedDigits(minutes % 60)}
       </div>

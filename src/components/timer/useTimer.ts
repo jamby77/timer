@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { TimerState } from "@/components/timer/index";
 import {
   getCurrentIntervalAndPhase,
   getIntervalDuration,
@@ -14,6 +15,7 @@ const useTimer = create<TimerState>()((set, get) => {
     timerId: -1,
     time: 0,
     intervals: undefined,
+    phase: undefined,
     pause: () => {
       set((state) => {
         clearInterval(state.timerId);
@@ -42,6 +44,9 @@ const useTimer = create<TimerState>()((set, get) => {
             stateUpdate.currentInterval = currentInterval;
             // @ts-ignore
             stateUpdate.phase = phase;
+          } else {
+            // @ts-ignore
+            stateUpdate.phase = "work";
           }
           return stateUpdate;
         });

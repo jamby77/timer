@@ -1,89 +1,45 @@
 "use client";
 
-import cn from "clsx";
+import { useEffect } from "react";
 
+import { TimerState } from "@/components/timer/index";
+import IntervalDescription from "@/components/timer/IntervalDescription";
+import TimerControls from "@/components/timer/TimerControls";
 import TimerDisplay from "@/components/timer/TimerDisplay";
+import TimerProgress from "@/components/timer/TimerProgress";
 import useTimer from "@/components/timer/useTimer";
-import {
-  getIntervalDuration,
-  msToTime,
-  TimerStateEnum,
-  timeToString,
-  toFixedDigits,
-} from "@/components/timer/utilities";
+import { TimerStateEnum } from "@/components/timer/utilities";
 
-const intervals: IntervalsInterface = {
-  intervals: [
-    {
-      work: 10000,
-      rest: 20000,
-      rounds: 3,
-      name: "Tabata",
-    },
-  ],
-};
-
-export function Timer({}) {
+export function Timer({ config }: { config?: Omit<TimerState, "stop" | "start" | "pause"> }) {
   const time = useTimer((state) => state.time);
+  const running = useTimer((state) => state.running);
+  const phase = useTimer((state) => state.phase);
   const start = useTimer((state) => state.start);
   const stop = useTimer((state) => state.stop);
   const pause = useTimer((state) => state.pause);
-  const running = useTimer((state) => state.running);
   const currentInterval = useTimer((state) => state.currentInterval);
-  const phase = useTimer((state) => state.phase);
   const intervals = useTimer((state) => state.intervals);
-  const endTime = getIntervalDuration(intervals);
+
+  useEffect(() => {
+    if (!config) {
+      return;
+    }
+    useTimer.setState(config);
+  }, [config]);
   return (
     <div>
-      <h1>timer</h1>
-      <div className="m-10 flex h-full w-full flex-col items-center justify-center gap-4  font-bold">
-        <div className="flex flex-row gap-2">
-          {running !== TimerStateEnum.running && (
-            <button className="bg-green-light rounded-xl p-4" onClick={() => start()}>
-              {running !== TimerStateEnum.paused && "Start"}
-              {running === TimerStateEnum.paused && "Resume"}
-            </button>
-          )}
-          {running === TimerStateEnum.running && (
-            <button className="bg-red rounded-xl p-4" onClick={() => stop()}>
-              Stop
-            </button>
-          )}
-          {running === TimerStateEnum.running && (
-            <button className="bg-yellow rounded-xl p-4" onClick={() => pause()}>
-              Pause
-            </button>
-          )}
-        </div>
-
+      <div className="m-10 flex h-full w-full flex-col items-center justify-center gap-4">
+        <TimerControls running={running} onStart={start} onPause={pause} onStop={stop} />
         <TimerDisplay time={time} phase={phase} />
 
-        {currentInterval && (
-          <div className="flex items-baseline gap-1">
-            <span className="text-gray-md text-lg">Round: </span>
-            <div
-              className={cn("text-3xl", {
-                "text-green": phase === "rest",
-                "text-yellow": phase === "work",
-              })}
-            >
-              {currentInterval}&nbsp;
-              {phase}
-            </div>
-          </div>
-        )}
-
-        <div>&quot;{intervals?.intervals[0].name}&quot;</div>
-        <div>
-          {intervals?.intervals[0].rounds} rounds of:{" "}
-          {timeToString(msToTime(intervals?.intervals[0].work ?? 0))} work,{" "}
-          {timeToString(msToTime(intervals?.intervals[0].rest ?? 0))} rest, total time of{" "}
-          {timeToString(msToTime(endTime))}
+        <TimerProgress currentInterval={currentInterval} phase={phase} />
+        <IntervalDescription intervals={intervals} />
+        <div className="text-sm uppercase text-slate-400">
+          {running === TimerStateEnum.running && "running"}
+          {running === TimerStateEnum.initial && "Press start"}
+          {running === TimerStateEnum.stopped && "stopped"}
+          {running === TimerStateEnum.paused && "paused"}
         </div>
-        {running === TimerStateEnum.running && "Timer running"}
-        {running === TimerStateEnum.initial && "Press start"}
-        {running === TimerStateEnum.stopped && "Timer stopped"}
-        {running === TimerStateEnum.paused && "Timer paused"}
       </div>
     </div>
   );

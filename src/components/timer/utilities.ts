@@ -1,3 +1,5 @@
+import { IntervalPhase, IntervalsInterface, TimeStruct } from "@/components/timer/index";
+
 export enum TimerStateEnum {
   initial,
   running,
@@ -23,7 +25,15 @@ export function timeToString(time: TimeStruct): string {
   return res;
 }
 
-export function msToTime(time: number): TimeStruct {
+export function msToTime(time?: number): TimeStruct {
+  if (!time || isNaN(time)) {
+    return {
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    };
+  }
   let ms = 0,
     seconds = 0,
     minutes = 0,
