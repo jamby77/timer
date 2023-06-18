@@ -16,7 +16,7 @@ const config: StorybookConfig = {
     },
   },
   docs: {
-    autodocs: "tag",
+    autodocs: true,
     defaultName: "Info",
   },
 };

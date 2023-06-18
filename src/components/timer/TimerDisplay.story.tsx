@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import TimerDisplay from "./TimerDisplay";
 
 const meta: Meta<typeof TimerDisplay> = {
-  title: "Timer/TimerDisplay",
+  title: "Timer/Timer/Display",
   component: TimerDisplay,
 };
 

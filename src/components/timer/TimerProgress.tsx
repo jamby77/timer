@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import cn from "clsx";
 
 import { IntervalPhase } from "@/components/timer/index";
@@ -16,28 +17,29 @@ export default function TimerProgress({
     return null;
   }
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="my-8 flex flex-col items-center gap-1">
       <div
-        className={cn("flex items-baseline whitespace-nowrap text-3xl", {
-          "text-green-500": phase === "rest",
-          "text-yellow-700 ": phase === "work",
-          after: phase === "work",
-        })}
+        className={cn(
+          "mb-4 flex items-baseline whitespace-nowrap text-6xl font-bold transition-colors duration-700",
+          {
+            "text-green-500": phase === "rest",
+            "text-yellow-700 ": phase === "work",
+            after: phase === "work",
+          },
+        )}
       >
         {currentRound} / {totalRounds}
       </div>
-      <div className="text-6xl ">
-        <span
-          className={cn("block transition-all", {
-            "animation-none collapse opacity-0": phase === "rest",
-            "animate-pulse": phase === "work",
+      <div className="text-9xl ">
+        <div
+          className={cn("transition-all delay-700 duration-700", {
+            "animate-none opacity-40": phase === "rest",
+            "animate-pulse opacity-100": phase === "work",
           })}
         >
-          🚴‍♂️🏋️‍♂️🏊‍♂️🤸‍♂️🏃‍♂️
-        </span>
-        <span className={cn("block transition-all", { "collapse opacity-0": phase === "work" })}>
-          🩴🏖🌊
-        </span>
+          {phase === "work" && "🚴‍♂️🏋️‍♂️🏊‍♂️🤸‍♂️🏃‍♂️"}
+          {phase === "rest" && "🏖"}
+        </div>
       </div>
     </div>
   );

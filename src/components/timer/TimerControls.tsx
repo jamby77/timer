@@ -1,4 +1,7 @@
 import { ReactNode } from "react";
+import PauseIcon from "@/icons/PauseIcon";
+import PlayIcon from "@/icons/PlayIcon";
+import StopIcon from "@/icons/StopIcon";
 import cn from "clsx";
 
 import { TimerStateEnum } from "@/components/timer/utilities";
@@ -17,14 +20,20 @@ const renderButton = (
 ) => {
   return (
     <button
-      className={cn(`rounded-xl px-4 py-2 text-slate-50`, {
-        "bg-green-400": kind === "start",
-        "bg-red-400": kind === "stop",
-        "bg-yellow-400": kind === "pause",
-      })}
+      className={cn(
+        `flex h-20 w-20 items-center justify-center rounded-full text-xs text-slate-50`,
+        {
+          "bg-green-500": kind === "start",
+          "bg-red-500": kind === "stop",
+          "bg-yellow-400": kind === "pause",
+        },
+      )}
       onClick={handler}
     >
-      {children}
+      {kind === "start" && <PlayIcon className="text-white" />}
+      {kind === "stop" && <StopIcon className="text-white" />}
+      {kind === "pause" && <PauseIcon className="text-white" />}
+      <span className="sr-only">{children}</span>
     </button>
   );
 };

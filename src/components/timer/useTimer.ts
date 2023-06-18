@@ -1,21 +1,34 @@
 import { create } from "zustand";
 
-import { TimerState } from "@/components/timer/index";
+import { StopwatchTimerInterface, TimerState } from "@/components/timer/index";
 import {
   getCurrentIntervalAndPhase,
   getIntervalDuration,
+  isIntervalTimer,
+  isNotIntervalTimer,
   TimerStateEnum,
+  TimerTypeEnum,
 } from "@/components/timer/utilities";
+
+const timer: StopwatchTimerInterface = {
+  type: TimerTypeEnum.stopwatch,
+  // 99 minutes
+  duration: 99 * 60 * 1000,
+};
+
+const defaultTimerConfig = {
+  startTime: 0,
+  running: TimerStateEnum.initial,
+  currentTime: 0,
+  timerId: -1,
+  time: 0,
+  timer,
+  phase: undefined,
+};
 
 const useTimer = create<TimerState>()((set, get) => {
   return {
-    startTime: 0,
-    running: TimerStateEnum.initial,
-    currentTime: 0,
-    timerId: -1,
-    time: 0,
-    intervals: undefined,
-    phase: undefined,
+    ...defaultTimerConfig,
     pause: () => {
       set((state) => {
         if (state.timerId) {
@@ -44,11 +57,11 @@ const useTimer = create<TimerState>()((set, get) => {
             currentRound: undefined,
             phase: undefined,
           };
-          if (state.intervals?.intervals && state.intervals?.intervals?.length > 0) {
+          if (isIntervalTimer(state.timer)) {
             // we have intervals
             const { currentRound, phase, totalRounds } = getCurrentIntervalAndPhase(
               time,
-              state.intervals,
+              state.timer,
             );
             stateUpdate.currentRound = currentRound;
             stateUpdate.totalRounds = totalRounds;
@@ -66,16 +79,18 @@ const useTimer = create<TimerState>()((set, get) => {
           startTime = startTime - state.time;
         }
         let duration;
-        if (state.intervals?.intervals && state.intervals?.intervals?.length > 0) {
+        if (isIntervalTimer(state.timer)) {
           // set endTime
-          duration = getIntervalDuration(state.intervals);
-          console.log({ duration });
+          duration = getIntervalDuration(state.timer);
+        } else if (isNotIntervalTimer(state.timer)) {
+          duration = state.timer.duration;
         }
         return {
           startTime,
           endTime: duration,
           running: TimerStateEnum.running,
           timerId: Number(timerId),
+          time: 0,
         };
       });
     },
