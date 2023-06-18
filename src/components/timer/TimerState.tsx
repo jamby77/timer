@@ -1,7 +1,5 @@
 "use client";
 
-import { useRef } from "react";
-
 import useTimer from "@/components/timer/useTimer";
 import {
   msToTime,

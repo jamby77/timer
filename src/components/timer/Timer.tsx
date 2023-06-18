@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { TimerState } from "@/components/timer/index";
 import IntervalDescription from "@/components/timer/IntervalDescription";

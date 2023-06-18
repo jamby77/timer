@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import cn from "clsx";
 
 import { IntervalPhase } from "@/components/timer/index";

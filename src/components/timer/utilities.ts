@@ -45,10 +45,7 @@ export function msToTime(time?: number): TimeStruct {
       milliseconds: 0,
     };
   }
-  let ms = 0,
-    seconds = 0,
-    minutes = 0,
-    hrs = 0;
+  let ms: number, seconds: number, minutes: number, hrs: number;
   // time in seconds, format as HH:mm:ss.mmm
   ms = time % 1000;
   seconds = Math.floor(time / 1000);
