@@ -5,6 +5,7 @@ interface TimerState {
   running: TimerStateEnum;
   currentTime: number;
   time: number;
+  countdown?: number;
   timerId?: number | null;
   currentRound?: number;
   totalRounds?: number;

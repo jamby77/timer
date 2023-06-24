@@ -53,6 +53,7 @@ const useTimer = create<TimerState>()((set, get) => {
     },
     start: () => {
       const timerId = setInterval(() => {
+        // TODO - 24.06.23 - figure out countdown!!!
         let currentTime = Date.now();
         const startTime = get().startTime;
         const endTime = get().endTime;
