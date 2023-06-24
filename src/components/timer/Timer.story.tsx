@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { IntervalInterface } from "@/components/timer/index";
+import {
+  CountdownTimerInterface,
+  IntervalInterface,
+  StopwatchTimerInterface,
+} from "@/components/timer/index";
+import { defaultTimer } from "@/components/timer/useTimer";
 import { TimerStateEnum, TimerTypeEnum } from "@/components/timer/utilities";
 import { Timer } from "./Timer";
 
@@ -11,7 +16,7 @@ const meta: Meta<typeof Timer> = {
 
 export default meta;
 type Story = StoryObj<typeof Timer>;
-const timer: IntervalInterface = {
+const intervalTimerConfig: IntervalInterface = {
   type: TimerTypeEnum.interval,
   intervals: [
     {
@@ -22,7 +27,53 @@ const timer: IntervalInterface = {
     },
   ],
 };
-export const TimerDefault: Story = {};
+
+const swTimerConfig: StopwatchTimerInterface = {
+  duration: 5000,
+  type: TimerTypeEnum.stopwatch,
+};
+
+const cdTimerConfig: CountdownTimerInterface = {
+  duration: 5000,
+  type: TimerTypeEnum.countdown,
+};
+
+export const TimerDefault: Story = {
+  args: {
+    config: {
+      currentTime: 0,
+      startTime: 0,
+      time: 0,
+      running: TimerStateEnum.initial,
+      timer: defaultTimer,
+    },
+  },
+};
+
+export const TimerStopWatch: Story = {
+  args: {
+    config: {
+      currentTime: 0,
+      startTime: 0,
+      time: 0,
+      running: TimerStateEnum.initial,
+      timer: swTimerConfig,
+    },
+  },
+};
+
+export const TimerCountdown: Story = {
+  args: {
+    config: {
+      currentTime: 0,
+      startTime: 0,
+      time: 0,
+      running: TimerStateEnum.initial,
+      timer: cdTimerConfig,
+    },
+  },
+};
+
 export const TimerInterval: Story = {
   args: {
     config: {
@@ -30,7 +81,7 @@ export const TimerInterval: Story = {
       startTime: 0,
       time: 0,
       running: TimerStateEnum.initial,
-      timer,
+      timer: intervalTimerConfig,
     },
   },
 };

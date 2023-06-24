@@ -11,10 +11,13 @@ interface TimerState {
   phase?: IntervalPhase;
   timer?: IntervalInterface | StopwatchTimerInterface | CountdownTimerInterface;
   endTime?: number;
+  init: (config: BaseTimerState) => void;
   start: () => void;
-  stop: () => void;
+  stop: (complete?: boolean) => void;
   pause: () => void;
 }
+
+type BaseTimerState = Omit<TimerState, "stop" | "start" | "pause" | "init">;
 
 type IntervalPhase = "work" | "rest";
 

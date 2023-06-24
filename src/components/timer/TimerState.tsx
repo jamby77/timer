@@ -21,7 +21,7 @@ export default function TimerStateDisplay() {
         {running === TimerStateEnum.stopped && "stopped"}
         {running === TimerStateEnum.paused && "paused"}
       </div>
-      {timer?.type === TimerTypeEnum.stopwatch && (
+      {timer?.type === TimerTypeEnum.stopwatch && endTime !== undefined && (
         <div className="text-sm text-slate-600">({timeCapString} cap)</div>
       )}
     </div>

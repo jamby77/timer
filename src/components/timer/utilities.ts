@@ -12,6 +12,7 @@ export enum TimerStateEnum {
   running,
   stopped,
   paused,
+  complete,
 }
 export enum TimerTypeEnum {
   stopwatch,
@@ -37,7 +38,7 @@ export function timeToString(time: TimeStruct): string {
 }
 
 export function msToTime(time?: number): TimeStruct {
-  if (!time || isNaN(time)) {
+  if (!time || isNaN(time) || time < 0) {
     return {
       hours: 0,
       minutes: 0,

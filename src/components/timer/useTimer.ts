@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { StopwatchTimerInterface, TimerState } from "@/components/timer/index";
+import { BaseTimerState, StopwatchTimerInterface, TimerState } from "@/components/timer/index";
 import {
   getCurrentIntervalAndPhase,
   getIntervalDuration,
@@ -10,25 +10,34 @@ import {
   TimerTypeEnum,
 } from "@/components/timer/utilities";
 
-const timer: StopwatchTimerInterface = {
+export const defaultTimer: StopwatchTimerInterface = {
   type: TimerTypeEnum.stopwatch,
   // 99 minutes
   duration: 99 * 60 * 1000,
 };
 
-const defaultTimerConfig = {
+const defaultTimerConfig: BaseTimerState = {
   startTime: 0,
   running: TimerStateEnum.initial,
   currentTime: 0,
   timerId: -1,
   time: 0,
-  timer,
+  timer: defaultTimer,
   phase: undefined,
+  endTime: undefined,
+  currentRound: undefined,
+  totalRounds: undefined,
 };
 
 const useTimer = create<TimerState>()((set, get) => {
   return {
     ...defaultTimerConfig,
+    init(config) {
+      if (get().running !== TimerStateEnum.initial) {
+        get().stop();
+      }
+      set({ ...defaultTimerConfig, ...config });
+    },
     pause: () => {
       set((state) => {
         if (state.timerId) {
@@ -45,12 +54,14 @@ const useTimer = create<TimerState>()((set, get) => {
     start: () => {
       const timerId = setInterval(() => {
         let currentTime = Date.now();
-
+        const startTime = get().startTime;
+        const endTime = get().endTime;
+        const time = currentTime - startTime;
+        if (endTime && time > endTime) {
+          get().stop(true);
+          return;
+        }
         set((state) => {
-          const time = currentTime - state.startTime;
-          if (state.endTime && time > state.endTime) {
-            get().stop();
-          }
           const stateUpdate: Partial<TimerState> = {
             time,
             currentTime,
@@ -68,6 +79,11 @@ const useTimer = create<TimerState>()((set, get) => {
             stateUpdate.phase = phase;
           } else {
             stateUpdate.phase = "work";
+          }
+
+          // if timer is countdown, time should be duration - time
+          if (state.timer?.type === TimerTypeEnum.countdown) {
+            stateUpdate.time = state.timer?.duration - stateUpdate.time!;
           }
           return stateUpdate;
         });
@@ -94,17 +110,27 @@ const useTimer = create<TimerState>()((set, get) => {
         };
       });
     },
-    stop: () => {
+    stop: (complete = false) => {
       set((state) => {
         if (state.timerId) {
           clearInterval(state.timerId);
         }
-        return {
+        let stateUpdate = {
           timerId: -1,
           running: TimerStateEnum.stopped,
           startTime: 0,
           currentTime: 0,
+          time: 0,
         };
+
+        if (complete) {
+          stateUpdate.running = TimerStateEnum.complete;
+          // display better end time
+          if (state.timer?.type !== TimerTypeEnum.countdown) {
+            stateUpdate.time = state.endTime!;
+          }
+        }
+        return stateUpdate;
       });
     },
   };

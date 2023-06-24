@@ -28,7 +28,7 @@ const TimerDisplay = ({
   const [emphasis, setEmphasis] = useState(emphasisInit);
   useEffect(() => {
     const update = { ...emphasis };
-    if (running === TimerStateEnum.stopped) {
+    if (running === TimerStateEnum.stopped || running === TimerStateEnum.initial) {
       setEmphasis(emphasisInit);
       return;
     }
@@ -56,7 +56,7 @@ const TimerDisplay = ({
   return (
     <div
       className={cn(
-        "timer-container flex h-10 flex-row items-baseline gap-1 whitespace-nowrap font-mono text-2xl font-normal",
+        "timer-container flex h-10 flex-row items-baseline gap-1 whitespace-nowrap font-mono text-2xl font-normal tabular-nums",
         {
           "text-green-500": phase === "rest",
           "text-yellow-700": phase === "work",

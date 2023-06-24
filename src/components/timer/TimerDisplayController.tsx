@@ -7,7 +7,6 @@ function TimerDisplayController({}) {
   const phase = useTimer((state) => state.phase);
   const running = useTimer((state) => state.running);
   const parsedTime = msToTime(time);
-
   return <TimerDisplay {...parsedTime} phase={phase} running={running} />;
 }
 
