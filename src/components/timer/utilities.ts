@@ -1,4 +1,11 @@
-import { IntervalPhase, IntervalsInterface, TimeStruct } from "@/components/timer/index";
+import {
+  CountdownTimerInterface,
+  IntervalInterface,
+  IntervalPhase,
+  StopwatchTimerInterface,
+  TimerInterface,
+  TimeStruct,
+} from "@/components/timer/index";
 
 export enum TimerStateEnum {
   initial,
@@ -6,7 +13,12 @@ export enum TimerStateEnum {
   stopped,
   paused,
 }
-
+export enum TimerTypeEnum {
+  stopwatch,
+  countdown,
+  interval,
+}
+//
 export function timeToString(time: TimeStruct): string {
   let res: string[] = [];
   if (time.hours > 0) {
@@ -33,16 +45,12 @@ export function msToTime(time?: number): TimeStruct {
       milliseconds: 0,
     };
   }
-  let ms = 0,
-    seconds = 0,
-    minutes = 0,
-    hrs = 0;
+  let ms: number, seconds: number, minutes: number, hrs: number;
   // time in seconds, format as HH:mm:ss.mmm
   ms = time % 1000;
   seconds = Math.floor(time / 1000);
   minutes = Math.floor(seconds / 60);
   hrs = Math.floor(minutes / 60);
-  console.log({ hrs, minutes, seconds, ms });
 
   return {
     hours: hrs,
@@ -56,7 +64,7 @@ export const toFixedDigits = (num: number, pad = 2) => {
   return num.toString(10).padStart(pad, "0");
 };
 
-export const getIntervalDuration = (intervalsConfig?: IntervalsInterface) => {
+export const getIntervalDuration = (intervalsConfig?: IntervalInterface) => {
   if (!intervalsConfig) {
     return 0;
   }
@@ -71,10 +79,10 @@ export const getIntervalDuration = (intervalsConfig?: IntervalsInterface) => {
  * which interval round and phase are we in
  *
  * @param time {number} elapsed time in milliseconds
- * @param intervalsConfig {IntervalsInterface}
+ * @param intervalsConfig {IntervalInterface}
  * @returns
  */
-export const getCurrentIntervalAndPhase = (time: number, intervalsConfig: IntervalsInterface) => {
+export const getCurrentIntervalAndPhase = (time: number, intervalsConfig: IntervalInterface) => {
   const { intervals } = intervalsConfig;
   const result: {
     currentRound: number;
@@ -111,3 +119,23 @@ export const getCurrentIntervalAndPhase = (time: number, intervalsConfig: Interv
 
   return result;
 };
+
+export function isIntervalTimer(timer?: TimerInterface): timer is IntervalInterface {
+  if (!timer) {
+    return false;
+  }
+  return (
+    timer.type === TimerTypeEnum.interval &&
+    timer.intervals !== undefined &&
+    timer.intervals?.length > 0
+  );
+}
+
+export function isNotIntervalTimer(
+  timer?: TimerInterface,
+): timer is StopwatchTimerInterface | CountdownTimerInterface {
+  if (!timer) {
+    return false;
+  }
+  return typeof timer.duration === "number" && typeof timer.intervals === "undefined";
+}

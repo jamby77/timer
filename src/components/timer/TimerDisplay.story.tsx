@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import TimerDisplay from "./TimerDisplay";
 
 const meta: Meta<typeof TimerDisplay> = {
-  title: "Timer/TimerDisplay",
+  title: "Timer/Timer/Display",
   component: TimerDisplay,
 };
 
@@ -13,25 +13,31 @@ type Story = StoryObj<typeof TimerDisplay>;
 export const TimerDisplayDefault: Story = {};
 export const TimerDisplayWithMinTime: Story = {
   args: {
-    time: 1,
+    milliseconds: 1,
   },
 };
 export const TimerDisplayWithTime: Story = {
   args: {
-    time: 232311,
+    milliseconds: 311,
+    seconds: 52,
+    minutes: 3,
   },
 };
 
 export const TimerDisplayWithTimeInWorkPhase: Story = {
   args: {
     phase: "work",
-    time: 232311,
+    milliseconds: 311,
+    seconds: 52,
+    minutes: 3,
   },
 };
 
 export const TimerDisplayWithTimeInRestPhase: Story = {
   args: {
     phase: "rest",
-    time: 232311,
+    milliseconds: 311,
+    seconds: 52,
+    minutes: 3,
   },
 };

@@ -1,11 +1,14 @@
-import { IntervalsInterface } from "@/components/timer/index";
-import { getIntervalDuration, msToTime, timeToString } from "@/components/timer/utilities";
+import useTimer from "@/components/timer/useTimer";
+import {
+  getIntervalDuration,
+  isIntervalTimer,
+  msToTime,
+  timeToString,
+} from "@/components/timer/utilities";
 
-interface IntervalDescriptionProps {
-  intervals?: IntervalsInterface;
-}
-export default function IntervalDescription({ intervals }: IntervalDescriptionProps) {
-  if (!intervals) {
+export default function IntervalDescription() {
+  const intervals = useTimer((state) => state.timer);
+  if (!isIntervalTimer(intervals)) {
     return null;
   }
   const endTime = getIntervalDuration(intervals);
