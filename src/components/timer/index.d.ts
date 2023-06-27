@@ -20,7 +20,7 @@ interface TimerState {
 
 type BaseTimerState = Omit<TimerState, "stop" | "start" | "pause" | "init">;
 
-type IntervalPhase = "work" | "rest";
+type IntervalPhase = "work" | "rest" | "countdown";
 
 interface Interval {
   /**

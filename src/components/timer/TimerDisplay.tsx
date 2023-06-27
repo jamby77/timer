@@ -72,7 +72,7 @@ const TimerDisplay = ({
       </div>
       :
       <div className={cn("sec", { "text-6xl font-bold": emphasis.emphasisSe })}>
-        {toFixedDigits(seconds % 60)}
+        <span>{toFixedDigits(seconds % 60)}</span>
       </div>
       .
       <div className={cn("ms text-sm", { "font-bold": emphasis.emphasisMs })}>

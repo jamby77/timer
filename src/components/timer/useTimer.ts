@@ -15,7 +15,6 @@ export const defaultTimer: StopwatchTimerInterface = {
   // 99 minutes
   duration: 99 * 60 * 1000,
 };
-
 const defaultTimerConfig: BaseTimerState = {
   startTime: 0,
   running: TimerStateEnum.initial,
@@ -27,6 +26,7 @@ const defaultTimerConfig: BaseTimerState = {
   endTime: undefined,
   currentRound: undefined,
   totalRounds: undefined,
+  countdown: undefined,
 };
 
 const useTimer = create<TimerState>()((set, get) => {
@@ -53,7 +53,7 @@ const useTimer = create<TimerState>()((set, get) => {
     },
     start: () => {
       const timerId = setInterval(() => {
-        // TODO - 24.06.23 - figure out countdown!!!
+        // TODO: 24.06.23 - figure out countdown!!!
         let currentTime = Date.now();
         const startTime = get().startTime;
         const endTime = get().endTime;
@@ -69,7 +69,9 @@ const useTimer = create<TimerState>()((set, get) => {
             currentRound: undefined,
             phase: undefined,
           };
-          if (isIntervalTimer(state.timer)) {
+          if (state.countdown && time < state.countdown * 1000) {
+            stateUpdate.phase = "countdown";
+          } else if (isIntervalTimer(state.timer)) {
             // we have intervals
             const { currentRound, phase, totalRounds } = getCurrentIntervalAndPhase(
               time,
@@ -95,12 +97,17 @@ const useTimer = create<TimerState>()((set, get) => {
           // timer is paused, not stopped
           startTime = startTime - state.time;
         }
-        let duration;
+        let duration = 0;
         if (isIntervalTimer(state.timer)) {
           // set endTime
           duration = getIntervalDuration(state.timer);
         } else if (isNotIntervalTimer(state.timer)) {
           duration = state.timer.duration;
+        }
+
+        if (state.countdown) {
+          // add countdown duration to overall duration
+          duration += state.countdown * 1000; // countdown is in seconds
         }
         return {
           startTime,

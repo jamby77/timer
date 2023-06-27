@@ -21,7 +21,7 @@ export function Timer({ config }: { config?: BaseTimerState }) {
 
   return (
     <div>
-      <div className="m-10 flex h-full w-full flex-col items-center justify-center gap-4">
+      <div className="mx-auto my-10 flex h-full w-full flex-col items-center justify-center gap-4">
         <TimerStateDisplay />
         <TimerControlsController />
         <TimerDisplayController />
