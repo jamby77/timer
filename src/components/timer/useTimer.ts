@@ -145,3 +145,89 @@ const useTimer = create<TimerState>()((set, get) => {
 });
 
 export default useTimer;
+
+type TimerListener = {
+  onupdate?: Array<(time: number) => void>;
+  onstop?: Array<() => void>;
+};
+export class Timer {
+  private readonly duration: number;
+  private requestFrameId: number | null = null;
+  private startTime: number | null = null;
+  private time = 0;
+  private listeners: TimerListener = {};
+
+  constructor(duration: number) {
+    this.duration = duration;
+    this.stop = this.stop.bind(this);
+  }
+
+  addUpdateListener(listener: (time: number) => void) {
+    if (!this.listeners.onupdate) {
+      this.listeners.onupdate = [];
+    }
+    this.listeners.onupdate.push(listener);
+  }
+  addStopListener(listener: () => void) {
+    if (!this.listeners.onstop) {
+      this.listeners.onstop = [];
+    }
+    this.listeners.onstop.push(listener);
+  }
+
+  notifyUpdateListeners() {
+    if (!this.listeners.onupdate) {
+      return;
+    }
+    for (const listener of this.listeners.onupdate) {
+      if (this.time > this.duration) {
+        listener(this.duration);
+      } else {
+        listener(this.time);
+      }
+    }
+  }
+  notifyStopListeners() {
+    if (!this.listeners.onstop) {
+      return;
+    }
+    for (const listener of this.listeners.onstop) {
+      listener();
+    }
+  }
+
+  run(): void {
+    this.startTime = performance.now();
+    const loop = (currentTime: number) => {
+      if (!this.startTime) {
+        return;
+      }
+      this.time = currentTime - this.startTime;
+
+      this.notifyUpdateListeners();
+      if (this.time >= this.duration) {
+        // timer complete
+        this.stop();
+        return;
+      }
+
+      this.requestFrameId = requestAnimationFrame(loop);
+    };
+    this.requestFrameId = requestAnimationFrame(loop);
+  }
+
+  stopTimer() {
+    if (this.requestFrameId) {
+      cancelAnimationFrame(this.requestFrameId);
+    }
+  }
+  reset(): void {
+    this.startTime = null;
+    this.time = 0;
+  }
+  stop(): void {
+    // TODO - 29.06.23 - maybe do other things?
+    this.stopTimer();
+    this.notifyStopListeners();
+  }
+}
