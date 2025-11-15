@@ -1,0 +1,15 @@
+export type TimerState = "idle" | "running" | "paused" | "completed";
+
+export interface TimerOptions {
+  onTick?: (time: number) => void;
+  onComplete?: () => void;
+  onStateChange?: (state: TimerState) => void;
+}
+
+export interface TimerControls {
+  start: () => void;
+  pause: () => void;
+  reset: () => void;
+  getState: () => TimerState;
+  getTime: () => number;
+}
