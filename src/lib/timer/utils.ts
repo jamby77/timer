@@ -8,7 +8,10 @@ export const formatTime = (time: number): string => {
   const milliseconds = Math.round((time % 1000) / 10); // Convert to 2-digit (0-99)
   const mins = Math.floor(totalSeconds / 60);
   const secs = totalSeconds % 60;
-  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${milliseconds.toString().padStart(2, "0")}`;
+  const msStr = milliseconds.toString().padStart(2, "0").slice(0, 2);
+  let minStr = mins.toString().padStart(2, "0");
+  let secStr = secs.toString().padStart(2, "0");
+  return `${minStr}:${secStr}.${msStr}`;
 };
 
 export const parseTimeToMs = (timeString: string): number => {

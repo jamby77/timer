@@ -5,15 +5,19 @@ interface CardProps {
   status: ReactNode;
   time: string;
   children: ReactNode;
+  subtitle?: ReactNode;
 }
 
-export function Card({ label, status, time, children }: CardProps) {
+export function Card({ label, status, time, children, subtitle }: CardProps) {
+  console.log("Card rendered");
+  console.log({ label, status, time, subtitle });
   return (
-    <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-      <h1 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h1>
-      <p className="mb-8 text-center text-sm text-gray-500">{status}</p>
+    <div className="w-fit max-w-5xl rounded-lg bg-white p-8 shadow-lg">
+      <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h2>
+      {subtitle && <p className="mb-2 text-center text-xs text-gray-400">{subtitle}</p>}
+      <p className="mb-8 text-center text-base text-gray-500">{status}</p>
       <div className="mb-8 text-center">
-        <div className="font-mono text-6xl text-gray-800">{time}</div>
+        <div className="font-mono text-9xl text-gray-800 tabular-nums">{time}</div>
       </div>
       <div className="flex justify-center space-x-4">{children}</div>
     </div>

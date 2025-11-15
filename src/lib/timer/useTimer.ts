@@ -46,6 +46,10 @@ export const useTimer = (
     timerRef.current?.reset();
   }, []);
 
+  const restart = useCallback(() => {
+    timerRef.current?.reset();
+    timerRef.current?.start();
+  }, []);
   const getState = useCallback((): TimerState => {
     return timerRef.current?.getState() ?? TimerState.Idle;
   }, []);
@@ -60,6 +64,7 @@ export const useTimer = (
     start,
     pause,
     reset,
+    restart,
     getState,
     getTime,
   } as const;

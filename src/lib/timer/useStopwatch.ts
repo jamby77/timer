@@ -54,11 +54,17 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
     stopwatchRef.current?.reset();
   }, []);
 
+  const restart = useCallback(() => {
+    stopwatchRef.current?.reset();
+    stopwatchRef.current?.start();
+  }, [reset, start]);
+
   return {
     time,
     state,
     start,
     pause,
     reset,
+    restart,
   } as const;
 };
