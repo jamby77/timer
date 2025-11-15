@@ -45,7 +45,7 @@ export class Stopwatch {
       onComplete: () => {
         this.stop();
       },
-      onStateChange: (state) => {
+      onStateChange: (_state) => {
         // State changes are handled by the Timer instance
       },
     });
