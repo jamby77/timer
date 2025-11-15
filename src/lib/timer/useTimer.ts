@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Timer as TimerClass } from './Timer';
-import { TimerOptions, TimerState } from './types';
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Timer as TimerClass } from "./Timer";
+import { TimerOptions, TimerState } from "./types";
 
 export const useTimer = (initialTime: number, options?: TimerOptions) => {
   const [time, setTime] = useState(initialTime);
-  const [state, setState] = useState<TimerState>('idle');
+  const [state, setState] = useState<TimerState>(TimerState.Idle);
   const timerRef = useRef<TimerClass | null>(null);
 
   // Initialize timer instance
@@ -59,7 +60,7 @@ export const useTimer = (initialTime: number, options?: TimerOptions) => {
   }, []);
 
   const getState = useCallback((): TimerState => {
-    return timerRef.current?.getState() ?? 'idle';
+    return timerRef.current?.getState() ?? TimerState.Idle;
   }, []);
 
   const getTime = useCallback((): number => {
