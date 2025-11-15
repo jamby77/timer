@@ -3,7 +3,7 @@ import { TimerOptions, TimerState } from "./types";
 
 export class Timer {
   private time: number;
-  private state: TimerState = "idle";
+  private state: TimerState = TimerState.Idle;
   private startTime: number | null = null;
   private remainingTime: number;
   private animationFrameId: number | NodeJS.Timeout | null = null;
@@ -32,7 +32,7 @@ export class Timer {
     this.options?.onTick?.(this.time);
 
     if (this.time <= 0) {
-      this.state = "idle";
+      this.state = TimerState.Idle;
       this.cleanup();
       this.options?.onComplete?.();
       this.options?.onStateChange?.(this.state);
@@ -43,21 +43,21 @@ export class Timer {
   }
 
   public start() {
-    if (this.state === "running") return;
+    if (this.state === TimerState.Running) return;
 
     this.startTime = performance.now();
     this.lastTickTime = null;
-    this.state = "running";
+    this.state = TimerState.Running;
     this.options?.onStateChange?.(this.state);
 
     this.animationFrameId = requestAnimationFrame((ts) => this.updateTime(ts));
   }
 
   public pause() {
-    if (this.state !== "running") return;
+    if (this.state !== TimerState.Running) return;
 
     this.cleanup();
-    this.state = "paused";
+    this.state = TimerState.Paused;
     this.options?.onStateChange?.(this.state);
   }
 
@@ -66,7 +66,7 @@ export class Timer {
     this.time = this.remainingTime = this.initialTime;
     this.startTime = null;
     this.lastTickTime = null;
-    this.state = "idle";
+    this.state = TimerState.Idle;
     this.options?.onStateChange?.(this.state);
   }
 

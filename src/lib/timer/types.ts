@@ -1,4 +1,9 @@
-export type TimerState = "idle" | "running" | "paused" | "completed";
+export enum TimerState {
+  Idle = 'idle',
+  Running = 'running',
+  Paused = 'paused',
+  Completed = 'completed'
+}
 
 export interface TimerOptions {
   onTick?: (time: number) => void;
