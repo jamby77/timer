@@ -1,81 +1,70 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-
-import { TimerControls, TimerOptions, TimerState } from "./types";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Timer as TimerClass } from './Timer';
+import { TimerOptions, TimerState } from './types';
 
 export const useTimer = (initialTime: number, options?: TimerOptions) => {
   const [time, setTime] = useState(initialTime);
-  const [state, setState] = useState<TimerState>("idle");
-  const startTimeRef = useRef<number | null>(null);
-  const remainingTimeRef = useRef(initialTime);
-  const animationFrameRef = useRef<number | undefined>(undefined);
+  const [state, setState] = useState<TimerState>('idle');
+  const timerRef = useRef<TimerClass | null>(null);
 
-  const updateTime = useCallback(
-    (timestamp: number) => {
-      if (startTimeRef.current === null) return;
+  // Initialize timer instance
+  useEffect(() => {
+    const timer = new TimerClass(initialTime, {
+      ...options,
+      onTick: (currentTime) => {
+        setTime(currentTime);
+        options?.onTick?.(currentTime);
+      },
+      onStateChange: (newState) => {
+        setState(newState);
+        options?.onStateChange?.(newState);
+      },
+    });
 
-      const elapsed = timestamp - startTimeRef.current;
-      const newTime = Math.max(0, remainingTimeRef.current - elapsed);
+    timerRef.current = timer;
 
-      setTime(newTime);
-      options?.onTick?.(newTime);
+    // Cleanup timer on unmount
+    return () => {
+      timer.destroy();
+      timerRef.current = null;
+    };
+  }, [initialTime]); // Only recreate when initialTime changes
 
-      if (newTime <= 0) {
-        setState("idle");
-        options?.onComplete?.();
-        return;
-      }
+  // Update timer options when they change
+  useEffect(() => {
+    if (!timerRef.current) return;
 
-      animationFrameRef.current = requestAnimationFrame(updateTime);
-    },
-    [options],
-  );
+    // Update callbacks using the public method
+    timerRef.current.updateOptions({
+      ...options,
+      onTick: (currentTime) => {
+        options?.onTick?.(currentTime);
+      },
+      onStateChange: (newState) => {
+        options?.onStateChange?.(newState);
+      },
+    });
+  }, [options]);
 
   const start = useCallback(() => {
-    if (state === "running") return;
-
-    startTimeRef.current = performance.now();
-    setState("running");
-    options?.onStateChange?.("running");
-
-    animationFrameRef.current = requestAnimationFrame(updateTime);
-  }, [state, updateTime, options]);
-
-  const pause = useCallback(() => {
-    if (state !== "running") return;
-
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = undefined;
-    }
-
-    remainingTimeRef.current = time;
-    setState("paused");
-    options?.onStateChange?.("paused");
-  }, [state, time, options]);
-
-  const reset = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = undefined;
-    }
-
-    setTime(initialTime);
-    remainingTimeRef.current = initialTime;
-    startTimeRef.current = null;
-    setState("idle");
-    options?.onStateChange?.("idle");
-  }, [initialTime, options]);
-
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
+    timerRef.current?.start();
   }, []);
 
-  const getState = useCallback(() => state, [state]);
-  const getTime = useCallback(() => time, [time]);
+  const pause = useCallback(() => {
+    timerRef.current?.pause();
+  }, []);
+
+  const reset = useCallback(() => {
+    timerRef.current?.reset();
+  }, []);
+
+  const getState = useCallback((): TimerState => {
+    return timerRef.current?.getState() ?? 'idle';
+  }, []);
+
+  const getTime = useCallback((): number => {
+    return timerRef.current?.getTime() ?? initialTime;
+  }, [initialTime]);
 
   return {
     time,
