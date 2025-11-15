@@ -85,6 +85,7 @@ export class Timer {
     this.startTime = null;
     this.lastTickTime = null;
     this.state = TimerState.Idle;
+    this.options?.onTick?.(this.time);
     this.options?.onStateChange?.(this.state);
   }
 
