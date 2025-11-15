@@ -1,4 +1,6 @@
 import { Timer } from "./Timer";
+import { TimerState } from "./types";
+import { formatTime } from "./utils";
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
 
@@ -38,6 +40,7 @@ export class Stopwatch {
     this.tickCallback = options.onTick;
 
     this.timer = new Timer(this.timeLimitMs, {
+      debug: true,
       onTick: (remaining) => {
         const elapsed = this.timeLimitMs - remaining;
         this.tickCallback?.(elapsed);
@@ -111,27 +114,17 @@ export class Stopwatch {
   }
 
   /**
-   * Format the elapsed time as a string (HH:MM:SS.mmm)
+   * Get the current state of the stopwatch
    */
-  public formatTime(includeMilliseconds: boolean = true): string {
-    const time = this.getElapsedTime();
-    const ms = Math.floor(time % 1000);
-    const totalSeconds = Math.floor(time / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+  public getState(): TimerState {
+    return this.timer.getState();
+  }
 
-    const pad = (num: number, size: number = 2): string => {
-      return num.toString().padStart(size, "0");
-    };
-
-    let result = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-
-    if (includeMilliseconds) {
-      result += `.${ms.toString().padStart(3, "0").slice(0, 3)}`;
-    }
-
-    return result;
+  /**
+   * Format the elapsed time as a string (MM:SS.MS)
+   */
+  public formatTime(): string {
+    return formatTime(this.getElapsedTime());
   }
 
   /**

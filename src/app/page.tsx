@@ -1,5 +1,11 @@
+import { Stopwatch } from "@/components/Stopwatch";
 import { Timer } from "@/components/Timer";
 
 export default function Home() {
-  return <Timer duration={10} label="Work Timer" completionMessage="Time's up!" />;
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-10 bg-gray-100 p-4">
+      <Timer duration={10} label="Work" completionMessage="Time's up!" />
+      <Stopwatch label="Stopwatch" timeLimit={5000} />
+    </div>
+  );
 }

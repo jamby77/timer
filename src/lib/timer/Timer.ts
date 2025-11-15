@@ -8,12 +8,13 @@ export class Timer {
   private animationFrameId: number | NodeJS.Timeout | null = null;
   private lastTickTime: number | null = null;
   private options?: TimerOptions;
+  private readonly debug: boolean = false;
 
   constructor(
     private readonly initialTime: number,
     options?: TimerOptions,
-    private readonly debug = false,
   ) {
+    this.debug = options?.debug ?? false;
     this.time = initialTime;
     this.options = options;
   }
@@ -39,7 +40,9 @@ export class Timer {
 
     this.time = Math.max(0, this.time - delta);
 
-    this.log("updateTime - time after: " + this.time + "ms (" + Math.round(this.time / 1000) + "s)");
+    this.log(
+      "updateTime - time after: " + this.time + "ms (" + Math.round(this.time / 1000) + "s)",
+    );
 
     this.options?.onTick?.(this.time);
 
