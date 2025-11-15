@@ -1,34 +1,51 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Timer Application
 
-## Getting Started
+A responsive timer application built with Next.js and React, featuring smooth animations and precise timing control.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+- Countdown timer with visual feedback
+- Smooth animations during the final countdown seconds
+- Clean, modern UI built with Tailwind CSS
+- Type-safe development with TypeScript
+- Component development with Storybook
+
+## Tech Stack
+
+- **Framework**: Next.js 
+- **State Management**: Zustand
+- **Styling**: Tailwind CSS
+- **Development**: TypeScript, ESLint, Prettier
+- **Testing**: Storybook
+
+## Project Structure
+
+```
+src/
+├── app/                  # Next.js app directory
+│   └── page.tsx          # Main page component
+├── components/           # Reusable components
+│   └── timer/            # Timer related components
+│       ├── useTimer.ts   # Timer hook implementation
+│       ├── utilities.ts  # Helper functions
+│       └── index.d.ts    # Type definitions
+├── public/               # Static assets
+└── styles/               # Global styles
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Custom Timer Implementation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application features a custom timer implementation using `requestAnimationFrame` for smooth updates. The timer supports:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- Precise timing control
+- Multiple event listeners
+- Play/pause/stop functionality
+- Countdown and stopwatch modes
 
-## Learn More
+## Contributing
 
-To learn more about Next.js, take a look at the following resources:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
