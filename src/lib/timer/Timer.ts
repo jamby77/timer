@@ -5,34 +5,47 @@ export class Timer {
   private time: number;
   private state: TimerState = TimerState.Idle;
   private startTime: number | null = null;
-  private remainingTime: number;
   private animationFrameId: number | NodeJS.Timeout | null = null;
   private lastTickTime: number | null = null;
   private options?: TimerOptions;
 
-  constructor(initialTime: number, options?: TimerOptions) {
+  constructor(
+    private readonly initialTime: number,
+    options?: TimerOptions,
+    private readonly debug = false,
+  ) {
     this.time = initialTime;
-    this.remainingTime = initialTime;
     this.options = options;
   }
 
+  private log(message?: any) {
+    if (!this.debug) return;
+    console.log("[Timer] " + message);
+  }
+
   private updateTime(timestamp: number) {
+    this.log("updateTime() called, current state: " + this.state);
     if (this.startTime === null) return;
 
     if (this.lastTickTime === null) {
       this.lastTickTime = timestamp;
+      this.log("First tick, lastTickTime set to: " + timestamp);
     }
 
     const delta = timestamp - this.lastTickTime;
     this.lastTickTime = timestamp;
 
-    this.remainingTime = Math.max(0, this.remainingTime - delta);
-    this.time = this.remainingTime;
+    this.log("updateTime - delta: " + delta + "ms, time before: " + this.time);
+
+    this.time = Math.max(0, this.time - delta);
+
+    this.log("updateTime - time after: " + this.time + "ms (" + Math.round(this.time / 1000) + "s)");
 
     this.options?.onTick?.(this.time);
 
     if (this.time <= 0) {
-      this.state = TimerState.Idle;
+      this.log("Timer completed!");
+      this.state = TimerState.Completed;
       this.cleanup();
       this.options?.onComplete?.();
       this.options?.onStateChange?.(this.state);
@@ -43,11 +56,16 @@ export class Timer {
   }
 
   public start() {
-    if (this.state === TimerState.Running) return;
+    this.log("start() called, current state: " + this.state);
+    if (this.state === TimerState.Running) {
+      this.log("Already running, returning");
+      return;
+    }
 
     this.startTime = performance.now();
     this.lastTickTime = null;
     this.state = TimerState.Running;
+    this.log("State changed to Running, time: " + this.time + "ms");
     this.options?.onStateChange?.(this.state);
 
     this.animationFrameId = requestAnimationFrame((ts) => this.updateTime(ts));
@@ -63,7 +81,7 @@ export class Timer {
 
   public reset() {
     this.cleanup();
-    this.time = this.remainingTime = this.initialTime;
+    this.time = this.initialTime;
     this.startTime = null;
     this.lastTickTime = null;
     this.state = TimerState.Idle;
@@ -84,7 +102,6 @@ export class Timer {
 
   public setTime(newTime: number) {
     this.time = newTime;
-    this.remainingTime = newTime;
   }
 
   public updateOptions(newOptions: Partial<TimerOptions>) {
@@ -104,9 +121,5 @@ export class Timer {
       this.animationFrameId = null;
     }
     this.lastTickTime = null;
-  }
-
-  private get initialTime() {
-    return this.time;
   }
 }

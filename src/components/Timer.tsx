@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import PauseIcon from "@/icons/PauseIcon";
-import PlayIcon from "@/icons/PlayIcon";
-import StopIcon from "@/icons/StopIcon";
-import { formatTime, TimerState, useTimer } from "@/lib/timer";
+import { formatTimeMs, TimerState, useTimer } from "@/lib/timer";
+
+import { TimerButton } from "./TimerButton";
 
 interface TimerProps {
   /** Duration in seconds */
@@ -24,13 +22,28 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
   const isRunning = state === TimerState.Running;
   const isPaused = state === TimerState.Paused;
   const isCompleted = state === TimerState.Completed;
+  const isIdle = state === TimerState.Idle;
 
-  // Show completion message when timer finishes
-  useEffect(() => {
-    if (isCompleted && completionMessage) {
-      alert(completionMessage);
-    }
-  }, [isCompleted, completionMessage]);
+  const handleStart = () => {
+    console.log("Start button clicked, current state:", state);
+    start();
+  };
+
+  const handlePause = () => {
+    console.log("Pause button clicked, current state:", state);
+    pause();
+  };
+
+  const handleReset = () => {
+    console.log("Reset button clicked, current state:", state);
+    reset();
+  };
+
+  const handleRestart = () => {
+    console.log("Restart button clicked, current state:", state);
+    reset();
+    start();
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
@@ -39,36 +52,20 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
         <p className="mb-8 text-center text-sm text-gray-500">
           {isRunning && "Running..."}
           {isPaused && "Paused"}
-          {!isRunning && !isPaused && "Ready"}
+          {isIdle && "Ready"}
+          {isCompleted && !!completionMessage && completionMessage}
         </p>
         <div className="mb-8 text-center">
-          <div className="font-mono text-6xl text-gray-800">{formatTime(time)}</div>
+          <div className="font-mono text-6xl text-gray-800">{formatTimeMs(time)}</div>
         </div>
         <div className="flex justify-center space-x-4">
-          {!isRunning ? (
-            <button
-              onClick={start}
-              className="focus:ring-opacity-50 rounded-full bg-green-500 p-4 text-white transition-colors hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
-              aria-label="Start timer"
-            >
-              <PlayIcon className="h-6 w-6" />
-            </button>
-          ) : (
-            <button
-              onClick={pause}
-              className="focus:ring-opacity-50 rounded-full bg-yellow-500 p-4 text-white transition-colors hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-              aria-label="Pause timer"
-            >
-              <PauseIcon className="h-6 w-6" />
-            </button>
-          )}
-          <button
-            onClick={reset}
-            className="focus:ring-opacity-50 rounded-full bg-red-500 p-4 text-white transition-colors hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none"
-            aria-label="Stop timer"
-          >
-            <StopIcon className="h-6 w-6" />
-          </button>
+          <TimerButton
+            state={state}
+            onStart={handleStart}
+            onPause={handlePause}
+            onReset={handleReset}
+            onRestart={handleRestart}
+          />
         </div>
       </div>
     </div>
