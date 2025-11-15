@@ -11,7 +11,6 @@ type UseStopwatchOptions = Omit<StopwatchOptionsType, "onTick" | "onStateChange"
 
 export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const [time, setTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
   const [state, setState] = useState<TimerState>(TimerState.Idle);
   const stopwatchRef = useRef<Stopwatch | null>(null);
 
@@ -25,21 +24,13 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
       },
       onStop: (time) => {
         setTime(time);
-        setState(TimerState.Completed);
         options.onStop?.(time);
       },
+      onStateChange: (newState) => {
+        setState(newState);
+        options.onStateChange?.(newState);
+      },
     });
-
-    const handleStateChange = () => {
-      const running = stopwatch.isRunning;
-      const newState = stopwatch.getState();
-      setIsRunning(running);
-      setState(newState);
-      options.onStateChange?.(newState);
-    };
-
-    // Initial state check
-    handleStateChange();
 
     // Store the instance
     stopwatchRef.current = stopwatch;
@@ -59,22 +50,15 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
     stopwatchRef.current?.pause();
   }, []);
 
-  const stop = useCallback(() => {
-    stopwatchRef.current?.stop();
-  }, []);
-
   const reset = useCallback(() => {
     stopwatchRef.current?.reset();
-    setTime(0);
   }, []);
 
   return {
     time,
     state,
-    isRunning,
     start,
     pause,
-    stop,
     reset,
   } as const;
 };

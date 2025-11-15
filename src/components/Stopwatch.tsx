@@ -28,11 +28,6 @@ export function Stopwatch({
     onStateChange,
   });
 
-  const isRunning = state === TimerState.Running;
-  const isPaused = state === TimerState.Paused;
-  const isIdle = state === TimerState.Idle;
-  const isCompleted = state === TimerState.Completed;
-
   const handleStart = useCallback(() => {
     start();
   }, [start]);
@@ -51,7 +46,7 @@ export function Stopwatch({
   }, [reset, start]);
 
   const status = getStatusMessage(state, completionMessage);
-
+  console.log({ state });
   return (
     <Card label={label} status={status} time={formatTime(time)}>
       <TimerButton

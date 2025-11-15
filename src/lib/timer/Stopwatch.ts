@@ -16,6 +16,11 @@ export interface StopwatchOptions {
   onStop?: (elapsedTime: number) => void;
 
   /**
+   * Callback that's called when the stopwatch state changes
+   */
+  onStateChange?: (state: TimerState) => void;
+
+  /**
    * Whether to start the stopwatch immediately on creation
    * @default false
    */
@@ -33,23 +38,27 @@ export class Stopwatch {
   private readonly timeLimitMs: number;
   private readonly stopCallback?: (elapsedTime: number) => void;
   private readonly tickCallback?: (elapsedTime: number) => void;
+  private readonly stateChangeCallback?: (state: TimerState) => void;
 
   constructor(options: StopwatchOptions = {}) {
     this.timeLimitMs = options.timeLimitMs ?? ONE_YEAR_MS;
     this.stopCallback = options.onStop;
     this.tickCallback = options.onTick;
+    this.stateChangeCallback = options.onStateChange;
 
     this.timer = new Timer(this.timeLimitMs, {
-      debug: true,
+      // debug: true,
       onTick: (remaining) => {
         const elapsed = this.timeLimitMs - remaining;
         this.tickCallback?.(elapsed);
       },
       onComplete: () => {
-        this.stop();
+        if (this.stopCallback) {
+          this.stopCallback(this.getElapsedTime());
+        }
       },
-      onStateChange: (_state) => {
-        // State changes are handled by the Timer instance
+      onStateChange: (state) => {
+        this.stateChangeCallback?.(state);
       },
     });
 
@@ -76,20 +85,6 @@ export class Stopwatch {
    */
   public pause(): void {
     this.timer.pause();
-  }
-
-  /**
-   * Stop the stopwatch, reset the elapsed time, and notify listeners
-   */
-  public stop(): void {
-    const wasRunning = this.isRunning;
-    this.timer.pause();
-
-    if (wasRunning && this.stopCallback) {
-      this.stopCallback(this.getElapsedTime());
-    }
-
-    this.reset();
   }
 
   /**
