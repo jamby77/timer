@@ -7,8 +7,10 @@ export class Timer {
   private startTime: number | null = null;
   private animationFrameId: number | NodeJS.Timeout | null = null;
   private lastTickTime: number | null = null;
+  private lastUpdateTime: number = 0;
   private options?: TimerOptions;
   private readonly debug: boolean = false;
+  private readonly updateInterval: number = 100; // Update UI every 100ms
 
   constructor(
     private readonly initialTime: number,
@@ -30,6 +32,7 @@ export class Timer {
 
     if (this.lastTickTime === null) {
       this.lastTickTime = timestamp;
+      this.lastUpdateTime = timestamp;
       this.log("First tick, lastTickTime set to: " + timestamp);
     }
 
@@ -44,7 +47,11 @@ export class Timer {
       "updateTime - time after: " + this.time + "ms (" + Math.round(this.time / 1000) + "s)",
     );
 
-    this.options?.onTick?.(this.time);
+    // Only call onTick every updateInterval ms to reduce re-renders
+    if (timestamp - this.lastUpdateTime >= this.updateInterval) {
+      this.options?.onTick?.(this.time);
+      this.lastUpdateTime = timestamp;
+    }
 
     if (this.time <= 0) {
       this.log("Timer completed!");

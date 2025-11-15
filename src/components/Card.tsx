@@ -9,8 +9,6 @@ interface CardProps {
 }
 
 export function Card({ label, status, time, children, subtitle }: CardProps) {
-  console.log("Card rendered");
-  console.log({ label, status, time, subtitle });
   return (
     <div className="w-fit max-w-5xl rounded-lg bg-white p-8 shadow-lg">
       <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h2>

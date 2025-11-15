@@ -30,7 +30,7 @@ export function Stopwatch({
 
   const status = getStatusMessage(state, completionMessage);
   const subtitle = timeLimit ? `(Time limit: ${formatTime(timeLimit * 1000)})` : undefined;
-
+  console.log("SW");
   return (
     <Card label={label} status={status} time={formatTime(time)} subtitle={subtitle}>
       <TimerButton
