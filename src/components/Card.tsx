@@ -12,22 +12,26 @@ interface CardProps {
 }
 
 export function Card({ label, status, time, children, subtitle, currentStep }: CardProps) {
-  console.log({ currentStep });
   return (
     <div
-      className={`bg w-fit max-w-5xl rounded-lg p-8 shadow-lg ${cx({
+      className={cx("w-fit max-w-5xl rounded-lg p-8 shadow-lg", {
         "bg-emerald-400": currentStep?.isWork,
-        "bg-rose-300": !currentStep?.isWork,
+        "bg-rose-300": currentStep && !currentStep?.isWork,
         "bg-transparent": !currentStep,
-      })}`}
+      })}
     >
       <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h2>
-      {subtitle && (
-        <p className="mx-auto mb-2 max-w-40 rounded-2xl bg-white/80 text-center text-xs text-gray-500">
-          {subtitle}
-        </p>
-      )}
-      <p className="mb-8 text-center text-base text-gray-500">{status}</p>
+      <p
+        className={cx(
+          "mx-auto mb-2 max-w-24 rounded bg-white/80 text-center text-xs text-gray-500",
+          { invisible: !subtitle },
+        )}
+      >
+        {subtitle}
+      </p>
+      <p className={cx({ invisible: !status }, "mb-8 text-center text-base text-gray-500")}>
+        {status}
+      </p>
       <div className="mb-8 text-center">
         <div className="font-mono text-9xl text-gray-800 tabular-nums">{time}</div>
       </div>

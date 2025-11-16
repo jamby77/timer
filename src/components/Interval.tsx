@@ -10,6 +10,7 @@ import { formatTime, getStatusMessage } from "@/lib/timer";
 import { TimerState, type IntervalConfig } from "@/lib/timer/types";
 import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
+import cx from "clsx";
 
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
@@ -78,14 +79,19 @@ export function Interval({ intervalConfig }: IntervalProps) {
         label={currentStep?.label || "Interval Timer"}
         status={status}
         time={formatTime(timeLeft)}
-        subtitle={`${getCurrentIntervalInfo()}`}
+        subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
         currentStep={currentStep}
       >
-        <div className="mb-4 h-2 w-full rounded-full bg-gray-200">
+        <div
+          className={cx("mb-4 h-2 w-full rounded-full bg-gray-200", {
+            invisible: !currentStep,
+          })}
+        >
           <div
-            className={`h-2 rounded-full transition-all duration-100 ${
-              currentStep?.isWork ? "bg-emerald-700" : "bg-rose-700"
-            }`}
+            className={cx("h-2 rounded-full transition-all duration-100", {
+              "bg-emerald-700": currentStep?.isWork,
+              "bg-rose-700": currentStep && !currentStep?.isWork,
+            })}
             style={{ width: `${getProgress()}%` }}
           />
         </div>

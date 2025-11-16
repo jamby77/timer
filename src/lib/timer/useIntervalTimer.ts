@@ -94,6 +94,8 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
       onSequenceComplete: () => {
         // Internal state update
         setTimerState(TimerState.Completed);
+        setCurrentStep(null);
+        setCurrentStepIndex(0);
         // External callback
         onSequenceComplete?.();
       },
@@ -119,12 +121,6 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
     if (!managerRef.current) {
       return;
     }
-    // Set initial state
-    const initialStep = managerRef.current.getCurrentStep();
-    if (initialStep) {
-      setCurrentStep(initialStep);
-      setTimeLeft(initialStep.duration);
-    }
 
     return () => {
       // Cleanup the old timer manager
@@ -138,13 +134,8 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
     if (timerState === TimerState.Completed) {
       managerRef.current?.reset();
       setTimerState(TimerState.Idle);
-      const initialStep = managerRef.current?.getCurrentStep();
-      if (initialStep) {
-        setCurrentStep(initialStep);
-        setCurrentStepIndex(0);
-        setTimeLeft(initialStep.duration);
-      }
     }
+    
     managerRef.current?.start();
     setTimerState(TimerState.Running);
   }, [timerState]);
@@ -157,12 +148,9 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
   const reset = useCallback(() => {
     managerRef.current?.reset();
     setTimerState(TimerState.Idle);
-    const initialStep = managerRef.current?.getCurrentStep();
-    if (initialStep) {
-      setCurrentStep(initialStep);
-      setCurrentStepIndex(0);
-      setTimeLeft(initialStep.duration);
-    }
+    setCurrentStep(null);
+    setCurrentStepIndex(0);
+    setTimeLeft(0);
   }, []);
 
   const skipCurrentStep = useCallback(() => {
