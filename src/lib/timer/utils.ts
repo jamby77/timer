@@ -19,14 +19,16 @@ export const parseTimeToMs = (timeString: string): number => {
   return (minutes * 60 + seconds) * 1000;
 };
 
-export function getStatusMessage(state: TimerState, completionMessage?: string) {
-  return state === TimerState.Running
-    ? "Running..."
-    : state === TimerState.Paused
-      ? "Paused"
-      : state === TimerState.Idle
-        ? "Ready"
-        : state === TimerState.Completed && !!completionMessage
-          ? completionMessage
-          : null;
+export function getStatusMessage(state: TimerState, completionMessage?: string): string {
+  switch (state) {
+    case TimerState.Running:
+      return "Running...";
+    case TimerState.Paused:
+      return "Paused";
+    case TimerState.Completed:
+      return completionMessage || "Completed";
+    case TimerState.Idle:
+    default:
+      return "Ready";
+  }
 }

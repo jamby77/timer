@@ -90,3 +90,4 @@ function TimerButton({ state, onStart, onPause, onReset, onRestart }: TimerButto
 }
 
 export default memo(TimerButton);
+export { BaseButton };

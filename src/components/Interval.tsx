@@ -5,10 +5,11 @@ import PauseIcon from "@/icons/PauseIcon";
 import PlayIcon from "@/icons/PlayIcon";
 import RepeatIcon from "@/icons/Repeat";
 import StopIcon from "@/icons/StopIcon";
-import { formatTime } from "@/lib/timer";
-import { type IntervalConfig } from "@/lib/timer/types";
+import { formatTime, getStatusMessage } from "@/lib/timer";
+import { TimerState, type IntervalConfig } from "@/lib/timer/types";
 import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
+import { BaseButton } from "./TimerButton";
 
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
@@ -30,7 +31,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
   const {
     currentStep,
     currentStepIndex,
-    isRunning,
+    timerState,
     timeLeft,
     start,
     reset,
@@ -46,11 +47,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
     start();
   }, [reset, start]);
 
-  const getStatus = () => {
-    if (isRunning) return "Running...";
-    if (!currentStep) return "Ready";
-    return "Paused";
-  };
+  const status = getStatusMessage(timerState);
 
   const getProgress = () => {
     if (!currentStep) return 0;
@@ -68,7 +65,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
     <div className="flex flex-col items-center gap-8">
       <Card
         label={currentStep?.label || "Interval Timer"}
-        status={getStatus()}
+        status={status}
         time={formatTime(timeLeft)}
         subtitle={`Interval ${getCurrentIntervalInfo()}`}
       >
@@ -81,38 +78,42 @@ export function Interval({ intervalConfig }: IntervalProps) {
           />
         </div>
         <div className="flex gap-4">
-          {!isRunning ? (
-            <button
+          {timerState === TimerState.Idle || timerState === TimerState.Completed ? (
+            <BaseButton
               onClick={start}
-              className="focus:ring-opacity-50 rounded-full bg-green-500 p-4 text-white transition-colors hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
               title="Start intervals"
+              label="Start intervals"
+              className="bg-green-500 hover:bg-green-600 focus:ring-green-500"
             >
               <PlayIcon className="h-6 w-6" />
-            </button>
+            </BaseButton>
           ) : (
-            <button
+            <BaseButton
               onClick={pause}
-              className="focus:ring-opacity-50 rounded-full bg-yellow-500 p-4 text-white transition-colors hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-              title="Skip current interval"
+              title="Pause intervals"
+              label="Pause intervals"
+              className="bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500"
             >
               <PauseIcon className="h-6 w-6" />
-            </button>
+            </BaseButton>
           )}
-          <button
+          <BaseButton
             onClick={skipCurrentStep}
-            disabled={!isRunning}
-            className="focus:ring-opacity-50 rounded-full bg-red-500 p-4 text-white transition-colors hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
-            title="Stop intervals"
+            disabled={timerState !== TimerState.Running}
+            title="Skip current interval"
+            label="Skip current interval"
+            className="bg-red-500 hover:bg-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
             <StopIcon className="h-6 w-6" />
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton
             onClick={handleRestart}
-            className="focus:ring-opacity-50 rounded-full bg-green-500 p-4 text-white transition-colors hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
             title="Restart intervals"
+            label="Restart intervals"
+            className="bg-green-500 hover:bg-green-600 focus:ring-green-500"
           >
             <RepeatIcon className="h-6 w-6" />
-          </button>
+          </BaseButton>
         </div>
       </Card>
       <LapHistory laps={laps} onClearHistory={clearHistory} />

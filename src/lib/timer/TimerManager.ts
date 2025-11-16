@@ -112,9 +112,9 @@ export class TimerManager {
 
     // Stop the current timer before moving to next step
     this.timer?.pause();
-    
-    // Complete the current step to move to the next one
-    this.handleTimerComplete();
+
+    // Advance to the next step
+    this.advanceToNextStep();
   }
 
   public reset(): void {
@@ -200,6 +200,11 @@ export class TimerManager {
 
     currentStep?.onComplete?.();
 
+    // Advance to the next step
+    this.advanceToNextStep();
+  }
+
+  private advanceToNextStep(): void {
     // Clear the completed timer
     this.timer = undefined;
 

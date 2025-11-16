@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { StepState, TimerManager, type TimerStep } from "./TimerManager";
-import { type IntervalConfig } from "./types";
+import { TimerState, type IntervalConfig } from "./types";
 
 function generateSteps(
   skipLastRest: boolean,
@@ -23,12 +23,14 @@ function generateSteps(
       label: workLabel,
       isWork: true,
       onStepStateChange: (state, data) => {
+        const elapsedTime = data.elapsed;
         if (state === StepState.Complete) {
           // Use full duration when completed naturally
-          onWorkStepComplete?.(workDuration * 1000);
+          const fullDuration = workDuration * 1000;
+          onWorkStepComplete?.(fullDuration);
         } else if (state === StepState.Skip) {
           // Use actual elapsed time when skipped
-          onWorkStepComplete?.(data.elapsed);
+          onWorkStepComplete?.(elapsedTime);
         }
       },
     });
@@ -49,7 +51,7 @@ function generateSteps(
 export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
+  const [timerState, setTimerState] = useState<TimerState>(TimerState.Idle);
   const [timeLeft, setTimeLeft] = useState(0);
   const managerRef = useRef<TimerManager | null>(null);
 
@@ -91,7 +93,7 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
       },
       onSequenceComplete: () => {
         // Internal state update
-        setIsRunning(false);
+        setTimerState(TimerState.Completed);
         // External callback
         onSequenceComplete?.();
       },
@@ -106,7 +108,6 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
     workLabel,
     restLabel,
     skipLastRest,
-    onWorkStepComplete,
     onStepChange,
     onSequenceComplete,
   ]);
@@ -133,18 +134,29 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
 
   // Create stable callbacks
   const start = useCallback(() => {
+    // If we're in Completed state, reset first to start fresh
+    if (timerState === TimerState.Completed) {
+      managerRef.current?.reset();
+      setTimerState(TimerState.Idle);
+      const initialStep = managerRef.current?.getCurrentStep();
+      if (initialStep) {
+        setCurrentStep(initialStep);
+        setCurrentStepIndex(0);
+        setTimeLeft(initialStep.duration);
+      }
+    }
     managerRef.current?.start();
-    setIsRunning(true);
-  }, []);
+    setTimerState(TimerState.Running);
+  }, [timerState]);
 
   const pause = useCallback(() => {
     managerRef.current?.pause();
-    setIsRunning(false);
+    setTimerState(TimerState.Paused);
   }, []);
 
   const reset = useCallback(() => {
     managerRef.current?.reset();
-    setIsRunning(false);
+    setTimerState(TimerState.Idle);
     const initialStep = managerRef.current?.getCurrentStep();
     if (initialStep) {
       setCurrentStep(initialStep);
@@ -155,12 +167,13 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
 
   const skipCurrentStep = useCallback(() => {
     managerRef.current?.skipCurrentStep();
+    // State stays Running unless sequence completes (handled by onSequenceComplete)
   }, []);
 
   return {
     currentStep,
     currentStepIndex,
-    isRunning,
+    timerState,
     timeLeft,
     start,
     pause,
