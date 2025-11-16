@@ -2,9 +2,9 @@
 
 import { useCallback } from "react";
 import { formatTime } from "@/lib/timer";
-import { TimerManager, type TimerStep } from "@/lib/timer/TimerManager";
+import { type TimerStep } from "@/lib/timer/TimerManager";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
-import { useTimerManager } from "@/lib/timer/useTimerManager";
+import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
 import { type IntervalConfig } from "@/lib/timer/types";
 
 import { Card } from "./Card";
@@ -28,30 +28,7 @@ export function Interval({
   onStateChange,
   onSequenceComplete,
 }: IntervalProps) {
-  const {
-    workDuration,
-    restDuration,
-    intervals,
-    workLabel = "Work",
-    restLabel = "Rest",
-    skipLastRest = true,
-  } = intervalConfig;
-  
   const { laps, addLap, clearHistory } = useLapHistory();
-
-  // Create the interval timer using the static method with lap tracking
-  const timerManager = TimerManager.createIntervalTimer(
-    workDuration * 1000,
-    restDuration * 1000,
-    intervals,
-    workLabel,
-    restLabel,
-    skipLastRest,
-    (elapsedTime) => {
-      // Add lap with the actual elapsed time
-      addLap(elapsedTime);
-    },
-  );
 
   const {
     currentStep,
@@ -60,20 +37,25 @@ export function Interval({
     timeLeft,
     start,
     reset,
-    manager,
-  } = useTimerManager({
-    steps: timerManager.getSteps(),
-    repeat: 1,
-    onStepChange: onStateChange,
-    onSequenceComplete: onSequenceComplete,
-  });
+    skipCurrentStep,
+  } = useIntervalTimer(
+    intervalConfig,
+    (elapsedTime) => {
+      // Add lap with the actual elapsed time
+      addLap(elapsedTime);
+    },
+    onStateChange,
+    onSequenceComplete,
+  );
+
+  const handleStart = useCallback(() => {
+    start();
+  }, [start]);
 
   const handlePause = useCallback(() => {
-    // Skip the current interval and add lap with elapsed time
-    if (manager) {
-      manager.skipCurrentStep();
-    }
-  }, [manager]);
+    // Skip the current interval
+    skipCurrentStep();
+  }, [skipCurrentStep]);
 
   const handleReset = useCallback(() => {
     reset();
@@ -82,8 +64,8 @@ export function Interval({
 
   const handleRestart = useCallback(() => {
     handleReset();
-    start();
-  }, [handleReset, start]);
+    handleStart();
+  }, [handleReset, handleStart]);
 
   const getStatus = () => {
     if (isRunning) return "Running...";
@@ -100,7 +82,7 @@ export function Interval({
 
   const getCurrentIntervalInfo = () => {
     const workSteps = Math.ceil((currentStepIndex + 1) / 2);
-    return `${workSteps}/${intervals}`;
+    return `${workSteps}/${intervalConfig.intervals}`;
   };
 
   return (
@@ -122,7 +104,7 @@ export function Interval({
         <div className="flex gap-4">
           {!isRunning ? (
             <button
-              onClick={start}
+              onClick={handleStart}
               className="bg-green-500 hover:bg-green-600 focus:ring-green-500 focus:ring-opacity-50 rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none"
               title="Start intervals"
             >

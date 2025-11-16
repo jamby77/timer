@@ -218,54 +218,6 @@ export class TimerManager {
       this.currentRepeat = 0;
     }
   }
-
-  // Utility method to create a simple interval timer
-  public static createIntervalTimer(
-    workDuration: number,
-    restDuration: number,
-    intervals: number,
-    workLabel: string = "Work",
-    restLabel: string = "Rest",
-    skipLastRest: boolean = false,
-    onWorkStepComplete?: (elapsedTime: number) => void,
-  ): TimerManager {
-    const steps: TimerStep[] = [];
-
-    const restIntervals = skipLastRest ? intervals - 1 : intervals;
-    for (let i = 0; i < intervals; i++) {
-      // Work interval
-      steps.push({
-        id: `work-${i}`,
-        duration: workDuration,
-        label: workLabel,
-        isWork: true,
-        onStepStateChange: (state, data) => {
-          if (state === StepState.Complete) {
-            // Use full duration when completed naturally
-            onWorkStepComplete?.(workDuration);
-          } else if (state === StepState.Skip) {
-            // Use actual elapsed time when skipped
-            onWorkStepComplete?.(data.elapsed);
-          }
-        },
-      });
-
-      // Rest interval (except after the last work interval)
-      if (i < restIntervals) {
-        steps.push({
-          id: `rest-${i}`,
-          duration: restDuration,
-          label: restLabel,
-          isWork: false,
-        });
-      }
-    }
-
-    return new TimerManager({
-      steps,
-      repeat: 1, // We're handling the intervals in the steps
-    });
-  }
 }
 
 export default TimerManager;
