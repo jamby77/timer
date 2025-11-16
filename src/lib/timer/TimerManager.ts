@@ -30,7 +30,7 @@ export interface TimerStep {
 
 export interface TimerSequenceOptions {
   steps: TimerStep[];
-  repeat?: number;
+  repeat?: number; // Number of times to repeat the sequence, 0 for infinite
   onStepChange?: (step: TimerStep, stepIndex: number) => void;
   onSequenceComplete?: () => void;
   onTick?: (time: number, totalElapsedTime: number, step: TimerStep | null) => void; // Add this
@@ -93,6 +93,7 @@ export class TimerManager {
     }
 
     this.timer?.pause();
+    this.isSequenceRunning = false;
   }
 
   public skipCurrentStep(): void {
