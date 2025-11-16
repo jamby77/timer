@@ -35,7 +35,7 @@ export function Card({ label, status, time, children, subtitle, currentStep }: C
       <div className="mb-8 text-center">
         <div className="font-mono text-9xl text-gray-800 tabular-nums">{time}</div>
       </div>
-      <div className="flex justify-center space-x-4">{children}</div>
+      <div className="flex flex-col justify-center space-x-4">{children}</div>
     </div>
   );
 }

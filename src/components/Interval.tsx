@@ -144,8 +144,8 @@ export function Interval({ intervalConfig }: IntervalProps) {
             <RepeatIcon className="h-6 w-6" />
           </BaseButton>
         </div>
+        <LapHistory laps={laps} onClearHistory={clearHistory} />
       </Card>
-      <LapHistory laps={laps} onClearHistory={clearHistory} />
     </div>
   );
 }
