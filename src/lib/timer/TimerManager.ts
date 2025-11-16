@@ -30,9 +30,10 @@ export interface TimerStep {
 
 export interface TimerSequenceOptions {
   steps: TimerStep[];
-  repeat?: number; // Number of times to repeat the sequence, 0 for infinite
+  repeat?: number;
   onStepChange?: (step: TimerStep, stepIndex: number) => void;
   onSequenceComplete?: () => void;
+  onTick?: (time: number, totalElapsedTime: number, step: TimerStep | null) => void; // Add this
 }
 
 export class TimerManager {
@@ -44,12 +45,18 @@ export class TimerManager {
   private isSequenceRunning: boolean = false;
   private readonly onStepChange?: (step: TimerStep, stepIndex: number) => void;
   private readonly onSequenceComplete?: () => void;
+  private readonly onStepTick?: (
+    time: number,
+    totalElapsedTime: number,
+    step: TimerStep | null,
+  ) => void;
 
   constructor(options: TimerSequenceOptions) {
     this.sequence = [...options.steps];
     this.totalRepeats = options.repeat ?? 0;
     this.onStepChange = options.onStepChange;
     this.onSequenceComplete = options.onSequenceComplete;
+    this.onStepTick = options.onTick;
   }
 
   public start(): void {
@@ -167,9 +174,14 @@ export class TimerManager {
     this.timer = new Timer(currentStep.duration, {
       onComplete: this.handleTimerComplete.bind(this),
       onStateChange: this.handleTimerStateChange.bind(this),
+      onTick: this.handleTimerTick.bind(this),
     });
 
     this.timer.start();
+  }
+
+  private handleTimerTick(time: number, totalElapsedTime: number): void {
+    this.onStepTick?.(time, totalElapsedTime, this.getCurrentStep());
   }
 
   private handleTimerComplete(): void {
