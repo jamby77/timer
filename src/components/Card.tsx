@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import { TimerStep } from "@/lib/timer/TimerManager";
+import cx from "clsx";
 
 interface CardProps {
   label: string;
@@ -6,13 +8,25 @@ interface CardProps {
   time: string;
   children: ReactNode;
   subtitle?: ReactNode;
+  currentStep?: TimerStep | null;
 }
 
-export function Card({ label, status, time, children, subtitle }: CardProps) {
+export function Card({ label, status, time, children, subtitle, currentStep }: CardProps) {
+  console.log({ currentStep });
   return (
-    <div className="w-fit max-w-5xl rounded-lg bg-white p-8 shadow-lg">
+    <div
+      className={`bg w-fit max-w-5xl rounded-lg p-8 shadow-lg ${cx({
+        "bg-emerald-400": currentStep?.isWork,
+        "bg-rose-300": !currentStep?.isWork,
+        "bg-transparent": !currentStep,
+      })}`}
+    >
       <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h2>
-      {subtitle && <p className="mb-2 text-center text-xs text-gray-400">{subtitle}</p>}
+      {subtitle && (
+        <p className="mx-auto mb-2 max-w-40 rounded-2xl bg-white/80 text-center text-xs text-gray-500">
+          {subtitle}
+        </p>
+      )}
       <p className="mb-8 text-center text-base text-gray-500">{status}</p>
       <div className="mb-8 text-center">
         <div className="font-mono text-9xl text-gray-800 tabular-nums">{time}</div>

@@ -78,12 +78,13 @@ export function Interval({ intervalConfig }: IntervalProps) {
         label={currentStep?.label || "Interval Timer"}
         status={status}
         time={formatTime(timeLeft)}
-        subtitle={`Interval ${getCurrentIntervalInfo()}`}
+        subtitle={`${getCurrentIntervalInfo()}`}
+        currentStep={currentStep}
       >
         <div className="mb-4 h-2 w-full rounded-full bg-gray-200">
           <div
             className={`h-2 rounded-full transition-all duration-100 ${
-              currentStep?.isWork ? "bg-green-500" : "bg-blue-500"
+              currentStep?.isWork ? "bg-emerald-700" : "bg-rose-700"
             }`}
             style={{ width: `${getProgress()}%` }}
           />
