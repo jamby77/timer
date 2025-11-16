@@ -48,6 +48,16 @@ export function Interval({ intervalConfig }: IntervalProps) {
     start();
   }, [reset, start]);
 
+  const handleStop = useCallback(() => {
+    // Record current lap if timer is running and we're in a work step
+    if (timerState === TimerState.Running && currentStep?.isWork) {
+      const elapsed = currentStep.duration - timeLeft;
+      addLap(elapsed);
+    }
+    // Stop and reset the timer
+    reset();
+  }, [timerState, currentStep, timeLeft, reset, addLap]);
+
   const status = getStatusMessage(timerState);
 
   const getProgress = () => {
@@ -105,9 +115,18 @@ export function Interval({ intervalConfig }: IntervalProps) {
             disabled={timerState !== TimerState.Running}
             title="Skip current interval"
             label="Skip current interval"
-            className="bg-red-500 hover:bg-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+            className="bg-orange-500 hover:bg-orange-600 focus:ring-orange-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
             <SkipIcon className="h-6 w-6" />
+          </BaseButton>
+          <BaseButton
+            onClick={handleStop}
+            disabled={timerState !== TimerState.Running}
+            title="Stop intervals"
+            label="Stop intervals"
+            className="bg-red-500 hover:bg-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+          >
+            <StopIcon className="h-6 w-6" />
           </BaseButton>
           <BaseButton
             onClick={handleRestart}
