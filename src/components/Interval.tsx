@@ -78,11 +78,11 @@ export function Interval({ intervalConfig }: IntervalProps) {
           />
         </div>
         <div className="flex gap-4">
-          {timerState === TimerState.Idle || timerState === TimerState.Completed ? (
+          {timerState === TimerState.Idle || timerState === TimerState.Completed || timerState === TimerState.Paused ? (
             <BaseButton
               onClick={start}
-              title="Start intervals"
-              label="Start intervals"
+              title={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
+              label={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
               className="bg-green-500 hover:bg-green-600 focus:ring-green-500"
             >
               <PlayIcon className="h-6 w-6" />

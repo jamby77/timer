@@ -22,7 +22,7 @@ const BaseButton = ({ onClick, children, label, title, className, disabled, ...r
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`focus:ring-opacity-50 rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none ${
+      className={`focus:ring-opacity-50 cursor-pointer rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none ${
         className
       }`}
       aria-label={label}
