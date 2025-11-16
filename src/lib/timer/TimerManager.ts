@@ -2,6 +2,22 @@ import { TimerState } from "@/lib/timer/types";
 
 import { Timer } from "./Timer";
 
+export enum StepState {
+  Start = "start",
+  Pause = "pause",
+  Resume = "resume",
+  Complete = "complete",
+  Skip = "skip",
+}
+
+export interface StepStateData {
+  step: TimerStep;
+  index: number;
+  elapsed: number; // 0 when not applicable (start, resume, complete)
+}
+
+export type StepStateChangeCallback = (state: StepState, data: StepStateData) => void;
+
 export interface TimerStep {
   duration: number; // in milliseconds
   label: string;
@@ -9,6 +25,7 @@ export interface TimerStep {
   isWork?: boolean;
   onStart?: () => void;
   onComplete?: () => void;
+  onStepStateChange?: StepStateChangeCallback;
 }
 
 export interface TimerSequenceOptions {
@@ -23,41 +40,75 @@ export class TimerManager {
   private currentStepIndex: number = 0;
   private currentRepeat: number = 0;
   private readonly totalRepeats: number = 0;
-  private timer: Timer;
+  private timer?: Timer;
   private isSequenceRunning: boolean = false;
-  private sequenceOptions: TimerSequenceOptions;
+  private readonly onStepChange?: (step: TimerStep, stepIndex: number) => void;
+  private readonly onSequenceComplete?: () => void;
 
   constructor(options: TimerSequenceOptions) {
-    this.sequenceOptions = {
-      repeat: 0,
-      ...options,
-    };
-    this.sequence = [...this.sequenceOptions.steps];
-    this.totalRepeats = this.sequenceOptions.repeat ?? 0;
-
-    this.timer = new Timer(0, {
-      onComplete: this.handleTimerComplete.bind(this),
-      onStateChange: this.handleTimerStateChange.bind(this),
-    });
+    this.sequence = [...options.steps];
+    this.totalRepeats = options.repeat ?? 0;
+    this.onStepChange = options.onStepChange;
+    this.onSequenceComplete = options.onSequenceComplete;
   }
 
   public start(): void {
     if (this.isSequenceRunning) return;
 
     this.isSequenceRunning = true;
-    if (this.timer.getState() === TimerState.Idle) {
+    if (!this.timer || this.timer.getState() === TimerState.Idle) {
       this.startCurrentStep();
     } else {
+      // Timer was paused, notify about resume
+      const currentStep = this.getCurrentStep();
+      if (currentStep) {
+        currentStep.onStepStateChange?.(StepState.Resume, {
+          step: currentStep,
+          index: this.getCurrentStepIndex(),
+          elapsed: 0,
+        });
+      }
       this.timer.start();
     }
   }
 
   public pause(): void {
-    this.timer.pause();
+    const currentStep = this.getCurrentStep();
+
+    // Notify step about pause with elapsed time
+    if (currentStep && this.isSequenceRunning && this.timer) {
+      const elapsed = currentStep.duration - this.timer.getTime();
+      currentStep.onStepStateChange?.(StepState.Pause, {
+        step: currentStep,
+        index: this.getCurrentStepIndex(),
+        elapsed,
+      });
+    }
+
+    this.timer?.pause();
+  }
+
+  public skipCurrentStep(): void {
+    const currentStep = this.getCurrentStep();
+    if (!currentStep || !this.isSequenceRunning || !this.timer) return;
+
+    // Get the elapsed time for the current step
+    const elapsed = currentStep.duration - this.timer.getTime();
+
+    // Notify step about skip with elapsed time
+    currentStep.onStepStateChange?.(StepState.Skip, {
+      step: currentStep,
+      index: this.getCurrentStepIndex(),
+      elapsed,
+    });
+
+    // Complete the current step to move to the next one
+    this.handleTimerComplete();
   }
 
   public reset(): void {
-    this.timer.reset();
+    this.timer?.reset();
+    this.timer = undefined; // Clear timer completely
     this.currentStepIndex = 0;
     this.currentRepeat = 0;
     this.isSequenceRunning = false;
@@ -87,6 +138,10 @@ export class TimerManager {
     return this.isSequenceRunning;
   }
 
+  public getSteps(): TimerStep[] {
+    return [...this.sequence];
+  }
+
   private startCurrentStep(): void {
     const currentStep = this.getCurrentStep();
     if (!currentStep) {
@@ -97,8 +152,16 @@ export class TimerManager {
     // Call the step's onStart callback if provided
     currentStep.onStart?.();
 
+    // Notify step about starting
+    const currentStepIndex = this.getCurrentStepIndex();
+    currentStep.onStepStateChange?.(StepState.Start, {
+      step: currentStep,
+      index: currentStepIndex,
+      elapsed: 0,
+    });
+
     // Notify about the step change
-    this.sequenceOptions.onStepChange?.(currentStep, this.currentStepIndex);
+    this.onStepChange?.(currentStep, currentStepIndex);
 
     // Set up and start the timer for this step
     this.timer = new Timer(currentStep.duration, {
@@ -111,7 +174,18 @@ export class TimerManager {
 
   private handleTimerComplete(): void {
     const currentStep = this.getCurrentStep();
+
+    // Notify step about completion
+    currentStep?.onStepStateChange?.(StepState.Complete, {
+      step: currentStep,
+      index: this.getCurrentStepIndex(),
+      elapsed: 0,
+    });
+
     currentStep?.onComplete?.();
+
+    // Clear the completed timer
+    this.timer = undefined;
 
     // Move to the next step
     this.currentStepIndex++;
@@ -123,8 +197,9 @@ export class TimerManager {
 
       // Check if we've completed all repeats
       if (this.totalRepeats > 0 && this.currentRepeat >= this.totalRepeats) {
-        this.sequenceOptions.onSequenceComplete?.();
+        this.onSequenceComplete?.();
         this.isSequenceRunning = false;
+        this.timer = undefined; // Clear timer when sequence completes
         return;
       }
     }
@@ -152,6 +227,7 @@ export class TimerManager {
     workLabel: string = "Work",
     restLabel: string = "Rest",
     skipLastRest: boolean = false,
+    onWorkStepComplete?: (elapsedTime: number) => void,
   ): TimerManager {
     const steps: TimerStep[] = [];
 
@@ -163,6 +239,15 @@ export class TimerManager {
         duration: workDuration,
         label: workLabel,
         isWork: true,
+        onStepStateChange: (state, data) => {
+          if (state === StepState.Complete) {
+            // Use full duration when completed naturally
+            onWorkStepComplete?.(workDuration);
+          } else if (state === StepState.Skip) {
+            // Use actual elapsed time when skipped
+            onWorkStepComplete?.(data.elapsed);
+          }
+        },
       });
 
       // Rest interval (except after the last work interval)

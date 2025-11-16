@@ -19,3 +19,18 @@ export interface TimerControls {
   getState: () => TimerState;
   getTime: () => number;
 }
+
+export interface IntervalConfig {
+  /** Work duration in seconds */
+  workDuration: number;
+  /** Rest duration in seconds */
+  restDuration: number;
+  /** Number of intervals to complete */
+  intervals: number;
+  /** Label for work periods */
+  workLabel?: string;
+  /** Label for rest periods */
+  restLabel?: string;
+  /** Whether to skip the last rest period */
+  skipLastRest?: boolean;
+}
