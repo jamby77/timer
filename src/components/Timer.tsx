@@ -46,12 +46,8 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
   };
 
   const handleRestart = () => {
-    // Clear history and restart
-    clearHistory();
     restart();
   };
-
-  const lastLapTime = laps.length > 0 ? laps[laps.length - 1].lapTime : null;
 
   const status = getStatusMessage(state, completionMessage);
 
@@ -66,7 +62,7 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
           onRestart={handleRestart}
         />
       </Card>
-      <LapHistory laps={laps} currentLap={lastLapTime} />
+      <LapHistory laps={laps} onClearHistory={clearHistory} />
     </div>
   );
 }

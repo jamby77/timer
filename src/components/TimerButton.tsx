@@ -78,7 +78,7 @@ function TimerButton({ state, onStart, onPause, onReset, onRestart }: TimerButto
       {playButton}
       <BaseButton
         onClick={onReset}
-        disabled={isCompleted}
+        disabled={!isRunning}
         className={`bg-red-500 hover:bg-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500`}
         label="Stop timer"
         title="Stop"

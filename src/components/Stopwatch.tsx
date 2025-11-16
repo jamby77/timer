@@ -29,13 +29,9 @@ export function Stopwatch({
 
   const handleStateChange = useCallback(
     (newState: TimerState) => {
-      // When stopwatch completes, record the time limit as a lap
-      if (newState === TimerState.Completed && timeLimit > 0) {
-        addLap(timeLimit * 1000);
-      }
       onStateChange?.(newState);
     },
-    [timeLimit, addLap, onStateChange],
+    [onStateChange],
   );
 
   const handleStop = useCallback(
@@ -60,10 +56,8 @@ export function Stopwatch({
   }, [time, reset, addLap]);
 
   const handleRestart = useCallback(() => {
-    // Clear history and restart
-    clearHistory();
     restart();
-  }, [clearHistory, restart]);
+  }, [restart]);
 
   const lastLapTime = laps.length > 0 ? laps[laps.length - 1].lapTime : null;
 
@@ -81,7 +75,7 @@ export function Stopwatch({
           onRestart={handleRestart}
         />
       </Card>
-      <LapHistory laps={laps} currentLap={lastLapTime} />
+      <LapHistory laps={laps} onClearHistory={clearHistory} />
     </div>
   );
 }
