@@ -4,15 +4,16 @@ import { useCallback } from "react";
 import PauseIcon from "@/icons/PauseIcon";
 import PlayIcon from "@/icons/PlayIcon";
 import RepeatIcon from "@/icons/Repeat";
+import SkipIcon from "@/icons/SkipIcon";
 import StopIcon from "@/icons/StopIcon";
 import { formatTime, getStatusMessage } from "@/lib/timer";
 import { TimerState, type IntervalConfig } from "@/lib/timer/types";
 import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
-import { BaseButton } from "./TimerButton";
 
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
+import { BaseButton } from "./TimerButton";
 
 interface IntervalProps {
   /** Configuration for the interval timer */
@@ -78,7 +79,9 @@ export function Interval({ intervalConfig }: IntervalProps) {
           />
         </div>
         <div className="flex gap-4">
-          {timerState === TimerState.Idle || timerState === TimerState.Completed || timerState === TimerState.Paused ? (
+          {timerState === TimerState.Idle ||
+          timerState === TimerState.Completed ||
+          timerState === TimerState.Paused ? (
             <BaseButton
               onClick={start}
               title={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
@@ -104,7 +107,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
             label="Skip current interval"
             className="bg-red-500 hover:bg-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
           >
-            <StopIcon className="h-6 w-6" />
+            <SkipIcon className="h-6 w-6" />
           </BaseButton>
           <BaseButton
             onClick={handleRestart}
