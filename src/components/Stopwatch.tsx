@@ -59,8 +59,6 @@ export function Stopwatch({
     restart();
   }, [restart]);
 
-  const lastLapTime = laps.length > 0 ? laps[laps.length - 1].lapTime : null;
-
   const status = getStatusMessage(state, completionMessage);
   const timeLimitDisplay = timeLimit ? `(Time limit: ${formatTime(timeLimit * 1000)})` : undefined;
 

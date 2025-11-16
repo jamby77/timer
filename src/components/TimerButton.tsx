@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, memo } from "react";
+import { ButtonHTMLAttributes, memo, ReactNode } from "react";
 import PauseIcon from "@/icons/PauseIcon";
 import PlayIcon from "@/icons/PlayIcon";
 import RepeatIcon from "@/icons/Repeat";
@@ -37,7 +37,7 @@ const BaseButton = ({ onClick, children, label, title, className, disabled, ...r
 function TimerButton({ state, onStart, onPause, onReset, onRestart }: TimerButtonProps) {
   const isRunning = state === TimerState.Running;
   const isCompleted = state === TimerState.Completed;
-  let playButton = null;
+  let playButton: ReactNode;
   if (isCompleted) {
     playButton = (
       <BaseButton
