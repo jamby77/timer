@@ -6,9 +6,9 @@ export enum TimerState {
 }
 
 export interface TimerOptions {
-  onTick?: (time: number) => void;
-  onComplete?: () => void;
-  onStateChange?: (state: TimerState) => void;
+  onTick?: (time: number, totalElapsedTime: number) => void;
+  onComplete?: (totalElapsedTime: number) => void;
+  onStateChange?: (state: TimerState, totalElapsedTime: number) => void;
   debug?: boolean;
 }
 

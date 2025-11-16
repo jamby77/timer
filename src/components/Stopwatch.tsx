@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { formatTime, getStatusMessage, TimerState, useStopwatch } from "@/lib/timer";
 
 import { Card } from "./Card";
@@ -23,21 +23,47 @@ export function Stopwatch({
   onStateChange,
   completionMessage,
 }: StopwatchProps) {
+  const [lastLapTime, setLastLapTime] = useState<number | null>(null);
+
+  const handleStateChange = useCallback(
+    (newState: TimerState) => {
+      onStateChange?.(newState);
+    },
+    [onStateChange],
+  );
+
+  const handleStop = useCallback(
+    (elapsedTime: number) => {
+      setLastLapTime(elapsedTime);
+    },
+    [],
+  );
+
   const { time, state, start, pause, reset, restart } = useStopwatch({
     timeLimitMs: timeLimit * 1000,
-    onStateChange,
+    onStateChange: handleStateChange,
+    onStop: handleStop,
   });
 
+  const handleReset = useCallback(() => {
+    // Save the current elapsed time before resetting
+    if (time > 0) {
+      setLastLapTime(time);
+    }
+    reset();
+  }, [time, reset]);
+
   const status = getStatusMessage(state, completionMessage);
-  const subtitle = timeLimit ? `(Time limit: ${formatTime(timeLimit * 1000)})` : undefined;
-  console.log("SW");
+  const timeLimitDisplay = timeLimit ? `(Time limit: ${formatTime(timeLimit * 1000)})` : undefined;
+  const lastLapDisplay = lastLapTime !== null ? `Last lap: ${formatTime(lastLapTime)}` : timeLimitDisplay;
+
   return (
-    <Card label={label} status={status} time={formatTime(time)} subtitle={subtitle}>
+    <Card label={label} status={status} time={formatTime(time)} subtitle={lastLapDisplay}>
       <TimerButton
         state={state}
         onStart={start}
         onPause={pause}
-        onReset={reset}
+        onReset={handleReset}
         onRestart={restart}
       />
     </Card>

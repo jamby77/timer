@@ -8,6 +8,7 @@ export class Timer {
   private animationFrameId: number | NodeJS.Timeout | null = null;
   private lastTickTime: number | null = null;
   private lastUpdateTime: number = 0;
+  private totalElapsedTime: number = 0;
   private options?: TimerOptions;
   private readonly debug: boolean = false;
   private readonly updateInterval: number = 100; // Update UI every 100ms
@@ -42,24 +43,26 @@ export class Timer {
     this.log("updateTime - delta: " + delta + "ms, time before: " + this.time);
 
     this.time = Math.max(0, this.time - delta);
+    this.totalElapsedTime += delta;
 
     this.log(
       "updateTime - time after: " + this.time + "ms (" + Math.round(this.time / 1000) + "s)",
     );
 
-    // Only call onTick every updateInterval ms to reduce re-renders
-    if (timestamp - this.lastUpdateTime >= this.updateInterval) {
-      this.options?.onTick?.(this.time);
-      this.lastUpdateTime = timestamp;
-    }
-
     if (this.time <= 0) {
       this.log("Timer completed!");
       this.state = TimerState.Completed;
       this.cleanup();
-      this.options?.onComplete?.();
-      this.options?.onStateChange?.(this.state);
+      this.options?.onTick?.(0, this.totalElapsedTime);
+      this.options?.onComplete?.(this.totalElapsedTime);
+      this.options?.onStateChange?.(this.state, this.totalElapsedTime);
       return;
+    }
+
+    // Only call onTick every updateInterval ms to reduce re-renders
+    if (timestamp - this.lastUpdateTime >= this.updateInterval) {
+      this.options?.onTick?.(this.time, this.totalElapsedTime);
+      this.lastUpdateTime = timestamp;
     }
 
     this.animationFrameId = requestAnimationFrame((ts) => this.updateTime(ts));
@@ -76,7 +79,7 @@ export class Timer {
     this.lastTickTime = null;
     this.state = TimerState.Running;
     this.log("State changed to Running, time: " + this.time + "ms");
-    this.options?.onStateChange?.(this.state);
+    this.options?.onStateChange?.(this.state, this.totalElapsedTime);
 
     this.animationFrameId = requestAnimationFrame((ts) => this.updateTime(ts));
   }
@@ -86,7 +89,7 @@ export class Timer {
 
     this.cleanup();
     this.state = TimerState.Paused;
-    this.options?.onStateChange?.(this.state);
+    this.options?.onStateChange?.(this.state, this.totalElapsedTime);
   }
 
   public reset() {
@@ -94,9 +97,10 @@ export class Timer {
     this.time = this.initialTime;
     this.startTime = null;
     this.lastTickTime = null;
+    this.totalElapsedTime = 0;
     this.state = TimerState.Idle;
-    this.options?.onTick?.(this.time);
-    this.options?.onStateChange?.(this.state);
+    this.options?.onTick?.(this.time, this.totalElapsedTime);
+    this.options?.onStateChange?.(this.state, this.totalElapsedTime);
   }
 
   public getState(): TimerState {
@@ -105,6 +109,10 @@ export class Timer {
 
   public getTime(): number {
     return this.time;
+  }
+
+  public getTotalElapsedTime(): number {
+    return this.totalElapsedTime;
   }
 
   public getInitialTime(): number {
