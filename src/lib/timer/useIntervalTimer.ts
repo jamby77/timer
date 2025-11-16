@@ -95,7 +95,7 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
         // External callback
         onSequenceComplete?.();
       },
-      onTick: (time, _totalElapsedTime, step) => {
+      onTick: (time, _totalElapsedTime, _step) => {
         setTimeLeft(time);
       },
     });

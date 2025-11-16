@@ -110,6 +110,9 @@ export class TimerManager {
       elapsed,
     });
 
+    // Stop the current timer before moving to next step
+    this.timer?.pause();
+    
     // Complete the current step to move to the next one
     this.handleTimerComplete();
   }
