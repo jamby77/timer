@@ -36,6 +36,6 @@ export interface IntervalConfig {
   /** Whether to skip the last rest period */
   skipLastRest?: boolean;
   onWorkStepComplete?: (time: number) => void;
-  onStepChange?: (step: TimerStep, stepIndex: number) => void;
+  onStepChange?: (step: TimerStep | null, stepIndex: number) => void;
   onSequenceComplete?: () => void;
 }

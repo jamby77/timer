@@ -97,9 +97,6 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
       },
       onTick: (time, _totalElapsedTime, step) => {
         setTimeLeft(time);
-        if (currentStep !== step) {
-          setCurrentStep(step);
-        }
       },
     });
   }, [

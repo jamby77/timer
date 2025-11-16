@@ -1,35 +1,32 @@
 "use client";
 
 import { useCallback } from "react";
+import PauseIcon from "@/icons/PauseIcon";
+import PlayIcon from "@/icons/PlayIcon";
+import RepeatIcon from "@/icons/Repeat";
+import StopIcon from "@/icons/StopIcon";
 import { formatTime } from "@/lib/timer";
-import { type TimerStep } from "@/lib/timer/TimerManager";
-import { useLapHistory } from "@/lib/timer/useLapHistory";
-import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
 import { type IntervalConfig } from "@/lib/timer/types";
+import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
+import { useLapHistory } from "@/lib/timer/useLapHistory";
 
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
-import PlayIcon from "@/icons/PlayIcon";
-import PauseIcon from "@/icons/PauseIcon";
-import StopIcon from "@/icons/StopIcon";
-import RepeatIcon from "@/icons/Repeat";
 
 interface IntervalProps {
   /** Configuration for the interval timer */
   intervalConfig: IntervalConfig;
-  /** Optional callback when interval state changes */
-  onStateChange?: (step: TimerStep | null, stepIndex: number) => void;
-  /** Optional callback when all intervals complete */
-  onSequenceComplete?: () => void;
 }
 
-export function Interval({
-  intervalConfig,
-  onStateChange,
-  onSequenceComplete,
-}: IntervalProps) {
+export function Interval({ intervalConfig }: IntervalProps) {
   const { laps, addLap, clearHistory } = useLapHistory();
-
+  const addLapCallback = useCallback(
+    (elapsedTime: number) => {
+      // Add lap with the actual elapsed time
+      addLap(elapsedTime);
+    },
+    [addLap],
+  );
   const {
     currentStep,
     currentStepIndex,
@@ -37,35 +34,17 @@ export function Interval({
     timeLeft,
     start,
     reset,
+    pause,
     skipCurrentStep,
-  } = useIntervalTimer(
-    intervalConfig,
-    (elapsedTime) => {
-      // Add lap with the actual elapsed time
-      addLap(elapsedTime);
-    },
-    onStateChange,
-    onSequenceComplete,
-  );
-
-  const handleStart = useCallback(() => {
-    start();
-  }, [start]);
-
-  const handlePause = useCallback(() => {
-    // Skip the current interval
-    skipCurrentStep();
-  }, [skipCurrentStep]);
-
-  const handleReset = useCallback(() => {
-    reset();
-    clearHistory();
-  }, [reset, clearHistory]);
+  } = useIntervalTimer({
+    ...intervalConfig,
+    onWorkStepComplete: addLapCallback,
+  });
 
   const handleRestart = useCallback(() => {
-    handleReset();
-    handleStart();
-  }, [handleReset, handleStart]);
+    reset();
+    start();
+  }, [reset, start]);
 
   const getStatus = () => {
     if (isRunning) return "Running...";
@@ -93,7 +72,7 @@ export function Interval({
         time={formatTime(timeLeft)}
         subtitle={`Interval ${getCurrentIntervalInfo()}`}
       >
-        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+        <div className="mb-4 h-2 w-full rounded-full bg-gray-200">
           <div
             className={`h-2 rounded-full transition-all duration-100 ${
               currentStep?.isWork ? "bg-green-500" : "bg-blue-500"
@@ -104,32 +83,32 @@ export function Interval({
         <div className="flex gap-4">
           {!isRunning ? (
             <button
-              onClick={handleStart}
-              className="bg-green-500 hover:bg-green-600 focus:ring-green-500 focus:ring-opacity-50 rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none"
+              onClick={start}
+              className="focus:ring-opacity-50 rounded-full bg-green-500 p-4 text-white transition-colors hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
               title="Start intervals"
             >
               <PlayIcon className="h-6 w-6" />
             </button>
           ) : (
             <button
-              onClick={handlePause}
-              className="bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500 focus:ring-opacity-50 rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none"
+              onClick={pause}
+              className="focus:ring-opacity-50 rounded-full bg-yellow-500 p-4 text-white transition-colors hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
               title="Skip current interval"
             >
               <PauseIcon className="h-6 w-6" />
             </button>
           )}
           <button
-            onClick={handleReset}
+            onClick={skipCurrentStep}
             disabled={!isRunning}
-            className="bg-red-500 hover:bg-red-600 focus:ring-red-500 focus:ring-opacity-50 rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+            className="focus:ring-opacity-50 rounded-full bg-red-500 p-4 text-white transition-colors hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
             title="Stop intervals"
           >
             <StopIcon className="h-6 w-6" />
           </button>
           <button
             onClick={handleRestart}
-            className="bg-green-500 hover:bg-green-600 focus:ring-green-500 focus:ring-opacity-50 rounded-full p-4 text-white transition-colors focus:ring-2 focus:outline-none"
+            className="focus:ring-opacity-50 rounded-full bg-green-500 p-4 text-white transition-colors hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
             title="Restart intervals"
           >
             <RepeatIcon className="h-6 w-6" />
