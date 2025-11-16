@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { formatTime, getStatusMessage, TimerState, useTimer } from "@/lib/timer";
+import { useLapHistory } from "@/lib/timer/useLapHistory";
 
 import { Card } from "./Card";
+import { LapHistory } from "./LapHistory";
 import TimerButton from "./TimerButton";
 
 interface TimerProps {
@@ -18,17 +20,17 @@ interface TimerProps {
 }
 
 export function Timer({ duration, label = "Timer", completionMessage, onStateChange }: TimerProps) {
-  const [lastLapTime, setLastLapTime] = useState<number | null>(null);
+  const { laps, addLap, clearHistory } = useLapHistory();
 
   const handleStateChange = useCallback(
     (newState: TimerState, elapsed: number) => {
-      // Show last lap when timer completes
+      // When timer completes, record the full duration as a lap
       if (newState === TimerState.Completed && elapsed > 0) {
-        setLastLapTime(elapsed);
+        addLap(duration * 1000);
       }
       onStateChange?.(newState);
     },
-    [onStateChange],
+    [duration, addLap, onStateChange],
   );
 
   const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(duration * 1000, {
@@ -36,25 +38,35 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
   });
 
   const handleReset = () => {
-    // Save the total elapsed time before resetting
+    // Save the total elapsed time as a lap before resetting
     if (totalElapsedTime > 0) {
-      setLastLapTime(totalElapsedTime);
+      addLap(totalElapsedTime);
     }
     reset();
   };
 
+  const handleRestart = () => {
+    // Clear history and restart
+    clearHistory();
+    restart();
+  };
+
+  const lastLapTime = laps.length > 0 ? laps[laps.length - 1].lapTime : null;
+
   const status = getStatusMessage(state, completionMessage);
-  const lastLapDisplay = lastLapTime !== null ? `Last lap: ${formatTime(lastLapTime)}` : null;
 
   return (
-    <Card label={label} status={status} time={formatTime(time)} subtitle={lastLapDisplay}>
-      <TimerButton
-        state={state}
-        onStart={start}
-        onPause={pause}
-        onReset={handleReset}
-        onRestart={restart}
-      />
-    </Card>
+    <div className="flex flex-col items-center gap-8">
+      <Card label={label} status={status} time={formatTime(time)}>
+        <TimerButton
+          state={state}
+          onStart={start}
+          onPause={pause}
+          onReset={handleReset}
+          onRestart={handleRestart}
+        />
+      </Card>
+      <LapHistory laps={laps} currentLap={lastLapTime} />
+    </div>
   );
 }

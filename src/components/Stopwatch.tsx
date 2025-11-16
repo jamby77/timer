@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { formatTime, getStatusMessage, TimerState, useStopwatch } from "@/lib/timer";
+import { useLapHistory } from "@/lib/timer/useLapHistory";
 
 import { Card } from "./Card";
+import { LapHistory } from "./LapHistory";
 import TimerButton from "./TimerButton";
 
 interface StopwatchProps {
@@ -23,20 +25,24 @@ export function Stopwatch({
   onStateChange,
   completionMessage,
 }: StopwatchProps) {
-  const [lastLapTime, setLastLapTime] = useState<number | null>(null);
+  const { laps, addLap, clearHistory } = useLapHistory();
 
   const handleStateChange = useCallback(
     (newState: TimerState) => {
+      // When stopwatch completes, record the time limit as a lap
+      if (newState === TimerState.Completed && timeLimit > 0) {
+        addLap(timeLimit * 1000);
+      }
       onStateChange?.(newState);
     },
-    [onStateChange],
+    [timeLimit, addLap, onStateChange],
   );
 
   const handleStop = useCallback(
     (elapsedTime: number) => {
-      setLastLapTime(elapsedTime);
+      addLap(elapsedTime);
     },
-    [],
+    [addLap],
   );
 
   const { time, state, start, pause, reset, restart } = useStopwatch({
@@ -46,26 +52,36 @@ export function Stopwatch({
   });
 
   const handleReset = useCallback(() => {
-    // Save the current elapsed time before resetting
+    // Save the current elapsed time as a lap before resetting
     if (time > 0) {
-      setLastLapTime(time);
+      addLap(time);
     }
     reset();
-  }, [time, reset]);
+  }, [time, reset, addLap]);
+
+  const handleRestart = useCallback(() => {
+    // Clear history and restart
+    clearHistory();
+    restart();
+  }, [clearHistory, restart]);
+
+  const lastLapTime = laps.length > 0 ? laps[laps.length - 1].lapTime : null;
 
   const status = getStatusMessage(state, completionMessage);
   const timeLimitDisplay = timeLimit ? `(Time limit: ${formatTime(timeLimit * 1000)})` : undefined;
-  const lastLapDisplay = lastLapTime !== null ? `Last lap: ${formatTime(lastLapTime)}` : timeLimitDisplay;
 
   return (
-    <Card label={label} status={status} time={formatTime(time)} subtitle={lastLapDisplay}>
-      <TimerButton
-        state={state}
-        onStart={start}
-        onPause={pause}
-        onReset={handleReset}
-        onRestart={restart}
-      />
-    </Card>
+    <div className="flex flex-col items-center gap-8">
+      <Card label={label} status={status} time={formatTime(time)} subtitle={timeLimitDisplay}>
+        <TimerButton
+          state={state}
+          onStart={start}
+          onPause={pause}
+          onReset={handleReset}
+          onRestart={handleRestart}
+        />
+      </Card>
+      <LapHistory laps={laps} currentLap={lastLapTime} />
+    </div>
   );
 }
