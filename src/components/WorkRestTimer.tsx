@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PauseIcon from "@/icons/PauseIcon";
 import PlayIcon from "@/icons/PlayIcon";
 import RepeatIcon from "@/icons/Repeat";
 import SkipIcon from "@/icons/SkipIcon";
 import StopIcon from "@/icons/StopIcon";
-import { formatTime, getStatusMessage } from "@/lib/timer";
-import { TimerState, TimerPhase } from "@/lib/timer/types";
-import { useWorkRestTimer } from "@/lib/timer/useWorkRestTimer";
+import { getStatusMessage } from "@/lib/timer";
+import { getDisplayData } from "@/lib/timer/displayUtils";
+import { TimerPhase, TimerState } from "@/lib/timer/types";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
+import { useWorkRestTimer } from "@/lib/timer/useWorkRestTimer";
 import cx from "clsx";
 
 import { Card } from "./Card";
@@ -24,9 +25,9 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
   const { laps, addLap, clearHistory } = useLapHistory();
   const [ratioInteger, setRatioInteger] = useState<string>("1");
   const [ratioDecimal, setRatioDecimal] = useState<string>("00");
-  
+
   const [state, actions] = useWorkRestTimer({
-    onLapRecorded: addLap
+    onLapRecorded: addLap,
   });
 
   // Sync ratio inputs with state when hook ratio changes
@@ -41,43 +42,52 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
   }, [state.ratio]);
 
   // Sync inputs when hook state changes
-  React.useEffect(() => {
+  useEffect(() => {
     syncRatioInputs();
   }, [state.ratio, syncRatioInputs]);
 
   // Update inputs when ratio changes from external sources
-  const handleRatioInputChange = useCallback((integer: string, decimal: string) => {
-    const newRatio = parseFloat(`${integer}.${decimal.padEnd(2, "0")}`);
-    if (!isNaN(newRatio) && newRatio >= 0.01 && newRatio <= 100) {
-      actions.setRatio(newRatio);
-    }
-  }, [actions.setRatio]);
+  const handleRatioInputChange = useCallback(
+    (integer: string, decimal: string) => {
+      const newRatio = parseFloat(`${integer}.${decimal.padEnd(2, "0")}`);
+      if (!isNaN(newRatio) && newRatio >= 0.01 && newRatio <= 100) {
+        actions.setRatio(newRatio);
+      }
+    },
+    [actions.setRatio],
+  );
 
-  const handleIntegerChange = useCallback((value: string) => {
-    // Validate input
-    if (value === "" || value === "-") {
-      setRatioInteger("0");
-      return;
-    }
-    
-    const intValue = parseInt(value) || 0;
-    if (intValue >= 0 && intValue <= 100) {
-      setRatioInteger(value);
-      handleRatioInputChange(value, ratioDecimal);
-    }
-  }, [ratioDecimal, handleRatioInputChange]);
+  const handleIntegerChange = useCallback(
+    (value: string) => {
+      // Validate input
+      if (value === "" || value === "-") {
+        setRatioInteger("0");
+        return;
+      }
 
-  const handleDecimalChange = useCallback((value: string) => {
-    // Validate input - only allow 2 digits
-    if (value === "" || value === "-") {
-      setRatioDecimal("00");
-      return;
-    }
-    
-    const decValue = value.slice(0, 2);
-    setRatioDecimal(decValue);
-    handleRatioInputChange(ratioInteger, decValue);
-  }, [ratioInteger, handleRatioInputChange]);
+      const intValue = parseInt(value) || 0;
+      if (intValue >= 0 && intValue <= 100) {
+        setRatioInteger(value);
+        handleRatioInputChange(value, ratioDecimal);
+      }
+    },
+    [ratioDecimal, handleRatioInputChange],
+  );
+
+  const handleDecimalChange = useCallback(
+    (value: string) => {
+      // Validate input - only allow 2 digits
+      if (value === "" || value === "-") {
+        setRatioDecimal("00");
+        return;
+      }
+
+      const decValue = value.slice(0, 2);
+      setRatioDecimal(decValue);
+      handleRatioInputChange(ratioInteger, decValue);
+    },
+    [ratioInteger, handleRatioInputChange],
+  );
 
   const handleRestart = useCallback(() => {
     actions.reset();
@@ -96,10 +106,13 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
     actions.skipRest();
   }, [actions]);
 
-  const handleAdjustRatio = useCallback((delta: number) => {
-    actions.adjustRatio(delta);
-    // Remove manual sync - useEffect will handle it
-  }, [actions.adjustRatio]);
+  const handleAdjustRatio = useCallback(
+    (delta: number) => {
+      actions.adjustRatio(delta);
+      // Remove manual sync - useEffect will handle it
+    },
+    [actions.adjustRatio],
+  );
 
   const handleResetRatio = useCallback(() => {
     actions.resetRatio();
@@ -108,33 +121,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
 
   const status = getStatusMessage(state.state);
 
-  const getDisplayData = () => {
-    switch (state.phase) {
-      case TimerPhase.Work:
-        return {
-          time: formatTime(state.currentTime),
-          progress: actions.getProgress(),
-          label: "WORK",
-          isWork: true,
-        };
-      case TimerPhase.Rest:
-        return {
-          time: formatTime(state.currentTime),
-          progress: actions.getProgress(),
-          label: "REST",
-          isWork: false,
-        };
-      default:
-        return {
-          time: "00:00.00",
-          progress: 0,
-          label: "READY",
-          isWork: false,
-        };
-    }
-  };
-
-  const displayData = getDisplayData();
+  const displayData = getDisplayData(state, actions.getProgress);
   const currentRatio = (state.ratio / 100).toFixed(2);
 
   return (
@@ -161,9 +148,8 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         </div>
 
         {/* Main Control Buttons */}
-        <div className="flex gap-4 mb-4">
-          {state.phase === TimerPhase.Idle ||
-          state.state === TimerState.Paused ? (
+        <div className="mb-4 flex gap-4">
+          {state.phase === TimerPhase.Idle || state.state === TimerState.Paused ? (
             <BaseButton
               onClick={state.phase === TimerPhase.Idle ? actions.startWork : actions.resumeWork}
               title={state.phase === TimerPhase.Idle ? "Start work" : "Resume work"}
@@ -227,7 +213,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         </div>
 
         {/* Ratio Controls */}
-        <div className="flex flex-col gap-2 mb-4">
+        <div className="mb-4 flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-700">Ratio:</span>
             <div className="flex items-center gap-1">
@@ -238,7 +224,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
                 value={ratioInteger}
                 onChange={(e) => handleIntegerChange(e.target.value)}
                 disabled={state.phase !== TimerPhase.Idle}
-                className="w-12 px-1 py-1 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+                className="w-12 rounded border border-gray-300 px-1 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
               />
               <span className="text-gray-500">.</span>
               <input
@@ -248,20 +234,20 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
                 value={ratioDecimal}
                 onChange={(e) => handleDecimalChange(e.target.value)}
                 disabled={state.phase !== TimerPhase.Idle}
-                className="w-12 px-1 py-1 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+                className="w-12 rounded border border-gray-300 px-1 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
               />
               <span className="text-sm text-gray-500">x</span>
             </div>
           </div>
 
           {/* Quick Adjustment Buttons */}
-          <div className="flex gap-2 justify-center">
+          <div className="flex justify-center gap-2">
             <BaseButton
               onClick={() => handleAdjustRatio(100)} // +1.0
               title="Increase ratio by 1.0"
               label="+1.0"
               disabled={state.phase !== TimerPhase.Idle}
-              className="text-xs px-2 py-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300"
+              className="bg-gray-500 px-2 py-1 text-xs hover:bg-gray-600 disabled:bg-gray-300"
             >
               +1.0
             </BaseButton>
@@ -270,7 +256,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
               title="Increase ratio by 0.01"
               label="+0.01"
               disabled={state.phase !== TimerPhase.Idle}
-              className="text-xs px-2 py-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300"
+              className="bg-gray-500 px-2 py-1 text-xs hover:bg-gray-600 disabled:bg-gray-300"
             >
               +0.01
             </BaseButton>
@@ -279,7 +265,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
               title="Decrease ratio by 0.01"
               label="-0.01"
               disabled={state.phase !== TimerPhase.Idle}
-              className="text-xs px-2 py-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300"
+              className="bg-gray-500 px-2 py-1 text-xs hover:bg-gray-600 disabled:bg-gray-300"
             >
               -0.01
             </BaseButton>
@@ -288,7 +274,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
               title="Decrease ratio by 1.0"
               label="-1.0"
               disabled={state.phase !== TimerPhase.Idle}
-              className="text-xs px-2 py-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300"
+              className="bg-gray-500 px-2 py-1 text-xs hover:bg-gray-600 disabled:bg-gray-300"
             >
               -1.0
             </BaseButton>
@@ -297,7 +283,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
               title="Reset ratio to 1.0"
               label="Reset 1x"
               disabled={state.phase !== TimerPhase.Idle}
-              className="text-xs px-2 py-1 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300"
+              className="bg-purple-500 px-2 py-1 text-xs hover:bg-purple-600 disabled:bg-gray-300"
             >
               Reset 1x
             </BaseButton>
