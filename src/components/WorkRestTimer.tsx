@@ -7,8 +7,8 @@ import RepeatIcon from "@/icons/Repeat";
 import SkipIcon from "@/icons/SkipIcon";
 import StopIcon from "@/icons/StopIcon";
 import { formatTime, getStatusMessage } from "@/lib/timer";
-import { TimerState } from "@/lib/timer/types";
-import { useWorkRestTimer, TimerPhase } from "@/lib/timer/useWorkRestTimer";
+import { TimerState, TimerPhase } from "@/lib/timer/types";
+import { useWorkRestTimer } from "@/lib/timer/useWorkRestTimer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
 import cx from "clsx";
 

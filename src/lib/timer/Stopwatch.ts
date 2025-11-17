@@ -88,6 +88,16 @@ export class Stopwatch {
   }
 
   /**
+   * Stop the stopwatch and trigger onStop callback
+   */
+  public stop(): void {
+    if (!this.isRunning || this.getElapsedTime() >= this.timeLimitMs - 100) return;
+    
+    this.pause();
+    this.stopCallback?.(this.getElapsedTime());
+  }
+
+  /**
    * Reset the stopwatch to zero
    */
   public reset(): void {

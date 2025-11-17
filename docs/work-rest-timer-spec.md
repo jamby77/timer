@@ -36,12 +36,18 @@ A new timer component that combines stopwatch functionality for work periods wit
 - **Duration Formula**: `Rest Time = Work Time × Ratio`
 - **Example**: Work 1:00 with ratio 2.0 → Rest 2:00
 - **Display**: Shows remaining time in MM:SS.MS format
-- **Controls**: Only Skip/Stop buttons (no pause)
+- **Controls**: Skip and Stop buttons (no pause)
 - **Behavior**:
   - Auto-starts when work phase ends, give short delay to allow user to see work time, something like 100ms
   - Cannot be paused (must complete or be skipped)
-  - Skip ends rest phase immediately
-  - Stop ends rest phase and resets to idle
+  - Skip ends rest phase immediately and automatically starts next work phase
+  - Stop ends entire execution and returns to idle
+
+### Session Management
+- **Maximum Rounds**: 1000 consecutive work/rest cycles
+- **Round Counter**: Displays current round starting at 1
+- **Stop Execution**: Separate UI button to stop entire session and return to idle
+- **Skip Rest**: Automatically transitions to next work phase without user intervention
 
 ## User Interface
 

@@ -1,76 +1,54 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Stopwatch } from "./Stopwatch";
 import { Timer } from "./Timer";
-import { TimerState } from "./types";
+import {
+  TimerPhase,
+  TimerState,
+  WorkRestTimerActions,
+  WorkRestTimerOptions,
+  WorkRestTimerState,
+} from "./types";
 
-export enum TimerPhase {
-  Idle = "idle",
-  Work = "work",
-  Rest = "rest",
-  Completed = "completed",
-}
-
-export interface WorkRestTimerState {
-  phase: TimerPhase;
-  ratio: number; // Work/rest multiplier (stored as integer * 100)
-  rounds: number; // Count of completed work sessions
-  state: TimerState; // Active timing state
-  currentTime: number; // Current time in milliseconds (work elapsed or rest remaining)
-}
-
-export interface WorkRestTimerActions {
-  // Work phase controls
-  startWork: () => void;
-  pauseWork: () => void;
-  resumeWork: () => void;
-  stopWork: () => void;
-
-  // Rest phase controls
-  skipRest: () => void;
-  stopRest: () => void;
-
-  // Configuration
-  adjustRatio: (delta: number) => void; // delta = 1 for 0.01, -1 for -0.01
-  setRatio: (ratio: number) => void;
-  resetRatio: () => void;
-
-  // System controls
-  reset: () => void;
-  getProgress: () => number; // Progress percentage (0-100)
-}
-
-export interface WorkRestTimerOptions {
-  onLapRecorded?: (time: number) => void; // Callback for lap recording
-}
-
-const WORK_TIME_LIMIT_MS = 99 * 60 * 1000 + 99 * 1000; // 99:99 = 5,999,000ms
+const WORK_TIME_LIMIT_MS = (99 * 60 + 99) * 1000; // 99:99 = // 6,039.000
 const DEFAULT_RATIO = 100; // 1.0 stored as integer
 const MIN_RATIO = 1; // 0.01 stored as integer
 const MAX_RATIO = 10000; // 100.0 stored as integer
 const REST_DELAY_MS = 100; // 100ms delay before rest starts
+const MAX_ROUNDS = 1000; // Maximum consecutive work/rest cycles
 
-export const useWorkRestTimer = (options: WorkRestTimerOptions = {}): [WorkRestTimerState, WorkRestTimerActions] => {
+export const useWorkRestTimer = ({ onLapRecorded }: WorkRestTimerOptions = {}): [
+  WorkRestTimerState,
+  WorkRestTimerActions,
+] => {
   const [state, setState] = useState<WorkRestTimerState>({
     phase: TimerPhase.Idle,
     ratio: DEFAULT_RATIO,
     rounds: 0,
+    maxRounds: MAX_ROUNDS,
     state: TimerState.Idle,
     currentTime: 0,
   });
 
   const timerRef = useRef<Timer | null>(null);
+  const stopwatchRef = useRef<Stopwatch | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const onLapRecordedRef = useRef(options.onLapRecorded);
+  const onLapRecordedRef = useRef(onLapRecorded);
 
   // Update callback ref when options change
   useEffect(() => {
-    onLapRecordedRef.current = options.onLapRecorded;
-  }, [options.onLapRecorded]);
+    onLapRecordedRef.current = onLapRecorded;
+  }, [onLapRecorded]);
 
-  // Clean up current timer and timeout
+  // Clean up current timer and stopwatch
   const cleanupTimer = useCallback(() => {
     if (timerRef.current) {
       timerRef.current.destroy();
       timerRef.current = null;
+    }
+    if (stopwatchRef.current) {
+      stopwatchRef.current.destroy();
+      stopwatchRef.current = null;
     }
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -78,121 +56,125 @@ export const useWorkRestTimer = (options: WorkRestTimerOptions = {}): [WorkRestT
     }
   }, []);
 
-  // Create work timer
-  const createWorkTimer = useCallback(() => {
+  // Create work stopwatch
+  const createWorkStopwatch = useCallback(() => {
     cleanupTimer();
-    
-    const workTimer = new Timer(WORK_TIME_LIMIT_MS, {
-      onTick: (timeLeft, totalElapsedTime) => {
+
+    const stopwatch = new Stopwatch({
+      timeLimitMs: WORK_TIME_LIMIT_MS,
+      onTick: (elapsedTime) => {
         // Update currentTime to trigger re-renders
-        setState(prev => ({ ...prev, currentTime: totalElapsedTime }));
+        setState((prev) => ({ ...prev, currentTime: elapsedTime }));
       },
-      onComplete: (totalElapsedTime) => {
-        // Work timer completed (hit 99:99 limit)
-        onLapRecordedRef.current?.(totalElapsedTime);
-        // Pass current ratio to avoid stale closure
-        startRestPhase(totalElapsedTime, state.ratio);
+      onStop: (elapsedTime) => {
+        // Record lap - state transitions handled by action functions
+        onLapRecordedRef.current?.(elapsedTime);
       },
       onStateChange: (newState) => {
-        setState(prev => ({ ...prev, state: newState }));
+        setState((prev) => ({ ...prev, state: newState }));
       },
     });
 
-    timerRef.current = workTimer;
-    return workTimer;
-  }, [cleanupTimer, state.ratio]);
-
-  // Create rest timer
-  const createRestTimer = useCallback((duration: number) => {
-    cleanupTimer();
-    
-    const restTimer = new Timer(duration, {
-      onTick: (timeLeft, totalElapsedTime) => {
-        // Update currentTime to trigger re-renders (show remaining time)
-        setState(prev => ({ ...prev, currentTime: timeLeft }));
-      },
-      onComplete: () => {
-        // Rest completed, return to idle state
-        setState(prev => ({
-          ...prev,
-          phase: TimerPhase.Idle, // Stay in idle, not work
-          rounds: prev.rounds + 1,
-          state: TimerState.Idle,
-          currentTime: 0,
-        }));
-        // User must manually start next work phase
-      },
-      onStateChange: (newState) => {
-        setState(prev => ({ ...prev, state: newState }));
-      },
-    });
-
-    timerRef.current = restTimer;
-    return restTimer;
+    stopwatchRef.current = stopwatch;
+    return stopwatch;
   }, [cleanupTimer]);
 
-  // Start rest phase
-  const startRestPhase = useCallback((workDuration: number, ratio: number) => {
-    const restDuration = Math.round(workDuration * (ratio / 100));
-    
-    // Cap rest duration to 99:99 if needed
-    const cappedRestDuration = Math.min(restDuration, WORK_TIME_LIMIT_MS);
+  // Create rest timer
+  const createRestTimer = useCallback(
+    (duration: number) => {
+      cleanupTimer();
 
-    timeoutRef.current = setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        phase: TimerPhase.Rest,
-        state: TimerState.Idle,
-      }));
-      
-      const restTimer = createRestTimer(cappedRestDuration);
-      restTimer.start();
-      setState(prev => ({ ...prev, state: TimerState.Running }));
-    }, REST_DELAY_MS);
-  }, [createRestTimer]);
+      const restTimer = new Timer(duration, {
+        onTick: (timeLeft) => {
+          // Update currentTime to trigger re-renders (show remaining time)
+          setState((prev) => ({ ...prev, currentTime: timeLeft }));
+        },
+        onComplete: () => {
+          // Rest completed, return to idle state
+          setState((prev) => ({
+            ...prev,
+            phase: TimerPhase.Idle, // Stay in idle, not work
+            rounds: prev.rounds + 1,
+            state: TimerState.Idle,
+            currentTime: 0,
+          }));
+          // User must manually start next work phase
+        },
+        onStateChange: (newState) => {
+          setState((prev) => ({ ...prev, state: newState }));
+        },
+      });
+
+      timerRef.current = restTimer;
+      return restTimer;
+    },
+    [cleanupTimer],
+  );
+
+  // Start rest phase
+  const startRestPhase = useCallback(
+    (workDuration: number, ratio: number) => {
+      const restDuration = Math.round(workDuration * (ratio / 100));
+
+      // Cap rest duration to 99:99 if needed
+      const cappedRestDuration = Math.min(restDuration, WORK_TIME_LIMIT_MS);
+
+      timeoutRef.current = setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          phase: TimerPhase.Rest,
+          state: TimerState.Idle,
+        }));
+
+        const restTimer = createRestTimer(cappedRestDuration);
+        restTimer.start();
+      }, REST_DELAY_MS);
+    },
+    [createRestTimer],
+  );
 
   // Start work
   const startWork = useCallback(() => {
     if (state.phase !== TimerPhase.Idle) return;
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       phase: TimerPhase.Work,
       state: TimerState.Idle,
     }));
 
-    const workTimer = createWorkTimer();
-    workTimer.start();
-    setState(prev => ({ ...prev, state: TimerState.Running }));
-  }, [state.phase, createWorkTimer]);
+    const stopwatch = createWorkStopwatch();
+    stopwatch.start();
+  }, [state.phase, createWorkStopwatch]);
 
   // Pause work
   const pauseWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work || state.state !== TimerState.Running) return;
-    
-    timerRef.current?.pause();
-    setState(prev => ({ ...prev, state: TimerState.Paused }));
+
+    stopwatchRef.current?.pause();
   }, [state.phase, state.state]);
 
   // Resume work
   const resumeWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work || state.state !== TimerState.Paused) return;
-    
-    timerRef.current?.start();
-    setState(prev => ({ ...prev, state: TimerState.Running }));
+
+    stopwatchRef.current?.start();
   }, [state.phase, state.state]);
 
   // Stop work
   const stopWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work) return;
 
-    const workDuration = timerRef.current?.getTotalElapsedTime() || 0;
-    onLapRecordedRef.current?.(workDuration);
+    // Stop the stopwatch first to trigger onStop callback and record lap
+    stopwatchRef.current?.stop();
+
+    const workDuration = stopwatchRef.current?.getElapsedTime() || 0;
+
     cleanupTimer();
-    
+
     // Handle zero work duration edge case
     if (workDuration === 0) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         phase: TimerPhase.Idle,
         state: TimerState.Idle,
@@ -200,64 +182,97 @@ export const useWorkRestTimer = (options: WorkRestTimerOptions = {}): [WorkRestT
       }));
       return;
     }
-    
+
     startRestPhase(workDuration, state.ratio);
   }, [state.phase, state.ratio, cleanupTimer, startRestPhase]);
 
-  // Skip rest
+  // Skip rest - automatically start next work phase
   const skipRest = useCallback(() => {
     if (state.phase !== TimerPhase.Rest) return;
 
+    // Check if max rounds reached
+    if (state.rounds >= state.maxRounds) {
+      cleanupTimer();
+      setState((prev) => ({
+        ...prev,
+        phase: TimerPhase.Idle,
+        state: TimerState.Idle,
+        currentTime: 0,
+      }));
+      return;
+    }
+
     cleanupTimer();
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      phase: TimerPhase.Idle, // Go to idle, not work
+      phase: TimerPhase.Work,
       rounds: prev.rounds + 1,
       state: TimerState.Idle,
       currentTime: 0,
     }));
-  }, [state.phase, cleanupTimer]);
+
+    // Automatically start next work phase
+    const stopwatch = createWorkStopwatch();
+    stopwatch.start();
+  }, [state.phase, state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch]);
 
   // Stop rest (reset completely)
   const stopRest = useCallback(() => {
     if (state.phase !== TimerPhase.Rest) return;
 
     cleanupTimer();
-    setState({
+    setState((prev) => ({
+      ...prev,
       phase: TimerPhase.Idle,
-      ratio: state.ratio,
-      rounds: state.rounds,
       state: TimerState.Idle,
       currentTime: 0,
-    });
-  }, [state.phase, state.ratio, state.rounds, cleanupTimer]);
+    }));
+  }, [state.phase, cleanupTimer]);
 
   // Adjust ratio
-  const adjustRatio = useCallback((delta: number) => {
-    if (state.phase !== TimerPhase.Idle) return; // Only allow when idle
+  const adjustRatio = useCallback(
+    (delta: number) => {
+      if (state.phase !== TimerPhase.Idle) return; // Only allow when idle
 
-    setState(prev => {
-      const newRatio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, prev.ratio + delta));
-      return { ...prev, ratio: newRatio };
-    });
-  }, [state.phase]);
+      setState((prev) => {
+        const newRatio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, prev.ratio + delta));
+        return { ...prev, ratio: newRatio };
+      });
+    },
+    [state.phase],
+  );
 
   // Set ratio directly
-  const setRatio = useCallback((ratio: number) => {
-    if (state.phase !== TimerPhase.Idle) return; // Only allow when idle
+  const setRatio = useCallback(
+    (ratio: number) => {
+      if (state.phase !== TimerPhase.Idle) return; // Only allow when idle
 
-    setState(prev => {
-      const internalRatio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, Math.round(ratio * 100)));
-      return { ...prev, ratio: internalRatio };
-    });
-  }, [state.phase]);
+      setState((prev) => {
+        const internalRatio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, Math.round(ratio * 100)));
+        return { ...prev, ratio: internalRatio };
+      });
+    },
+    [state.phase],
+  );
 
   // Reset ratio
   const resetRatio = useCallback(() => {
     if (state.phase !== TimerPhase.Idle) return;
-    
-    setState(prev => ({ ...prev, ratio: DEFAULT_RATIO }));
+
+    setState((prev) => ({ ...prev, ratio: DEFAULT_RATIO }));
   }, [state.phase]);
+
+  // Set max rounds
+  const setMaxRounds = useCallback(
+    (maxRounds: number) => {
+      if (state.phase !== TimerPhase.Idle) return; // Only allow when idle
+
+      // Cap at MAX_ROUNDS
+      const cappedMaxRounds = Math.max(1, Math.min(maxRounds, MAX_ROUNDS));
+      setState((prev) => ({ ...prev, maxRounds: cappedMaxRounds }));
+    },
+    [state.phase],
+  );
 
   // Reset everything
   const reset = useCallback(() => {
@@ -266,6 +281,7 @@ export const useWorkRestTimer = (options: WorkRestTimerOptions = {}): [WorkRestT
       phase: TimerPhase.Idle,
       ratio: DEFAULT_RATIO,
       rounds: 0,
+      maxRounds: MAX_ROUNDS,
       state: TimerState.Idle,
       currentTime: 0,
     });
@@ -273,18 +289,27 @@ export const useWorkRestTimer = (options: WorkRestTimerOptions = {}): [WorkRestT
 
   // Get progress
   const getProgress = useCallback(() => {
-    if (!timerRef.current) return 0;
-
-    if (state.phase === TimerPhase.Work) {
+    if (state.phase === TimerPhase.Work && stopwatchRef.current) {
       const elapsed = state.currentTime;
       return (elapsed / WORK_TIME_LIMIT_MS) * 100;
-    } else if (state.phase === TimerPhase.Rest) {
+    } else if (state.phase === TimerPhase.Rest && timerRef.current) {
       const duration = timerRef.current.getInitialTime();
       const timeLeft = state.currentTime;
       return ((duration - timeLeft) / duration) * 100;
     }
     return 0;
   }, [state.phase, state.currentTime]);
+
+  // Stop entire execution
+  const stopExecution = useCallback(() => {
+    cleanupTimer();
+    setState((prev) => ({
+      ...prev,
+      phase: TimerPhase.Idle,
+      state: TimerState.Idle,
+      currentTime: 0,
+    }));
+  }, [cleanupTimer]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -301,7 +326,9 @@ export const useWorkRestTimer = (options: WorkRestTimerOptions = {}): [WorkRestT
     adjustRatio,
     setRatio,
     resetRatio,
+    setMaxRounds,
     reset,
+    stopExecution,
     getProgress,
   };
 
