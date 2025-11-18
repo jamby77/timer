@@ -73,6 +73,10 @@ export function Interval({ intervalConfig }: IntervalProps) {
     return `${workSteps}/${intervalConfig.intervals}`;
   };
 
+  const showPlayButton =
+    timerState === TimerState.Idle ||
+    timerState === TimerState.Completed ||
+    timerState === TimerState.Paused;
   return (
     <div className="flex flex-col items-center gap-8">
       <Card
@@ -95,10 +99,8 @@ export function Interval({ intervalConfig }: IntervalProps) {
             style={{ width: `${getProgress()}%` }}
           />
         </div>
-        <div className="flex gap-4">
-          {timerState === TimerState.Idle ||
-          timerState === TimerState.Completed ||
-          timerState === TimerState.Paused ? (
+        <div className="flex items-center justify-center gap-4">
+          {showPlayButton ? (
             <BaseButton
               onClick={start}
               title={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}

@@ -48,27 +48,24 @@ function generateSteps(
   return steps;
 }
 
-export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
+export const useIntervalTimer = ({
+  workDuration,
+  restDuration,
+  intervals,
+  workLabel = "Work",
+  restLabel = "Rest",
+  skipLastRest = true,
+  onWorkStepComplete,
+  onStepChange,
+  onSequenceComplete,
+}: IntervalConfig) => {
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [timerState, setTimerState] = useState<TimerState>(TimerState.Idle);
   const [timeLeft, setTimeLeft] = useState(0);
   const managerRef = useRef<TimerManager | null>(null);
 
-  const {
-    workDuration,
-    restDuration,
-    intervals,
-    workLabel = "Work",
-    restLabel = "Rest",
-    skipLastRest = true,
-    onWorkStepComplete,
-    onStepChange,
-    onSequenceComplete,
-  } = intervalConfig;
-
-  const timerManager = useMemo(() => {
-    console.log("// Generate steps directly in the hook");
+  managerRef.current = useMemo(() => {
     const steps = generateSteps(
       skipLastRest,
       intervals,
@@ -114,14 +111,13 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
     onSequenceComplete,
   ]);
 
-  managerRef.current = timerManager;
-
   // Update the timer manager when dependencies change
   useEffect(() => {
     if (!managerRef.current) {
       return;
     }
 
+    setTimeLeft(managerRef.current.getCurrentStep()?.duration || 0);
     return () => {
       // Cleanup the old timer manager
       managerRef.current = null;
@@ -135,7 +131,7 @@ export const useIntervalTimer = (intervalConfig: IntervalConfig) => {
       managerRef.current?.reset();
       setTimerState(TimerState.Idle);
     }
-    
+
     managerRef.current?.start();
     setTimerState(TimerState.Running);
   }, [timerState]);
