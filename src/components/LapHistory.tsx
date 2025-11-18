@@ -8,6 +8,37 @@ interface LapHistoryProps {
   onClearHistory?: () => void;
 }
 
+const ExpandButton = ({
+  label,
+  opened = false,
+  onClick,
+}: {
+  label?: string;
+  opened?: boolean;
+  onClick?: () => void;
+}) => {
+  return (
+    <button
+      className="cursor-pointer rounded p-1 text-gray-500 transition-colors hover:text-gray-700"
+      aria-label={label}
+      onClick={onClick}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className={cx("h-4 w-4 transition-transform duration-300 ease-in-out", {
+          "rotate-90": opened,
+        })}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+      </svg>
+    </button>
+  );
+};
+
 export function LapHistory({ laps, onClearHistory }: LapHistoryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -26,64 +57,34 @@ export function LapHistory({ laps, onClearHistory }: LapHistoryProps) {
     >
       {!isExpanded && laps.length > 0 ? (
         // Compact view - show only last lap
-        <div className="flex items-center justify-between rounded bg-gray-50/50 px-4 py-2 text-sm transition-all duration-300 ease-in-out">
+        <div
+          className="flex cursor-pointer items-center justify-between gap-4 rounded bg-gray-50/50 px-4 py-2 text-sm transition-all duration-300 ease-in-out"
+          role="button"
+          onClick={toggleExpand}
+        >
           <span className="font-medium text-gray-700">Last lap</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <span className="font-mono text-gray-800">
               {formatTime(laps[laps.length - 1].lapTime)}
             </span>
-            <button
-              onClick={toggleExpand}
-              className="rounded p-1 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
-              aria-label="Expand lap history"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-4 w-4 transition-transform duration-300 ease-in-out"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
+            <ExpandButton label="Expand lap history" onClick={toggleExpand} />
           </div>
         </div>
       ) : laps.length > 0 ? (
         // Expanded view - show full list (only when laps exist)
         <div className="w-full max-w-5xl rounded-lg bg-gray-50 p-6 transition-all duration-300 ease-in-out">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-4">
             <h3 className="text-lg font-semibold text-gray-800">Lap History</h3>
             <div className="flex items-center gap-2">
               {onClearHistory && (
                 <button
                   onClick={handleClearHistory}
-                  className="rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
+                  className="cursor-pointer rounded bg-red-50 px-3 py-1 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
                 >
                   Clear
                 </button>
               )}
-              <button
-                onClick={toggleExpand}
-                className="rounded p-1 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
-                aria-label="Collapse lap history"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-4 w-4 rotate-90 transition-transform duration-300 ease-in-out"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </button>
+              <ExpandButton label="Collapse lap history" opened onClick={toggleExpand} />
             </div>
           </div>
           <div className="space-y-2">
@@ -93,9 +94,13 @@ export function LapHistory({ laps, onClearHistory }: LapHistoryProps) {
               return (
                 <div
                   key={lap.id}
-                  className={`flex items-center justify-between rounded px-4 py-2 text-sm transition-all duration-300 ease-in-out ${
-                    isLastLap ? "bg-blue-50 text-blue-700" : "bg-white text-gray-500"
-                  }`}
+                  className={cx(
+                    "flex items-center justify-between rounded px-4 py-2 text-sm transition-all duration-300 ease-in-out",
+                    {
+                      "bg-blue-50 text-blue-700 hover:bg-blue-100": isLastLap,
+                      "bg-white text-gray-500 hover:bg-gray-100": !isLastLap,
+                    },
+                  )}
                 >
                   <span className="font-medium">{isLastLap ? "Last lap" : `Lap ${lapNumber}`}</span>
                   <span className="font-mono">{formatTime(lap.lapTime)}</span>

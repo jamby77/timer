@@ -38,4 +38,7 @@ next-env.d.ts
 
 *storybook.log
 storybook-static
-stories/
+# Ignore Storybook example files, but keep our timer component stories
+src/stories/*
+!src/stories/timers/
+!src/stories/timers/**

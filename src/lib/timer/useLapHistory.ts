@@ -10,12 +10,13 @@ export const useLapHistory = () => {
   const [laps, setLaps] = useState<LapEntry[]>([]);
 
   const addLap = useCallback((time: number) => {
+    const now = Date.now();
     setLaps((prev) => [
       ...prev,
       {
-        id: `lap-${Date.now()}-${Math.random()}`,
+        id: `lap-${now}-${Math.random()}`,
         lapTime: time,
-        timestamp: Date.now(),
+        timestamp: now,
       },
     ]);
   }, []);
