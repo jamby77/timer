@@ -60,7 +60,7 @@ export function Stopwatch({
   }, [restart]);
 
   const status = getStatusMessage(state, completionMessage);
-  const timeLimitDisplay = timeLimit ? `(Time limit: ${formatTime(timeLimit * 1000)})` : undefined;
+  const timeLimitDisplay = timeLimit ? `(Cap: ${formatTime(timeLimit * 1000)})` : undefined;
 
   return (
     <div className="flex flex-col items-center gap-8">

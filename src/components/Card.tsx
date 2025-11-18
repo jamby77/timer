@@ -23,13 +23,13 @@ export function Card({ label, status, time, children, subtitle, currentStep }: C
       <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h2>
       <p
         className={cx(
-          "mx-auto mb-2 max-w-24 rounded bg-white/80 text-center text-xs text-gray-500",
+          "mx-auto mb-2 max-w-32 rounded bg-white/80 text-center text-xs text-gray-700",
           { invisible: !subtitle },
         )}
       >
         {subtitle}
       </p>
-      <p className={cx({ invisible: !status }, "mb-8 text-center text-base text-gray-500")}>
+      <p className={cx({ invisible: !status }, "mb-8 text-center text-base text-gray-600")}>
         {status}
       </p>
       <div className="mb-8 text-center">

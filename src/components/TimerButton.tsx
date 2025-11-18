@@ -74,7 +74,7 @@ function TimerButton({ state, onStart, onPause, onReset, onRestart }: TimerButto
   }
 
   return (
-    <>
+    <div className="flex items-center justify-center gap-2">
       {playButton}
       <BaseButton
         onClick={onReset}
@@ -85,7 +85,7 @@ function TimerButton({ state, onStart, onPause, onReset, onRestart }: TimerButto
       >
         <StopIcon className="h-6 w-6" />
       </BaseButton>
-    </>
+    </div>
   );
 }
 

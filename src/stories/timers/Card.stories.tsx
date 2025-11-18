@@ -1,7 +1,30 @@
+import { TimerState } from "@/lib/timer";
+import { fn } from "storybook/test";
+
 import { Card } from "@/components/Card";
+import TimerButton from "@/components/TimerButton";
 import preview from "../../../.storybook/preview";
 
 const meta = preview.meta({ component: Card });
+export const WithButtons = meta.story({
+  args: {
+    label: "WORK/REST (r 1.00x)",
+    status: "Running",
+    time: "01:23.45",
+    subtitle: "Round: 1",
+    currentStep: { isWork: true } as any,
+    children: (
+      <TimerButton
+        state={TimerState.Paused}
+        onStart={fn()}
+        onPause={fn()}
+        onReset={fn()}
+        onRestart={fn()}
+      />
+    ),
+  },
+});
+
 export const WorkPhase = meta.story({
   args: {
     label: "WORK/REST (r 1.00x)",

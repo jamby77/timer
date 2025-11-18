@@ -1,6 +1,7 @@
 import "../src/app/globals.css";
 
 import addonA11y from "@storybook/addon-a11y";
+import addonDocs from "@storybook/addon-docs";
 // Replace your-framework with the framework you are using (e.g., react-vite, nextjs, nextjs-vite)
 import { definePreview } from "@storybook/nextjs-vite";
 
@@ -27,7 +28,7 @@ import { definePreview } from "@storybook/nextjs-vite";
 
 export default definePreview({
   // 👇 Add your addons here
-  addons: [addonA11y()],
+  addons: [addonA11y(), addonDocs()],
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
