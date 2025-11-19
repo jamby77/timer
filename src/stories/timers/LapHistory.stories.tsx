@@ -10,6 +10,8 @@ const meta = preview.meta({
   },
   args: {
     onClearHistory: fn(),
+    lastLap: null,
+    bestLap: null,
   },
 });
 const now = Date.now();
@@ -20,8 +22,18 @@ export const Empty = meta.story({
   },
 });
 
-export const SingleLap = meta.story({
+export const Default = meta.story({
   args: {
+    lastLap: {
+      id: "1",
+      lapTime: 65432,
+      timestamp: now,
+    },
+    bestLap: {
+      id: "1",
+      lapTime: 65432,
+      timestamp: now,
+    },
     laps: [
       {
         id: "1",
@@ -33,8 +45,8 @@ export const SingleLap = meta.story({
 });
 
 export const MultipleLaps = meta.story({
-  args: {
-    laps: [
+  render: () => {
+    const laps = [
       {
         id: "1",
         lapTime: 65432,
@@ -50,16 +62,26 @@ export const MultipleLaps = meta.story({
         lapTime: 58900,
         timestamp: now,
       },
-    ],
+    ];
+    const bestLap = laps.reduce((best, lap) => {
+      if (!best) return lap;
+      return lap.lapTime < best.lapTime ? lap : best;
+    });
+    return <LapHistory laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
   },
 });
 
 export const ManyLaps = meta.story({
-  args: {
-    laps: Array.from({ length: 10 }, (_, i) => ({
+  render: () => {
+    const laps = Array.from({ length: 10 }, (_, i) => ({
       id: String(i + 1),
       lapTime: 60000 + Math.random() * 20000,
       timestamp: now - (10 - i) * 1000,
-    })),
+    }));
+    const bestLap = laps.reduce((best, lap) => {
+      if (!best) return lap;
+      return lap.lapTime < best.lapTime ? lap : best;
+    });
+    return <LapHistory laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
   },
 });

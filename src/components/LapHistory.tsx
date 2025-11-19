@@ -5,6 +5,8 @@ import cx from "clsx";
 
 interface LapHistoryProps {
   laps: LapEntry[];
+  lastLap: LapEntry | null;
+  bestLap: LapEntry | null;
   onClearHistory?: () => void;
 }
 
@@ -39,7 +41,7 @@ const ExpandButton = ({
   );
 };
 
-export function LapHistory({ laps, onClearHistory }: LapHistoryProps) {
+export function LapHistory({ laps, lastLap, bestLap, onClearHistory }: LapHistoryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
@@ -62,11 +64,14 @@ export function LapHistory({ laps, onClearHistory }: LapHistoryProps) {
           role="button"
           onClick={toggleExpand}
         >
-          <span className="font-medium text-gray-700">Last lap</span>
           <div className="flex items-center gap-4">
-            <span className="font-mono text-gray-800">
-              {formatTime(laps[laps.length - 1].lapTime)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-700">Last lap</span>
+              <span className="font-mono text-gray-800">{formatTime(lastLap?.lapTime || 0)}</span>
+              <span>/</span>
+              <span className="font-medium text-gray-700">Best lap</span>
+              <span className="font-mono text-gray-800">{formatTime(bestLap?.lapTime || 0)}</span>
+            </div>
             <ExpandButton label="Expand lap history" onClick={toggleExpand} />
           </div>
         </div>
@@ -88,21 +93,37 @@ export function LapHistory({ laps, onClearHistory }: LapHistoryProps) {
             </div>
           </div>
           <div className="space-y-2">
+            <div className="flex items-center justify-between gap-4 bg-blue-50 px-4 text-lg hover:bg-blue-100">
+              {lastLap && (
+                <div className="flex items-center justify-between gap-2 text-blue-700">
+                  <span className="font-medium">Last lap: </span>
+                  <span className="font-mono font-bold text-blue-800">
+                    {formatTime(lastLap?.lapTime || 0)}
+                  </span>
+                </div>
+              )}
+              {bestLap && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-gray-700">Best lap: </span>
+                  <span className="font-mono font-bold text-gray-800">
+                    {formatTime(bestLap?.lapTime || 0)}
+                  </span>
+                </div>
+              )}
+            </div>
             {[...laps].reverse().map((lap, index) => {
-              const isLastLap = index === 0;
+              if (index === 0) {
+                return null;
+              }
               const lapNumber = laps.length - index;
               return (
                 <div
                   key={lap.id}
                   className={cx(
-                    "flex items-center justify-between rounded px-4 py-2 text-sm transition-all duration-300 ease-in-out",
-                    {
-                      "bg-blue-50 text-blue-700 hover:bg-blue-100": isLastLap,
-                      "bg-white text-gray-500 hover:bg-gray-100": !isLastLap,
-                    },
+                    "flex items-center justify-between rounded bg-white px-4 py-2 text-sm text-gray-500 transition-all duration-300 ease-in-out hover:bg-gray-100",
                   )}
                 >
-                  <span className="font-medium">{isLastLap ? "Last lap" : `Lap ${lapNumber}`}</span>
+                  <span className="font-medium">{`Lap ${lapNumber}`}</span>
                   <span className="font-mono">{formatTime(lap.lapTime)}</span>
                 </div>
               );
