@@ -1,4 +1,4 @@
-import { fn } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
 import { LapHistory } from "@/components/LapHistory";
 import preview from "../../../.storybook/preview";
@@ -19,6 +19,9 @@ const now = Date.now();
 export const Empty = meta.story({
   args: {
     laps: [],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent).toBe("");
   },
 });
 
@@ -41,6 +44,11 @@ export const Default = meta.story({
         timestamp: now,
       },
     ],
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent).toContain("Last lap");
+    expect(canvasElement.textContent).toContain("Best lap");
+    expect(canvasElement.textContent).toContain("01:05.43");
   },
 });
 
@@ -69,6 +77,11 @@ export const MultipleLaps = meta.story({
     });
     return <LapHistory laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
   },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent).toContain("Last lap");
+    expect(canvasElement.textContent).toContain("Best lap");
+    expect(canvasElement.textContent).toContain("00:58.90");
+  },
 });
 
 export const ManyLaps = meta.story({
@@ -83,5 +96,9 @@ export const ManyLaps = meta.story({
       return lap.lapTime < best.lapTime ? lap : best;
     });
     return <LapHistory laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
+  },
+  play: async ({ canvasElement }) => {
+    expect(canvasElement.textContent).toContain("Last lap");
+    expect(canvasElement.textContent).toContain("Best lap");
   },
 });
