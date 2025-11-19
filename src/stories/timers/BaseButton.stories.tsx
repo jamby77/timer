@@ -80,9 +80,9 @@ export const Skip = meta.story({
     </BaseButton>
   ),
   play: async ({ canvasElement }) => {
-    const button = canvasElement.querySelector('button');
-    expect(button?.getAttribute('title')).toBe("Skip rest");
-    expect(button?.getAttribute('aria-label')).toBe("Skip rest");
+    const button = canvasElement.querySelector("button");
+    expect(button?.getAttribute("title")).toBe("Skip rest");
+    expect(button?.getAttribute("aria-label")).toBe("Skip rest");
   },
 });
 

@@ -26,12 +26,12 @@ import { definePreview } from "@storybook/nextjs-vite";
 
 // export default preview;
 
-export default definePreview({
+const annotations = {
   // 👇 Add your addons here
   addons: [addonA11y(), addonDocs()],
   tags: ["autodocs"],
   parameters: {
-    layout: "centered",
+    layout: "centered" as const,
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -43,7 +43,7 @@ export default definePreview({
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
-      test: "todo",
+      test: "todo" as const,
     },
   },
   // parameters: {
@@ -52,4 +52,7 @@ export default definePreview({
   //     options: { xpath: true },
   //   },
   // },
-});
+};
+
+export default definePreview(annotations);
+export { annotations };
