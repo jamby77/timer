@@ -5,8 +5,8 @@ import cx from "clsx";
 
 interface LapHistoryProps {
   laps: LapEntry[];
-  lastLap: LapEntry | null;
-  bestLap: LapEntry | null;
+  lastLap?: LapEntry | null;
+  bestLap?: LapEntry | null;
   onClearHistory?: () => void;
 }
 
@@ -59,12 +59,8 @@ export function LapHistory({ laps, lastLap, bestLap, onClearHistory }: LapHistor
     >
       {!isExpanded && laps.length > 0 ? (
         // Compact view - show only last lap
-        <div
-          className="flex cursor-pointer items-center justify-between gap-4 rounded bg-gray-50/50 px-4 py-2 text-sm transition-all duration-300 ease-in-out"
-          role="button"
-          onClick={toggleExpand}
-        >
-          <div className="flex items-center gap-4">
+        <div className="flex cursor-pointer items-center justify-between gap-4 rounded bg-gray-50/50 px-4 py-2 text-sm transition-all duration-300 ease-in-out">
+          <div className="flex items-center gap-4" role="button" onClick={toggleExpand}>
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-700">Last lap</span>
               <span className="font-mono text-gray-800">{formatTime(lastLap?.lapTime || 0)}</span>
@@ -72,8 +68,8 @@ export function LapHistory({ laps, lastLap, bestLap, onClearHistory }: LapHistor
               <span className="font-medium text-gray-700">Best lap</span>
               <span className="font-mono text-gray-800">{formatTime(bestLap?.lapTime || 0)}</span>
             </div>
-            <ExpandButton label="Expand lap history" onClick={toggleExpand} />
           </div>
+          <ExpandButton label="Expand lap history" onClick={toggleExpand} />
         </div>
       ) : laps.length > 0 ? (
         // Expanded view - show full list (only when laps exist)

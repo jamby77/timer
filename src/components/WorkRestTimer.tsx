@@ -215,8 +215,9 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         {/* Ratio Controls */}
         <div className="mb-4 flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Ratio:</span>
+            <label className="text-sm font-medium text-gray-700">Ratio:</label>
             <div className="flex items-center gap-1">
+              <label className="sr-only">Ratio integer part</label>
               <input
                 type="number"
                 min="0"
@@ -224,9 +225,11 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
                 value={ratioInteger}
                 onChange={(e) => handleIntegerChange(e.target.value)}
                 disabled={state.phase !== TimerPhase.Idle}
+                aria-label="Ratio integer part"
                 className="w-12 rounded border border-gray-300 px-1 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
               />
               <span className="text-gray-500">.</span>
+              <label className="sr-only">Ratio decimal part</label>
               <input
                 type="number"
                 min="0"
@@ -234,9 +237,10 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
                 value={ratioDecimal}
                 onChange={(e) => handleDecimalChange(e.target.value)}
                 disabled={state.phase !== TimerPhase.Idle}
+                aria-label="Ratio decimal part"
                 className="w-12 rounded border border-gray-300 px-1 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
               />
-              <span className="text-sm text-gray-500">x</span>
+              <span className="text-sm text-gray-700">x</span>
             </div>
           </div>
 
@@ -283,7 +287,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
               title="Reset ratio to 1.0"
               label="Reset 1x"
               disabled={state.phase !== TimerPhase.Idle}
-              className="bg-purple-500 px-2 py-1 text-xs hover:bg-purple-600 disabled:bg-gray-300"
+              className="bg-purple-700 px-2 py-1 text-xs hover:bg-purple-800 disabled:bg-gray-300"
             >
               Reset 1x
             </BaseButton>

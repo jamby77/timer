@@ -8,22 +8,8 @@ import preview from "../../../.storybook/preview";
 const meta = preview.meta({ component: BaseButton });
 
 export const Primary = meta.story({
-  args: { children: "Button", title: "true", className: "bg-blue-500 hover:bg-blue-600" },
+  args: { children: "Button", title: "true", className: "bg-blue-700 hover:bg-blue-800" },
 });
-
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
-// const meta: Meta<typeof BaseButton> = {
-//   component: BaseButton,
-//   parameters: {
-//     layout: "centered",
-//   },
-//   tags: ["autodocs"],
-//   args: { onClick: fn() },
-//   argTypes: {
-//     disabled: { control: "boolean" },
-//     className: { control: "text" },
-//   },
-// };
 
 export default meta;
 

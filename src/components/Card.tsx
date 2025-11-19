@@ -29,7 +29,7 @@ export function Card({ label, status, time, children, subtitle, currentStep }: C
       >
         {subtitle}
       </p>
-      <p className={cx({ invisible: !status }, "mb-8 text-center text-base text-gray-600")}>
+      <p className={cx({ invisible: !status }, "mb-8 text-center text-sm text-gray-700")}>
         {status}
       </p>
       <div className="mb-8 text-center">
