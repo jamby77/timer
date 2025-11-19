@@ -25,8 +25,8 @@ export const Start = meta.story({
       <PlayIcon className="h-6 w-6" />
     </BaseButton>
   ),
-  play: async ({ canvasElement }) => {
-    const button = canvasElement.querySelector("button");
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole("button");
     expect(button?.getAttribute("title")).toBe("Start");
     expect(button?.getAttribute("aria-label")).toBe("Start timer");
   },
@@ -43,8 +43,8 @@ export const Pause = meta.story({
       <PauseIcon className="h-6 w-6" />
     </BaseButton>
   ),
-  play: async ({ canvasElement }) => {
-    const button = canvasElement.querySelector("button");
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole("button");
     expect(button?.getAttribute("title")).toBe("Pause");
     expect(button?.getAttribute("aria-label")).toBe("Pause timer");
   },
@@ -61,8 +61,8 @@ export const Stop = meta.story({
       <StopIcon className="h-6 w-6" />
     </BaseButton>
   ),
-  play: async ({ canvasElement }) => {
-    const button = canvasElement.querySelector("button");
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole("button");
     expect(button?.getAttribute("title")).toBe("Stop");
     expect(button?.getAttribute("aria-label")).toBe("Stop timer");
   },
@@ -79,8 +79,8 @@ export const Skip = meta.story({
       <SkipIcon className="h-6 w-6" />
     </BaseButton>
   ),
-  play: async ({ canvasElement }) => {
-    const button = canvasElement.querySelector("button");
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole("button");
     expect(button?.getAttribute("title")).toBe("Skip rest");
     expect(button?.getAttribute("aria-label")).toBe("Skip rest");
   },
@@ -92,8 +92,8 @@ export const RatioControl = meta.story({
     title: "Increase ratio",
     className: "bg-gray-500 px-2 py-1 text-xs hover:bg-gray-600 disabled:bg-gray-300",
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("+1.0");
+  play: async ({ canvas }) => {
+    expect(canvas.getByRole("button").textContent).toContain("+1.0");
   },
 });
 
@@ -108,8 +108,8 @@ export const Restart = meta.story({
       <RepeatIcon className="h-6 w-6" />
     </BaseButton>
   ),
-  play: async ({ canvasElement }) => {
-    const button = canvasElement.querySelector("button");
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole("button");
     expect(button?.getAttribute("title")).toBe("Restart timer");
     expect(button?.getAttribute("aria-label")).toBe("Restart timer");
   },
@@ -121,7 +121,9 @@ export const ResetRatio = meta.story({
     title: "Reset ratio to 1.0",
     className: "bg-purple-700 px-2 py-1 text-xs hover:bg-purple-800 disabled:bg-gray-300",
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Reset 1x");
+  play: async ({ canvasElement, canvas }) => {
+    const htmlElement = await canvas.findByText("Reset 1x");
+    console.log(htmlElement);
+    expect(htmlElement).toContainHTML("Reset 1x");
   },
 });
