@@ -1,3 +1,4 @@
+import preview from "#.storybook/preview";
 import PauseIcon from "@/icons/PauseIcon";
 import PlayIcon from "@/icons/PlayIcon";
 import RepeatIcon from "@/icons/Repeat";
@@ -6,7 +7,6 @@ import StopIcon from "@/icons/StopIcon";
 import { expect } from "storybook/test";
 
 import { BaseButton } from "@/components/TimerButton";
-import preview from "../../../.storybook/preview";
 
 // CSF Factories - Less boilerplate and no type assignments!
 

@@ -1,5 +1,5 @@
+import preview from "#.storybook/preview";
 import { Interval } from "@/components/Interval";
-import preview from "../../../.storybook/preview";
 
 const meta = preview.meta({
   component: Interval,
