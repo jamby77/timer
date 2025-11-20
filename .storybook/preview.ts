@@ -3,7 +3,7 @@ import "../src/app/globals.css";
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 // Replace your-framework with the framework you are using (e.g., react-vite, nextjs, nextjs-vite)
-import { definePreview } from "@storybook/nextjs-vite";
+import { definePreview, Preview } from "@storybook/nextjs-vite";
 
 //
 // const preview: Preview = {
@@ -25,13 +25,10 @@ import { definePreview } from "@storybook/nextjs-vite";
 // };
 
 // export default preview;
-
-const annotations = {
-  // 👇 Add your addons here
-  addons: [addonA11y(), addonDocs()],
+export const annotations: Preview = {
   tags: ["autodocs"],
   parameters: {
-    layout: "centered" as const,
+    layout: "centered",
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -43,16 +40,15 @@ const annotations = {
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
-      test: "todo" as const,
+      test: "todo",
     },
   },
-  // parameters: {
-  //   // type-safe!
-  //   a11y: {
-  //     options: { xpath: true },
-  //   },
-  // },
 };
+const preview = definePreview({
+  // 👇 Add your addons here
+  addons: [addonA11y(), addonDocs()],
+  tags: annotations.tags,
+  parameters: annotations.parameters,
+});
 
-export default definePreview(annotations);
-export { annotations };
+export default preview;
