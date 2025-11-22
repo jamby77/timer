@@ -1,5 +1,4 @@
 import { TimerType } from "@/lib/timer/types";
-import { TIMER_TYPE_LABELS } from "@/lib/enums";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
@@ -72,7 +71,7 @@ export const Interactive = meta.story({
     selectedType: null,
     onTypeSelect: fn(),
   },
-  play: async ({ canvasElement, step, args }) => {
+  play: async ({ canvasElement, step }) => {
     // Test clicking on different timer types
     const intervalCard = Array.from(canvasElement.querySelectorAll(".cursor-pointer")).find((el) =>
       el.textContent?.includes("Interval"),

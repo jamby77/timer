@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import { ReactNode } from "react";
+import { ThemeProvider } from "@/providers/theme-provider";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 
@@ -15,10 +16,17 @@ export const metadata: Metadata = {
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Navigation />
-        <main>{children}</main>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navigation />
+          <main className="bg-background">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

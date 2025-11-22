@@ -1,7 +1,7 @@
 @import 'tailwindcss';
+@import "tw-animate-css";
 
 @plugin 'tailwindcss-animate';
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,6 +41,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* Timer colors */
+  --color-tm-work-bg: var(--tm-work-bg);
+  --color-tm-work-fg: var(--tm-work-fg);
+  --color-tm-rest-bg: var(--tm-rest-bg);
+  --color-tm-rest-fg: var(--tm-rest-fg);
+  --color-tm-play: var(--tm-play);
+  --color-tm-pause: var(--tm-pause);
+  --color-tm-reset: var(--tm-reset);
+  --color-tm-stop: var(--tm-stop);
+  --color-tm-skip: var(--tm-skip);
+  --color-tm-pr-work-bg: var(--tm-pr-work-bg);
+  --color-tm-pr-rest-bg: var(--tm-pr-rest-bg);
 }
 
 :root {
@@ -76,6 +88,23 @@
   --sidebar-ring: oklch(0.704 0.04 256.788);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
+  
+  /* Timer colors - Light theme */
+  --tm-work-fg: oklch(0.945 0.015 142.3);
+  --tm-work-bg: oklch(0.714 0.188 143.292);
+  --tm-rest-bg: oklch(0.769 0.148 77.315);
+  --tm-rest-fg: oklch(0.973 0.001 106.424);
+  /* Timer button colors - Light theme */
+  --tm-play: oklch(0.532 0.151 143.091);
+  --tm-pause: oklch(0.713 0.139 104.204);
+  --tm-reset: oklch(0.612 0.186 297.73);
+  --tm-stop: oklch(0.577 0.245 27.325);
+  --tm-skip: oklch(0.381 0.099 43.946);
+  
+  /* Progress colors - Light theme */
+  --tm-pr-work-bg: oklch(0.405 0.07 142.3);
+  --tm-pr-rest-bg: oklch(0.466 0.096 76.172);
+  --progress-indicator-color: var(--primary)
 }
 
 .dark {
@@ -110,6 +139,21 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  
+  /* Timer colors - Dark theme */
+  --tm-work-bg: oklch(0.714 0.188 143.292 / 0.3);
+  --tm-work-fg: oklch(0.845 0.03 142.3);
+  --tm-rest-bg: oklch(0.769 0.148 77.315 / 0.5);
+  --tm-rest-fg: oklch(0.845 0.03 254.3);
+  --tm-play: oklch(0.845 0.03 142.3);
+  --tm-pause: oklch(0.845 0.08 25.3);
+  --tm-reset: oklch(0.704 0.191 22.216);
+  --tm-stop: oklch(0.704 0.191 22.216);
+  --tm-skip: oklch(0.845 0.08 45.3);
+  
+  /* Progress colors - Dark theme */
+  --tm-pr-work-bg: oklch(0.61 0.089 142.515);
+  --tm-pr-rest-bg: oklch(0.822 0.062 87.373);
 }
 
 @layer base {

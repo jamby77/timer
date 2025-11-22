@@ -1,11 +1,11 @@
 import React from "react";
-import { TimerCategory, TimerType, WorkRestMode } from "@/types/configure";
+import { mockStyles } from "@/testing/mocks";
+import { createMockTimerConfig } from "@/testing/utils";
+import { TimerCategory, TimerType } from "@/types/configure";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
 import { PredefinedStyles } from "./PredefinedStyles";
-import { createMockTimerConfig } from "@/testing/utils";
-import { mockStyles } from "@/testing/mocks";
 
 const meta = preview.meta({
   title: "Configure/PredefinedStyles",

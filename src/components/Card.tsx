@@ -1,6 +1,15 @@
 import { ReactNode } from "react";
 import { TimerStep } from "@/lib/timer/TimerManager";
-import cx from "clsx";
+import { cn } from "@/lib/utils";
+
+import {
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Card as ShadcnCard,
+} from "@/components/ui/card";
 
 interface CardProps {
   label: string;
@@ -13,29 +22,47 @@ interface CardProps {
 
 export function Card({ label, status, time, children, subtitle, currentStep }: CardProps) {
   return (
-    <div
-      className={cx("w-fit max-w-5xl rounded-lg p-8 shadow-lg", {
-        "bg-emerald-400": currentStep?.isWork,
-        "bg-rose-300": currentStep && !currentStep?.isWork,
-        "bg-transparent": !currentStep,
+    <ShadcnCard
+      className={cn("px-2", {
+        "bg-tm-work-bg": currentStep?.isWork,
+        "bg-tm-rest-bg": currentStep && !currentStep?.isWork,
       })}
     >
-      <h2 className="mb-2 text-center text-3xl font-bold text-gray-800">{label}</h2>
-      <p
-        className={cx(
-          "mx-auto mb-2 max-w-32 rounded bg-white/80 text-center text-xs text-gray-700",
-          { invisible: !subtitle },
-        )}
-      >
-        {subtitle}
-      </p>
-      <p className={cx({ invisible: !status }, "mb-8 text-center text-sm text-gray-700")}>
-        {status}
-      </p>
-      <div className="mb-8 text-center">
-        <div className="font-mono text-9xl text-gray-800 tabular-nums">{time}</div>
-      </div>
-      <div className="flex flex-col justify-center space-x-4">{children}</div>
-    </div>
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-card-foreground text-center text-3xl font-bold">
+          {label}
+        </CardTitle>
+        <CardDescription className="text-card-foreground">
+          {subtitle && (
+            <div
+              className={cn("mx-auto max-w-32 text-center text-xs", {
+                invisible: !subtitle,
+              })}
+            >
+              {subtitle}
+            </div>
+          )}
+          {status && (
+            <div className={cn("text-center text-sm", { invisible: !status })}>{status}</div>
+          )}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        <div
+          className={cn("font-mono text-9xl font-bold tabular-nums", {
+            "text-tm-work-fg": currentStep?.isWork,
+            "text-tm-rest-fg": currentStep && !currentStep?.isWork,
+            "text-foreground": !currentStep,
+          })}
+        >
+          {time}
+        </div>
+      </CardContent>
+
+      <CardFooter className="justify-center px-0 pt-0">
+        <div className="flex flex-col space-x-4">{children}</div>
+      </CardFooter>
+    </ShadcnCard>
   );
 }

@@ -1,8 +1,8 @@
+import { setupLocalStorageMock } from "@/testing/mocks";
 import { AnyTimerConfig, CountdownConfig, TimerType } from "@/types/configure";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { storage } from "./storage";
-import { localStorageMock, setupLocalStorageMock } from "@/testing/mocks";
 
 // Setup global mocks
 setupLocalStorageMock();

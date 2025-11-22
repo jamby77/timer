@@ -1,5 +1,4 @@
-import { TimerType, WorkRestMode } from "@/types/configure";
-import { AnyTimerConfig } from "@/types/configure";
+import { AnyTimerConfig, TimerType, WorkRestMode } from "@/types/configure";
 
 /**
  * Creates a mock timer configuration for testing purposes
@@ -67,19 +66,17 @@ export const createMockTimerConfig = (name: string, type: TimerType): AnyTimerCo
 
 /**
  * Creates a mock countdown timer configuration
- * @param overrides - Optional properties to override
  * @returns A mock countdown timer configuration
  */
-export const createMockCountdownConfig = (overrides: Partial<AnyTimerConfig> = {}): AnyTimerConfig => {
+export const createMockCountdownConfig = (): AnyTimerConfig => {
   return createMockTimerConfig("Test Countdown", TimerType.COUNTDOWN);
 };
 
 /**
  * Creates a mock interval timer configuration
- * @param overrides - Optional properties to override
  * @returns A mock interval timer configuration
  */
-export const createMockIntervalConfig = (overrides: Partial<AnyTimerConfig> = {}): AnyTimerConfig => {
+export const createMockIntervalConfig = (): AnyTimerConfig => {
   return createMockTimerConfig("Test Interval", TimerType.INTERVAL);
 };
 
@@ -88,7 +85,9 @@ export const createMockIntervalConfig = (overrides: Partial<AnyTimerConfig> = {}
  * @param overrides - Optional properties to override
  * @returns A mock stopwatch configuration
  */
-export const createMockStopwatchConfig = (overrides: Partial<AnyTimerConfig> = {}): AnyTimerConfig => {
+export const createMockStopwatchConfig = (
+  overrides: Partial<AnyTimerConfig> = {},
+): AnyTimerConfig => {
   return createMockTimerConfig("Test Stopwatch", TimerType.STOPWATCH);
 };
 
@@ -97,7 +96,9 @@ export const createMockStopwatchConfig = (overrides: Partial<AnyTimerConfig> = {
  * @param overrides - Optional properties to override
  * @returns A mock work/rest timer configuration
  */
-export const createMockWorkRestConfig = (overrides: Partial<AnyTimerConfig> = {}): AnyTimerConfig => {
+export const createMockWorkRestConfig = (
+  overrides: Partial<AnyTimerConfig> = {},
+): AnyTimerConfig => {
   return createMockTimerConfig("Test Work/Rest", TimerType.WORKREST);
 };
 
@@ -120,7 +121,7 @@ export const createMockDate = (dateString?: string): Date => {
 export const createMockTimerWithTimestamp = (
   name: string,
   type: TimerType,
-  timestamp: string
+  timestamp: string,
 ): AnyTimerConfig => {
   const mockDate = createMockDate(timestamp);
   const config = createMockTimerConfig(name, type);

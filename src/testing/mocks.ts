@@ -1,5 +1,6 @@
+import { TimerCategory, TimerType } from "@/types/configure";
 import { vi } from "vitest";
-import { TimerCategory, TimerType, WorkRestMode } from "@/types/configure";
+
 import { createMockTimerConfig } from "./utils";
 
 /**

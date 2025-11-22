@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import PlayIcon from "@/icons/PlayIcon";
 import { validateTimerConfig } from "@/lib/configure/utils";
 import { TIMER_TYPE_LABELS } from "@/lib/enums";
 import type { AnyTimerConfig, TimerConfigFormProps } from "@/types/configure";
-import { TimerType } from "@/types/configure";
 
-import { ButtonLegacy, CardContainer } from "@/components/ui";
+import { CardContainer } from "@/components/ui";
 import { CommonFields } from "./CommonFields";
 import { FormActions } from "./FormActions";
 import { FormErrors } from "./FormErrors";

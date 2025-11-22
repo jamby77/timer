@@ -1,10 +1,10 @@
+import React from "react";
+import { TimerType } from "@/lib/timer/types";
+import { createMockTimerConfig } from "@/testing/utils";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
+
 import { RecentTimers } from "./RecentTimers";
-import { TimerType } from "@/lib/timer/types";
-import { AnyTimerConfig, WorkRestMode } from "@/types/configure";
-import React from "react";
-import { createMockTimerConfig } from "@/testing/utils";
 
 const meta = preview.meta({
   title: "Configure/RecentTimers",
@@ -25,7 +25,9 @@ export const Empty = meta.story({
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain("No Recent Timers");
-    expect(canvasElement.textContent).toContain("Start a timer to see it appear here for quick access");
+    expect(canvasElement.textContent).toContain(
+      "Start a timer to see it appear here for quick access",
+    );
   },
 });
 
@@ -33,10 +35,10 @@ export const WithTimers = meta.story({
   args: {
     timers: [
       {
-        id: 'timer-1',
-        config: createMockTimerConfig('Tabata', TimerType.INTERVAL),
+        id: "timer-1",
+        config: createMockTimerConfig("Tabata", TimerType.INTERVAL),
         startedAt: new Date(),
-      }
+      },
     ],
   },
   play: async ({ canvasElement }) => {
@@ -58,18 +60,18 @@ export const MultipleTimers = meta.story({
   render: (args) => {
     const timers = [
       {
-        id: 'timer-1',
-        config: createMockTimerConfig('Tabata', TimerType.INTERVAL),
+        id: "timer-1",
+        config: createMockTimerConfig("Tabata", TimerType.INTERVAL),
         startedAt: new Date(),
       },
       {
-        id: 'timer-2', 
-        config: createMockTimerConfig('EMOM', TimerType.INTERVAL),
+        id: "timer-2",
+        config: createMockTimerConfig("EMOM", TimerType.INTERVAL),
         startedAt: new Date(Date.now() - 3600000), // 1 hour ago
       },
       {
-        id: 'timer-3',
-        config: createMockTimerConfig('Countdown', TimerType.COUNTDOWN),
+        id: "timer-3",
+        config: createMockTimerConfig("Countdown", TimerType.COUNTDOWN),
         startedAt: new Date(Date.now() - 7200000), // 2 hours ago
       },
     ];
@@ -116,18 +118,18 @@ export const MixedTypes = meta.story({
   render: (args) => {
     const timers = [
       {
-        id: 'timer-1',
-        config: createMockTimerConfig('Countdown', TimerType.COUNTDOWN),
+        id: "timer-1",
+        config: createMockTimerConfig("Countdown", TimerType.COUNTDOWN),
         startedAt: new Date(),
       },
       {
-        id: 'timer-2',
-        config: createMockTimerConfig('Stopwatch', TimerType.STOPWATCH),
+        id: "timer-2",
+        config: createMockTimerConfig("Stopwatch", TimerType.STOPWATCH),
         startedAt: new Date(Date.now() - 1800000),
       },
       {
-        id: 'timer-3',
-        config: createMockTimerConfig('Interval', TimerType.INTERVAL),
+        id: "timer-3",
+        config: createMockTimerConfig("Interval", TimerType.INTERVAL),
         startedAt: new Date(Date.now() - 3600000),
       },
     ];
@@ -144,34 +146,34 @@ export const TimerStart = meta.story({
   args: {
     timers: [
       {
-        id: 'timer-1',
-        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
+        id: "timer-1",
+        config: createMockTimerConfig("Test Timer", TimerType.COUNTDOWN),
         startedAt: new Date(),
-      }
+      },
     ],
     onStartTimer: fn(),
     onRemoveTimer: fn(),
     onClearAll: fn(),
   },
   play: async ({ canvasElement, step, args }) => {
-    const startButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.textContent?.includes('Start')
+    const startButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.textContent?.includes("Start"),
     );
-    
+
     expect(startButton).toBeTruthy();
-    
+
     if (startButton) {
-      await step('start timer', () => {
+      await step("start timer", () => {
         startButton.click();
       });
     }
-    
+
     expect(args.onStartTimer).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Test Timer',
+        name: "Test Timer",
         type: TimerType.COUNTDOWN,
         duration: 300,
-      })
+      }),
     );
   },
 });
@@ -180,29 +182,29 @@ export const TimerRemoval = meta.story({
   args: {
     timers: [
       {
-        id: 'timer-1',
-        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
+        id: "timer-1",
+        config: createMockTimerConfig("Test Timer", TimerType.COUNTDOWN),
         startedAt: new Date(),
-      }
+      },
     ],
     onStartTimer: fn(),
     onRemoveTimer: fn(),
     onClearAll: fn(),
   },
   play: async ({ canvasElement, step, args }) => {
-    const removeButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.getAttribute('aria-label')?.includes('Remove')
+    const removeButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.getAttribute("aria-label")?.includes("Remove"),
     );
-    
+
     expect(removeButton).toBeTruthy();
-    
+
     if (removeButton) {
-      await step('remove timer', () => {
+      await step("remove timer", () => {
         removeButton.click();
       });
     }
-    
-    expect(args.onRemoveTimer).toHaveBeenCalledWith('timer-1');
+
+    expect(args.onRemoveTimer).toHaveBeenCalledWith("timer-1");
   },
 });
 
@@ -210,28 +212,28 @@ export const ClearAllTimers = meta.story({
   args: {
     timers: [
       {
-        id: 'timer-1',
-        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
+        id: "timer-1",
+        config: createMockTimerConfig("Test Timer", TimerType.COUNTDOWN),
         startedAt: new Date(),
-      }
+      },
     ],
     onStartTimer: fn(),
     onRemoveTimer: fn(),
     onClearAll: fn(),
   },
   play: async ({ canvasElement, step, args }) => {
-    const clearAllButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.textContent?.includes('Clear All')
+    const clearAllButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.textContent?.includes("Clear All"),
     );
-    
+
     expect(clearAllButton).toBeTruthy();
-    
+
     if (clearAllButton) {
-      await step('clear all timers', () => {
+      await step("clear all timers", () => {
         clearAllButton.click();
       });
     }
-    
+
     expect(args.onClearAll).toHaveBeenCalled();
   },
 });

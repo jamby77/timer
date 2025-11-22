@@ -51,3 +51,16 @@ export const TIMER_TYPE_LABELS: Record<TimerType, string> = {
   [TimerType.WORKREST]: "Work/Rest Ratio",
   [TimerType.COMPLEX]: "Complex",
 };
+
+// Theme-related enums
+export enum Theme {
+  LIGHT = "light",
+  DARK = "dark",
+  SYSTEM = "system",
+}
+
+export const THEME_LABELS: Record<Theme, string> = {
+  [Theme.LIGHT]: "Light",
+  [Theme.DARK]: "Dark",
+  [Theme.SYSTEM]: "System",
+};

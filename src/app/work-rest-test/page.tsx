@@ -4,14 +4,14 @@ import { WorkRestTimer } from "@/components/WorkRestTimer";
 
 export default function WorkRestTestPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center mb-8">Work/Rest Timer Test</h1>
-        
-        <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="min-h-screen py-8">
+      <div className="mx-auto max-w-4xl px-4">
+        <h1 className="mb-8 text-center text-3xl font-bold">Work/Rest Timer Test</h1>
+
+        <div className="shadow-card rounded-lg p-6 shadow-lg">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Test Instructions:</h2>
-            <ul className="list-disc list-inside space-y-1 text-gray-700">
+            <h2 className="mb-2 text-xl font-semibold">Test Instructions:</h2>
+            <ul className="text-foreground list-inside list-disc space-y-1">
               <li>Click "Start work" to begin work phase</li>
               <li>Verify timer counts up (MM:SS.MS format)</li>
               <li>Click "Stop work" to record lap and start rest</li>
@@ -22,7 +22,7 @@ export default function WorkRestTestPage() {
               <li>Test skip/stop rest functionality</li>
             </ul>
           </div>
-          
+
           <WorkRestTimer />
         </div>
       </div>

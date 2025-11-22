@@ -12,6 +12,7 @@ import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
 import cx from "clsx";
 
+import { Progress } from "@/components/ui/progress";
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
 import { BaseButton } from "./TimerButton";
@@ -86,26 +87,21 @@ export function Interval({ intervalConfig }: IntervalProps) {
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
         currentStep={currentStep}
       >
-        <div
-          className={cx("mb-4 h-2 w-full rounded-full bg-gray-200", {
+        <Progress
+          value={getProgress()}
+          className={cx("mb-4", {
             invisible: !currentStep,
+            "[--progress-indicator-color:var(--tm-pr-work-bg)]": currentStep?.isWork,
+            "[--progress-indicator-color:var(--tm-pr-rest-bg)]": !currentStep?.isWork,
           })}
-        >
-          <div
-            className={cx("h-2 rounded-full transition-all duration-100", {
-              "bg-emerald-700": currentStep?.isWork,
-              "bg-rose-700": currentStep && !currentStep?.isWork,
-            })}
-            style={{ width: `${getProgress()}%` }}
-          />
-        </div>
+        />
         <div className="flex items-center justify-center gap-4">
           {showPlayButton ? (
             <BaseButton
               onClick={start}
               title={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
               label={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
-              className="bg-green-500 hover:bg-green-600 focus:ring-green-500"
+              className="bg-tm-play hover:bg-tm-play/80 focus:ring-tm-play"
             >
               <PlayIcon className="h-6 w-6" />
             </BaseButton>
@@ -114,7 +110,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
               onClick={pause}
               title="Pause intervals"
               label="Pause intervals"
-              className="bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500"
+              className="bg-tm-pause hover:bg-tm-pause/80 focus:ring-tm-pause"
             >
               <PauseIcon className="h-6 w-6" />
             </BaseButton>
@@ -124,7 +120,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
             disabled={timerState !== TimerState.Running}
             title="Skip current interval"
             label="Skip current interval"
-            className="bg-orange-500 hover:bg-orange-600 focus:ring-orange-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+            className="bg-tm-skip hover:bg-tm-skip/80 focus:ring-tm-skip disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
           >
             <SkipIcon className="h-6 w-6" />
           </BaseButton>
@@ -133,7 +129,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
             disabled={timerState !== TimerState.Running}
             title="Stop intervals"
             label="Stop intervals"
-            className="bg-red-500 hover:bg-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+            className="bg-tm-stop hover:bg-tm-stop/80 focus:ring-tm-stop disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
           >
             <StopIcon className="h-6 w-6" />
           </BaseButton>
@@ -141,7 +137,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
             onClick={handleRestart}
             title="Restart intervals"
             label="Restart intervals"
-            className="bg-green-500 hover:bg-green-600 focus:ring-green-500"
+            className="bg-tm-reset hover:bg-tm-reset/80 focus:ring-tm-reset"
           >
             <RepeatIcon className="h-6 w-6" />
           </BaseButton>

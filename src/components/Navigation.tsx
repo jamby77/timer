@@ -1,8 +1,10 @@
 "use client";
 
-import cx from "clsx";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Navigation = () => {
   const pathname = usePathname();
@@ -17,24 +19,31 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="border-b border-gray-200 bg-white shadow-sm">
+    <nav className="border-border bg-background text-foreground border-b shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cx("inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium", {
-                  "border-blue-500 text-gray-900": pathname === item.href,
-                  "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700":
-                    pathname !== item.href,
-                })}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                    {
+                      "text-foreground border-blue-500": isActive,
+                      "text-muted-foreground hover:border-muted hover:text-foreground h border-transparent":
+                        pathname !== item.href,
+                    },
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
+          <ThemeToggle />
         </div>
       </div>
     </nav>
