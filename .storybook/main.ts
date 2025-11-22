@@ -8,6 +8,7 @@ const config = defineMain({
     "@storybook/addon-a11y",
     "@storybook/addon-vitest",
     "@storybook/addon-docs",
+    "@storybook/addon-mcp"
   ],
   docs: {
     defaultName: "Documentation",
