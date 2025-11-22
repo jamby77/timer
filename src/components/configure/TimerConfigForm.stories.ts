@@ -1,17 +1,24 @@
-import preview from "#.storybook/preview";
-import { expect, fn } from "storybook/test";
-import { TimerConfigForm } from "./TimerConfigForm";
+import React from "react";
 import { TimerType } from "@/lib/timer/types";
 import { AnyTimerConfig, WorkRestMode } from "@/types/configure";
-import React from "react";
+import preview from "#.storybook/preview";
+import { expect, fn } from "storybook/test";
+
+import { TimerConfigForm } from "./TimerConfigForm";
 
 const meta = preview.meta({
   title: "Configure/TimerConfigForm",
   component: TimerConfigForm,
   argTypes: {
-    type: { 
+    type: {
       control: "select",
-      options: [TimerType.COUNTDOWN, TimerType.STOPWATCH, TimerType.INTERVAL, TimerType.WORKREST, TimerType.COMPLEX],
+      options: [
+        TimerType.COUNTDOWN,
+        TimerType.STOPWATCH,
+        TimerType.INTERVAL,
+        TimerType.WORKREST,
+        TimerType.COMPLEX,
+      ],
     },
     isPredefined: { control: "boolean" },
   },
@@ -68,7 +75,7 @@ export const WorkRestRatio = meta.story({
     type: TimerType.WORKREST,
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Configure Work/rest Timer");
+    expect(canvasElement.textContent).toContain("Configure Work/Rest Timer");
     expect(canvasElement.textContent).toContain("Rest Mode");
     expect(canvasElement.textContent).toContain("Work/Rest Ratio");
     expect(canvasElement.textContent).toContain("Maximum Work Time (seconds)");
@@ -79,8 +86,8 @@ export const WorkRestRatio = meta.story({
 export const WorkRestFixed = meta.story({
   render: (args) => {
     const initialConfig = {
-      id: 'fixed-rest-timer',
-      name: 'Fixed Rest Timer',
+      id: "fixed-rest-timer",
+      name: "Fixed Rest Timer",
       type: TimerType.WORKREST,
       restMode: WorkRestMode.FIXED,
       fixedRestDuration: 30,
@@ -105,8 +112,12 @@ export const Complex = meta.story({
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain("Configure Complex Timer");
-    expect(canvasElement.textContent).toContain("Complex timers allow you to combine multiple timer types");
-    expect(canvasElement.textContent).toContain("This feature will be implemented in a future update");
+    expect(canvasElement.textContent).toContain(
+      "Complex timers allow you to combine multiple timer types",
+    );
+    expect(canvasElement.textContent).toContain(
+      "This feature will be implemented in a future update",
+    );
   },
 });
 
@@ -115,14 +126,14 @@ export const PredefinedStyle = meta.story({
     type: TimerType.COUNTDOWN,
     isPredefined: true,
     initialConfig: {
-      id: 'tabata-config',
-      name: 'Tabata',
+      id: "tabata-config",
+      name: "Tabata",
       type: TimerType.INTERVAL,
       workDuration: 20,
       restDuration: 10,
       intervals: 8,
-      workLabel: 'Work',
-      restLabel: 'Rest',
+      workLabel: "Work",
+      restLabel: "Rest",
       skipLastRest: true,
       createdAt: new Date(),
       lastUsed: new Date(),
@@ -140,11 +151,11 @@ export const WithInitialData = meta.story({
   args: {
     type: TimerType.COUNTDOWN,
     initialConfig: {
-      id: 'countdown-5min',
-      name: '5 Minute Timer',
+      id: "countdown-5min",
+      name: "5 Minute Timer",
       type: TimerType.COUNTDOWN,
       duration: 300,
-      completionMessage: 'Time is up!',
+      completionMessage: "Time is up!",
       createdAt: new Date(),
       lastUsed: new Date(),
     } as AnyTimerConfig,
@@ -164,23 +175,25 @@ export const Interactive = meta.story({
   },
   play: async ({ canvasElement, step }) => {
     const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement;
-    const workDurationInput = canvasElement.querySelector('input[placeholder*="20"]') as HTMLInputElement;
-    
+    const workDurationInput = canvasElement.querySelector(
+      'input[placeholder*="20"]',
+    ) as HTMLInputElement;
+
     expect(nameInput).toBeTruthy();
     expect(workDurationInput).toBeTruthy();
-    
+
     if (nameInput && workDurationInput) {
-      await step('fill in timer name', () => {
-        nameInput.value = 'Custom Interval';
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      await step("fill in timer name", () => {
+        nameInput.value = "Custom Interval";
+        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      
-      await step('fill in work duration', () => {
-        workDurationInput.value = '45';
-        workDurationInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+      await step("fill in work duration", () => {
+        workDurationInput.value = "45";
+        workDurationInput.dispatchEvent(new Event("input", { bubbles: true }));
       });
     }
-    
+
     expect(canvasElement.textContent).toContain("Custom Interval");
   },
 });
@@ -192,18 +205,18 @@ export const FormValidation = meta.story({
     onSaveAsPredefined: fn(),
   },
   play: async ({ canvasElement, step }) => {
-    const submitButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.textContent?.includes('Start Timer')
+    const submitButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.textContent?.includes("Start Timer"),
     );
-    
+
     expect(submitButton).toBeTruthy();
-    
+
     if (submitButton) {
-      await step('submit empty form to trigger validation', () => {
+      await step("submit empty form to trigger validation", () => {
         submitButton.click();
       });
     }
-    
+
     expect(canvasElement.textContent).toContain("Please fix the following errors");
     expect(canvasElement.textContent).toContain("Timer name is required");
   },
@@ -217,33 +230,35 @@ export const ValidFormSubmission = meta.story({
   },
   play: async ({ canvasElement, step, args }) => {
     const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement;
-    const durationInput = canvasElement.querySelector('input[placeholder*="300"]') as HTMLInputElement;
-    const submitButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.textContent?.includes('Start Timer')
+    const durationInput = canvasElement.querySelector(
+      'input[placeholder*="300"]',
+    ) as HTMLInputElement;
+    const submitButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.textContent?.includes("Start Timer"),
     );
-    
+
     if (nameInput && durationInput && submitButton) {
-      await step('fill valid timer configuration', () => {
-        nameInput.value = 'Test Timer';
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        durationInput.value = '300';
-        durationInput.dispatchEvent(new Event('input', { bubbles: true }));
+      await step("fill valid timer configuration", () => {
+        nameInput.value = "Test Timer";
+        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+        durationInput.value = "300";
+        durationInput.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      
-      await step('submit valid form', () => {
+
+      await step("submit valid form", () => {
         submitButton.click();
       });
     }
-    
+
     expect(args.onStartTimer).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Test Timer',
+        name: "Test Timer",
         type: TimerType.COUNTDOWN,
         duration: 300,
         createdAt: expect.any(Date),
         lastUsed: expect.any(Date),
-      })
+      }),
     );
   },
 });
@@ -256,31 +271,33 @@ export const SaveAsPredefined = meta.story({
   },
   play: async ({ canvasElement, step, args }) => {
     const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement;
-    const durationInput = canvasElement.querySelector('input[placeholder*="300"]') as HTMLInputElement;
-    const saveButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.textContent?.includes('Save as Predefined')
+    const durationInput = canvasElement.querySelector(
+      'input[placeholder*="300"]',
+    ) as HTMLInputElement;
+    const saveButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.textContent?.includes("Save as Predefined"),
     );
-    
+
     if (nameInput && durationInput && saveButton) {
-      await step('fill timer configuration for saving', () => {
-        nameInput.value = 'Custom Timer';
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        durationInput.value = '300';
-        durationInput.dispatchEvent(new Event('input', { bubbles: true }));
+      await step("fill timer configuration for saving", () => {
+        nameInput.value = "Custom Timer";
+        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+        durationInput.value = "300";
+        durationInput.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      
-      await step('save as predefined', () => {
+
+      await step("save as predefined", () => {
         saveButton.click();
       });
     }
-    
+
     expect(args.onSaveAsPredefined).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Custom Timer',
+        name: "Custom Timer",
         type: TimerType.COUNTDOWN,
         duration: 300,
-      })
+      }),
     );
   },
 });
@@ -295,16 +312,16 @@ export const WorkRestModeToggle = meta.story({
     // Initially shows ratio mode
     expect(canvasElement.textContent).toContain("Work/Rest Ratio");
     expect(canvasElement.textContent).not.toContain("Fixed Rest Duration");
-    
-    const restModeSelect = canvasElement.querySelector('select') as HTMLSelectElement;
-    
+
+    const restModeSelect = canvasElement.querySelector("select") as HTMLSelectElement;
+
     if (restModeSelect) {
-      await step('switch to fixed rest mode', () => {
-        restModeSelect.value = 'FIXED';
-        restModeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      await step("switch to fixed rest mode", () => {
+        restModeSelect.value = "FIXED";
+        restModeSelect.dispatchEvent(new Event("change", { bubbles: true }));
       });
     }
-    
+
     expect(canvasElement.textContent).toContain("Fixed Rest Duration");
     expect(canvasElement.textContent).not.toContain("Work/Rest Ratio");
   },
@@ -318,21 +335,21 @@ export const IntervalFieldValidation = meta.story({
   },
   play: async ({ canvasElement, step }) => {
     const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement;
-    const submitButton = Array.from(canvasElement.querySelectorAll('button')).find(
-      el => el.textContent?.includes('Start Timer')
+    const submitButton = Array.from(canvasElement.querySelectorAll("button")).find((el) =>
+      el.textContent?.includes("Start Timer"),
     );
-    
+
     if (nameInput && submitButton) {
-      await step('fill only name, leave work duration empty', () => {
-        nameInput.value = 'Test Timer';
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      await step("fill only name, leave work duration empty", () => {
+        nameInput.value = "Test Timer";
+        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      
-      await step('submit incomplete form', () => {
+
+      await step("submit incomplete form", () => {
         submitButton.click();
       });
     }
-    
+
     expect(canvasElement.textContent).toContain("Work duration must be greater than 0");
   },
 });

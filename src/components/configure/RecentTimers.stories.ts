@@ -4,65 +4,7 @@ import { RecentTimers } from "./RecentTimers";
 import { TimerType } from "@/lib/timer/types";
 import { AnyTimerConfig, WorkRestMode } from "@/types/configure";
 import React from "react";
-
-// Helper to create mock timer config
-const createMockTimer = (name: string, type: TimerType): AnyTimerConfig => {
-  const baseConfig = {
-    id: `timer-${name.toLowerCase()}`,
-    name,
-    createdAt: new Date(),
-    lastUsed: new Date(),
-  };
-
-  switch (type) {
-    case TimerType.COUNTDOWN:
-      return {
-        ...baseConfig,
-        type,
-        duration: 300,
-        completionMessage: 'Time is up!',
-      } as AnyTimerConfig;
-    
-    case TimerType.STOPWATCH:
-      return {
-        ...baseConfig,
-        type,
-        timeLimit: 600,
-      } as AnyTimerConfig;
-    
-    case TimerType.INTERVAL:
-      return {
-        ...baseConfig,
-        type,
-        workDuration: 20,
-        restDuration: 10,
-        intervals: 8,
-        workLabel: 'Work',
-        restLabel: 'Rest',
-        skipLastRest: true,
-      } as AnyTimerConfig;
-    
-    case TimerType.WORKREST:
-      return {
-        ...baseConfig,
-        type,
-        ratio: 2.0,
-        maxWorkTime: 300,
-        maxRounds: 10,
-        restMode: WorkRestMode.RATIO,
-      } as AnyTimerConfig;
-    
-    case TimerType.COMPLEX:
-      return {
-        ...baseConfig,
-        type,
-        phases: [],
-      } as AnyTimerConfig;
-    
-    default:
-      throw new Error(`Unsupported timer type: ${type}`);
-  }
-};
+import { createMockTimerConfig } from "@/testing/utils";
 
 const meta = preview.meta({
   title: "Configure/RecentTimers",
@@ -92,7 +34,7 @@ export const WithTimers = meta.story({
     timers: [
       {
         id: 'timer-1',
-        config: createMockTimer('Tabata', TimerType.INTERVAL),
+        config: createMockTimerConfig('Tabata', TimerType.INTERVAL),
         startedAt: new Date(),
       }
     ],
@@ -117,17 +59,17 @@ export const MultipleTimers = meta.story({
     const timers = [
       {
         id: 'timer-1',
-        config: createMockTimer('Tabata', TimerType.INTERVAL),
+        config: createMockTimerConfig('Tabata', TimerType.INTERVAL),
         startedAt: new Date(),
       },
       {
         id: 'timer-2', 
-        config: createMockTimer('EMOM', TimerType.INTERVAL),
+        config: createMockTimerConfig('EMOM', TimerType.INTERVAL),
         startedAt: new Date(Date.now() - 3600000), // 1 hour ago
       },
       {
         id: 'timer-3',
-        config: createMockTimer('Countdown', TimerType.COUNTDOWN),
+        config: createMockTimerConfig('Countdown', TimerType.COUNTDOWN),
         startedAt: new Date(Date.now() - 7200000), // 2 hours ago
       },
     ];
@@ -152,7 +94,7 @@ export const ManyTimers = meta.story({
   render: (args) => {
     const timers = Array.from({ length: 15 }, (_, i) => ({
       id: `timer-${i + 1}`,
-      config: createMockTimer(`Timer ${i + 1}`, TimerType.COUNTDOWN),
+      config: createMockTimerConfig(`Timer ${i + 1}`, TimerType.COUNTDOWN),
       startedAt: new Date(Date.now() - i * 60000), // Different times
     }));
     return React.createElement(RecentTimers, { ...args, timers });
@@ -175,17 +117,17 @@ export const MixedTypes = meta.story({
     const timers = [
       {
         id: 'timer-1',
-        config: createMockTimer('Countdown', TimerType.COUNTDOWN),
+        config: createMockTimerConfig('Countdown', TimerType.COUNTDOWN),
         startedAt: new Date(),
       },
       {
         id: 'timer-2',
-        config: createMockTimer('Stopwatch', TimerType.STOPWATCH),
+        config: createMockTimerConfig('Stopwatch', TimerType.STOPWATCH),
         startedAt: new Date(Date.now() - 1800000),
       },
       {
         id: 'timer-3',
-        config: createMockTimer('Interval', TimerType.INTERVAL),
+        config: createMockTimerConfig('Interval', TimerType.INTERVAL),
         startedAt: new Date(Date.now() - 3600000),
       },
     ];
@@ -203,7 +145,7 @@ export const TimerStart = meta.story({
     timers: [
       {
         id: 'timer-1',
-        config: createMockTimer('Test Timer', TimerType.COUNTDOWN),
+        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
         startedAt: new Date(),
       }
     ],
@@ -239,7 +181,7 @@ export const TimerRemoval = meta.story({
     timers: [
       {
         id: 'timer-1',
-        config: createMockTimer('Test Timer', TimerType.COUNTDOWN),
+        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
         startedAt: new Date(),
       }
     ],
@@ -269,7 +211,7 @@ export const ClearAllTimers = meta.story({
     timers: [
       {
         id: 'timer-1',
-        config: createMockTimer('Test Timer', TimerType.COUNTDOWN),
+        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
         startedAt: new Date(),
       }
     ],
