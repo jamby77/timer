@@ -42,3 +42,12 @@ export enum TimerCategory {
   SPORTS = "sports",
   CUSTOM = "custom",
 }
+
+// Timer type labels for UI display
+export const TIMER_TYPE_LABELS: Record<TimerType, string> = {
+  [TimerType.COUNTDOWN]: "Countdown",
+  [TimerType.STOPWATCH]: "Stopwatch",
+  [TimerType.INTERVAL]: "Interval",
+  [TimerType.WORKREST]: "Work/Rest Ratio",
+  [TimerType.COMPLEX]: "Complex",
+};

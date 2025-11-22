@@ -1,6 +1,6 @@
 "use client";
 
-import { TimerType } from "@/lib/enums";
+import { TimerType, TIMER_TYPE_LABELS } from "@/lib/enums";
 import type { TimerTypeSelectorProps } from "@/types/configure";
 import cx from "clsx";
 
@@ -8,17 +8,17 @@ import { CardContainer } from "@/components/ui";
 
 export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelectorProps) => {
   const TIMER_TYPES = [
-    { type: TimerType.COUNTDOWN, name: "Countdown", description: "Simple countdown timer" },
+    { type: TimerType.COUNTDOWN, name: TIMER_TYPE_LABELS[TimerType.COUNTDOWN], description: "Simple countdown timer" },
     {
       type: TimerType.STOPWATCH,
-      name: "Stopwatch",
+      name: TIMER_TYPE_LABELS[TimerType.STOPWATCH],
       description: "Count-up timer with optional limit",
     },
-    { type: TimerType.INTERVAL, name: "Interval", description: "Work/rest cycles" },
-    { type: TimerType.WORKREST, name: "Work/Rest Ratio", description: "Ratio-based timer" },
+    { type: TimerType.INTERVAL, name: TIMER_TYPE_LABELS[TimerType.INTERVAL], description: "Work/rest cycles" },
+    { type: TimerType.WORKREST, name: TIMER_TYPE_LABELS[TimerType.WORKREST], description: "Ratio-based timer" },
     {
       type: TimerType.COMPLEX,
-      name: "Complex",
+      name: TIMER_TYPE_LABELS[TimerType.COMPLEX],
       description: "Multi-sequence timer combining different types",
     },
   ] as const;

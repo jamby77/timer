@@ -12,6 +12,7 @@ import type {
   WorkRestConfig,
 } from "@/types/configure";
 import { TimerType, WorkRestMode } from "@/types/configure";
+import { TIMER_TYPE_LABELS } from "@/lib/enums";
 
 import { Button, CardContainer } from "@/components/ui";
 
@@ -109,7 +110,7 @@ export const TimerConfigForm = ({
     <CardContainer>
       <div className="mb-6">
         <h2 className="mb-2 text-xl font-semibold text-gray-900">
-          Configure {type.charAt(0) + type.slice(1).toLowerCase()} Timer
+          Configure {TIMER_TYPE_LABELS[type]} Timer
         </h2>
         {isPredefined && (
           <p className="text-sm text-gray-600">

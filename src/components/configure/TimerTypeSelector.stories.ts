@@ -1,4 +1,5 @@
 import { TimerType } from "@/lib/timer/types";
+import { TIMER_TYPE_LABELS } from "@/lib/enums";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 

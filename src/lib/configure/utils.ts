@@ -1,4 +1,5 @@
 import { AnyTimerConfig, TimerCategory, TimerType, WorkRestMode } from "@/types/configure";
+import { TIMER_TYPE_LABELS } from "@/lib/enums";
 
 // Configuration summary generator
 export const getConfigSummary = (config: AnyTimerConfig): string => {
@@ -148,20 +149,7 @@ export const validateTimerConfig = (config: AnyTimerConfig): string[] => {
 
 // Get timer type display name
 export const getTimerTypeDisplayName = (type: TimerType): string => {
-  switch (type) {
-    case TimerType.COUNTDOWN:
-      return "Countdown";
-    case TimerType.STOPWATCH:
-      return "Stopwatch";
-    case TimerType.INTERVAL:
-      return "Interval";
-    case TimerType.WORKREST:
-      return "Work/Rest";
-    case TimerType.COMPLEX:
-      return "Complex";
-    default:
-      return "Unknown";
-  }
+  return TIMER_TYPE_LABELS[type] || "Unknown";
 };
 
 // Get timer category display name
