@@ -1,7 +1,9 @@
 import "./globals.css";
 
+import { ReactNode } from "react";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
+
 import { Navigation } from "@/components/Navigation";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
   description: "A versatile timer application for workouts and productivity",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -20,4 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-}
+};
+
+export default Layout;

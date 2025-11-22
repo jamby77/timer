@@ -1,4 +1,12 @@
-import { TimerCategory, TimerType } from "@/types/configure";
+import {
+  CountdownConfig,
+  IntervalConfig,
+  StopwatchConfig,
+  TimerCategory,
+  TimerType,
+  WorkRestConfig,
+  WorkRestMode,
+} from "@/types/configure";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -70,7 +78,7 @@ describe("presets", () => {
       const strengthStyles = getPredefinedStylesByCategory(TimerCategory.STRENGTH);
       const flexibilityStyles = getPredefinedStylesByCategory(TimerCategory.FLEXIBILITY);
 
-      expect(cardioStyles).toHaveLength(5); // Tabata, EMOM, E2MOM, HIIT, Stopwatch
+      expect(cardioStyles).toHaveLength(4); // Tabata, EMOM, HIIT, Stopwatch
       expect(strengthStyles).toHaveLength(3); // E2MOM, Work/Rest Ratio, Work/Rest Fixed
       expect(flexibilityStyles).toHaveLength(1); // Countdown
     });
@@ -83,9 +91,9 @@ describe("presets", () => {
         type: TimerType.COUNTDOWN,
         duration: 300,
         completionMessage: "Done!",
-      };
+      } as CountdownConfig;
 
-      const style = createPredefinedStyle(
+      const style = createPredefinedStyle<CountdownConfig>(
         "custom-timer",
         "Custom Timer",
         "A custom countdown timer",
@@ -107,26 +115,32 @@ describe("presets", () => {
     });
 
     it("generates unique ID for style", () => {
-      const config = {
+      const config1 = {
         name: "Custom Timer",
         type: TimerType.COUNTDOWN,
         duration: 300,
-      };
+      } as Omit<CountdownConfig, "id" | "createdAt" | "lastUsed">;
 
-      const style1 = createPredefinedStyle(
+      const config2 = {
+        name: "Custom Timer 2",
+        type: TimerType.COUNTDOWN,
+        duration: 300,
+      } as Omit<CountdownConfig, "id" | "createdAt" | "lastUsed">;
+
+      const style1 = createPredefinedStyle<CountdownConfig>(
         "timer-1",
         "Timer 1",
         "Description 1",
         TimerCategory.CUSTOM,
-        config,
+        config1,
       );
 
-      const style2 = createPredefinedStyle(
+      const style2 = createPredefinedStyle<CountdownConfig>(
         "timer-2",
         "Timer 2",
         "Description 2",
         TimerCategory.CUSTOM,
-        config,
+        config2,
       );
 
       expect(style1.id).not.toBe(style2.id);
@@ -142,9 +156,9 @@ describe("presets", () => {
         workLabel: "Work",
         restLabel: "Rest",
         skipLastRest: false,
-      };
+      } as Omit<IntervalConfig, "id" | "createdAt" | "lastUsed">;
 
-      const style = createPredefinedStyle(
+      const style = createPredefinedStyle<IntervalConfig>(
         "custom-interval",
         "Custom Interval",
         "A custom interval timer",
@@ -165,10 +179,10 @@ describe("presets", () => {
         ratio: 3.0,
         maxWorkTime: 600,
         maxRounds: 12,
-        restMode: "RATIO",
-      };
+        restMode: WorkRestMode.RATIO,
+      } as Omit<WorkRestConfig, "id" | "createdAt" | "lastUsed">;
 
-      const style = createPredefinedStyle(
+      const style = createPredefinedStyle<WorkRestConfig>(
         "custom-workrest",
         "Custom Work/Rest",
         "A custom work/rest timer",
@@ -180,7 +194,7 @@ describe("presets", () => {
       expect(style.config.ratio).toBe(3.0);
       expect(style.config.maxWorkTime).toBe(600);
       expect(style.config.maxRounds).toBe(12);
-      expect(style.config.restMode).toBe("RATIO");
+      expect(style.config.restMode).toBe("ratio");
     });
   });
 
@@ -212,10 +226,10 @@ describe("presets", () => {
       const tabata = PREDEFINED_STYLES.find((style) => style.name === "Tabata");
       expect(tabata).toBeTruthy();
       expect(tabata?.config.type).toBe(TimerType.INTERVAL);
-      expect(tabata?.config.workDuration).toBe(20);
-      expect(tabata?.config.restDuration).toBe(10);
-      expect(tabata?.config.intervals).toBe(8);
-      expect(tabata?.config.skipLastRest).toBe(true);
+      expect((tabata?.config as IntervalConfig).workDuration).toBe(20);
+      expect((tabata?.config as IntervalConfig).restDuration).toBe(10);
+      expect((tabata?.config as IntervalConfig).intervals).toBe(8);
+      expect((tabata?.config as IntervalConfig).skipLastRest).toBe(true);
       expect(tabata?.category).toBe(TimerCategory.CARDIO);
     });
 
@@ -223,9 +237,9 @@ describe("presets", () => {
       const emom = PREDEFINED_STYLES.find((style) => style.name === "EMOM (10 min)");
       expect(emom).toBeTruthy();
       expect(emom?.config.type).toBe(TimerType.INTERVAL);
-      expect(emom?.config.workDuration).toBe(60);
-      expect(emom?.config.restDuration).toBe(0);
-      expect(emom?.config.intervals).toBe(10);
+      expect((emom?.config as IntervalConfig).workDuration).toBe(60);
+      expect((emom?.config as IntervalConfig).restDuration).toBe(0);
+      expect((emom?.config as IntervalConfig).intervals).toBe(10);
       expect(emom?.category).toBe(TimerCategory.CARDIO);
     });
 
@@ -233,9 +247,9 @@ describe("presets", () => {
       const e2mom = PREDEFINED_STYLES.find((style) => style.name === "E2MOM (5 rounds)");
       expect(e2mom).toBeTruthy();
       expect(e2mom?.config.type).toBe(TimerType.INTERVAL);
-      expect(e2mom?.config.workDuration).toBe(60);
-      expect(e2mom?.config.restDuration).toBe(60);
-      expect(e2mom?.config.intervals).toBe(5);
+      expect((e2mom?.config as IntervalConfig).workDuration).toBe(60);
+      expect((e2mom?.config as IntervalConfig).restDuration).toBe(60);
+      expect((e2mom?.config as IntervalConfig).intervals).toBe(5);
       expect(e2mom?.category).toBe(TimerCategory.STRENGTH);
     });
 
@@ -243,9 +257,9 @@ describe("presets", () => {
       const hiit = PREDEFINED_STYLES.find((style) => style.name === "HIIT");
       expect(hiit).toBeTruthy();
       expect(hiit?.config.type).toBe(TimerType.INTERVAL);
-      expect(hiit?.config.workDuration).toBe(30);
-      expect(hiit?.config.restDuration).toBe(30);
-      expect(hiit?.config.intervals).toBe(10);
+      expect((hiit?.config as IntervalConfig).workDuration).toBe(30);
+      expect((hiit?.config as IntervalConfig).restDuration).toBe(30);
+      expect((hiit?.config as IntervalConfig).intervals).toBe(10);
       expect(hiit?.category).toBe(TimerCategory.CARDIO);
     });
 
@@ -253,8 +267,8 @@ describe("presets", () => {
       const countdown = PREDEFINED_STYLES.find((style) => style.name === "Countdown (5 min)");
       expect(countdown).toBeTruthy();
       expect(countdown?.config.type).toBe(TimerType.COUNTDOWN);
-      expect(countdown?.config.duration).toBe(300);
-      expect(countdown?.config.completionMessage).toBe("Time is up!");
+      expect((countdown?.config as CountdownConfig).duration).toBe(300);
+      expect((countdown?.config as CountdownConfig).completionMessage).toBe("Time is up!");
       expect(countdown?.category).toBe(TimerCategory.FLEXIBILITY);
     });
 
@@ -264,8 +278,8 @@ describe("presets", () => {
       );
       expect(stopwatch).toBeTruthy();
       expect(stopwatch?.config.type).toBe(TimerType.STOPWATCH);
-      expect(stopwatch?.config.timeLimit).toBe(600);
-      expect(stopwatch?.config.completionMessage).toBe("Time limit reached");
+      expect((stopwatch?.config as StopwatchConfig).timeLimit).toBe(600);
+      expect((stopwatch?.config as StopwatchConfig).completionMessage).toBe("Time limit reached");
       expect(stopwatch?.category).toBe(TimerCategory.CARDIO);
     });
 
@@ -273,8 +287,8 @@ describe("presets", () => {
       const ratio = PREDEFINED_STYLES.find((style) => style.name === "Work/Rest (1:1 ratio)");
       expect(ratio).toBeTruthy();
       expect(ratio?.config.type).toBe(TimerType.WORKREST);
-      expect(ratio?.config.ratio).toBe(1.0);
-      expect(ratio?.config.restMode).toBe("RATIO");
+      expect((ratio?.config as WorkRestConfig).ratio).toBe(1.0);
+      expect((ratio?.config as WorkRestConfig).restMode).toBe("ratio");
       expect(ratio?.category).toBe(TimerCategory.STRENGTH);
     });
 
@@ -282,8 +296,8 @@ describe("presets", () => {
       const fixed = PREDEFINED_STYLES.find((style) => style.name === "Work/Rest (Fixed 30s rest)");
       expect(fixed).toBeTruthy();
       expect(fixed?.config.type).toBe(TimerType.WORKREST);
-      expect(fixed?.config.restMode).toBe("FIXED");
-      expect(fixed?.config.fixedRestDuration).toBe(30);
+      expect((fixed?.config as WorkRestConfig).restMode).toBe("fixed");
+      expect((fixed?.config as WorkRestConfig).fixedRestDuration).toBe(30);
       expect(fixed?.category).toBe(TimerCategory.STRENGTH);
     });
   });

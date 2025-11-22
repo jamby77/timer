@@ -84,13 +84,13 @@ export enum TimerCategory {
 }
 
 // Predefined timer style
-export interface PredefinedStyle {
+export interface PredefinedStyle<T extends AnyTimerConfig> {
   id: string;
   name: string;
   description: string;
   category: TimerCategory;
   isBuiltIn: boolean;
-  config: AnyTimerConfig;
+  config: T;
 }
 
 // Recent timer entry
@@ -114,8 +114,8 @@ export interface TimerTypeSelectorProps {
 }
 
 export interface PredefinedStylesProps {
-  styles: PredefinedStyle[];
-  onSelectStyle: (style: PredefinedStyle) => void;
+  styles: PredefinedStyle<AnyTimerConfig>[];
+  onSelectStyle: (style: PredefinedStyle<AnyTimerConfig>) => void;
   onStartTimer: (config: AnyTimerConfig) => void;
 }
 

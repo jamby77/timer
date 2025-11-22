@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { PlayIcon } from "@/icons/PlayIcon";
+import PlayIcon from "@/icons/PlayIcon";
 import {
   formatDuration,
   getConfigSummary,
   getTimerCategoryDisplayName,
 } from "@/lib/configure/utils";
 import { PredefinedStylesProps, TimerCategory } from "@/types/configure";
-import cx from "clsx";
 
 import { Button } from "@/components/Button";
 import { Card } from "@/components/UI/Card";
@@ -91,8 +90,8 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
   };
 
   return (
-    <Card
-      className="group cursor-pointer transition-shadow hover:shadow-md"
+    <div
+      className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow hover:shadow-md"
       onClick={handleCardClick}
     >
       <div className="mb-4">
@@ -113,6 +112,6 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
           Start
         </Button>
       </div>
-    </Card>
+    </div>
   );
 };

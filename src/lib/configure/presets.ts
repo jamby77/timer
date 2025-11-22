@@ -111,7 +111,7 @@ const WORKREST_FIXED_CONFIG: WorkRestConfig = {
   // Note: createdAt and lastUsed will be set when timer is actually used
 } as WorkRestConfig;
 
-export const PREDEFINED_STYLES: PredefinedStyle[] = [
+export const PREDEFINED_STYLES: PredefinedStyle<AnyTimerConfig>[] = [
   {
     id: TimerConfigHash.generateTimerId(TABATA_CONFIG),
     name: "Tabata",
@@ -179,32 +179,32 @@ export const PREDEFINED_STYLES: PredefinedStyle[] = [
 ];
 
 // Helper functions
-export const getPredefinedStyles = (): PredefinedStyle[] => {
+export const getPredefinedStyles = (): PredefinedStyle<AnyTimerConfig>[] => {
   return PREDEFINED_STYLES;
 };
 
-export const getPredefinedStyleById = (id: string): PredefinedStyle | undefined => {
+export const getPredefinedStyleById = (id: string): PredefinedStyle<AnyTimerConfig> | undefined => {
   return PREDEFINED_STYLES.find((style) => style.id === id);
 };
 
-export const getPredefinedStylesByCategory = (category: TimerCategory): PredefinedStyle[] => {
+export const getPredefinedStylesByCategory = (category: TimerCategory): PredefinedStyle<AnyTimerConfig>[] => {
   return PREDEFINED_STYLES.filter((style) => style.category === category);
 };
 
 // Helper function to create a predefined style with generated ID
-export const createPredefinedStyle = (
+export const createPredefinedStyle = <T extends AnyTimerConfig>(
   id: string,
   name: string,
   description: string,
   category: TimerCategory,
-  config: Omit<AnyTimerConfig, "id" | "createdAt" | "lastUsed">,
-): PredefinedStyle => {
-  const fullConfig: AnyTimerConfig = {
+  config: Omit<T, "id" | "createdAt" | "lastUsed">,
+): PredefinedStyle<T> => {
+  const fullConfig: T = {
     ...config,
     id, // Include the provided ID
     createdAt: new Date(),
     lastUsed: new Date(),
-  } as AnyTimerConfig;
+  } as T;
 
   return {
     id: TimerConfigHash.generateTimerId(fullConfig),

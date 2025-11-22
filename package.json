@@ -10,6 +10,7 @@
     "sb": "storybook dev -p 6006",
     "build-sb": "storybook build",
     "test": "vitest",
+    "test:unit": "vitest --config vitest.unit.config.ts",
     "test:ui": "vitest --ui",
     "test:run": "vitest run"
   },
@@ -49,6 +50,7 @@
     "storybook": "^10.0.8",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.0.13"
   },
   "imports": {

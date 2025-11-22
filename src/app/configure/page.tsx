@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { getPredefinedStyles } from "@/lib/configure/presets";
 import { storage } from "@/lib/configure/storage";
-import { PredefinedStyle, TimerConfig } from "@/types/configure";
+import { TimerConfigHash } from "@/lib/timer/TimerConfigHash";
+import { AnyTimerConfig, PredefinedStyle, RecentTimer, TimerType } from "@/types/configure";
 import { useRouter } from "next/navigation";
 
 import { PredefinedStyles } from "@/components/configure/PredefinedStyles";
@@ -12,9 +13,7 @@ import { TimerConfigForm } from "@/components/configure/TimerConfigForm";
 import { TimerTypeSelector } from "@/components/configure/TimerTypeSelector";
 
 export default function ConfigurePage() {
-  const [recentTimers, setRecentTimers] = useState<
-    Array<{ id: string; config: TimerConfig; startedAt: Date }>
-  >([]);
+  const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([]);
   const [selectedType, setSelectedType] = useState<TimerType | null>(null);
   const [selectedPredefined, setSelectedPredefined] = useState<PredefinedStyle | null>(null);
   const router = useRouter();
@@ -25,8 +24,8 @@ export default function ConfigurePage() {
     setRecentTimers(timers);
   }, []);
 
-  const handleStartTimer = (config: TimerConfig, isPredefined: boolean = false) => {
-    let finalConfig: TimerConfig;
+  const handleStartTimer = (config: AnyTimerConfig, isPredefined: boolean = false) => {
+    let finalConfig: AnyTimerConfig;
 
     if (isPredefined) {
       // For predefined configs: copy and add runtime timestamps
