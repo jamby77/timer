@@ -1,5 +1,13 @@
 import { TimerStep } from "@/lib/timer/TimerManager";
 
+export enum TimerType {
+  COUNTDOWN = "COUNTDOWN",
+  STOPWATCH = "STOPWATCH", 
+  INTERVAL = "INTERVAL",
+  WORKREST = "WORKREST",
+  COMPLEX = "COMPLEX",
+}
+
 export enum TimerState {
   Idle = "idle",
   Running = "running",
