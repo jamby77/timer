@@ -100,10 +100,14 @@ export const WorkRestFixed = meta.story({
     } as AnyTimerConfig;
     return <TimerConfigForm {...args} initialConfig={initialConfig} />;
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Configure Work/Rest Ratio Timer");
-    expect(canvasElement.textContent).toContain("Fixed Rest Duration (seconds)");
-    expect(canvasElement.textContent).not.toContain("Work/Rest Ratio");
+  play: async ({ canvas }) => {
+    const title = canvas.getByRole('heading', { name: /configure work/i });
+    const fixedRestLabel = canvas.getByLabelText(/fixed rest duration/i);
+    const ratioOption = canvas.queryByRole('option', { name: /work\/rest ratio/i });
+    
+    expect(title).toBeInTheDocument();
+    expect(fixedRestLabel).toBeInTheDocument();
+    expect(ratioOption).not.toBeInTheDocument();
   },
 });
 
