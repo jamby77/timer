@@ -1,4 +1,4 @@
-import { Interval } from "@/components/Interval";
+import { Interval } from "@/components/display/Interval";
 
 export default function Home() {
   return (

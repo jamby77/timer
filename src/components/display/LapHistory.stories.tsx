@@ -1,7 +1,7 @@
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
-import { LapHistory } from "@/components/LapHistory";
+import { LapHistory } from "@/components/display/LapHistory";
 
 const meta = preview.meta({
   component: LapHistory,

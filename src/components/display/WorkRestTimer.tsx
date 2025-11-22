@@ -1,11 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import PauseIcon from "@/icons/PauseIcon";
-import PlayIcon from "@/icons/PlayIcon";
-import RepeatIcon from "@/icons/Repeat";
-import SkipIcon from "@/icons/SkipIcon";
-import StopIcon from "@/icons/StopIcon";
 import { getStatusMessage } from "@/lib/timer";
 import { getDisplayData } from "@/lib/timer/displayUtils";
 import { TimerPhase, TimerState } from "@/lib/timer/types";
@@ -13,9 +8,16 @@ import { useLapHistory } from "@/lib/timer/useLapHistory";
 import { useWorkRestTimer } from "@/lib/timer/useWorkRestTimer";
 import cx from "clsx";
 
+import {
+  BaseButton,
+  PauseButton,
+  ResetButton,
+  SkipButton,
+  StartButton,
+  StopButton,
+} from "@/components/ui/timer-buttons";
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
-import { BaseButton } from "./TimerButton";
 
 interface WorkRestTimerProps {
   className?: string;
@@ -150,66 +152,32 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         {/* Main Control Buttons */}
         <div className="mb-4 flex gap-4">
           {state.phase === TimerPhase.Idle || state.state === TimerState.Paused ? (
-            <BaseButton
+            <StartButton
               onClick={state.phase === TimerPhase.Idle ? actions.startWork : actions.resumeWork}
               title={state.phase === TimerPhase.Idle ? "Start work" : "Resume work"}
               label={state.phase === TimerPhase.Idle ? "Start work" : "Resume work"}
-              className="bg-green-500 hover:bg-green-600 focus:ring-green-500"
-            >
-              <PlayIcon className="h-6 w-6" />
-            </BaseButton>
+            />
           ) : state.phase === TimerPhase.Work && state.state === TimerState.Running ? (
-            <BaseButton
-              onClick={actions.pauseWork}
-              title="Pause work"
-              label="Pause work"
-              className="bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500"
-            >
-              <PauseIcon className="h-6 w-6" />
-            </BaseButton>
+            <PauseButton onClick={actions.pauseWork} title="Pause work" label="Pause work" />
           ) : null}
 
           {state.phase === TimerPhase.Work && (
-            <BaseButton
-              onClick={handleStop}
-              title="Stop work"
-              label="Stop work"
-              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
-            >
-              <StopIcon className="h-6 w-6" />
-            </BaseButton>
+            <StopButton onClick={handleStop} title="Stop work" label="Stop work" />
           )}
 
           {state.phase === TimerPhase.Rest && (
             <>
-              <BaseButton
-                onClick={handleSkipRest}
-                title="Skip rest"
-                label="Skip rest"
-                className="bg-orange-500 hover:bg-orange-600 focus:ring-orange-500"
-              >
-                <SkipIcon className="h-6 w-6" />
-              </BaseButton>
-              <BaseButton
-                onClick={handleStop}
-                title="Stop rest"
-                label="Stop rest"
-                className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
-              >
-                <StopIcon className="h-6 w-6" />
-              </BaseButton>
+              <SkipButton onClick={handleSkipRest} title="Skip rest" label="Skip rest" />
+              <StopButton onClick={handleStop} title="Stop rest" label="Stop rest" />
             </>
           )}
 
-          <BaseButton
+          <ResetButton
             onClick={handleRestart}
             title="Restart"
             label="Restart"
-            className="bg-blue-500 hover:bg-blue-600 focus:ring-blue-500"
             disabled={state.phase === TimerPhase.Idle}
-          >
-            <RepeatIcon className="h-6 w-6" />
-          </BaseButton>
+          />
         </div>
 
         {/* Ratio Controls */}

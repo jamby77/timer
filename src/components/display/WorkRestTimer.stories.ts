@@ -1,5 +1,6 @@
 import preview from "#.storybook/preview";
-import { WorkRestTimer } from "@/components/WorkRestTimer";
+
+import { WorkRestTimer } from "@/components/display/WorkRestTimer";
 
 const meta = preview.meta({
   component: WorkRestTimer,

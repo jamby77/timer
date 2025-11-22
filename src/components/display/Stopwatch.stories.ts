@@ -1,5 +1,6 @@
 import preview from "#.storybook/preview";
-import { Stopwatch } from "@/components/Stopwatch";
+
+import { Stopwatch } from "@/components/display/Stopwatch";
 
 const meta = preview.meta({
   component: Stopwatch,

@@ -1,6 +1,6 @@
 "use client";
 
-import { WorkRestTimer } from "@/components/WorkRestTimer";
+import { WorkRestTimer } from "@/components/display/WorkRestTimer";
 
 export default function WorkRestTestPage() {
   return (

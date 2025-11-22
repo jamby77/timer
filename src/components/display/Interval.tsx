@@ -1,11 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import PauseIcon from "@/icons/PauseIcon";
-import PlayIcon from "@/icons/PlayIcon";
-import RepeatIcon from "@/icons/Repeat";
-import SkipIcon from "@/icons/SkipIcon";
-import StopIcon from "@/icons/StopIcon";
 import { formatTime, getStatusMessage } from "@/lib/timer";
 import { TimerState, type IntervalConfig } from "@/lib/timer/types";
 import { useIntervalTimer } from "@/lib/timer/useIntervalTimer";
@@ -13,9 +8,15 @@ import { useLapHistory } from "@/lib/timer/useLapHistory";
 import cx from "clsx";
 
 import { Progress } from "@/components/ui/progress";
+import {
+  PauseButton,
+  ResetButton,
+  SkipButton,
+  StartButton,
+  StopButton,
+} from "@/components/ui/timer-buttons";
 import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
-import { BaseButton } from "./TimerButton";
 
 interface IntervalProps {
   /** Configuration for the interval timer */
@@ -97,50 +98,31 @@ export function Interval({ intervalConfig }: IntervalProps) {
         />
         <div className="flex items-center justify-center gap-4">
           {showPlayButton ? (
-            <BaseButton
+            <StartButton
               onClick={start}
               title={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
               label={timerState === TimerState.Paused ? "Resume intervals" : "Start intervals"}
-              className="bg-tm-play hover:bg-tm-play/80 focus:ring-tm-play"
-            >
-              <PlayIcon className="h-6 w-6" />
-            </BaseButton>
+            />
           ) : (
-            <BaseButton
-              onClick={pause}
-              title="Pause intervals"
-              label="Pause intervals"
-              className="bg-tm-pause hover:bg-tm-pause/80 focus:ring-tm-pause"
-            >
-              <PauseIcon className="h-6 w-6" />
-            </BaseButton>
+            <PauseButton onClick={pause} title="Pause intervals" label="Pause intervals" />
           )}
-          <BaseButton
+          <SkipButton
             onClick={skipCurrentStep}
             disabled={timerState !== TimerState.Running}
             title="Skip current interval"
             label="Skip current interval"
-            className="bg-tm-skip hover:bg-tm-skip/80 focus:ring-tm-skip disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
-          >
-            <SkipIcon className="h-6 w-6" />
-          </BaseButton>
-          <BaseButton
+          />
+          <StopButton
             onClick={handleStop}
             disabled={timerState !== TimerState.Running}
             title="Stop intervals"
             label="Stop intervals"
-            className="bg-tm-stop hover:bg-tm-stop/80 focus:ring-tm-stop disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
-          >
-            <StopIcon className="h-6 w-6" />
-          </BaseButton>
-          <BaseButton
+          />
+          <ResetButton
             onClick={handleRestart}
             title="Restart intervals"
             label="Restart intervals"
-            className="bg-tm-reset hover:bg-tm-reset/80 focus:ring-tm-reset"
-          >
-            <RepeatIcon className="h-6 w-6" />
-          </BaseButton>
+          />
         </div>
         <LapHistory laps={laps} onClearHistory={clearHistory} />
       </Card>

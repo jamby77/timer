@@ -1,9 +1,9 @@
-import preview from "#.storybook/preview";
 import { TimerState } from "@/lib/timer";
+import preview from "#.storybook/preview";
 import { fn } from "storybook/test";
 
-import { Card } from "@/components/Card";
-import TimerButton from "@/components/TimerButton";
+import { Card } from "@/components/display/Card";
+import TimerButton from "@/components/display/TimerButton";
 
 const meta = preview.meta({ component: Card });
 export const WithButtons = meta.story({

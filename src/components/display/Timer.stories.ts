@@ -1,7 +1,7 @@
 import preview from "#.storybook/preview";
 import { fn } from "storybook/test";
 
-import { Timer } from "@/components/Timer";
+import { Timer } from "@/components/display/Timer";
 
 const meta = preview.meta({
   component: Timer,
