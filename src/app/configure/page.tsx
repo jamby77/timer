@@ -15,7 +15,8 @@ import { TimerTypeSelector } from "@/components/configure/TimerTypeSelector";
 export default function ConfigurePage() {
   const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([]);
   const [selectedType, setSelectedType] = useState<TimerType | null>(null);
-  const [selectedPredefined, setSelectedPredefined] = useState<PredefinedStyle | null>(null);
+  const [selectedPredefined, setSelectedPredefined] =
+    useState<PredefinedStyle<AnyTimerConfig> | null>(null);
   const router = useRouter();
 
   useEffect(() => {

@@ -1,7 +1,7 @@
-import { TimerType } from "@/lib/timer/types";
+import { TimerType, WorkRestMode, TimerCategory } from "@/lib/enums";
 
-// Re-export TimerType for convenience
-export { TimerType };
+// Re-export enums for backward compatibility
+export { TimerType, WorkRestMode, TimerCategory };
 
 // Timer configuration base interface
 export interface TimerConfig {
@@ -34,11 +34,6 @@ export interface IntervalConfig extends TimerConfig {
   restLabel?: string;
   skipLastRest?: boolean;
   countdownBeforeStart?: number; // seconds
-}
-
-export enum WorkRestMode {
-  RATIO = "ratio",
-  FIXED = "fixed",
 }
 
 export interface WorkRestConfig extends TimerConfig {
@@ -75,13 +70,6 @@ export type AnyTimerConfig =
   | ComplexConfig;
 
 // Timer categories for organization
-export enum TimerCategory {
-  CARDIO = "cardio",
-  STRENGTH = "strength",
-  FLEXIBILITY = "flexibility",
-  SPORTS = "sports",
-  CUSTOM = "custom",
-}
 
 // Predefined timer style
 export interface PredefinedStyle<T extends AnyTimerConfig> {

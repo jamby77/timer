@@ -1,26 +1,8 @@
 import { TimerStep } from "@/lib/timer/TimerManager";
+import { TimerType, TimerState, TimerPhase } from "@/lib/enums";
 
-export enum TimerType {
-  COUNTDOWN = "COUNTDOWN",
-  STOPWATCH = "STOPWATCH", 
-  INTERVAL = "INTERVAL",
-  WORKREST = "WORKREST",
-  COMPLEX = "COMPLEX",
-}
-
-export enum TimerState {
-  Idle = "idle",
-  Running = "running",
-  Paused = "paused",
-  Completed = "completed",
-}
-
-export enum TimerPhase {
-  Idle = "idle",
-  Work = "work",
-  Rest = "rest",
-  Completed = "completed",
-}
+// Re-export enums for backward compatibility
+export { TimerType, TimerState, TimerPhase };
 
 export interface WorkRestTimerState {
   phase: TimerPhase;

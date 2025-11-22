@@ -2,15 +2,10 @@
 
 import { useState } from "react";
 import PlayIcon from "@/icons/PlayIcon";
-import {
-  formatDuration,
-  getConfigSummary,
-  getTimerCategoryDisplayName,
-} from "@/lib/configure/utils";
+import { getConfigSummary, getTimerCategoryDisplayName } from "@/lib/configure/utils";
 import { PredefinedStylesProps, TimerCategory } from "@/types/configure";
 
-import { Button } from "@/components/Button";
-import { Card } from "@/components/UI/Card";
+import { Button, CardContainer } from "@/components/ui";
 
 export const PredefinedStyles = ({
   styles,
@@ -34,7 +29,7 @@ export const PredefinedStyles = ({
       : styles.filter((style) => style.category === selectedCategory);
 
   return (
-    <Card>
+    <CardContainer>
       <div className="mb-6">
         <h2 className="mb-4 text-xl font-semibold text-gray-900">Predefined Styles</h2>
 
@@ -69,7 +64,7 @@ export const PredefinedStyles = ({
           ))}
         </div>
       )}
-    </Card>
+    </CardContainer>
   );
 };
 

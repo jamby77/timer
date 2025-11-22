@@ -1,4 +1,4 @@
-import { TimerCategory, TimerType } from "@/types/configure";
+import { CountdownConfig, IntervalConfig, StopwatchConfig, WorkRestConfig, ComplexConfig, TimerCategory, TimerType } from "@/types/configure";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -6,12 +6,12 @@ import {
   configToUrlParams,
   formatDuration,
   formatRelativeTime,
-  generateTimerId,
   getConfigSummary,
   getTimerCategoryDisplayName,
   getTimerTypeDisplayName,
   validateTimerConfig,
 } from "./utils";
+import { TimerConfigHash } from "@/lib/timer/TimerConfigHash";
 
 describe("utils", () => {
   describe("formatDuration", () => {
@@ -76,7 +76,7 @@ describe("utils", () => {
         completionMessage: "Done!",
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as CountdownConfig;
 
       expect(getConfigSummary(config)).toBe("5m countdown");
     });
@@ -89,7 +89,7 @@ describe("utils", () => {
         timeLimit: 600,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as StopwatchConfig;
 
       const configWithoutLimit = {
         id: "test",
@@ -97,7 +97,7 @@ describe("utils", () => {
         type: TimerType.STOPWATCH,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as StopwatchConfig;
 
       expect(getConfigSummary(configWithLimit)).toBe("Stopwatch with 10m limit");
       expect(getConfigSummary(configWithoutLimit)).toBe("Open-ended stopwatch");
@@ -113,7 +113,7 @@ describe("utils", () => {
         intervals: 8,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as IntervalConfig;
 
       expect(getConfigSummary(config)).toBe("8 rounds: 20s work / 10s rest");
     });
@@ -126,10 +126,10 @@ describe("utils", () => {
         ratio: 2.0,
         maxWorkTime: 300,
         maxRounds: 10,
-        restMode: "RATIO",
+        restMode: "ratio",
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as WorkRestConfig;
 
       const fixedConfig = {
         id: "test",
@@ -138,11 +138,11 @@ describe("utils", () => {
         ratio: 2.0,
         maxWorkTime: 300,
         maxRounds: 10,
-        restMode: "FIXED",
+        restMode: "fixed",
         fixedRestDuration: 30,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as WorkRestConfig;
 
       expect(getConfigSummary(ratioConfig)).toBe("Work/rest with 2:1 ratio");
       expect(getConfigSummary(fixedConfig)).toBe("Work/rest with 30s fixed rest");
@@ -159,7 +159,7 @@ describe("utils", () => {
         ],
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as ComplexConfig;
 
       expect(getConfigSummary(config)).toBe("2 phase complex timer");
     });
@@ -174,7 +174,7 @@ describe("utils", () => {
         duration: 300,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as CountdownConfig;
 
       const invalidConfig = {
         id: "",
@@ -183,7 +183,7 @@ describe("utils", () => {
         duration: -1,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as CountdownConfig;
 
       expect(validateTimerConfig(validConfig)).toHaveLength(0);
       expect(validateTimerConfig(invalidConfig)).toContain("Timer name is required");
@@ -201,7 +201,7 @@ describe("utils", () => {
         intervals: 8,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as IntervalConfig;
 
       const invalidConfig = {
         id: "test",
@@ -212,7 +212,7 @@ describe("utils", () => {
         intervals: 0,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as IntervalConfig;
 
       expect(validateTimerConfig(validConfig)).toHaveLength(0);
       expect(validateTimerConfig(invalidConfig)).toContain("Work duration must be greater than 0");
@@ -230,10 +230,10 @@ describe("utils", () => {
         ratio: 2.0,
         maxWorkTime: 300,
         maxRounds: 10,
-        restMode: "RATIO",
+        restMode: "ratio",
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as WorkRestConfig;
 
       const invalidFixedConfig = {
         id: "test",
@@ -242,11 +242,11 @@ describe("utils", () => {
         ratio: 2.0,
         maxWorkTime: 300,
         maxRounds: 10,
-        restMode: "FIXED",
+        restMode: "fixed",
         fixedRestDuration: -1,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as WorkRestConfig;
 
       expect(validateTimerConfig(validConfig)).toHaveLength(0);
       expect(validateTimerConfig(invalidFixedConfig)).toContain(
@@ -275,7 +275,7 @@ describe("utils", () => {
     });
   });
 
-  describe("generateTimerId", () => {
+  describe("TimerConfigHash.generateTimerId", () => {
     it("generates consistent IDs for same config", () => {
       const config = {
         id: "test",
@@ -284,13 +284,13 @@ describe("utils", () => {
         duration: 300,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as CountdownConfig;
 
-      const id1 = generateTimerId(config);
-      const id2 = generateTimerId(config);
+      const id1 = TimerConfigHash.generateTimerId(config);
+      const id2 = TimerConfigHash.generateTimerId(config);
 
       expect(id1).toBe(id2);
-      expect(id1).toMatch(/^[a-zA-Z0-9]{16}$/);
+      expect(id1).toMatch(/^timer_[a-f0-9]+$/);
     });
 
     it("generates different IDs for different configs", () => {
@@ -299,21 +299,21 @@ describe("utils", () => {
         name: "Test Timer 1",
         type: TimerType.COUNTDOWN,
         duration: 300,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-      };
+        createdAt: new Date("2023-01-01T00:00:00Z"),
+        lastUsed: new Date("2023-01-01T00:00:00Z"),
+      } as CountdownConfig;
 
       const config2 = {
         id: "test",
         name: "Test Timer 2",
         type: TimerType.COUNTDOWN,
         duration: 300,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-      };
+        createdAt: new Date("2023-01-01T00:00:00Z"),
+        lastUsed: new Date("2023-01-01T00:00:00Z"),
+      } as CountdownConfig;
 
-      const id1 = generateTimerId(config1);
-      const id2 = generateTimerId(config2);
+      const id1 = TimerConfigHash.generateTimerId(config1);
+      const id2 = TimerConfigHash.generateTimerId(config2);
 
       expect(id1).not.toBe(id2);
     });
@@ -329,7 +329,7 @@ describe("utils", () => {
         completionMessage: "Done!",
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as CountdownConfig;
 
       const params = configToUrlParams(config);
       expect(params).toContain("id=test");
@@ -352,7 +352,7 @@ describe("utils", () => {
         skipLastRest: true,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as IntervalConfig;
 
       const params = configToUrlParams(config);
       expect(params).toContain("workDuration=20");
@@ -375,7 +375,7 @@ describe("utils", () => {
         intervals: 8,
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      } as IntervalConfig;
 
       const clonedConfig = cloneTimerConfig(originalConfig);
 
@@ -383,8 +383,8 @@ describe("utils", () => {
       expect(clonedConfig).not.toBe(originalConfig);
 
       // Modify original and ensure clone is unaffected
-      originalConfig.workDuration = 30;
-      expect(clonedConfig.workDuration).toBe(20);
+      (originalConfig as IntervalConfig).workDuration = 30;
+      expect((clonedConfig as IntervalConfig).workDuration).toBe(20);
     });
   });
 });

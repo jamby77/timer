@@ -1,4 +1,4 @@
-import { AnyTimerConfig } from "@/types/configure";
+import { AnyTimerConfig, WorkRestMode } from "@/types/configure";
 
 export class TimerConfigHash {
   /**
@@ -68,7 +68,7 @@ export class TimerConfigHash {
         normalized.maxWorkTime = config.maxWorkTime;
         normalized.maxRounds = config.maxRounds;
         normalized.restMode = config.restMode;
-        if (config.restMode === "FIXED" && config.fixedRestDuration) {
+        if (config.restMode === WorkRestMode.FIXED && config.fixedRestDuration) {
           normalized.fixedRestDuration = config.fixedRestDuration;
         }
         if (config.countdownBeforeStart) {

@@ -1,14 +1,10 @@
 import { TimerState } from "@/lib/timer/types";
+import { StepState } from "@/lib/enums";
 
 import { Timer } from "./Timer";
 
-export enum StepState {
-  Start = "start",
-  Pause = "pause",
-  Resume = "resume",
-  Complete = "complete",
-  Skip = "skip",
-}
+// Re-export StepState for backward compatibility
+export { StepState };
 
 export interface StepStateData {
   step: TimerStep;

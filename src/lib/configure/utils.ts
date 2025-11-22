@@ -1,4 +1,4 @@
-import { AnyTimerConfig, TimerCategory, TimerType } from "@/types/configure";
+import { AnyTimerConfig, TimerCategory, TimerType, WorkRestMode } from "@/types/configure";
 
 // Configuration summary generator
 export const getConfigSummary = (config: AnyTimerConfig): string => {
@@ -12,7 +12,7 @@ export const getConfigSummary = (config: AnyTimerConfig): string => {
     case TimerType.INTERVAL:
       return `${config.intervals} rounds: ${formatDuration(config.workDuration)} work / ${formatDuration(config.restDuration)} rest`;
     case TimerType.WORKREST:
-      if (config.restMode === "FIXED") {
+      if (config.restMode === WorkRestMode.FIXED) {
         return `Work/rest with ${formatDuration(config.fixedRestDuration!)} fixed rest`;
       }
       return `Work/rest with ${config.ratio}:1 ratio`;
@@ -59,14 +59,6 @@ export const formatRelativeTime = (date: Date): string => {
   if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
 
   return date.toLocaleDateString();
-};
-
-// Generate timer ID from configuration
-export const generateTimerId = (config: AnyTimerConfig): string => {
-  const baseString = `${config.type}-${config.name}-${JSON.stringify(config)}`;
-  return btoa(baseString)
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .substring(0, 16);
 };
 
 // Validate timer configuration
@@ -127,7 +119,7 @@ export const validateTimerConfig = (config: AnyTimerConfig): string[] => {
         errors.push("Maximum rounds must be greater than 0");
       }
       if (
-        config.restMode === "FIXED" &&
+        config.restMode === WorkRestMode.FIXED &&
         (!config.fixedRestDuration || config.fixedRestDuration <= 0)
       ) {
         errors.push("Fixed rest duration must be greater than 0");
@@ -245,5 +237,13 @@ export const configToUrlParams = (config: AnyTimerConfig): string => {
 
 // Deep clone timer configuration
 export const cloneTimerConfig = (config: AnyTimerConfig): AnyTimerConfig => {
-  return JSON.parse(JSON.stringify(config));
+  const cloned = JSON.parse(JSON.stringify(config));
+  // Convert date strings back to Date objects
+  if (cloned.createdAt) {
+    cloned.createdAt = new Date(cloned.createdAt);
+  }
+  if (cloned.lastUsed) {
+    cloned.lastUsed = new Date(cloned.lastUsed);
+  }
+  return cloned;
 };

@@ -1,12 +1,41 @@
-import { AnyTimerConfig, TimerType } from "@/types/configure";
-import { beforeEach, describe, expect, it } from "vitest";
+import { AnyTimerConfig, CountdownConfig, TimerType } from "@/types/configure";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { storage } from "./storage";
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+    key: vi.fn((index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
+  };
+})();
+
+// Setup global mocks
+vi.stubGlobal("localStorage", localStorageMock);
 
 describe("Storage Utilities", () => {
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
+    vi.clearAllMocks();
   });
 
   describe("getRecentTimers", () => {
@@ -122,7 +151,7 @@ describe("Storage Utilities", () => {
       const timers = storage.getRecentTimers();
       expect(timers).toHaveLength(1);
       expect(timers[0].config.name).toBe("Updated Timer");
-      expect(timers[0].config.duration).toBe(600);
+      expect((timers[0].config as CountdownConfig).duration).toBe(600);
     });
 
     it("limits number of recent timers", () => {
@@ -324,7 +353,7 @@ describe("Storage Utilities", () => {
       localStorage.setItem(
         "timer_valid",
         JSON.stringify({
-          id: "valid-timer",
+          id: "valid",
           name: "Valid Timer",
           type: TimerType.COUNTDOWN,
           duration: 300,
@@ -335,7 +364,7 @@ describe("Storage Utilities", () => {
 
       const allTimers = storage.getAllStoredTimers();
       expect(allTimers).toHaveLength(1);
-      expect(allTimers[0].id).toBe("valid-timer");
+      expect(allTimers[0].id).toBe("valid");
     });
   });
 

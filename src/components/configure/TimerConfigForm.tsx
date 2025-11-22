@@ -3,19 +3,17 @@
 import { useState } from "react";
 import PlayIcon from "@/icons/PlayIcon";
 import { validateTimerConfig } from "@/lib/configure/utils";
-import {
+import type {
   AnyTimerConfig,
   CountdownConfig,
   IntervalConfig,
   StopwatchConfig,
   TimerConfigFormProps,
-  TimerType,
   WorkRestConfig,
-  WorkRestMode,
 } from "@/types/configure";
+import { TimerType, WorkRestMode } from "@/types/configure";
 
-import { Button } from "@/components/Button";
-import { Card } from "@/components/UI/Card";
+import { Button, CardContainer } from "@/components/ui";
 
 export const TimerConfigForm = ({
   type,
@@ -108,7 +106,7 @@ export const TimerConfigForm = ({
   };
 
   return (
-    <Card>
+    <CardContainer>
       <div className="mb-6">
         <h2 className="mb-2 text-xl font-semibold text-gray-900">
           Configure {type.charAt(0) + type.slice(1).toLowerCase()} Timer
@@ -170,7 +168,7 @@ export const TimerConfigForm = ({
           )}
         </div>
       </form>
-    </Card>
+    </CardContainer>
   );
 };
 

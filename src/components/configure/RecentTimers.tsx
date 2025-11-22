@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { PlayIcon } from "@/icons/PlayIcon";
-import { Repeat } from "@/icons/Repeat";
-import { formatDuration, formatRelativeTime, getConfigSummary } from "@/lib/configure/utils";
+import PlayIcon from "@/icons/PlayIcon";
+import { formatRelativeTime, getConfigSummary } from "@/lib/configure/utils";
 import { RecentTimersProps } from "@/types/configure";
 import cx from "clsx";
 
-import { Button } from "@/components/Button";
-import { Card } from "@/components/UI/Card";
+import { Button, CardContainer } from "@/components/ui";
 
 export const RecentTimers = ({
   timers,
@@ -27,17 +25,17 @@ export const RecentTimers = ({
 
   if (timers.length === 0) {
     return (
-      <Card>
+      <CardContainer>
         <div className="py-8 text-center">
           <h2 className="mb-2 text-xl font-semibold text-gray-900">No Recent Timers</h2>
           <p className="text-gray-600">Start a timer to see it appear here for quick access.</p>
         </div>
-      </Card>
+      </CardContainer>
     );
   }
 
   return (
-    <Card>
+    <CardContainer>
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Recent Timers</h2>
         {timers.length > 0 && (
@@ -107,7 +105,7 @@ export const RecentTimers = ({
           </Button>
         </div>
       )}
-    </Card>
+    </CardContainer>
   );
 };
 
@@ -128,7 +126,7 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer, compact }: TimerCardPro
   };
 
   return (
-    <Card
+    <CardContainer
       className={cx("group relative transition-shadow hover:shadow-md", {
         "p-4": compact,
         "p-6": !compact,
@@ -162,6 +160,6 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer, compact }: TimerCardPro
           Start
         </Button>
       </div>
-    </Card>
+    </CardContainer>
   );
 };

@@ -1,10 +1,10 @@
 "use client";
 
-import { TimerType } from "@/lib/timer/types";
-import { TimerTypeSelectorProps } from "@/types/configure";
+import { TimerType } from "@/lib/enums";
+import type { TimerTypeSelectorProps } from "@/types/configure";
 import cx from "clsx";
 
-import { Card } from "@/components/UI/Card";
+import { CardContainer } from "@/components/ui";
 
 export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelectorProps) => {
   const TIMER_TYPES = [
@@ -24,11 +24,11 @@ export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelec
   ] as const;
 
   return (
-    <Card>
+    <CardContainer>
       <h2 className="mb-6 text-xl font-semibold text-gray-900">Timer Type</h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {TIMER_TYPES.map(({ type, name, description }) => (
-          <Card
+          <CardContainer
             key={type}
             className={cx("cursor-pointer transition-colors", {
               "ring-2 ring-blue-500": selectedType === type,
@@ -37,9 +37,9 @@ export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelec
           >
             <h3>{name}</h3>
             <p className="text-sm text-gray-600">{description}</p>
-          </Card>
+          </CardContainer>
         ))}
       </div>
-    </Card>
+    </CardContainer>
   );
 };
