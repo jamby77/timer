@@ -7,7 +7,7 @@ import { TIMER_TYPE_LABELS } from "@/lib/enums";
 import type { AnyTimerConfig, TimerConfigFormProps } from "@/types/configure";
 import { TimerType } from "@/types/configure";
 
-import { Button, CardContainer } from "@/components/ui";
+import { ButtonLegacy, CardContainer } from "@/components/ui";
 import { CommonFields } from "./CommonFields";
 import { FormActions } from "./FormActions";
 import { FormErrors } from "./FormErrors";

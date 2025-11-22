@@ -6,7 +6,7 @@ import { formatRelativeTime, getConfigSummary } from "@/lib/configure/utils";
 import { RecentTimersProps } from "@/types/configure";
 import cx from "clsx";
 
-import { Button, CardContainer } from "@/components/ui";
+import { ButtonLegacy, CardContainer } from "@/components/ui";
 
 export const RecentTimers = ({
   timers,
@@ -39,14 +39,14 @@ export const RecentTimers = ({
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">Recent Timers</h2>
         {timers.length > 0 && (
-          <Button
+          <ButtonLegacy
             variant="outline"
             size="sm"
             onClick={onClearAll}
             className="text-red-600 hover:border-red-300 hover:text-red-700"
           >
             Clear All
-          </Button>
+          </ButtonLegacy>
         )}
       </div>
 
@@ -100,9 +100,9 @@ export const RecentTimers = ({
       {/* Load more button */}
       {hasMore && (
         <div className="mt-6 text-center">
-          <Button variant="outline" onClick={handleLoadMore} className="w-full sm:w-auto">
+          <ButtonLegacy variant="outline" onClick={handleLoadMore} className="w-full sm:w-auto">
             Load More ({timers.length - visibleCount} remaining)
-          </Button>
+          </ButtonLegacy>
         </div>
       )}
     </CardContainer>
@@ -155,10 +155,10 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer, compact }: TimerCardPro
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500">{formatRelativeTime(timer.startedAt)}</span>
-        <Button size="sm" onClick={handleStart} className="flex items-center gap-2">
+        <ButtonLegacy size="sm" onClick={handleStart} className="flex items-center gap-2">
           <PlayIcon className="h-4 w-4" />
           Start
-        </Button>
+        </ButtonLegacy>
       </div>
     </CardContainer>
   );

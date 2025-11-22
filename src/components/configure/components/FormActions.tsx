@@ -1,6 +1,6 @@
 import PlayIcon from "@/icons/PlayIcon";
 
-import { Button } from "@/components/ui";
+import { ButtonLegacy } from "@/components/ui";
 
 interface FormActionsProps {
   isPredefined: boolean;
@@ -17,21 +17,21 @@ export const FormActions = ({
 }: FormActionsProps) => {
   return (
     <div className="flex gap-3 pt-4">
-      <Button type="submit" className="flex items-center gap-2">
+      <ButtonLegacy type="submit" className="flex items-center gap-2">
         <PlayIcon className="h-4 w-4" />
         Start Timer
-      </Button>
+      </ButtonLegacy>
 
       {!isPredefined && onSaveAsPredefined && (
-        <Button type="button" variant="outline" onClick={onHandleSave}>
+        <ButtonLegacy type="button" variant="outline" onClick={onHandleSave}>
           Save as Predefined
-        </Button>
+        </ButtonLegacy>
       )}
 
       {onSave && (
-        <Button type="button" variant="outline" onClick={onHandleSave}>
+        <ButtonLegacy type="button" variant="outline" onClick={onHandleSave}>
           Save Changes
-        </Button>
+        </ButtonLegacy>
       )}
     </div>
   );

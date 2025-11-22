@@ -5,7 +5,7 @@ import PlayIcon from "@/icons/PlayIcon";
 import { getConfigSummary, getTimerCategoryDisplayName } from "@/lib/configure/utils";
 import { PredefinedStylesProps, TimerCategory } from "@/types/configure";
 
-import { Button, CardContainer } from "@/components/ui";
+import { ButtonLegacy, CardContainer } from "@/components/ui";
 
 export const PredefinedStyles = ({
   styles,
@@ -36,14 +36,14 @@ export const PredefinedStyles = ({
         {/* Category filter */}
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
-            <Button
+            <ButtonLegacy
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
             >
               {category === "all" ? "All" : getTimerCategoryDisplayName(category)}
-            </Button>
+            </ButtonLegacy>
           ))}
         </div>
       </div>
@@ -102,10 +102,10 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500">{getTimerCategoryDisplayName(style.category)}</span>
-        <Button size="sm" onClick={handleStartClick} className="flex items-center gap-2">
+        <ButtonLegacy size="sm" onClick={handleStartClick} className="flex items-center gap-2">
           <PlayIcon className="h-4 w-4" />
           Start
-        </Button>
+        </ButtonLegacy>
       </div>
     </div>
   );
