@@ -7,6 +7,7 @@ interface LapHistoryProps {
   laps: LapEntry[];
   lastLap?: LapEntry | null;
   bestLap?: LapEntry | null;
+  initialExpanded?: boolean;
   onClearHistory?: () => void;
 }
 
@@ -41,8 +42,14 @@ const ExpandButton = ({
   );
 };
 
-export function LapHistory({ laps, lastLap, bestLap, onClearHistory }: LapHistoryProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function LapHistory({
+  laps,
+  lastLap,
+  bestLap,
+  onClearHistory,
+  initialExpanded = false,
+}: LapHistoryProps) {
+  const [isExpanded, setIsExpanded] = useState(initialExpanded);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -50,7 +57,9 @@ export function LapHistory({ laps, lastLap, bestLap, onClearHistory }: LapHistor
     onClearHistory?.();
     setIsExpanded(false);
   };
-
+  if (laps.length === 0) {
+    return null;
+  }
   return (
     <div
       className={cx("mt-6 w-full transition-all duration-300 ease-in-out", {

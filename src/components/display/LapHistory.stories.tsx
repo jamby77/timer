@@ -9,6 +9,7 @@ const meta = preview.meta({
     laps: { control: "object" },
   },
   args: {
+    laps: [],
     onClearHistory: fn(),
     lastLap: null,
     bestLap: null,
@@ -20,12 +21,12 @@ export const Empty = meta.story({
   args: {
     laps: [],
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toBe("");
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText("Last lap")).not.toBeInTheDocument();
   },
 });
 
-export const Default = meta.story({
+export const SingleLap = meta.story({
   args: {
     lastLap: {
       id: "1",
@@ -45,16 +46,28 @@ export const Default = meta.story({
       },
     ],
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Last lap");
-    expect(canvasElement.textContent).toContain("Best lap");
-    expect(canvasElement.textContent).toContain("01:05.43");
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText("Last lap")).toBeInTheDocument();
+    expect(canvas.queryByText("Best lap")).toBeInTheDocument();
+    expect(canvas.getAllByText("01:05.43").length).toBeGreaterThanOrEqual(2);
+  },
+});
+
+export const SingleLapExpanded = meta.story({
+  args: {
+    initialExpanded: true,
+    ...SingleLap.input.args,
+  },
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText(/Last lap/)).toBeInTheDocument();
+    expect(canvas.queryByText(/Best lap/)).toBeInTheDocument();
+    expect(canvas.getAllByText("01:05.43").length).toBeGreaterThanOrEqual(2);
   },
 });
 
 export const MultipleLaps = meta.story({
-  render: () => {
-    const laps = [
+  args: {
+    laps: [
       {
         id: "1",
         lapTime: 65432,
@@ -70,35 +83,79 @@ export const MultipleLaps = meta.story({
         lapTime: 58900,
         timestamp: now,
       },
-    ];
+    ],
+  },
+  render: (args) => {
+    const laps = args.laps;
     const bestLap = laps.reduce((best, lap) => {
       if (!best) return lap;
       return lap.lapTime < best.lapTime ? lap : best;
     });
     return <LapHistory laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Last lap");
-    expect(canvasElement.textContent).toContain("Best lap");
-    expect(canvasElement.textContent).toContain("00:58.90");
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText("Last lap")).toBeInTheDocument();
+    expect(canvas.queryByText("Best lap")).toBeInTheDocument();
+    expect(canvas.getAllByText("00:58.90").length).toBeGreaterThanOrEqual(2);
+  },
+});
+
+export const MultipleLapsExpanded = meta.story({
+  args: {
+    initialExpanded: true,
+    ...MultipleLaps.input.args,
+  },
+  render: (args) => {
+    const laps = args.laps;
+    const bestLap = laps.reduce((best, lap) => {
+      if (!best) return lap;
+      return lap.lapTime < best.lapTime ? lap : best;
+    });
+    return <LapHistory {...args} laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
+  },
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText(/Last lap/)).toBeInTheDocument();
+    expect(canvas.queryByText(/Best lap/)).toBeInTheDocument();
+    expect(canvas.getAllByText("00:58.90").length).toBeGreaterThanOrEqual(2);
   },
 });
 
 export const ManyLaps = meta.story({
-  render: () => {
-    const laps = Array.from({ length: 10 }, (_, i) => ({
+  args: {
+    laps: Array.from({ length: 10 }, (_, i) => ({
       id: String(i + 1),
       lapTime: 60000 + Math.random() * 20000,
       timestamp: now - (10 - i) * 1000,
-    }));
+    })),
+  },
+  render: (args) => {
+    const laps = args.laps;
     const bestLap = laps.reduce((best, lap) => {
       if (!best) return lap;
       return lap.lapTime < best.lapTime ? lap : best;
     });
     return <LapHistory laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Last lap");
-    expect(canvasElement.textContent).toContain("Best lap");
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText("Last lap")).toBeInTheDocument();
+    expect(canvas.queryByText("Best lap")).toBeInTheDocument();
+  },
+});
+export const ManyLapsExpanded = meta.story({
+  args: {
+    initialExpanded: true,
+    ...ManyLaps.input.args,
+  },
+  render: (args) => {
+    const laps = args.laps;
+    const bestLap = laps.reduce((best, lap) => {
+      if (!best) return lap;
+      return lap.lapTime < best.lapTime ? lap : best;
+    });
+    return <LapHistory {...args} laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />;
+  },
+  play: async ({ canvas }) => {
+    expect(canvas.queryByText("Last lap")).toBeInTheDocument();
+    expect(canvas.queryByText("Best lap")).toBeInTheDocument();
   },
 });
