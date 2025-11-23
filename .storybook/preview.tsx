@@ -29,7 +29,7 @@ export default definePreview({
   ],
   parameters: {
     docs: {
-      theme: themes.dark,
+      theme: themes.normal,
     },
     layout: "centered",
     controls: {

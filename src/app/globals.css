@@ -55,6 +55,35 @@
   --color-tm-pr-rest-bg: var(--tm-pr-rest-bg);
 }
 
+.animated-border-card {
+  background:
+          linear-gradient(45deg, var(--color-slate-900), var(--color-slate-800) 50%, var(--color-slate-900)) padding-box,
+          conic-gradient(
+                  from var(--border-angle),
+                  var(--color-tm-work-bg) 80%,
+                  var(--color-tm-rest-bg) 86%,
+                  var(--color-tm-pause) 90%,
+                  var(--color-tm-rest-bg) 94%,
+                  var(--color-tm-work-bg)
+          ) border-box;
+  animation: var(--animate-border);
+}
+
+@property --border-angle {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: '<angle>';
+}
+
+@theme {
+  --animate-border: border 1s linear infinite;
+  @keyframes border {
+    to {
+      --border-angle: 360deg;
+    }
+  }
+}
+
 :root {
   --radius: 0.625rem;
   --card: oklch(1 0 0);
