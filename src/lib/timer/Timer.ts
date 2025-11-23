@@ -4,7 +4,6 @@ import { TimerState } from '@/lib/enums'
 
 import { cancelAnimationFrame, requestAnimationFrame } from './requestAnimationFramePolyfill'
 
-
 export class Timer {
   private time: number
   private state: TimerState = TimerState.Idle

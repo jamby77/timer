@@ -22,7 +22,12 @@ interface TimerProps {
   onStateChange?: (state: TimerState) => void
 }
 
-export function Timer({ duration, label = 'Timer', completionMessage, onStateChange }: TimerProps) {
+export const Timer = ({
+  duration,
+  label = 'Timer!!',
+  completionMessage,
+  onStateChange,
+}: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
 
   const handleStateChange = useCallback(
@@ -35,9 +40,11 @@ export function Timer({ duration, label = 'Timer', completionMessage, onStateCha
     },
     [duration, addLap, onStateChange]
   )
-  const handleComplete = () => {
-    toast(completionMessage)
-  }
+  const handleComplete = useCallback(() => {
+    toast.success('Timer finished', {
+      description: completionMessage,
+    })
+  }, [completionMessage])
 
   const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
     duration * 1000,
@@ -46,7 +53,6 @@ export function Timer({ duration, label = 'Timer', completionMessage, onStateCha
       onComplete: handleComplete,
     }
   )
-  console.log({ time, state, totalElapsedTime })
   const handleReset = () => {
     // Save the total elapsed time as a lap before resetting
     if (totalElapsedTime > 0) {

@@ -1,18 +1,20 @@
-import "./globals.css";
+import './globals.css'
 
-import { ReactNode } from "react";
-import { ThemeProvider } from "@/providers/theme-provider";
-import { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { ReactNode } from 'react'
+import { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 
-import { Navigation } from "@/components/Navigation";
+import { ThemeProvider } from '@/providers/theme-provider'
 
-const inter = Inter({ subsets: ["latin"] });
+import { Toaster } from '@/components/ui/sonner'
+import { Navigation } from '@/components/Navigation'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Timer App",
-  description: "A versatile timer application for workouts and productivity",
-};
+  title: 'Timer App',
+  description: 'A versatile timer application for workouts and productivity',
+}
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
@@ -26,10 +28,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
         >
           <Navigation />
           <main className="bg-background">{children}</main>
+          <Toaster position="top-center" duration={10000} richColors />
         </ThemeProvider>
       </body>
     </html>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout

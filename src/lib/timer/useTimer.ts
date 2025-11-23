@@ -2,19 +2,19 @@ import { useCallback, useEffect, useReducer, useRef } from 'react'
 
 import type { TimerOptions } from './types'
 
-import { TimerState as TimerStateEnum } from '@/lib/enums'
+import { TimerState } from '@/lib/enums'
 
 import { Timer as TimerClass } from './Timer'
 
 interface UseTimerState {
   time: number
-  state: TimerStateEnum
+  state: TimerState
   totalElapsedTime: number
 }
 
 type TimerAction =
   | { type: 'TICK'; payload: { time: number; elapsed: number } }
-  | { type: 'STATE_CHANGE'; payload: { state: TimerStateEnum; elapsed: number } }
+  | { type: 'STATE_CHANGE'; payload: { state: TimerState; elapsed: number } }
   | { type: 'RESET'; payload: { initialTime: number } }
 
 export const timerReducer = (state: UseTimerState, action: TimerAction): UseTimerState => {
@@ -34,7 +34,7 @@ export const timerReducer = (state: UseTimerState, action: TimerAction): UseTime
     case 'RESET':
       return {
         time: action.payload.initialTime,
-        state: TimerStateEnum.Idle,
+        state: TimerState.Idle,
         totalElapsedTime: 0,
       }
     default:
@@ -48,12 +48,11 @@ export const useTimer = (
 ) => {
   const [{ state, time, totalElapsedTime }, dispatch] = useReducer(timerReducer, {
     time: initialTime,
-    state: TimerStateEnum.Idle,
+    state: TimerState.Idle,
     totalElapsedTime: 0,
   })
   const timerRef = useRef<TimerClass | null>(null)
 
-  console.log({ state, time, totalElapsedTime })
   // Initialize timer instance
   useEffect(() => {
     const timer = new TimerClass(initialTime, {
@@ -66,7 +65,7 @@ export const useTimer = (
         onStateChange?.(newState, elapsed)
       },
       onComplete: (elapsed) => {
-        dispatch({ type: 'STATE_CHANGE', payload: { state: TimerStateEnum.Completed, elapsed } })
+        dispatch({ type: 'STATE_CHANGE', payload: { state: TimerState.Completed, elapsed } })
         onComplete?.(elapsed)
       },
     })
@@ -96,8 +95,9 @@ export const useTimer = (
     timerRef.current?.reset()
     timerRef.current?.start()
   }, [])
-  const getState = useCallback((): TimerStateEnum => {
-    return timerRef.current?.getState() ?? TimerStateEnum.Idle
+
+  const getState = useCallback((): TimerState | undefined => {
+    return timerRef.current?.getState()
   }, [])
 
   const getTime = useCallback((): number => {
