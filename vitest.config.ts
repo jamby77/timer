@@ -21,6 +21,19 @@ export default defineConfig({
           environment: "node",
         },
       },
+      // React browser tests project (chromium)
+      {
+        plugins: [tsconfigPaths()],
+        test: {
+          name: "react-browser",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{ browser: "chromium" }],
+          },
+        },
+      },
       // Storybook tests project
       {
         extends: true,

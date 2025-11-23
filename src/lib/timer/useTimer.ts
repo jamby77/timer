@@ -17,7 +17,7 @@ type TimerAction =
   | { type: 'STATE_CHANGE'; payload: { state: TimerStateEnum; elapsed: number } }
   | { type: 'RESET'; payload: { initialTime: number } }
 
-const timerReducer = (state: UseTimerState, action: TimerAction): UseTimerState => {
+export const timerReducer = (state: UseTimerState, action: TimerAction): UseTimerState => {
   switch (action.type) {
     case 'TICK':
       return {
@@ -53,6 +53,7 @@ export const useTimer = (
   })
   const timerRef = useRef<TimerClass | null>(null)
 
+  console.log({ state, time, totalElapsedTime })
   // Initialize timer instance
   useEffect(() => {
     const timer = new TimerClass(initialTime, {
