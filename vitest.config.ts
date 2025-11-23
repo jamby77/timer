@@ -15,6 +15,7 @@ export default defineConfig({
     projects: [
       // Unit tests project
       {
+        plugins: [tsconfigPaths()],
         test: {
           name: "unit",
           environment: "node",
