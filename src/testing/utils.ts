@@ -1,6 +1,14 @@
 import { AnyTimerConfig, TimerType, WorkRestMode } from "@/types/configure";
 
 /**
+ * Testing utility for waiting in async tests
+ * @param ms - Milliseconds to wait
+ * @returns Promise that resolves after the specified time
+ */
+export const sleep = (ms: number): Promise<void> => 
+  new Promise(resolve => setTimeout(resolve, ms));
+
+/**
  * Creates a mock timer configuration for testing purposes
  * @param name - The name of the timer
  * @param type - The type of timer to create

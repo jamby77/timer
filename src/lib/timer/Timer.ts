@@ -1,7 +1,9 @@
 import type { TimerOptions } from './types'
 
+import { TimerState } from '@/lib/enums'
+
 import { cancelAnimationFrame, requestAnimationFrame } from './requestAnimationFramePolyfill'
-import { TimerState } from './types'
+
 
 export class Timer {
   private time: number
@@ -85,10 +87,15 @@ export class Timer {
   }
 
   public pause() {
-    if (this.state !== TimerState.Running) return
+    this.log('pause() called, current state: ' + this.state)
+    if (this.state !== TimerState.Running) {
+      this.log('Not running, returning')
+      return
+    }
 
     this.cleanup()
     this.state = TimerState.Paused
+    this.log('State changed to Paused, time: ' + this.time + 'ms')
     this.options?.onStateChange?.(this.state, this.totalElapsedTime)
   }
 
