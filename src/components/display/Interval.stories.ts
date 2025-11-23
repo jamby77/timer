@@ -1,11 +1,11 @@
-import preview from "#.storybook/preview";
+import preview from '#.storybook/preview'
 
-import { Interval } from "./Interval";
+import { Interval } from './Interval'
 
 const meta = preview.meta({
   component: Interval,
-  tags: ["autodocs"],
-});
+  tags: ['autodocs'],
+})
 
 export const Default = meta.story({
   args: {
@@ -13,9 +13,9 @@ export const Default = meta.story({
       workDuration: 20,
       restDuration: 10,
       intervals: 8,
-      workLabel: "Work",
-      restLabel: "Rest",
+      workLabel: 'Work',
+      restLabel: 'Rest',
       skipLastRest: true,
     },
   },
-});
+})

@@ -1,25 +1,25 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react'
 
 export interface LapEntry {
-  id: string;
-  lapTime: number;
-  timestamp: number;
+  id: string
+  lapTime: number
+  timestamp: number
 }
 
 export const useLapHistory = () => {
-  const [laps, setLaps] = useState<LapEntry[]>([]);
+  const [laps, setLaps] = useState<LapEntry[]>([])
 
-  const lastLap = useMemo(() => laps[laps.length - 1], [laps]);
+  const lastLap = useMemo(() => laps[laps.length - 1], [laps])
   const bestLap = useMemo(() => {
-    if (laps.length === 0) return null;
+    if (laps.length === 0) return null
     return laps.reduce((best, lap) => {
-      if (!best) return lap;
-      return lap.lapTime < best.lapTime ? lap : best;
-    });
-  }, [laps]);
+      if (!best) return lap
+      return lap.lapTime < best.lapTime ? lap : best
+    })
+  }, [laps])
 
   const addLap = useCallback((time: number) => {
-    const now = Date.now();
+    const now = Date.now()
     setLaps((prev) => [
       ...prev,
       {
@@ -27,12 +27,12 @@ export const useLapHistory = () => {
         lapTime: time,
         timestamp: now,
       },
-    ]);
-  }, []);
+    ])
+  }, [])
 
   const clearHistory = useCallback(() => {
-    setLaps([]);
-  }, []);
+    setLaps([])
+  }, [])
 
   return {
     laps,
@@ -40,5 +40,5 @@ export const useLapHistory = () => {
     clearHistory,
     lastLap,
     bestLap,
-  };
-};
+  }
+}

@@ -1,69 +1,69 @@
-import { Timer } from "./Timer";
-import { TimerState } from "./types";
-import { formatTime } from "./utils";
+import { Timer } from './Timer'
+import { TimerState } from './types'
+import { formatTime } from './utils'
 
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000 // 1 year in milliseconds
 
 export interface StopwatchOptions {
   /**
    * Callback that's called on each tick with the current elapsed time in milliseconds
    */
-  onTick?: (elapsedTime: number) => void;
+  onTick?: (elapsedTime: number) => void
 
   /**
    * Callback that's called when the stopwatch is stopped
    */
-  onStop?: (elapsedTime: number) => void;
+  onStop?: (elapsedTime: number) => void
 
   /**
    * Callback that's called when the stopwatch state changes
    */
-  onStateChange?: (state: TimerState) => void;
+  onStateChange?: (state: TimerState) => void
 
   /**
    * Whether to start the stopwatch immediately on creation
    * @default false
    */
-  autoStart?: boolean;
+  autoStart?: boolean
 
   /**
    * Maximum time in milliseconds the stopwatch will run
    * @default ONE_YEAR_MS (1 year)
    */
-  timeLimitMs?: number;
+  timeLimitMs?: number
 }
 
 export class Stopwatch {
-  private timer: Timer;
-  private readonly timeLimitMs: number;
-  private readonly stopCallback?: (elapsedTime: number) => void;
-  private readonly tickCallback?: (elapsedTime: number) => void;
-  private readonly stateChangeCallback?: (state: TimerState) => void;
+  private timer: Timer
+  private readonly timeLimitMs: number
+  private readonly stopCallback?: (elapsedTime: number) => void
+  private readonly tickCallback?: (elapsedTime: number) => void
+  private readonly stateChangeCallback?: (state: TimerState) => void
 
   constructor(options: StopwatchOptions = {}) {
-    this.timeLimitMs = options.timeLimitMs ?? ONE_YEAR_MS;
-    this.stopCallback = options.onStop;
-    this.tickCallback = options.onTick;
-    this.stateChangeCallback = options.onStateChange;
+    this.timeLimitMs = options.timeLimitMs ?? ONE_YEAR_MS
+    this.stopCallback = options.onStop
+    this.tickCallback = options.onTick
+    this.stateChangeCallback = options.onStateChange
 
     this.timer = new Timer(this.timeLimitMs, {
       // debug: true,
       onTick: (remaining) => {
-        const elapsed = this.timeLimitMs - remaining;
-        this.tickCallback?.(elapsed);
+        const elapsed = this.timeLimitMs - remaining
+        this.tickCallback?.(elapsed)
       },
       onComplete: () => {
         if (this.stopCallback) {
-          this.stopCallback(this.getElapsedTime());
+          this.stopCallback(this.getElapsedTime())
         }
       },
       onStateChange: (state) => {
-        this.stateChangeCallback?.(state);
+        this.stateChangeCallback?.(state)
       },
-    });
+    })
 
     if (options.autoStart) {
-      this.start();
+      this.start()
     }
   }
 
@@ -71,71 +71,71 @@ export class Stopwatch {
    * Start or resume the stopwatch
    */
   public start(): void {
-    if (this.isRunning) return;
+    if (this.isRunning) return
 
     if (this.getElapsedTime() >= this.timeLimitMs) {
-      this.reset();
+      this.reset()
     }
 
-    this.timer.start();
+    this.timer.start()
   }
 
   /**
    * Pause the stopwatch
    */
   public pause(): void {
-    this.timer.pause();
+    this.timer.pause()
   }
 
   /**
    * Stop the stopwatch and trigger onStop callback
    */
   public stop(): void {
-    if (!this.isRunning || this.getElapsedTime() >= this.timeLimitMs - 100) return;
-    
-    this.pause();
-    this.stopCallback?.(this.getElapsedTime());
+    if (!this.isRunning || this.getElapsedTime() >= this.timeLimitMs - 100) return
+
+    this.pause()
+    this.stopCallback?.(this.getElapsedTime())
   }
 
   /**
    * Reset the stopwatch to zero
    */
   public reset(): void {
-    this.timer.reset();
+    this.timer.reset()
   }
 
   /**
    * Get the current elapsed time in milliseconds
    */
   public getElapsedTime(): number {
-    return Math.min(this.timeLimitMs - this.timer.getTime(), this.timeLimitMs);
+    return Math.min(this.timeLimitMs - this.timer.getTime(), this.timeLimitMs)
   }
 
   /**
    * Check if the stopwatch is currently running
    */
   public get isRunning(): boolean {
-    return this.timer.getState() === "running";
+    return this.timer.getState() === 'running'
   }
 
   /**
    * Get the current state of the stopwatch
    */
   public getState(): TimerState {
-    return this.timer.getState();
+    return this.timer.getState()
   }
 
   /**
    * Format the elapsed time as a string (MM:SS.MS)
    */
   public formatTime(): string {
-    return formatTime(this.getElapsedTime());
+    return formatTime(this.getElapsedTime())
   }
 
   /**
    * Clean up resources when the stopwatch is no longer needed
    */
   public destroy(): void {
-    this.timer.destroy();
+    this.timer.destroy()
   }
 }

@@ -1,38 +1,40 @@
-import { TimerPhase, WorkRestTimerState } from "./types";
-import { formatTime } from "./utils";
+import type { WorkRestTimerState } from './types'
+
+import { TimerPhase } from './types'
+import { formatTime } from './utils'
 
 export interface DisplayData {
-  time: string;
-  progress: number;
-  label: string;
-  isWork: boolean;
+  time: string
+  progress: number
+  label: string
+  isWork: boolean
 }
 
 export const getDisplayData = (
   state: WorkRestTimerState,
-  getProgress: () => number,
+  getProgress: () => number
 ): DisplayData => {
   switch (state.phase) {
     case TimerPhase.Work:
       return {
         time: formatTime(state.currentTime),
         progress: getProgress(),
-        label: "WORK",
+        label: 'WORK',
         isWork: true,
-      };
+      }
     case TimerPhase.Rest:
       return {
         time: formatTime(state.currentTime),
         progress: getProgress(),
-        label: "REST",
+        label: 'REST',
         isWork: false,
-      };
+      }
     default:
       return {
-        time: "00:00.00",
+        time: '00:00.00',
         progress: 0,
-        label: "READY",
+        label: 'READY',
         isWork: false,
-      };
+      }
   }
-};
+}

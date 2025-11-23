@@ -1,15 +1,15 @@
-import preview from "#.storybook/preview";
+import preview from '#.storybook/preview'
 
-import { Stopwatch } from "@/components/display/Stopwatch";
+import { Stopwatch } from '@/components/display/Stopwatch'
 
 const meta = preview.meta({
   component: Stopwatch,
   args: {
-    label: "Stopwatch",
+    label: 'Stopwatch',
     timeLimit: 5,
-    completionMessage: "Time limit reached",
+    completionMessage: 'Time limit reached',
   },
-  tags: ["autodocs"],
-});
+  tags: ['autodocs'],
+})
 
-export const Default = meta.story();
+export const Default = meta.story()

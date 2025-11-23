@@ -1,12 +1,13 @@
-"use client";
+'use client'
 
-import React, { useCallback, useEffect, useState } from "react";
-import { getStatusMessage } from "@/lib/timer";
-import { getDisplayData } from "@/lib/timer/displayUtils";
-import { TimerPhase, TimerState } from "@/lib/timer/types";
-import { useLapHistory } from "@/lib/timer/useLapHistory";
-import { useWorkRestTimer } from "@/lib/timer/useWorkRestTimer";
-import cx from "clsx";
+import React, { useCallback, useEffect, useState } from 'react'
+import cx from 'clsx'
+
+import { getStatusMessage } from '@/lib/timer'
+import { getDisplayData } from '@/lib/timer/displayUtils'
+import { TimerPhase, TimerState } from '@/lib/timer/types'
+import { useLapHistory } from '@/lib/timer/useLapHistory'
+import { useWorkRestTimer } from '@/lib/timer/useWorkRestTimer'
 
 import {
   BaseButton,
@@ -15,119 +16,119 @@ import {
   SkipButton,
   StartButton,
   StopButton,
-} from "@/components/ui/timer-buttons";
-import { LapHistory } from "./LapHistory";
-import { TimerCard } from "./TimerCard";
+} from '@/components/ui/timer-buttons'
+import { LapHistory } from './LapHistory'
+import { TimerCard } from './TimerCard'
 
 interface WorkRestTimerProps {
-  className?: string;
+  className?: string
 }
 
 export function WorkRestTimer({ className }: WorkRestTimerProps) {
-  const { laps, addLap, clearHistory } = useLapHistory();
-  const [ratioInteger, setRatioInteger] = useState<string>("1");
-  const [ratioDecimal, setRatioDecimal] = useState<string>("00");
+  const { laps, addLap, clearHistory } = useLapHistory()
+  const [ratioInteger, setRatioInteger] = useState<string>('1')
+  const [ratioDecimal, setRatioDecimal] = useState<string>('00')
 
   const [state, actions] = useWorkRestTimer({
     onLapRecorded: addLap,
-  });
+  })
 
   // Sync ratio inputs with state when hook ratio changes
   const syncRatioInputs = useCallback(() => {
-    const ratio = state.ratio / 100;
-    const integer = Math.floor(ratio).toString();
+    const ratio = state.ratio / 100
+    const integer = Math.floor(ratio).toString()
     const decimal = Math.round((ratio - Math.floor(ratio)) * 100)
       .toString()
-      .padStart(2, "0");
-    setRatioInteger(integer);
-    setRatioDecimal(decimal);
-  }, [state.ratio]);
+      .padStart(2, '0')
+    setRatioInteger(integer)
+    setRatioDecimal(decimal)
+  }, [state.ratio])
 
   // Sync inputs when hook state changes
   useEffect(() => {
-    syncRatioInputs();
-  }, [state.ratio, syncRatioInputs]);
+    syncRatioInputs()
+  }, [state.ratio, syncRatioInputs])
 
   // Update inputs when ratio changes from external sources
   const handleRatioInputChange = useCallback(
     (integer: string, decimal: string) => {
-      const newRatio = parseFloat(`${integer}.${decimal.padEnd(2, "0")}`);
+      const newRatio = parseFloat(`${integer}.${decimal.padEnd(2, '0')}`)
       if (!isNaN(newRatio) && newRatio >= 0.01 && newRatio <= 100) {
-        actions.setRatio(newRatio);
+        actions.setRatio(newRatio)
       }
     },
-    [actions.setRatio],
-  );
+    [actions.setRatio]
+  )
 
   const handleIntegerChange = useCallback(
     (value: string) => {
       // Validate input
-      if (value === "" || value === "-") {
-        setRatioInteger("0");
-        return;
+      if (value === '' || value === '-') {
+        setRatioInteger('0')
+        return
       }
 
-      const intValue = parseInt(value) || 0;
+      const intValue = parseInt(value) || 0
       if (intValue >= 0 && intValue <= 100) {
-        setRatioInteger(value);
-        handleRatioInputChange(value, ratioDecimal);
+        setRatioInteger(value)
+        handleRatioInputChange(value, ratioDecimal)
       }
     },
-    [ratioDecimal, handleRatioInputChange],
-  );
+    [ratioDecimal, handleRatioInputChange]
+  )
 
   const handleDecimalChange = useCallback(
     (value: string) => {
       // Validate input - only allow 2 digits
-      if (value === "" || value === "-") {
-        setRatioDecimal("00");
-        return;
+      if (value === '' || value === '-') {
+        setRatioDecimal('00')
+        return
       }
 
-      const decValue = value.slice(0, 2);
-      setRatioDecimal(decValue);
-      handleRatioInputChange(ratioInteger, decValue);
+      const decValue = value.slice(0, 2)
+      setRatioDecimal(decValue)
+      handleRatioInputChange(ratioInteger, decValue)
     },
-    [ratioInteger, handleRatioInputChange],
-  );
+    [ratioInteger, handleRatioInputChange]
+  )
 
   const handleRestart = useCallback(() => {
-    actions.reset();
-    actions.startWork();
-  }, [actions]);
+    actions.reset()
+    actions.startWork()
+  }, [actions])
 
   const handleStop = useCallback(() => {
     if (state.phase === TimerPhase.Work && state.state === TimerState.Running) {
-      actions.stopWork();
+      actions.stopWork()
     } else if (state.phase === TimerPhase.Rest) {
-      actions.stopRest();
+      actions.stopRest()
     }
-  }, [state.phase, state.state, actions]);
+  }, [state.phase, state.state, actions])
 
   const handleSkipRest = useCallback(() => {
-    actions.skipRest();
-  }, [actions]);
+    actions.skipRest()
+  }, [actions])
 
   const handleAdjustRatio = useCallback(
     (delta: number) => {
-      actions.adjustRatio(delta);
+      actions.adjustRatio(delta)
       // Remove manual sync - useEffect will handle it
     },
-    [actions.adjustRatio],
-  );
+    [actions.adjustRatio]
+  )
 
   const handleResetRatio = useCallback(() => {
-    actions.resetRatio();
+    actions.resetRatio()
     // Remove manual state setting - useEffect will handle sync
-  }, [actions.resetRatio]);
+  }, [actions.resetRatio])
 
-  const status = getStatusMessage(state.state);
+  const status = getStatusMessage(state.state)
 
-  const displayData = getDisplayData(state, actions.getProgress);
-  const currentRatio = (state.ratio / 100).toFixed(2);
+  const displayData = getDisplayData(state, actions.getProgress)
+  const currentRatio = (state.ratio / 100).toFixed(2)
 
   return (
-    <div className={cx("flex flex-col items-center gap-8", className)}>
+    <div className={cx('flex flex-col items-center gap-8', className)}>
       <TimerCard
         label={`WORK/REST (r ${currentRatio}x)`}
         status={status}
@@ -136,14 +137,14 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         currentStep={{ isWork: displayData.isWork } as any}
       >
         <div
-          className={cx("mb-4 h-2 w-full rounded-full bg-gray-200", {
+          className={cx('mb-4 h-2 w-full rounded-full bg-gray-200', {
             invisible: state.phase === TimerPhase.Idle,
           })}
         >
           <div
-            className={cx("h-2 rounded-full transition-all duration-100", {
-              "bg-emerald-700": displayData.isWork,
-              "bg-rose-700": !displayData.isWork && state.phase !== TimerPhase.Idle,
+            className={cx('h-2 rounded-full transition-all duration-100', {
+              'bg-emerald-700': displayData.isWork,
+              'bg-rose-700': !displayData.isWork && state.phase !== TimerPhase.Idle,
             })}
             style={{ width: `${displayData.progress}%` }}
           />
@@ -154,8 +155,8 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
           {state.phase === TimerPhase.Idle || state.state === TimerState.Paused ? (
             <StartButton
               onClick={state.phase === TimerPhase.Idle ? actions.startWork : actions.resumeWork}
-              title={state.phase === TimerPhase.Idle ? "Start work" : "Resume work"}
-              label={state.phase === TimerPhase.Idle ? "Start work" : "Resume work"}
+              title={state.phase === TimerPhase.Idle ? 'Start work' : 'Resume work'}
+              label={state.phase === TimerPhase.Idle ? 'Start work' : 'Resume work'}
             />
           ) : state.phase === TimerPhase.Work && state.state === TimerState.Running ? (
             <PauseButton onClick={actions.pauseWork} title="Pause work" label="Pause work" />
@@ -265,5 +266,5 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         <LapHistory laps={laps} onClearHistory={clearHistory} />
       </TimerCard>
     </div>
-  );
+  )
 }
