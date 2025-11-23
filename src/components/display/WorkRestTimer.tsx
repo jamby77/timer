@@ -16,8 +16,8 @@ import {
   StartButton,
   StopButton,
 } from "@/components/ui/timer-buttons";
-import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
+import { TimerCard } from "./TimerCard";
 
 interface WorkRestTimerProps {
   className?: string;
@@ -128,7 +128,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
 
   return (
     <div className={cx("flex flex-col items-center gap-8", className)}>
-      <Card
+      <TimerCard
         label={`WORK/REST (r ${currentRatio}x)`}
         status={status}
         time={displayData.time}
@@ -263,7 +263,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
         </div>
 
         <LapHistory laps={laps} onClearHistory={clearHistory} />
-      </Card>
+      </TimerCard>
     </div>
   );
 }

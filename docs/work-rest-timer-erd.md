@@ -16,7 +16,7 @@ that operates independently from the existing interval timer system.
 ### 1.3 Dependencies
 - React 19.2.0 (hooks, state management)
 - TypeScript 5.9.3 (type safety)
-- Existing components: Card, BaseButton, LapHistory
+- Existing components: TimerCard, BaseButton, LapHistory
 - Existing utilities: formatTime, icons
 
 ## 2. Architecture
@@ -28,7 +28,7 @@ WorkRestTimer (Component)
 │   ├── State Machine (TimerPhase)
 │   ├── Timing Engine (Timer.ts)
 │   └── Data Management
-├── Card (Layout Container)
+├── TimerCard (Layout Container)
 │   ├── Timer Display
 │   ├── Progress Bar
 │   └── Control Buttons
@@ -308,7 +308,7 @@ const getDisplayData = (state: WorkRestTimerState) => {
 ## 5. Integration Requirements
 
 ### 5.1 Component Integration
-- **Card Component**: Reuse for layout and styling
+- **TimerCard Component**: Reuse for layout and styling
 - **BaseButton**: Use for all interactive elements
 - **LapHistory**: Extend to show work/rest specific data
 - **Icons**: Reuse existing Play/Pause/Stop/Skip icons

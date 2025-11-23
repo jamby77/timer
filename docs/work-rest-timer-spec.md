@@ -87,7 +87,7 @@ A new timer component that combines stopwatch functionality for work periods wit
 ### Architecture
 - **New Hook**: `useWorkRestTimer` custom hook
 - **New Component**: `WorkRestTimer` component
-- **Reuse Existing**: `Card`, `BaseButton`, `LapHistory` components
+- **Reuse Existing**: `TimerCard`, `BaseButton`, `LapHistory` components
 - **State Management**: Local React state (no external store needed)
 
 ### Hook Interface
@@ -139,7 +139,7 @@ interface WorkRestTimerActions {
 ## Integration Points
 
 ### Existing Components
-- **Card**: Reuse for layout and visual styling
+- **TimerCard**: Reuse for layout and visual styling
 - **LapHistory**: Record work sessions with timestamps
 - **BaseButton**: Reuse for all control buttons
 - **Icons**: Use existing Play/Pause/Stop/Skip icons

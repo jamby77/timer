@@ -4,9 +4,9 @@ import { useCallback } from "react";
 import { formatTime, getStatusMessage, TimerState, useStopwatch } from "@/lib/timer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
 
-import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
 import TimerButton from "./TimerButton";
+import { TimerCard } from "./TimerCard";
 
 interface StopwatchProps {
   /** Label for the stopwatch */
@@ -64,7 +64,7 @@ export function Stopwatch({
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <Card label={label} status={status} time={formatTime(time)} subtitle={timeLimitDisplay}>
+      <TimerCard label={label} status={status} time={formatTime(time)} subtitle={timeLimitDisplay}>
         <TimerButton
           state={state}
           onStart={start}
@@ -72,7 +72,7 @@ export function Stopwatch({
           onReset={handleReset}
           onRestart={handleRestart}
         />
-      </Card>
+      </TimerCard>
       <LapHistory laps={laps} onClearHistory={clearHistory} />
     </div>
   );

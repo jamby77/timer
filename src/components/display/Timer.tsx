@@ -4,9 +4,9 @@ import { useCallback } from "react";
 import { formatTime, getStatusMessage, TimerState, useTimer } from "@/lib/timer";
 import { useLapHistory } from "@/lib/timer/useLapHistory";
 
-import { Card } from "./Card";
 import { LapHistory } from "./LapHistory";
 import TimerButton from "./TimerButton";
+import { TimerCard } from "./TimerCard";
 
 interface TimerProps {
   /** Duration in seconds */
@@ -33,9 +33,12 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
     [duration, addLap, onStateChange],
   );
 
-  const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(duration * 1000, {
-    onStateChange: handleStateChange,
-  });
+  const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
+    duration * 1000,
+    {
+      onStateChange: handleStateChange,
+    },
+  );
 
   const handleReset = () => {
     // Save the total elapsed time as a lap before resetting
@@ -53,7 +56,7 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <Card label={label} status={status} time={formatTime(time)}>
+      <TimerCard label={label} status={status} time={formatTime(time)}>
         <TimerButton
           state={state}
           onStart={start}
@@ -61,7 +64,7 @@ export function Timer({ duration, label = "Timer", completionMessage, onStateCha
           onReset={handleReset}
           onRestart={handleRestart}
         />
-      </Card>
+      </TimerCard>
       <LapHistory laps={laps} onClearHistory={clearHistory} />
     </div>
   );

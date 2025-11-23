@@ -59,7 +59,7 @@ src/
 │   │   ├── TimerConfigForm.spec.ts  # Tests for TimerConfigForm
 │   │   └── TimerConfigForm.stories.ts # Storybook stories
 │   ├── Button.tsx                   # Reusable button component
-│   ├── Card.tsx                     # Reusable card component
+│   ├── TimerCard.tsx                     # Reusable card component
 │   ├── Navigation.tsx               # Main navigation
 │   └── (existing timer components...)
 ├── lib/

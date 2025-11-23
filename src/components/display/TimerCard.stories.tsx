@@ -2,10 +2,10 @@ import { TimerState } from "@/lib/timer";
 import preview from "#.storybook/preview";
 import { fn } from "storybook/test";
 
-import { Card } from "@/components/display/Card";
 import TimerButton from "@/components/display/TimerButton";
+import { TimerCard } from "@/components/display/TimerCard";
 
-const meta = preview.meta({ component: Card });
+const meta = preview.meta({ component: TimerCard });
 export const WithButtons = meta.story({
   args: {
     label: "WORK/REST (r 1.00x)",

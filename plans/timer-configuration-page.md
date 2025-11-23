@@ -896,7 +896,7 @@ const TimerCard = ({
   const config = timer.config;
   
   return (
-    <Card className={cx("relative group hover:shadow-md transition-shadow", {
+    <TimerCard className={cx("relative group hover:shadow-md transition-shadow", {
       "p-4": compact,
       "p-6": !compact,
     })}>
@@ -932,7 +932,7 @@ const TimerCard = ({
       <Button onClick={onStart} className="w-full">
         Start Timer
       </Button>
-    </Card>
+    </TimerCard>
   );
 };
 ```
@@ -987,7 +987,7 @@ const TimerTypeSelector = ({
     <h2>Timer Type</h2>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {TIMER_TYPES.map(({ type, name, description }) => (
-        <Card
+        <TimerCard
           key={type}
           className={cx("cursor-pointer transition-colors", {
             "ring-2 ring-blue-500": selectedType === type,
@@ -996,7 +996,7 @@ const TimerTypeSelector = ({
         >
           <h3>{name}</h3>
           <p className="text-sm text-gray-600">{description}</p>
-        </Card>
+        </TimerCard>
       ))}
     </div>
   </section>
@@ -1074,7 +1074,7 @@ const TimerConfigForm = ({
   };
   
   return (
-    <Card>
+    <TimerCard>
       <h3>Configure {type} Timer</h3>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Common fields for all timer types */}
@@ -1095,7 +1095,7 @@ const TimerConfigForm = ({
           )}
         </div>
       </form>
-    </Card>
+    </TimerCard>
   );
 };
 ```
@@ -1520,7 +1520,7 @@ const getDefaultConfigForType = (type: TimerType) => {
 };
 ```
 
-### 6. Phase Configuration Card Component
+### 6. Phase Configuration TimerCard Component
 ```tsx
 interface PhaseConfigCardProps {
   phase: ComplexTimerPhase;
@@ -1552,7 +1552,7 @@ const PhaseConfigCard = ({
   };
   
   return (
-    <Card className="border-l-4 border-l-blue-500">
+    <TimerCard className="border-l-4 border-l-blue-500">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex flex-col space-y-1">
@@ -1614,7 +1614,7 @@ const PhaseConfigCard = ({
           />
         </div>
       )}
-    </Card>
+    </TimerCard>
   );
 };
 ```
@@ -1658,7 +1658,7 @@ const PredefinedStyles = ({
 };
 ```
 
-### 8. Enhanced Style Card Component
+### 8. Enhanced Style TimerCard Component
 ```tsx
 interface StyleCardProps {
   style: PredefinedStyle;
@@ -1701,7 +1701,7 @@ const StyleCard = ({
   const isUserStyle = !style.isBuiltIn;
   
   return (
-    <Card 
+    <TimerCard 
       className={`cursor-pointer hover:shadow-md transition-all duration-200 group relative ${
         isUserStyle ? 'border-blue-200 bg-blue-50' : ''
       }`}
@@ -1835,7 +1835,7 @@ const StyleCard = ({
           )}
         </div>
       </div>
-    </Card>
+    </TimerCard>
   );
 };
 ```
@@ -1884,7 +1884,7 @@ const EditStyleModal = ({
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+      <TimerCard className="w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Edit Timer Style</h2>
           <Button variant="ghost" onClick={onClose}>
@@ -1928,7 +1928,7 @@ const EditStyleModal = ({
             Cancel
           </Button>
         </div>
-      </Card>
+      </TimerCard>
     </div>
   );
 };
@@ -2484,7 +2484,7 @@ const TimerConfigForm = ({
   };
   
   return (
-    <Card>
+    <TimerCard>
       <h3>Configure {type} Timer</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         {renderFormFields()}
@@ -2497,7 +2497,7 @@ const TimerConfigForm = ({
           )}
         </div>
       </form>
-    </Card>
+    </TimerCard>
   );
 };
 
