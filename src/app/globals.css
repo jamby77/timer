@@ -76,6 +76,8 @@
           ) border-box;
 }
 
+
+
 @property --border-angle {
   inherits: false;
   initial-value: 0deg;
@@ -87,6 +89,26 @@
   @keyframes border {
     to {
       --border-angle: 360deg;
+    }
+  }
+
+  --animate-expand: expand 200ms ease-in-out;
+  --animate-collapse: collapse 200ms ease-in-out;
+  @keyframes expand {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+    }
+  }
+
+  @keyframes collapse {
+    from {
+      height: var(--radix-collapsible-content-height);
+    }
+    to {
+      height: 0;
     }
   }
 }

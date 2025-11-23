@@ -1,10 +1,12 @@
 'use client'
 
 import { useCallback } from 'react'
+import { toast } from 'sonner'
 
 import { formatTime, TimerState, useTimer } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
+import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
@@ -21,7 +23,7 @@ interface TimerProps {
 }
 
 export function Timer({ duration, label = 'Timer', completionMessage, onStateChange }: TimerProps) {
-  const { laps, addLap, clearHistory } = useLapHistory()
+  const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
 
   const handleStateChange = useCallback(
     (newState: TimerState, elapsed: number) => {
@@ -33,14 +35,18 @@ export function Timer({ duration, label = 'Timer', completionMessage, onStateCha
     },
     [duration, addLap, onStateChange]
   )
+  const handleComplete = () => {
+    toast(completionMessage)
+  }
 
   const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
     duration * 1000,
     {
       onStateChange: handleStateChange,
+      onComplete: handleComplete,
     }
   )
-
+  console.log({ time, state, totalElapsedTime })
   const handleReset = () => {
     // Save the total elapsed time as a lap before resetting
     if (totalElapsedTime > 0) {
@@ -54,7 +60,7 @@ export function Timer({ duration, label = 'Timer', completionMessage, onStateCha
   }
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <TimerContainer>
       <TimerCard label={label} state={state} time={formatTime(time)}>
         <TimerButton
           state={state}
@@ -64,7 +70,7 @@ export function Timer({ duration, label = 'Timer', completionMessage, onStateCha
           onRestart={handleRestart}
         />
       </TimerCard>
-      <LapHistory laps={laps} onClearHistory={clearHistory} />
-    </div>
+      <LapHistory laps={laps} onClearHistory={clearHistory} lastLap={lastLap} bestLap={bestLap} />
+    </TimerContainer>
   )
 }

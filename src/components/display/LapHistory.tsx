@@ -94,22 +94,16 @@ export function LapHistory({
     <Collapsible
       open={isExpanded}
       onOpenChange={setIsExpanded}
-      className={cx(
-        'mt-6 w-full divide-y rounded-md border-2 transition-all duration-300 ease-in-out',
-        {
-          invisible: laps.length === 0,
-          'bg-background border-accent divide-accent': isExpanded,
-        }
-      )}
+      className={cx('mt-6 w-full max-w-lg divide-y rounded-md border-2', {
+        invisible: laps.length === 0,
+        'bg-background border-accent divide-accent': isExpanded,
+      })}
     >
       {/*// Compact view - show only last lap*/}
       <div
-        className={cn(
-          'flex items-center justify-between gap-1 rounded-md text-sm transition-all duration-300 ease-in-out',
-          {
-            'bg-background/50': !isExpanded,
-          }
-        )}
+        className={cn('flex items-center justify-between gap-1 rounded-md text-sm', {
+          'bg-background/50': !isExpanded,
+        })}
       >
         <CollapsibleTrigger role="button" className="w-full cursor-pointer">
           {!isExpanded && (
@@ -124,10 +118,16 @@ export function LapHistory({
           <ExpandButton label="Expand lap history" opened={isExpanded} />
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent asChild>
+      <CollapsibleContent
+        asChild
+        className={cn('overflow-hidden', {
+          'animate-expand': isExpanded,
+          'animate-collapse': !isExpanded,
+        })}
+      >
         {laps.length > 0 ? (
           // Expanded view - show full list (only when laps exist)
-          <div className="w-full max-w-5xl space-y-2 p-6 px-4 transition-all duration-300 ease-in-out">
+          <div className="w-full max-w-5xl space-y-2 p-6 px-4">
             <Item className="justify-between px-4 text-lg" variant="outline">
               {lastLap && (
                 <div className="flex items-center justify-between gap-2">
@@ -152,12 +152,7 @@ export function LapHistory({
               }
               const lapNumber = laps.length - index
               return (
-                <Item
-                  size="sm"
-                  variant="outline"
-                  key={lap.id}
-                  className={cx('text-sm transition-all duration-300 ease-in-out')}
-                >
+                <Item size="sm" variant="outline" key={lap.id} className={cx('text-sm')}>
                   <ItemContent className="flex-row items-center justify-between">
                     <ItemTitle className="font-medium">{`Lap ${lapNumber}`}</ItemTitle>
                     <ItemDescription className="font-mono">

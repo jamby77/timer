@@ -24,13 +24,13 @@ interface CardProps {
 
 export const TimerCard = ({ label, state, time, children, subtitle, currentStep }: CardProps) => (
   <div
-    className={cn('rounded-xl border-4 border-transparent', {
+    className={cn('sticky top-8 z-10 rounded-lg border border-transparent', {
       'animated-border-card': currentStep?.isWork,
       'animate-border': state === TimerState.Running,
     })}
   >
     <ShadcnCard
-      className={cn('px-2', {
+      className={cn('rounded-lg border-none px-2', {
         'bg-tm-work-bg': currentStep?.isWork,
         'bg-tm-rest-bg': currentStep && !currentStep?.isWork,
       })}

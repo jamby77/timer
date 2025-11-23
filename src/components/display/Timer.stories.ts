@@ -9,7 +9,7 @@ const meta = preview.meta({
 
 export const Default = meta.story({
   args: {
-    duration: 10000,
+    duration: 10,
     label: 'Timer',
     completionMessage: 'On completion',
     onStateChange: fn(),
