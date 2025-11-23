@@ -44,3 +44,5 @@ src/stories/*
 !src/stories/timers/**
 
 median*
+
+__screenshots__/
