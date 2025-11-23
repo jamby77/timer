@@ -1,12 +1,12 @@
-import { AnyTimerConfig, TimerType, WorkRestMode } from "@/types/configure";
+import { AnyTimerConfig, TimerType, WorkRestMode } from '@/types/configure'
 
 /**
  * Testing utility for waiting in async tests
  * @param ms - Milliseconds to wait
  * @returns Promise that resolves after the specified time
  */
-export const sleep = (ms: number): Promise<void> => 
-  new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * Creates a mock timer configuration for testing purposes
@@ -20,7 +20,7 @@ export const createMockTimerConfig = (name: string, type: TimerType): AnyTimerCo
     name,
     createdAt: new Date(),
     lastUsed: new Date(),
-  };
+  }
 
   switch (type) {
     case TimerType.COUNTDOWN:
@@ -28,15 +28,15 @@ export const createMockTimerConfig = (name: string, type: TimerType): AnyTimerCo
         ...baseConfig,
         type,
         duration: 300,
-        completionMessage: "Time is up!",
-      };
+        completionMessage: 'Time is up!',
+      }
 
     case TimerType.STOPWATCH:
       return {
         ...baseConfig,
         type,
         timeLimit: 600,
-      };
+      }
 
     case TimerType.INTERVAL:
       return {
@@ -45,10 +45,10 @@ export const createMockTimerConfig = (name: string, type: TimerType): AnyTimerCo
         workDuration: 20,
         restDuration: 10,
         intervals: 8,
-        workLabel: "Work",
-        restLabel: "Rest",
+        workLabel: 'Work',
+        restLabel: 'Rest',
         skipLastRest: true,
-      };
+      }
 
     case TimerType.WORKREST:
       return {
@@ -58,57 +58,51 @@ export const createMockTimerConfig = (name: string, type: TimerType): AnyTimerCo
         maxWorkTime: 300,
         maxRounds: 10,
         restMode: WorkRestMode.RATIO,
-      };
+      }
 
     case TimerType.COMPLEX:
       return {
         ...baseConfig,
         type,
         phases: [],
-      };
+      }
 
     default:
-      throw new Error(`Unsupported timer type: ${type}`);
+      throw new Error(`Unsupported timer type: ${type}`)
   }
-};
+}
 
 /**
  * Creates a mock countdown timer configuration
  * @returns A mock countdown timer configuration
  */
 export const createMockCountdownConfig = (): AnyTimerConfig => {
-  return createMockTimerConfig("Test Countdown", TimerType.COUNTDOWN);
-};
+  return createMockTimerConfig('Test Countdown', TimerType.COUNTDOWN)
+}
 
 /**
  * Creates a mock interval timer configuration
  * @returns A mock interval timer configuration
  */
 export const createMockIntervalConfig = (): AnyTimerConfig => {
-  return createMockTimerConfig("Test Interval", TimerType.INTERVAL);
-};
+  return createMockTimerConfig('Test Interval', TimerType.INTERVAL)
+}
 
 /**
  * Creates a mock stopwatch configuration
- * @param overrides - Optional properties to override
  * @returns A mock stopwatch configuration
  */
-export const createMockStopwatchConfig = (
-  overrides: Partial<AnyTimerConfig> = {},
-): AnyTimerConfig => {
-  return createMockTimerConfig("Test Stopwatch", TimerType.STOPWATCH);
-};
+export const createMockStopwatchConfig = (): AnyTimerConfig => {
+  return createMockTimerConfig('Test Stopwatch', TimerType.STOPWATCH)
+}
 
 /**
  * Creates a mock work/rest timer configuration
- * @param overrides - Optional properties to override
  * @returns A mock work/rest timer configuration
  */
-export const createMockWorkRestConfig = (
-  overrides: Partial<AnyTimerConfig> = {},
-): AnyTimerConfig => {
-  return createMockTimerConfig("Test Work/Rest", TimerType.WORKREST);
-};
+export const createMockWorkRestConfig = (): AnyTimerConfig => {
+  return createMockTimerConfig('Test Work/Rest', TimerType.WORKREST)
+}
 
 /**
  * Utility to create mock date objects for consistent testing
@@ -116,8 +110,8 @@ export const createMockWorkRestConfig = (
  * @returns A Date object
  */
 export const createMockDate = (dateString?: string): Date => {
-  return dateString ? new Date(dateString) : new Date();
-};
+  return dateString ? new Date(dateString) : new Date()
+}
 
 /**
  * Creates a mock timer with custom timestamp
@@ -129,11 +123,11 @@ export const createMockDate = (dateString?: string): Date => {
 export const createMockTimerWithTimestamp = (
   name: string,
   type: TimerType,
-  timestamp: string,
+  timestamp: string
 ): AnyTimerConfig => {
-  const mockDate = createMockDate(timestamp);
-  const config = createMockTimerConfig(name, type);
-  config.createdAt = mockDate;
-  config.lastUsed = mockDate;
-  return config;
-};
+  const mockDate = createMockDate(timestamp)
+  const config = createMockTimerConfig(name, type)
+  config.createdAt = mockDate
+  config.lastUsed = mockDate
+  return config
+}

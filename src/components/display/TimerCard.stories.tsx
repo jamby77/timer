@@ -13,7 +13,7 @@ export const WithButtons = meta.story({
     state: TimerState.Paused,
     time: '01:23.45',
     subtitle: 'Round: 1',
-    currentStep: { isWork: true } as any,
+    isWork: true,
     children: (
       <TimerButton
         state={TimerState.Paused}
@@ -32,7 +32,7 @@ export const WorkPhase = meta.story({
     state: TimerState.Running,
     time: '01:23.45',
     subtitle: 'Round: 1',
-    currentStep: { isWork: true } as any,
+    isWork: true,
     children: <div>Control buttons would go here</div>,
   },
 })
@@ -43,7 +43,7 @@ export const RestPhase = meta.story({
     state: TimerState.Paused,
     time: '01:23.45',
     subtitle: 'Round: 1',
-    currentStep: { isWork: false } as any,
+    isWork: false,
     children: <div>Control buttons would go here</div>,
   },
 })
@@ -54,7 +54,6 @@ export const Idle = meta.story({
     state: TimerState.Idle,
     time: '00:00.00',
     subtitle: 'Round: 0',
-    currentStep: null,
     children: <div>Control buttons would go here</div>,
   },
 })

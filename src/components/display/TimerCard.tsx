@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 
 import { TimerState } from '@/lib/enums'
-import { TimerStep } from '@/lib/timer/TimerManager'
 import { cn } from '@/lib/utils'
 
 import {
@@ -19,20 +18,20 @@ interface CardProps {
   time: string
   children: ReactNode
   subtitle?: ReactNode
-  currentStep?: TimerStep | null
+  isWork?: boolean
 }
 
-export const TimerCard = ({ label, state, time, children, subtitle, currentStep }: CardProps) => (
+export const TimerCard = ({ label, state, time, children, subtitle, isWork }: CardProps) => (
   <div
     className={cn('sticky top-8 z-10 rounded-lg border border-transparent', {
-      'animated-border-card': currentStep?.isWork,
+      'animated-border-card': isWork,
       'animate-border': state === TimerState.Running,
     })}
   >
     <ShadcnCard
       className={cn('rounded-lg border-none px-2', {
-        'bg-tm-work-bg': currentStep?.isWork,
-        'bg-tm-rest-bg': currentStep && !currentStep?.isWork,
+        'bg-tm-work-bg': isWork,
+        'bg-tm-rest-bg': !isWork && isWork !== undefined,
       })}
     >
       <CardHeader className="space-y-2">
@@ -55,9 +54,9 @@ export const TimerCard = ({ label, state, time, children, subtitle, currentStep 
       <CardContent>
         <div
           className={cn('font-mono text-9xl font-bold tabular-nums', {
-            'text-tm-work-fg': currentStep?.isWork,
-            'text-tm-rest-fg': currentStep && !currentStep?.isWork,
-            'text-foreground': !currentStep,
+            'text-tm-work-fg': isWork,
+            'text-tm-rest-fg': !isWork && isWork !== undefined,
+            'text-foreground': isWork === undefined,
           })}
         >
           {time}

@@ -1,5 +1,15 @@
-import { TimerPhase, TimerState, TimerType } from '@/lib/enums'
+import { TimerPhase, TimerState, TimerType, WorkRestMode } from '@/lib/enums'
 import { type TimerStep } from '@/lib/timer/TimerManager'
+
+// Timer-specific configuration (without metadata)
+export interface WorkRestTimerConfig {
+  ratio?: number // work/rest ratio (e.g., 2.0 for 2:1)
+  maxWorkTime?: number // seconds
+  maxRounds?: number
+  restMode?: WorkRestMode
+  fixedRestDuration?: number // seconds (only used when restMode is FIXED)
+  countdownBeforeStart?: number // seconds
+}
 
 // Re-export enums for backward compatibility
 export { TimerType, TimerState, TimerPhase }
@@ -9,6 +19,9 @@ export interface WorkRestTimerState {
   ratio: number // Work/rest multiplier (stored as integer * 100)
   rounds: number // Count of completed work sessions
   maxRounds: number // Maximum rounds for this session (capped at MAX_ROUNDS)
+  maxWorkTime?: number // Maximum work time in seconds
+  restMode?: WorkRestMode // How rest duration is calculated
+  fixedRestDuration?: number // Fixed rest duration in seconds (only when restMode is FIXED)
   state: TimerState // Active timing state
   currentTime: number // Current time in milliseconds (work elapsed or rest remaining)
 }
@@ -37,6 +50,7 @@ export interface WorkRestTimerActions {
 }
 
 export interface WorkRestTimerOptions {
+  config?: WorkRestTimerConfig // Timer-specific configuration only
   onLapRecorded?: (time: number) => void // Callback for lap recording
 }
 

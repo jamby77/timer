@@ -14,15 +14,21 @@ const MAX_RATIO = 10000 // 100.0 stored as integer
 const REST_DELAY_MS = 100 // 100ms delay before rest starts
 const MAX_ROUNDS = 1000 // Maximum consecutive work/rest cycles
 
-export const useWorkRestTimer = ({ onLapRecorded }: WorkRestTimerOptions = {}): [
+export const useWorkRestTimer = ({ 
+  config = {},
+  onLapRecorded 
+}: WorkRestTimerOptions = {}): [
   WorkRestTimerState,
   WorkRestTimerActions,
 ] => {
   const [state, setState] = useState<WorkRestTimerState>({
     phase: TimerPhase.Idle,
-    ratio: DEFAULT_RATIO,
+    ratio: Math.round((config.ratio ?? 1.0) * 100), // Convert to integer * 100
     rounds: 0,
-    maxRounds: MAX_ROUNDS,
+    maxRounds: Math.min(config.maxRounds ?? MAX_ROUNDS, MAX_ROUNDS), // Cap at MAX_ROUNDS
+    maxWorkTime: config.maxWorkTime,
+    restMode: config.restMode,
+    fixedRestDuration: config.fixedRestDuration,
     state: TimerState.Idle,
     currentTime: 0,
   })
@@ -286,14 +292,12 @@ export const useWorkRestTimer = ({ onLapRecorded }: WorkRestTimerOptions = {}): 
 
   // Get progress
   const getProgress = useCallback(() => {
-    if (state.phase === TimerPhase.Work && stopwatchRef.current) {
-      const elapsed = state.currentTime
-      return (elapsed / WORK_TIME_LIMIT_MS) * 100
-    } else if (state.phase === TimerPhase.Rest && timerRef.current) {
+    if (state.phase === TimerPhase.Rest && timerRef.current) {
       const duration = timerRef.current.getInitialTime()
       const timeLeft = state.currentTime
       return ((duration - timeLeft) / duration) * 100
     }
+    // Work phase has no meaningful progress since duration is unknown
     return 0
   }, [state.phase, state.currentTime])
 

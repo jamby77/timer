@@ -1,4 +1,4 @@
-import { memo, ReactNode } from 'react'
+import { ReactNode } from 'react'
 
 import { TimerState } from '@/lib/timer'
 
@@ -33,4 +33,4 @@ function TimerButton({ state, onStart, onPause, onReset, onRestart }: TimerButto
   )
 }
 
-export default memo(TimerButton)
+export default TimerButton

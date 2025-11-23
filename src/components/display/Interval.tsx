@@ -91,7 +91,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
         state={timerState}
         time={formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
-        currentStep={currentStep}
+        isWork={currentStep?.isWork}
       >
         <Progress
           value={getProgress()}
