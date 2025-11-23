@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { formatTime, getStatusMessage, TimerState, useStopwatch } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
+import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
@@ -26,7 +27,7 @@ export function Stopwatch({
   onStateChange,
   completionMessage,
 }: StopwatchProps) {
-  const { laps, addLap, clearHistory } = useLapHistory()
+  const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
 
   const handleStateChange = useCallback(
     (newState: TimerState) => {
@@ -64,8 +65,8 @@ export function Stopwatch({
   const timeLimitDisplay = timeLimit ? `(Cap: ${formatTime(timeLimit * 1000)})` : undefined
 
   return (
-    <div className="flex flex-col items-center gap-8">
-      <TimerCard label={label} status={status} time={formatTime(time)} subtitle={timeLimitDisplay}>
+    <TimerContainer>
+      <TimerCard label={label} state={state} time={formatTime(time)} subtitle={timeLimitDisplay}>
         <TimerButton
           state={state}
           onStart={start}
@@ -74,7 +75,7 @@ export function Stopwatch({
           onRestart={handleRestart}
         />
       </TimerCard>
-      <LapHistory laps={laps} onClearHistory={clearHistory} />
-    </div>
+      <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
+    </TimerContainer>
   )
 }

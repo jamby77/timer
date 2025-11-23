@@ -3,8 +3,10 @@
 import { useCallback } from 'react'
 import cx from 'clsx'
 
+import type { IntervalConfig } from '@/lib/timer/types'
+
 import { formatTime, getStatusMessage } from '@/lib/timer'
-import { TimerState, type IntervalConfig } from '@/lib/timer/types'
+import { TimerState } from '@/lib/timer/types'
 import { useIntervalTimer } from '@/lib/timer/useIntervalTimer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
@@ -16,6 +18,7 @@ import {
   StartButton,
   StopButton,
 } from '@/components/ui/timer-buttons'
+import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 
@@ -25,7 +28,7 @@ interface IntervalProps {
 }
 
 export function Interval({ intervalConfig }: IntervalProps) {
-  const { laps, addLap, clearHistory } = useLapHistory()
+  const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const addLapCallback = useCallback(
     (elapsedTime: number) => {
       // Add lap with the actual elapsed time
@@ -82,46 +85,52 @@ export function Interval({ intervalConfig }: IntervalProps) {
     timerState === TimerState.Paused
 
   return (
-    <TimerCard
-      label={currentStep?.label || 'Interval Timer'}
-      status={status}
-      time={formatTime(timeLeft)}
-      subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
-      currentStep={currentStep}
-    >
-      <Progress
-        value={getProgress()}
-        className={cx('mb-4', {
-          invisible: !currentStep,
-          '[--progress-indicator-color:var(--tm-pr-work-bg)]': currentStep?.isWork,
-          '[--progress-indicator-color:var(--tm-pr-rest-bg)]': !currentStep?.isWork,
-        })}
-      />
-      <div className="flex items-center justify-center gap-4">
-        {showPlayButton ? (
-          <StartButton
-            onClick={start}
-            title={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
-            label={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
+    <TimerContainer>
+      <TimerCard
+        label={currentStep?.label || 'Interval Timer'}
+        state={timerState}
+        time={formatTime(timeLeft)}
+        subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
+        currentStep={currentStep}
+      >
+        <Progress
+          value={getProgress()}
+          className={cx('mb-4', {
+            invisible: !currentStep,
+            '[--progress-indicator-color:var(--tm-pr-work-bg)]': currentStep?.isWork,
+            '[--progress-indicator-color:var(--tm-pr-rest-bg)]': !currentStep?.isWork,
+          })}
+        />
+        <div className="flex items-center justify-center gap-4">
+          {showPlayButton ? (
+            <StartButton
+              onClick={start}
+              title={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
+              label={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
+            />
+          ) : (
+            <PauseButton onClick={pause} title="Pause intervals" label="Pause intervals" />
+          )}
+          <SkipButton
+            onClick={skipCurrentStep}
+            disabled={timerState !== TimerState.Running}
+            title="Skip current interval"
+            label="Skip current interval"
           />
-        ) : (
-          <PauseButton onClick={pause} title="Pause intervals" label="Pause intervals" />
-        )}
-        <SkipButton
-          onClick={skipCurrentStep}
-          disabled={timerState !== TimerState.Running}
-          title="Skip current interval"
-          label="Skip current interval"
-        />
-        <StopButton
-          onClick={handleStop}
-          disabled={timerState !== TimerState.Running}
-          title="Stop intervals"
-          label="Stop intervals"
-        />
-        <ResetButton onClick={handleRestart} title="Restart intervals" label="Restart intervals" />
-      </div>
-      <LapHistory laps={laps} onClearHistory={clearHistory} />
-    </TimerCard>
+          <StopButton
+            onClick={handleStop}
+            disabled={timerState !== TimerState.Running}
+            title="Stop intervals"
+            label="Stop intervals"
+          />
+          <ResetButton
+            onClick={handleRestart}
+            title="Restart intervals"
+            label="Restart intervals"
+          />
+        </div>
+      </TimerCard>
+      <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
+    </TimerContainer>
   )
 }

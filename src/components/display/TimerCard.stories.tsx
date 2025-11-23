@@ -10,7 +10,7 @@ const meta = preview.meta({ component: TimerCard })
 export const WithButtons = meta.story({
   args: {
     label: 'WORK/REST (r 1.00x)',
-    status: 'Running',
+    state: TimerState.Paused,
     time: '01:23.45',
     subtitle: 'Round: 1',
     currentStep: { isWork: true } as any,
@@ -29,7 +29,7 @@ export const WithButtons = meta.story({
 export const WorkPhase = meta.story({
   args: {
     label: 'WORK/REST (r 1.00x)',
-    status: 'Running',
+    state: TimerState.Running,
     time: '01:23.45',
     subtitle: 'Round: 1',
     currentStep: { isWork: true } as any,
@@ -40,7 +40,7 @@ export const WorkPhase = meta.story({
 export const RestPhase = meta.story({
   args: {
     label: 'WORK/REST (r 1.00x)',
-    status: 'Resting',
+    state: TimerState.Paused,
     time: '01:23.45',
     subtitle: 'Round: 1',
     currentStep: { isWork: false } as any,
@@ -51,7 +51,7 @@ export const RestPhase = meta.story({
 export const Idle = meta.story({
   args: {
     label: 'WORK/REST (r 1.00x)',
-    status: 'Ready to start',
+    state: TimerState.Idle,
     time: '00:00.00',
     subtitle: 'Round: 0',
     currentStep: null,
@@ -62,7 +62,7 @@ export const Idle = meta.story({
 export const WithoutSubtitle = meta.story({
   args: {
     label: 'WORK/REST (r 2.50x)',
-    status: 'Paused',
+    state: TimerState.Paused,
     time: '05:42.30',
     children: <div>Control buttons would go here</div>,
   },

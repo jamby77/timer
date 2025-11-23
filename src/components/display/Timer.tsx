@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react'
 
-import { formatTime, getStatusMessage, TimerState, useTimer } from '@/lib/timer'
+import { formatTime, TimerState, useTimer } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
 import { LapHistory } from './LapHistory'
@@ -53,11 +53,9 @@ export function Timer({ duration, label = 'Timer', completionMessage, onStateCha
     restart()
   }
 
-  const status = getStatusMessage(state, completionMessage)
-
   return (
     <div className="flex flex-col items-center gap-8">
-      <TimerCard label={label} status={status} time={formatTime(time)}>
+      <TimerCard label={label} state={state} time={formatTime(time)}>
         <TimerButton
           state={state}
           onStart={start}

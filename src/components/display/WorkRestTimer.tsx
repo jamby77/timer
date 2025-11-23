@@ -25,7 +25,7 @@ interface WorkRestTimerProps {
 }
 
 export function WorkRestTimer({ className }: WorkRestTimerProps) {
-  const { laps, addLap, clearHistory } = useLapHistory()
+  const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const [ratioInteger, setRatioInteger] = useState<string>('1')
   const [ratioDecimal, setRatioDecimal] = useState<string>('00')
 
@@ -131,7 +131,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
     <div className={cx('flex flex-col items-center gap-8', className)}>
       <TimerCard
         label={`WORK/REST (r ${currentRatio}x)`}
-        status={status}
+        state={state.state}
         time={displayData.time}
         subtitle={`Round: ${state.rounds + 1}`}
         currentStep={{ isWork: displayData.isWork } as any}
@@ -263,7 +263,7 @@ export function WorkRestTimer({ className }: WorkRestTimerProps) {
           </div>
         </div>
 
-        <LapHistory laps={laps} onClearHistory={clearHistory} />
+        <LapHistory laps={laps} lastLap={lastLap} bestLap={bestLap} onClearHistory={clearHistory} />
       </TimerCard>
     </div>
   )

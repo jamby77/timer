@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 
 interface LapHistoryProps {
   laps: LapEntry[]
@@ -29,7 +30,7 @@ const ExpandButton = ({
   return (
     <Button
       size="sm"
-      className="text-card-foreground bg-transparent p-0 px-1 shadow-none transition-colors hover:bg-transparent"
+      className="text-card-foreground mx-2 bg-transparent p-0 px-1 shadow-none transition-colors hover:bg-transparent"
       aria-label={label}
       onClick={onClick}
     >
@@ -49,19 +50,26 @@ const CollapsedHeader = ({
   lastLapTime: string
   bestLapTime: string
 }) => (
-  <div className="flex items-center gap-2">
+  <Item className="w-full" size="sm">
     <span className="text-accent-foreground font-medium">Last lap</span>
     <span className="text-card-foreground font-mono">{lastLapTime}</span>
     <span>/</span>
     <span className="text-accent-foreground font-medium">Best lap</span>
     <span className="text-card-foreground font-mono">{bestLapTime}</span>
-  </div>
+  </Item>
 )
 
-const ExpandedHeader = () => (
-  <div className="flex w-full items-center justify-start">
-    <h3 className="text-foreground text-lg font-semibold">Lap History</h3>
-  </div>
+const ExpandedHeader = ({ onClearHistory }: { onClearHistory?: () => void }) => (
+  <Item className="w-full pr-0" size="sm">
+    <ItemContent>
+      <ItemTitle className="text-foreground text-lg font-semibold">Lap History</ItemTitle>
+    </ItemContent>
+    <ItemActions>
+      <Button variant="destructive" className="uppercase" size="sm" onClick={onClearHistory}>
+        Clear
+      </Button>
+    </ItemActions>
+  </Item>
 )
 
 export function LapHistory({
@@ -77,93 +85,88 @@ export function LapHistory({
 
   const handleClearHistory = () => {
     onClearHistory?.()
-    // setIsExpanded(false);
+    setIsExpanded(false)
   }
   if (laps.length === 0) {
     return null
   }
   return (
     <Collapsible
-      defaultOpen={initialExpanded}
+      open={isExpanded}
       onOpenChange={setIsExpanded}
       className={cx(
-        'border-accent divide-accent mt-6 w-full divide-y rounded-md border-2 transition-all duration-300 ease-in-out',
+        'mt-6 w-full divide-y rounded-md border-2 transition-all duration-300 ease-in-out',
         {
           invisible: laps.length === 0,
+          'bg-background border-accent divide-accent': isExpanded,
         }
       )}
     >
       {/*// Compact view - show only last lap*/}
       <div
         className={cn(
-          'flex items-center justify-between gap-4 px-4 py-2 text-sm transition-all duration-300 ease-in-out',
+          'flex items-center justify-between gap-1 rounded-md text-sm transition-all duration-300 ease-in-out',
           {
-            'bg-background text-foreground rounded-t-lg': isExpanded,
-            'rounded-lg bg-gray-50/50': !isExpanded,
+            'bg-background/50': !isExpanded,
           }
         )}
       >
-        <CollapsibleTrigger role="button" className="cursor-pointer">
+        <CollapsibleTrigger role="button" className="w-full cursor-pointer">
           {!isExpanded && (
             <CollapsedHeader
               lastLapTime={formatTime(lastLap?.lapTime || 0)}
               bestLapTime={formatTime(bestLap?.lapTime || 0)}
             />
           )}
-          {isExpanded && <ExpandedHeader />}
+          {isExpanded && <ExpandedHeader onClearHistory={handleClearHistory} />}
         </CollapsibleTrigger>
-        <div className="space-x-2">
-          {isExpanded && !!onClearHistory && (
-            <Button variant="destructive" onClick={onClearHistory} className="uppercase" size="sm">
-              Clear
-            </Button>
-          )}
-          <CollapsibleTrigger asChild>
-            <ExpandButton label="Expand lap history" opened={isExpanded} />
-          </CollapsibleTrigger>
-        </div>
+        <CollapsibleTrigger asChild>
+          <ExpandButton label="Expand lap history" opened={isExpanded} />
+        </CollapsibleTrigger>
       </div>
       <CollapsibleContent asChild>
         {laps.length > 0 ? (
           // Expanded view - show full list (only when laps exist)
-          <div className="w-full max-w-5xl p-6 transition-all duration-300 ease-in-out">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-4 bg-blue-50 px-4 text-lg hover:bg-blue-100">
-                {lastLap && (
-                  <div className="flex items-center justify-between gap-2 text-blue-700">
-                    <span className="font-medium">Last lap: </span>
-                    <span className="font-mono font-bold text-blue-800">
-                      {formatTime(lastLap?.lapTime || 0)}
-                    </span>
-                  </div>
-                )}
-                {bestLap && (
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-gray-700">Best lap: </span>
-                    <span className="font-mono font-bold text-gray-800">
-                      {formatTime(bestLap?.lapTime || 0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {[...laps].reverse().map((lap, index) => {
-                if (index === 0) {
-                  return null
-                }
-                const lapNumber = laps.length - index
-                return (
-                  <div
-                    key={lap.id}
-                    className={cx(
-                      'flex items-center justify-between rounded bg-white px-4 py-2 text-sm text-gray-500 transition-all duration-300 ease-in-out hover:bg-gray-100'
-                    )}
-                  >
-                    <span className="font-medium">{`Lap ${lapNumber}`}</span>
-                    <span className="font-mono">{formatTime(lap.lapTime)}</span>
-                  </div>
-                )
-              })}
-            </div>
+          <div className="w-full max-w-5xl space-y-2 p-6 px-4 transition-all duration-300 ease-in-out">
+            <Item className="justify-between px-4 text-lg" variant="outline">
+              {lastLap && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Last lap: </span>
+                  <span className="text-lap-last-fg font-mono font-bold">
+                    {formatTime(lastLap?.lapTime || 0)}
+                  </span>
+                </div>
+              )}
+              {bestLap && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Best lap: </span>
+                  <span className="text-lap-best-fg font-mono font-bold">
+                    {formatTime(bestLap?.lapTime || 0)}
+                  </span>
+                </div>
+              )}
+            </Item>
+            {[...laps].reverse().map((lap, index) => {
+              if (index === 0) {
+                return null
+              }
+              const lapNumber = laps.length - index
+              return (
+                <Item
+                  size="sm"
+                  variant="outline"
+                  key={lap.id}
+                  className={cx('text-sm transition-all duration-300 ease-in-out')}
+                >
+                  <ItemContent className="flex-row items-center justify-between">
+                    <ItemTitle className="font-medium">{`Lap ${lapNumber}`}</ItemTitle>
+                    <ItemDescription className="font-mono">
+                      {formatTime(lap.lapTime)}
+                    </ItemDescription>
+                  </ItemContent>
+                </Item>
+              )
+            })}
           </div>
         ) : null}
       </CollapsibleContent>

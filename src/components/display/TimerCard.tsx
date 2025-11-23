@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 
+import { TimerState } from '@/lib/enums'
 import { TimerStep } from '@/lib/timer/TimerManager'
 import { cn } from '@/lib/utils'
 
@@ -14,17 +15,18 @@ import {
 
 interface CardProps {
   label: string
-  status: ReactNode
+  state: TimerState
   time: string
   children: ReactNode
   subtitle?: ReactNode
   currentStep?: TimerStep | null
 }
 
-export const TimerCard = ({ label, status, time, children, subtitle, currentStep }: CardProps) => (
+export const TimerCard = ({ label, state, time, children, subtitle, currentStep }: CardProps) => (
   <div
-    className={cn('animate-border rounded-xl border-4 border-transparent', {
+    className={cn('rounded-xl border-4 border-transparent', {
       'animated-border-card': currentStep?.isWork,
+      'animate-border': state === TimerState.Running,
     })}
   >
     <ShadcnCard
@@ -47,7 +49,6 @@ export const TimerCard = ({ label, status, time, children, subtitle, currentStep
               {subtitle}
             </p>
           )}
-          {status && <p className={cn('text-center text-sm', { invisible: !status })}>{status}</p>}
         </CardDescription>
       </CardHeader>
 
@@ -63,8 +64,8 @@ export const TimerCard = ({ label, status, time, children, subtitle, currentStep
         </div>
       </CardContent>
 
-      <CardFooter className="justify-center px-0 pt-0">
-        <div className="flex flex-col space-x-4">{children}</div>
+      <CardFooter className="grow justify-center px-0 pt-0">
+        <div className="flex max-w-8/10 grow flex-col space-x-4">{children}</div>
       </CardFooter>
     </ShadcnCard>
   </div>

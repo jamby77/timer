@@ -25,6 +25,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -46,11 +47,18 @@
   --color-tm-work-fg: var(--tm-work-fg);
   --color-tm-rest-bg: var(--tm-rest-bg);
   --color-tm-rest-fg: var(--tm-rest-fg);
+  /* Timer button colors - Light theme */
   --color-tm-play: var(--tm-play);
   --color-tm-pause: var(--tm-pause);
   --color-tm-reset: var(--tm-reset);
   --color-tm-stop: var(--tm-stop);
   --color-tm-skip: var(--tm-skip);
+
+  /* Laps colors */
+  --color-lap-best-fg: var(--lap-best-fg);
+  --color-lap-last-fg: var(--lap-last-fg);
+
+  /* Timer progress colors - Light theme */
   --color-tm-pr-work-bg: var(--tm-pr-work-bg);
   --color-tm-pr-rest-bg: var(--tm-pr-rest-bg);
 }
@@ -66,7 +74,6 @@
                   var(--color-tm-rest-bg) 94%,
                   var(--color-tm-work-bg)
           ) border-box;
-  animation: var(--animate-border);
 }
 
 @property --border-angle {
@@ -99,6 +106,7 @@
   --accent: oklch(0.968 0.007 247.896);
   --accent-foreground: oklch(0.208 0.042 265.755);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.978 0.003 17.213);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
@@ -129,6 +137,10 @@
   --tm-reset: oklch(0.612 0.186 297.73);
   --tm-stop: oklch(0.577 0.245 27.325);
   --tm-skip: oklch(0.381 0.099 43.946);
+
+  /* Laps colors */
+  --lap-best-fg: oklch(0.536 0.177 142.602);
+  --lap-last-fg: oklch(0.425 0.254 272.823);
   
   /* Progress colors - Light theme */
   --tm-pr-work-bg: oklch(0.405 0.07 142.3);
@@ -152,6 +164,7 @@
   --accent: oklch(0.279 0.041 260.031);
   --accent-foreground: oklch(0.984 0.003 247.858);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 89.876);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
@@ -174,11 +187,17 @@
   --tm-work-fg: oklch(0.845 0.03 142.3);
   --tm-rest-bg: oklch(0.769 0.148 77.315 / 0.5);
   --tm-rest-fg: oklch(0.845 0.03 254.3);
+
+  /* Timer button colors - Light theme */
   --tm-play: oklch(0.845 0.03 142.3);
   --tm-pause: oklch(0.845 0.08 25.3);
   --tm-reset: oklch(0.704 0.191 22.216);
   --tm-stop: oklch(0.704 0.191 22.216);
   --tm-skip: oklch(0.845 0.08 45.3);
+
+  /* Laps colors */
+  /*--lap-best-fg: oklch(0.208 0.042 265.755);*/
+  /*--lap-last-fg: oklch(0.208 0.042 265.755);*/
   
   /* Progress colors - Dark theme */
   --tm-pr-work-bg: oklch(0.61 0.089 142.515);
