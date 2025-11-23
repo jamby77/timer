@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { WorkRestTimerActions, WorkRestTimerOptions, WorkRestTimerState } from './types'
 
-import { TimerPhase, TimerState } from '@/lib/enums'
+import { TimerPhase, TimerState, WorkRestMode } from '@/lib/enums'
 
 import { Stopwatch } from './Stopwatch'
 import { Timer } from './Timer'
@@ -117,7 +117,15 @@ export const useWorkRestTimer = ({
   // Start rest phase
   const startRestPhase = useCallback(
     (workDuration: number, ratio: number) => {
-      const restDuration = Math.round(workDuration * (ratio / 100))
+      let restDuration: number
+      
+      // Calculate rest duration based on mode
+      if (state.restMode === WorkRestMode.FIXED && state.fixedRestDuration) {
+        restDuration = state.fixedRestDuration * 1000 // Convert seconds to milliseconds
+      } else {
+        // Default: ratio-based calculation
+        restDuration = Math.round(workDuration * (ratio / 100))
+      }
 
       // Cap rest duration to 99:99 if needed
       const cappedRestDuration = Math.min(restDuration, WORK_TIME_LIMIT_MS)
@@ -133,7 +141,7 @@ export const useWorkRestTimer = ({
         restTimer.start()
       }, REST_DELAY_MS)
     },
-    [createRestTimer]
+    [createRestTimer, state.restMode, state.fixedRestDuration]
   )
 
   // Start work

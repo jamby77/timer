@@ -39,13 +39,24 @@ export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
     actions.startWork()
   }, [actions])
 
+  const isRestPhase = state.phase === TimerPhase.Rest
+  const showProgress = isRestPhase
+  const isIdlePhase = state.phase === TimerPhase.Idle
+  const isWorkPhase = state.phase === TimerPhase.Work
+  const isRunningState = state.state === TimerState.Running
+  const isPausedState = state.state === TimerState.Paused
+
+  const showStartButton = isIdlePhase || isPausedState
+  const showStopButton = isWorkPhase
+  const showPauseButton = showStopButton && isRunningState
+
   const handleStop = useCallback(() => {
-    if (state.phase === TimerPhase.Work && state.state === TimerState.Running) {
+    if (showPauseButton) {
       actions.stopWork()
-    } else if (state.phase === TimerPhase.Rest) {
+    } else if (isRestPhase) {
       actions.stopRest()
     }
-  }, [state.phase, state.state, actions])
+  }, [state.phase, actions, showPauseButton])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
@@ -55,7 +66,6 @@ export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
   const { isWork, time } = getDisplayData(state)
   const currentRatio = (state.ratio / 100).toFixed(2)
 
-  const showProgress = state.phase === TimerPhase.Rest
   return (
     <div className={cx('flex flex-col items-center gap-8', className)}>
       <TimerCard
@@ -74,21 +84,29 @@ export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
 
         {/* Main Control Buttons */}
         <div className="flex items-center justify-center gap-4">
-          {state.phase === TimerPhase.Idle || state.state === TimerState.Paused ? (
-            <StartButton
-              onClick={state.phase === TimerPhase.Idle ? actions.startWork : actions.resumeWork}
-              title={state.phase === TimerPhase.Idle ? 'Start work' : 'Resume work'}
-              label={state.phase === TimerPhase.Idle ? 'Start work' : 'Resume work'}
-            />
-          ) : state.phase === TimerPhase.Work && state.state === TimerState.Running ? (
+          {showStartButton && (
+            <>
+              <StartButton
+                onClick={isIdlePhase ? actions.startWork : actions.resumeWork}
+                title={`${isIdlePhase ? 'Start' : 'Resume'} work`}
+                label={`${isIdlePhase ? 'Start' : 'Resume'} work`}
+              />
+            </>
+          )}
+          {showPauseButton && (
             <PauseButton onClick={actions.pauseWork} title="Pause work" label="Pause work" />
-          ) : null}
-
-          {state.phase === TimerPhase.Work && (
-            <StopButton onClick={handleStop} title="Stop work" label="Stop work" />
           )}
 
-          {state.phase === TimerPhase.Rest && (
+          {(showStopButton || showStartButton) && (
+            <StopButton
+              disabled={showStartButton}
+              onClick={handleStop}
+              title="Stop work"
+              label="Stop work"
+            />
+          )}
+
+          {isRestPhase && (
             <>
               <SkipButton onClick={handleSkipRest} title="Skip rest" label="Skip rest" />
               <StopButton onClick={handleStop} title="Stop rest" label="Stop rest" />
@@ -99,7 +117,7 @@ export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
             onClick={handleRestart}
             title="Restart"
             label="Restart"
-            disabled={state.phase === TimerPhase.Idle}
+            disabled={isIdlePhase}
           />
         </div>
         <LapHistory laps={laps} lastLap={lastLap} bestLap={bestLap} onClearHistory={clearHistory} />
