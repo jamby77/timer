@@ -1,6 +1,6 @@
 import type { AnyTimerConfig } from '@/types/configure'
 
-import { TimerCategory, TimerType, WorkRestMode } from '@/types/configure'
+import { TimerType, WorkRestMode } from '@/types/configure'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 
 // Configuration summary generator
@@ -155,22 +155,7 @@ export const getTimerTypeDisplayName = (type: TimerType): string => {
 }
 
 // Get timer category display name
-export const getTimerCategoryDisplayName = (category: TimerCategory): string => {
-  switch (category) {
-    case TimerCategory.CARDIO:
-      return 'Cardio'
-    case TimerCategory.STRENGTH:
-      return 'Strength'
-    case TimerCategory.FLEXIBILITY:
-      return 'Flexibility'
-    case TimerCategory.SPORTS:
-      return 'Sports'
-    case TimerCategory.CUSTOM:
-      return 'Custom'
-    default:
-      return 'Unknown'
-  }
-}
+
 
 // Convert timer config to URL parameters
 export const configToUrlParams = (config: AnyTimerConfig): string => {
@@ -209,11 +194,13 @@ export const configToUrlParams = (config: AnyTimerConfig): string => {
       break
 
     case TimerType.WORKREST:
-      params.set('ratio', config.ratio.toString())
       params.set('maxWorkTime', config.maxWorkTime.toString())
       params.set('maxRounds', config.maxRounds.toString())
       params.set('restMode', config.restMode)
-      if (config.fixedRestDuration) {
+      if (config.restMode === WorkRestMode.RATIO && config.ratio) {
+        params.set('ratio', config.ratio.toString())
+      }
+      if (config.restMode === WorkRestMode.FIXED && config.fixedRestDuration) {
         params.set('fixedRestDuration', config.fixedRestDuration.toString())
       }
       if (config.countdownBeforeStart) {

@@ -92,7 +92,6 @@ export const WorkRestFixed = meta.story({
       type: TimerType.WORKREST,
       restMode: WorkRestMode.FIXED,
       fixedRestDuration: 30,
-      ratio: 2.0,
       maxWorkTime: 300,
       maxRounds: 10,
       createdAt: new Date(),

@@ -79,7 +79,7 @@ export const TimerConfigForm = ({
   };
 
   const updateConfig = (updates: Partial<AnyTimerConfig>) => {
-    setConfig((prev) => ({ ...prev, ...updates }));
+    setConfig((prev) => ({ ...prev, ...updates } as AnyTimerConfig));
     setErrors([]);
   };
 

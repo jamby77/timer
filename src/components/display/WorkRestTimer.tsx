@@ -20,13 +20,13 @@ import {
 } from '@/components/ui/timer-buttons'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
+import { TimerContainer } from './TimerContainer'
 
 interface WorkRestTimerProps {
-  className?: string
   config?: WorkRestTimerConfig // Timer-specific configuration only
 }
 
-export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
+export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
 
   const [state, actions] = useWorkRestTimer({
@@ -67,7 +67,7 @@ export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
   const currentRatio = (state.ratio / 100).toFixed(2)
 
   return (
-    <div className={cx('flex flex-col items-center gap-8', className)}>
+    <TimerContainer>
       <TimerCard
         label={`WORK/REST (r ${currentRatio}x)`}
         state={state.state}
@@ -122,6 +122,6 @@ export function WorkRestTimer({ className, config = {} }: WorkRestTimerProps) {
         </div>
         <LapHistory laps={laps} lastLap={lastLap} bestLap={bestLap} onClearHistory={clearHistory} />
       </TimerCard>
-    </div>
+    </TimerContainer>
   )
 }

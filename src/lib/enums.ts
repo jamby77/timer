@@ -35,13 +35,6 @@ export enum WorkRestMode {
   FIXED = 'fixed',
 }
 
-export enum TimerCategory {
-  CARDIO = 'cardio',
-  STRENGTH = 'strength',
-  FLEXIBILITY = 'flexibility',
-  SPORTS = 'sports',
-  CUSTOM = 'custom',
-}
 
 // Timer type labels for UI display
 export const TIMER_TYPE_LABELS: Record<TimerType, string> = {

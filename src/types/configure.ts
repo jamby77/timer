@@ -1,64 +1,80 @@
-import { TimerType, WorkRestMode, TimerCategory } from "@/lib/enums";
+import { TimerType, WorkRestMode } from '@/lib/enums'
 
 // Re-export enums for backward compatibility
-export { TimerType, WorkRestMode, TimerCategory };
+export { TimerType, WorkRestMode }
 
 // Timer configuration base interface
 export interface TimerConfig {
-  id: string;
-  name: string;
-  type: TimerType;
-  createdAt: Date;
-  lastUsed: Date;
+  id: string
+  name: string
+  type: TimerType
+  createdAt?: Date
+  countdownBeforeStart?: number // seconds
+  lastUsed?: Date
 }
 
 // Specific timer type configurations
 export interface CountdownConfig extends TimerConfig {
-  type: TimerType.COUNTDOWN;
-  duration: number; // seconds
-  completionMessage?: string;
+  type: TimerType.COUNTDOWN
+  duration: number // seconds
+  completionMessage?: string
 }
 
 export interface StopwatchConfig extends TimerConfig {
-  type: TimerType.STOPWATCH;
-  timeLimit?: number; // seconds (optional)
-  completionMessage?: string;
+  type: TimerType.STOPWATCH
+  timeLimit?: number // seconds (optional)
+  completionMessage?: string
 }
 
 export interface IntervalConfig extends TimerConfig {
-  type: TimerType.INTERVAL;
-  workDuration: number; // seconds
-  restDuration: number; // seconds
-  intervals: number;
-  workLabel?: string;
-  restLabel?: string;
-  skipLastRest?: boolean;
-  countdownBeforeStart?: number; // seconds
+  type: TimerType.INTERVAL
+  workDuration: number // seconds
+  restDuration: number // seconds
+  intervals: number
+  workLabel?: string
+  restLabel?: string
+  skipLastRest?: boolean
 }
 
-export interface WorkRestConfig extends TimerConfig {
-  type: TimerType.WORKREST;
-  ratio: number; // work/rest ratio (e.g., 2.0 for 2:1)
-  maxWorkTime: number; // seconds
-  maxRounds: number;
-  restMode: WorkRestMode;
-  fixedRestDuration?: number; // seconds (only used when restMode is FIXED)
-  countdownBeforeStart?: number; // seconds
+// Base WorkRest configuration without ratio/fixedRestDuration
+interface BaseWorkRestConfig extends TimerConfig {
+  type: TimerType.WORKREST
+  maxWorkTime: number // seconds
+  maxRounds: number
+  restMode: WorkRestMode
+  countdownBeforeStart?: number // seconds
 }
+
+// WorkRest configuration using ratio
+export interface WorkRestRatioConfig extends BaseWorkRestConfig {
+  restMode: WorkRestMode.RATIO
+  ratio: number // work/rest ratio (e.g., 2.0 for 2:1)
+  fixedRestDuration?: never // explicitly disallow
+}
+
+// WorkRest configuration using fixed duration
+export interface WorkRestFixedConfig extends BaseWorkRestConfig {
+  restMode: WorkRestMode.FIXED
+  fixedRestDuration: number // seconds
+  ratio?: never // explicitly disallow
+}
+
+// Union type for WorkRest configurations
+export type WorkRestConfig = WorkRestRatioConfig | WorkRestFixedConfig
 
 export interface ComplexPhase {
-  id: string;
-  name: string;
-  type: TimerType;
-  config: CountdownConfig | StopwatchConfig | IntervalConfig | WorkRestConfig;
-  order: number;
+  id: string
+  name: string
+  type: TimerType
+  config: CountdownConfig | StopwatchConfig | IntervalConfig | WorkRestConfig
+  order: number
 }
 
 export interface ComplexConfig extends TimerConfig {
-  type: TimerType.COMPLEX;
-  phases: ComplexPhase[];
-  overallTimeLimit?: number; // seconds (optional)
-  autoAdvance?: boolean; // automatically move to next phase
+  type: TimerType.COMPLEX
+  phases: ComplexPhase[]
+  overallTimeLimit?: number // seconds (optional)
+  autoAdvance?: boolean // automatically move to next phase
 }
 
 // Union type for all timer configurations
@@ -67,62 +83,60 @@ export type AnyTimerConfig =
   | StopwatchConfig
   | IntervalConfig
   | WorkRestConfig
-  | ComplexConfig;
+  | ComplexConfig
 
-// Timer categories for organization
 
 // Predefined timer style
 export interface PredefinedStyle<T extends AnyTimerConfig> {
-  id: string;
-  name: string;
-  description: string;
-  category: TimerCategory;
-  isBuiltIn: boolean;
-  config: T;
+  id: string
+  name: string
+  description: string
+  isBuiltIn: boolean
+  config: T
 }
 
 // Recent timer entry
 export interface RecentTimer {
-  id: string;
-  config: AnyTimerConfig;
-  startedAt: Date;
+  id: string
+  config: AnyTimerConfig
+  startedAt: Date
 }
 
 // Component prop types
 export interface RecentTimersProps {
-  timers: RecentTimer[];
-  onStartTimer: (config: AnyTimerConfig, isPredefined?: boolean) => void;
-  onRemoveTimer: (timerId: string) => void;
-  onClearAll: () => void;
+  timers: RecentTimer[]
+  onStartTimer: (config: AnyTimerConfig, isPredefined?: boolean) => void
+  onRemoveTimer: (timerId: string) => void
+  onClearAll: () => void
 }
 
 export interface TimerTypeSelectorProps {
-  selectedType: TimerType | null;
-  onTypeSelect: (type: TimerType) => void;
+  selectedType: TimerType | null
+  onTypeSelect: (type: TimerType) => void
 }
 
 export interface PredefinedStylesProps {
-  styles: PredefinedStyle<AnyTimerConfig>[];
-  onSelectStyle: (style: PredefinedStyle<AnyTimerConfig>) => void;
-  onStartTimer: (config: AnyTimerConfig) => void;
+  styles: PredefinedStyle<AnyTimerConfig>[]
+  onSelectStyle: (style: PredefinedStyle<AnyTimerConfig>) => void
+  onStartTimer: (config: AnyTimerConfig) => void
 }
 
 export interface TimerConfigFormProps {
-  type: TimerType;
-  initialConfig?: AnyTimerConfig;
-  isPredefined?: boolean;
-  onStartTimer: (config: AnyTimerConfig) => void;
-  onSaveAsPredefined?: (config: AnyTimerConfig) => void;
-  onSave?: (config: AnyTimerConfig) => void;
+  type: TimerType
+  initialConfig?: AnyTimerConfig
+  isPredefined?: boolean
+  onStartTimer: (config: AnyTimerConfig) => void
+  onSaveAsPredefined?: (config: AnyTimerConfig) => void
+  onSave?: (config: AnyTimerConfig) => void
 }
 
 // Storage types
 export interface StorageManager {
-  getRecentTimers: () => RecentTimer[];
-  addRecentTimer: (config: AnyTimerConfig) => void;
-  removeTimer: (timerId: string) => void;
-  clearRecentTimers: () => void;
-  getTimerConfig: (timerId: string) => AnyTimerConfig | null;
-  storeTimerConfig: (config: AnyTimerConfig) => string;
-  getAllStoredTimers: () => Array<{ id: string; config: AnyTimerConfig }>;
+  getRecentTimers: () => RecentTimer[]
+  addRecentTimer: (config: AnyTimerConfig) => void
+  removeTimer: (timerId: string) => void
+  clearRecentTimers: () => void
+  getTimerConfig: (timerId: string) => AnyTimerConfig | null
+  storeTimerConfig: (config: AnyTimerConfig) => string
+  getAllStoredTimers: () => Array<{ id: string; config: AnyTimerConfig }>
 }

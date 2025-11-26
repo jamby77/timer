@@ -1,7 +1,7 @@
 import React from "react";
 import { mockStyles } from "@/testing/mocks";
 import { createMockTimerConfig } from "@/testing/utils";
-import { TimerCategory, TimerType } from "@/types/configure";
+import { TimerType } from "@/types/configure";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
@@ -52,60 +52,47 @@ export const FilteredByCategory = meta.story({
     onStartTimer: fn(),
   },
   render: (args) => {
-    // Filter to only show Cardio styles
-    const cardioStyles = mockStyles.filter((style) => style.category === TimerCategory.CARDIO);
-    return React.createElement(PredefinedStyles, { ...args, styles: cardioStyles });
+    // Show all styles since categories are removed
+    return React.createElement(PredefinedStyles, args);
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain("Tabata");
     expect(canvasElement.textContent).toContain("EMOM");
-    expect(canvasElement.textContent).not.toContain("Work/Rest Ratio");
+    expect(canvasElement.textContent).toContain("Work/Rest Ratio");
   },
 });
 
-export const StrengthCategory = meta.story({
+export const StrengthStyles = meta.story({
   args: {
     styles: [],
     onSelectStyle: fn(),
     onStartTimer: fn(),
   },
   render: (args) => {
-    // Filter to only show Strength styles
-    const strengthStyles = mockStyles.filter((style) => style.category === TimerCategory.STRENGTH);
-    return React.createElement(PredefinedStyles, { ...args, styles: strengthStyles });
+    // Show all styles since categories are removed
+    return React.createElement(PredefinedStyles, args);
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain("Work/Rest Ratio");
-    expect(canvasElement.textContent).not.toContain("Tabata");
-    expect(canvasElement.textContent).not.toContain("EMOM");
+    expect(canvasElement.textContent).toContain("Tabata");
+    expect(canvasElement.textContent).toContain("EMOM");
   },
 });
 
-export const MixedCategories = meta.story({
+export const MixedStyles = meta.story({
   args: {
     styles: [],
     onSelectStyle: fn(),
     onStartTimer: fn(),
   },
   render: (args) => {
-    // Create styles across different categories
-    const mixedStyles = [
-      ...mockStyles,
-      {
-        id: "style-4",
-        name: "Countdown",
-        description: "Simple 5-minute countdown",
-        category: TimerCategory.FLEXIBILITY,
-        isBuiltIn: true,
-        config: createMockTimerConfig("Countdown", TimerType.COUNTDOWN),
-      },
-    ];
-    return React.createElement(PredefinedStyles, { ...args, styles: mixedStyles });
+    // Show all styles since categories are removed
+    return React.createElement(PredefinedStyles, args);
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain("Cardio");
-    expect(canvasElement.textContent).toContain("Strength");
-    expect(canvasElement.textContent).toContain("Flexibility");
+    expect(canvasElement.textContent).toContain("Tabata");
+    expect(canvasElement.textContent).toContain("EMOM");
+    expect(canvasElement.textContent).toContain("Work/Rest Ratio");
     expect(canvasElement.textContent).toContain("Countdown");
   },
 });

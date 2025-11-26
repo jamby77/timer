@@ -7,7 +7,7 @@ import type {
   WorkRestConfig,
 } from '@/types/configure'
 
-import { TimerCategory, TimerType } from '@/types/configure'
+import { TimerType } from '@/types/configure'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import {
@@ -16,7 +16,6 @@ import {
   formatDuration,
   formatRelativeTime,
   getConfigSummary,
-  getTimerCategoryDisplayName,
   getTimerTypeDisplayName,
   validateTimerConfig,
 } from './utils'
@@ -143,7 +142,6 @@ describe('utils', () => {
         id: 'test',
         name: 'Test Timer',
         type: TimerType.WORKREST,
-        ratio: 2.0,
         maxWorkTime: 300,
         maxRounds: 10,
         restMode: 'fixed',
@@ -247,7 +245,6 @@ describe('utils', () => {
         id: 'test',
         name: 'Test Timer',
         type: TimerType.WORKREST,
-        ratio: 2.0,
         maxWorkTime: 300,
         maxRounds: 10,
         restMode: 'fixed',
@@ -270,16 +267,6 @@ describe('utils', () => {
       expect(getTimerTypeDisplayName(TimerType.INTERVAL)).toBe('Interval')
       expect(getTimerTypeDisplayName(TimerType.WORKREST)).toBe('Work/Rest')
       expect(getTimerTypeDisplayName(TimerType.COMPLEX)).toBe('Complex')
-    })
-  })
-
-  describe('getTimerCategoryDisplayName', () => {
-    it('returns correct display names', () => {
-      expect(getTimerCategoryDisplayName(TimerCategory.CARDIO)).toBe('Cardio')
-      expect(getTimerCategoryDisplayName(TimerCategory.STRENGTH)).toBe('Strength')
-      expect(getTimerCategoryDisplayName(TimerCategory.FLEXIBILITY)).toBe('Flexibility')
-      expect(getTimerCategoryDisplayName(TimerCategory.SPORTS)).toBe('Sports')
-      expect(getTimerCategoryDisplayName(TimerCategory.CUSTOM)).toBe('Custom')
     })
   })
 

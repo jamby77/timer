@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import PlayIcon from "@/icons/PlayIcon";
-import { getConfigSummary, getTimerCategoryDisplayName } from "@/lib/configure/utils";
-import { PredefinedStylesProps, TimerCategory } from "@/types/configure";
+import { getConfigSummary } from "@/lib/configure/utils";
+import { PredefinedStylesProps } from "@/types/configure";
 
 import { ButtonLegacy, CardContainer } from "@/components/ui";
 
@@ -12,49 +12,14 @@ export const PredefinedStyles = ({
   onSelectStyle,
   onStartTimer,
 }: PredefinedStylesProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<TimerCategory | "all">("all");
-
-  const categories: Array<TimerCategory | "all"> = [
-    "all",
-    TimerCategory.CARDIO,
-    TimerCategory.STRENGTH,
-    TimerCategory.FLEXIBILITY,
-    TimerCategory.SPORTS,
-    TimerCategory.CUSTOM,
-  ];
-
-  const filteredStyles =
-    selectedCategory === "all"
-      ? styles
-      : styles.filter((style) => style.category === selectedCategory);
-
   return (
     <CardContainer>
       <div className="mb-6">
         <h2 className="mb-4 text-xl font-semibold text-gray-900">Predefined Styles</h2>
 
-        {/* Category filter */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <ButtonLegacy
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category === "all" ? "All" : getTimerCategoryDisplayName(category)}
-            </ButtonLegacy>
-          ))}
-        </div>
-      </div>
-
-      {filteredStyles.length === 0 ? (
-        <div className="py-8 text-center">
-          <p className="text-gray-600">No predefined styles found for this category.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredStyles.map((style) => (
+        {/* Styles list */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {styles.map((style) => (
             <StyleCard
               key={style.id}
               style={style}
@@ -63,7 +28,7 @@ export const PredefinedStyles = ({
             />
           ))}
         </div>
-      )}
+      </div>
     </CardContainer>
   );
 };
@@ -101,7 +66,6 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">{getTimerCategoryDisplayName(style.category)}</span>
         <ButtonLegacy size="sm" onClick={handleStartClick} className="flex items-center gap-2">
           <PlayIcon className="h-4 w-4" />
           Start
