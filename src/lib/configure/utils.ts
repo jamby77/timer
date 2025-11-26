@@ -1,7 +1,126 @@
+import { z } from 'zod'
+
 import type { AnyTimerConfig } from '@/types/configure'
 
 import { TimerType, WorkRestMode } from '@/types/configure'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
+
+// Zod schemas for timer configuration validation
+
+// Base timer config schema
+const baseTimerConfigSchema = z.object({
+  id: z.string().min(1, 'Timer ID is required'),
+  name: z.string().min(1, 'Timer name is required'),
+  type: z.enum(TimerType),
+  createdAt: z.date().optional(),
+  countdownBeforeStart: z.number().int().min(0).optional(),
+  lastUsed: z.date().optional(),
+})
+
+// Countdown timer schema
+const countdownConfigSchema = baseTimerConfigSchema.extend({
+  type: z.literal(TimerType.COUNTDOWN),
+  duration: z
+    .number()
+    .int()
+    .min(1, 'Duration must be greater than 0')
+    .max(86400, 'Duration cannot exceed 24 hours'),
+  completionMessage: z.string().optional(),
+})
+
+// Stopwatch timer schema
+const stopwatchConfigSchema = baseTimerConfigSchema.extend({
+  type: z.literal(TimerType.STOPWATCH),
+  timeLimit: z
+    .number()
+    .int()
+    .min(1, 'Time limit must be greater than 0')
+    .max(86400, 'Time limit cannot exceed 24 hours')
+    .optional(),
+  completionMessage: z.string().optional(),
+})
+
+// Interval timer schema
+const intervalConfigSchema = baseTimerConfigSchema.extend({
+  type: z.literal(TimerType.INTERVAL),
+  workDuration: z.number().int().min(1, 'Work duration must be greater than 0'),
+  restDuration: z.number().int().min(0, 'Rest duration must be 0 or greater'),
+  intervals: z
+    .number()
+    .int()
+    .min(1, 'Number of intervals must be greater than 0')
+    .max(1000, 'Number of intervals cannot exceed 1000'),
+  workLabel: z.string().optional(),
+  restLabel: z.string().optional(),
+  skipLastRest: z.boolean().optional(),
+})
+
+// WorkRest ratio config schema
+const workRestRatioConfigSchema = baseTimerConfigSchema.extend({
+  type: z.literal(TimerType.WORKREST),
+  maxWorkTime: z.number().int().min(1, 'Maximum work time must be greater than 0'),
+  maxRounds: z.number().int().min(1, 'Maximum rounds must be greater than 0'),
+  restMode: z.literal(WorkRestMode.RATIO),
+  ratio: z.number().min(0.1, 'Work/rest ratio must be greater than 0'),
+  fixedRestDuration: z.never().optional(),
+})
+
+// WorkRest fixed config schema
+const workRestFixedConfigSchema = baseTimerConfigSchema.extend({
+  type: z.literal(TimerType.WORKREST),
+  maxWorkTime: z.number().int().min(1, 'Maximum work time must be greater than 0'),
+  maxRounds: z.number().int().min(1, 'Maximum rounds must be greater than 0'),
+  restMode: z.literal(WorkRestMode.FIXED),
+  fixedRestDuration: z.number().int().min(1, 'Fixed rest duration must be greater than 0'),
+  ratio: z.never().optional(),
+})
+
+// WorkRest union schema
+const workRestConfigSchema = z.discriminatedUnion('restMode', [
+  workRestRatioConfigSchema,
+  workRestFixedConfigSchema,
+])
+
+// Declare anyTimerConfigSchema first with explicit type to avoid circular reference issues
+const anyTimerConfigSchema = z.discriminatedUnion('type', [
+  countdownConfigSchema,
+  stopwatchConfigSchema,
+  intervalConfigSchema,
+  workRestConfigSchema,
+  // Complex config will be added after it's defined
+]) as any
+
+// Complex phase schema (can now reference anyTimerConfigSchema)
+const complexPhaseSchema = z.object({
+  id: z.string().min(1, 'Phase ID is required'),
+  name: z.string().min(1, 'Phase name is required'),
+  type: z.enum(TimerType),
+  config: z.lazy(() => anyTimerConfigSchema),
+  order: z.number().int().min(0, 'Phase order must be 0 or greater'),
+})
+
+// Complex timer schema
+const complexConfigSchema = baseTimerConfigSchema.extend({
+  type: z.literal(TimerType.COMPLEX),
+  phases: z.array(complexPhaseSchema).min(1, 'Complex timer must have at least one phase'),
+  overallTimeLimit: z.number().int().min(1).optional(),
+  autoAdvance: z.boolean().optional(),
+})
+
+// Now properly create the final union schema with complex config included
+const finalAnyTimerConfigSchema = z.discriminatedUnion('type', [
+  countdownConfigSchema,
+  stopwatchConfigSchema,
+  intervalConfigSchema,
+  workRestConfigSchema,
+  complexConfigSchema,
+])
+
+// Type inference from schemas
+export type TimerConfigSchema = z.infer<typeof finalAnyTimerConfigSchema>
+
+// Export the main schema for use in validation
+export const timerConfigSchema = finalAnyTimerConfigSchema
 
 // Configuration summary generator
 export const getConfigSummary = (config: AnyTimerConfig): string => {
@@ -64,87 +183,21 @@ export const formatRelativeTime = (date: Date): string => {
   return date.toLocaleDateString()
 }
 
-// Validate timer configuration
+// Validate timer configuration using Zod schemas
 export const validateTimerConfig = (config: AnyTimerConfig): string[] => {
+  const result = timerConfigSchema.safeParse(config)
+
+  if (result.success) {
+    return []
+  }
+
+  // Extract error messages from Zod error
   const errors: string[] = []
-
-  if (!config.name || config.name.trim().length === 0) {
-    errors.push('Timer name is required')
-  }
-
-  if (!config.id || config.id.trim().length === 0) {
-    errors.push('Timer ID is required')
-  }
-
-  switch (config.type) {
-    case TimerType.COUNTDOWN:
-      if (!config.duration || config.duration <= 0) {
-        errors.push('Duration must be greater than 0')
-      }
-      if (config.duration > 86400) {
-        // 24 hours
-        errors.push('Duration cannot exceed 24 hours')
-      }
-      break
-
-    case TimerType.STOPWATCH:
-      if (config.timeLimit && config.timeLimit <= 0) {
-        errors.push('Time limit must be greater than 0')
-      }
-      if (config.timeLimit && config.timeLimit > 86400) {
-        errors.push('Time limit cannot exceed 24 hours')
-      }
-      break
-
-    case TimerType.INTERVAL:
-      if (!config.workDuration || config.workDuration <= 0) {
-        errors.push('Work duration must be greater than 0')
-      }
-      if (!config.restDuration || config.restDuration < 0) {
-        errors.push('Rest duration must be 0 or greater')
-      }
-      if (!config.intervals || config.intervals <= 0) {
-        errors.push('Number of intervals must be greater than 0')
-      }
-      if (config.intervals > 1000) {
-        errors.push('Number of intervals cannot exceed 1000')
-      }
-      break
-
-    case TimerType.WORKREST:
-      if (!config.ratio || config.ratio <= 0) {
-        errors.push('Work/rest ratio must be greater than 0')
-      }
-      if (!config.maxWorkTime || config.maxWorkTime <= 0) {
-        errors.push('Maximum work time must be greater than 0')
-      }
-      if (!config.maxRounds || config.maxRounds <= 0) {
-        errors.push('Maximum rounds must be greater than 0')
-      }
-      if (
-        config.restMode === WorkRestMode.FIXED &&
-        (!config.fixedRestDuration || config.fixedRestDuration <= 0)
-      ) {
-        errors.push('Fixed rest duration must be greater than 0')
-      }
-      break
-
-    case TimerType.COMPLEX:
-      if (!config.phases || config.phases.length === 0) {
-        errors.push('Complex timer must have at least one phase')
-      }
-      if (config.phases.length > 20) {
-        errors.push('Complex timer cannot have more than 20 phases')
-      }
-      // Validate each phase
-      config.phases.forEach((phase, index) => {
-        const phaseErrors = validateTimerConfig(phase.config)
-        phaseErrors.forEach((error) => {
-          errors.push(`Phase ${index + 1}: ${error}`)
-        })
-      })
-      break
-  }
+  result.error.issues.forEach((issue) => {
+    // Create readable error messages from Zod issues
+    const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : ''
+    errors.push(`${path}${issue.message}`)
+  })
 
   return errors
 }
@@ -155,62 +208,6 @@ export const getTimerTypeDisplayName = (type: TimerType): string => {
 }
 
 // Get timer category display name
-
-
-// Convert timer config to URL parameters
-export const configToUrlParams = (config: AnyTimerConfig): string => {
-  const params = new URLSearchParams()
-  params.set('id', config.id)
-  params.set('type', config.type)
-  params.set('name', config.name)
-
-  switch (config.type) {
-    case TimerType.COUNTDOWN:
-      params.set('duration', config.duration.toString())
-      if (config.completionMessage) {
-        params.set('completionMessage', config.completionMessage)
-      }
-      break
-
-    case TimerType.STOPWATCH:
-      if (config.timeLimit) {
-        params.set('timeLimit', config.timeLimit.toString())
-      }
-      if (config.completionMessage) {
-        params.set('completionMessage', config.completionMessage)
-      }
-      break
-
-    case TimerType.INTERVAL:
-      params.set('workDuration', config.workDuration.toString())
-      params.set('restDuration', config.restDuration.toString())
-      params.set('intervals', config.intervals.toString())
-      if (config.workLabel) params.set('workLabel', config.workLabel)
-      if (config.restLabel) params.set('restLabel', config.restLabel)
-      if (config.skipLastRest) params.set('skipLastRest', 'true')
-      if (config.countdownBeforeStart) {
-        params.set('countdownBeforeStart', config.countdownBeforeStart.toString())
-      }
-      break
-
-    case TimerType.WORKREST:
-      params.set('maxWorkTime', config.maxWorkTime.toString())
-      params.set('maxRounds', config.maxRounds.toString())
-      params.set('restMode', config.restMode)
-      if (config.restMode === WorkRestMode.RATIO && config.ratio) {
-        params.set('ratio', config.ratio.toString())
-      }
-      if (config.restMode === WorkRestMode.FIXED && config.fixedRestDuration) {
-        params.set('fixedRestDuration', config.fixedRestDuration.toString())
-      }
-      if (config.countdownBeforeStart) {
-        params.set('countdownBeforeStart', config.countdownBeforeStart.toString())
-      }
-      break
-  }
-
-  return params.toString()
-}
 
 // Deep clone timer configuration
 export const cloneTimerConfig = (config: AnyTimerConfig): AnyTimerConfig => {

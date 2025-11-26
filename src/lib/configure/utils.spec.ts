@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import type {
   ComplexConfig,
   CountdownConfig,
@@ -12,7 +13,6 @@ import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import {
   cloneTimerConfig,
-  configToUrlParams,
   formatDuration,
   formatRelativeTime,
   getConfigSummary,
@@ -192,9 +192,10 @@ describe('utils', () => {
       } as CountdownConfig
 
       expect(validateTimerConfig(validConfig)).toHaveLength(0)
-      expect(validateTimerConfig(invalidConfig)).toContain('Timer name is required')
-      expect(validateTimerConfig(invalidConfig)).toContain('Timer ID is required')
-      expect(validateTimerConfig(invalidConfig)).toContain('Duration must be greater than 0')
+      const invalidResult = validateTimerConfig(invalidConfig)
+      expect(invalidResult).toContain('id: Timer ID is required')
+      expect(invalidResult).toContain('name: Timer name is required')
+      expect(invalidResult).toContain('duration: Duration must be greater than 0')
     })
 
     it('validates interval timers', () => {
@@ -221,10 +222,11 @@ describe('utils', () => {
       } as IntervalConfig
 
       expect(validateTimerConfig(validConfig)).toHaveLength(0)
-      expect(validateTimerConfig(invalidConfig)).toContain('Work duration must be greater than 0')
-      expect(validateTimerConfig(invalidConfig)).toContain('Rest duration must be 0 or greater')
-      expect(validateTimerConfig(invalidConfig)).toContain(
-        'Number of intervals must be greater than 0'
+      const invalidResult = validateTimerConfig(invalidConfig)
+      expect(invalidResult).toContain('workDuration: Work duration must be greater than 0')
+      expect(invalidResult).toContain('restDuration: Rest duration must be 0 or greater')
+      expect(invalidResult).toContain(
+        'intervals: Number of intervals must be greater than 0'
       )
     })
 
@@ -254,9 +256,73 @@ describe('utils', () => {
       } as WorkRestConfig
 
       expect(validateTimerConfig(validConfig)).toHaveLength(0)
-      expect(validateTimerConfig(invalidFixedConfig)).toContain(
-        'Fixed rest duration must be greater than 0'
+      const invalidResult = validateTimerConfig(invalidFixedConfig)
+      expect(invalidResult).toContain(
+        'fixedRestDuration: Fixed rest duration must be greater than 0'
       )
+    })
+
+    it('validates stopwatch timers', () => {
+      const validConfig = {
+        id: 'test',
+        name: 'Test Timer',
+        type: TimerType.STOPWATCH,
+        timeLimit: 600,
+        createdAt: new Date(),
+        lastUsed: new Date(),
+      } as StopwatchConfig
+
+      const invalidConfig = {
+        id: 'test',
+        name: 'Test Timer',
+        type: TimerType.STOPWATCH,
+        timeLimit: -1,
+        createdAt: new Date(),
+        lastUsed: new Date(),
+      } as StopwatchConfig
+
+      expect(validateTimerConfig(validConfig)).toHaveLength(0)
+      const invalidResult = validateTimerConfig(invalidConfig)
+      expect(invalidResult).toContain('timeLimit: Time limit must be greater than 0')
+    })
+
+    it('validates complex timers', () => {
+      const validConfig = {
+        id: 'test',
+        name: 'Test Timer',
+        type: TimerType.COMPLEX,
+        phases: [
+          {
+            id: 'phase-1',
+            name: 'Phase 1',
+            type: TimerType.COUNTDOWN,
+            config: {
+              id: 'phase-1-config',
+              name: 'Phase 1 Config',
+              type: TimerType.COUNTDOWN,
+              duration: 60,
+              createdAt: new Date(),
+              lastUsed: new Date(),
+            },
+            order: 1,
+          },
+        ],
+        createdAt: new Date(),
+        lastUsed: new Date(),
+      } as ComplexConfig
+
+      const invalidConfig = {
+        id: 'test',
+        name: 'Test Timer',
+        type: TimerType.COMPLEX,
+        phases: [],
+        createdAt: new Date(),
+        lastUsed: new Date(),
+      } as ComplexConfig
+
+      expect(validateTimerConfig(validConfig)).toHaveLength(0)
+      const invalidResult = validateTimerConfig(invalidConfig)
+      expect(invalidResult).toContain('phases: Complex timer must have at least one phase')
     })
   })
 
@@ -265,7 +331,7 @@ describe('utils', () => {
       expect(getTimerTypeDisplayName(TimerType.COUNTDOWN)).toBe('Countdown')
       expect(getTimerTypeDisplayName(TimerType.STOPWATCH)).toBe('Stopwatch')
       expect(getTimerTypeDisplayName(TimerType.INTERVAL)).toBe('Interval')
-      expect(getTimerTypeDisplayName(TimerType.WORKREST)).toBe('Work/Rest')
+      expect(getTimerTypeDisplayName(TimerType.WORKREST)).toBe('Work/Rest Ratio')
       expect(getTimerTypeDisplayName(TimerType.COMPLEX)).toBe('Complex')
     })
   })
@@ -311,51 +377,6 @@ describe('utils', () => {
       const id2 = TimerConfigHash.generateTimerId(config2)
 
       expect(id1).not.toBe(id2)
-    })
-  })
-
-  describe('configToUrlParams', () => {
-    it('converts countdown config to URL params', () => {
-      const config = {
-        id: 'test',
-        name: 'Test Timer',
-        type: TimerType.COUNTDOWN,
-        duration: 300,
-        completionMessage: 'Done!',
-        createdAt: new Date(),
-        lastUsed: new Date(),
-      } as CountdownConfig
-
-      const params = configToUrlParams(config)
-      expect(params).toContain('id=test')
-      expect(params).toContain('name=Test+Timer')
-      expect(params).toContain('type=COUNTDOWN')
-      expect(params).toContain('duration=300')
-      expect(params).toContain('completionMessage=Done%21')
-    })
-
-    it('converts interval config to URL params', () => {
-      const config = {
-        id: 'test',
-        name: 'Test Timer',
-        type: TimerType.INTERVAL,
-        workDuration: 20,
-        restDuration: 10,
-        intervals: 8,
-        workLabel: 'Work',
-        restLabel: 'Rest',
-        skipLastRest: true,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-      } as IntervalConfig
-
-      const params = configToUrlParams(config)
-      expect(params).toContain('workDuration=20')
-      expect(params).toContain('restDuration=10')
-      expect(params).toContain('intervals=8')
-      expect(params).toContain('workLabel=Work')
-      expect(params).toContain('restLabel=Rest')
-      expect(params).toContain('skipLastRest=true')
     })
   })
 
