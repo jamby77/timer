@@ -15,9 +15,9 @@ The configuration page should consist of three main sections:
 - **Purpose**: Quickly access previously used timer configurations
 - **Requirements**:
   - Display up to 10 most recent unique timer configurations
-  - Uniqueness determined by timer type AND settings
+  - Uniqueness determined by timer ID
   - Show timer type, key settings, and last used date
-  - One-click start functionality
+  - One-click start functionality 
   - Option to remove from recent list
   - Clear all recent timers option
 - **Responsive Design**:

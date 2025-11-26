@@ -132,8 +132,7 @@ describe('Storage Utilities', () => {
     })
 
     it('limits number of recent timers', () => {
-      // Add more than the maximum (20) timers
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < 15; i++) {
         const timer: AnyTimerConfig = {
           id: `timer-${i}`,
           name: `Timer ${i}`,
@@ -146,9 +145,9 @@ describe('Storage Utilities', () => {
       }
 
       const timers = storage.getRecentTimers()
-      expect(timers).toHaveLength(20)
-      expect(timers[0].config.name).toBe('Timer 24') // Most recent
-      expect(timers[19].config.name).toBe('Timer 5') // Oldest kept
+      expect(timers).toHaveLength(10)
+      expect(timers[0].config.name).toBe('Timer 14') // Most recent
+      expect(timers[9].config.name).toBe('Timer 5') // Oldest kept
     })
   })
 

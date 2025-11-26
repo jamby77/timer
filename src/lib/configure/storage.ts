@@ -1,9 +1,9 @@
 import type { AnyTimerConfig, RecentTimer, StorageManager } from '@/types/configure'
 
-class TimerStorage implements StorageManager {
+class LocalTimerStorage implements StorageManager {
   private readonly RECENT_TIMERS_KEY = 'recent_timers'
   private readonly TIMER_PREFIX = 'timer_'
-  private readonly MAX_RECENT_TIMERS = 20
+  private readonly MAX_RECENT_TIMERS = 10
 
   /**
    * Get all recent timers from localStorage
@@ -140,26 +140,22 @@ class TimerStorage implements StorageManager {
   }
 
   /**
-   * Clean up old timers (older than 24 hours for non-predefined timers)
+   * Clean up old stored timers (older than 24 hours), but preserve recent timers
    */
   cleanupOldTimers(): void {
     try {
-      const timers = this.getRecentTimers()
       const now = new Date()
       const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
-      // Keep built-in predefined styles and recent timers
-      const filteredTimers = timers.filter((timer) => {
-        const isRecent = timer.startedAt > oneDayAgo
-        const isBuiltIn =
-          timer.config.name.includes('(built-in)') ||
-          timer.config.id.startsWith('tabata-') ||
-          timer.config.id.startsWith('emom-') ||
-          timer.config.id.startsWith('e2mom-')
-        return isRecent || isBuiltIn
-      })
+      // Get all stored timer configs
+      const allStoredTimers = this.getAllStoredTimers()
 
-      localStorage.setItem(this.RECENT_TIMERS_KEY, JSON.stringify(filteredTimers))
+      // Clean up old timers
+      allStoredTimers.forEach(({ id, config }) => {
+        if (config.createdAt ? config.createdAt < oneDayAgo : false) {
+          localStorage.removeItem(this.TIMER_PREFIX + id)
+        }
+      })
     } catch (error) {
       console.error('Failed to cleanup old timers:', error)
     }
@@ -167,4 +163,4 @@ class TimerStorage implements StorageManager {
 }
 
 // Export singleton instance
-export const storage = new TimerStorage()
+export const storage = new LocalTimerStorage()
