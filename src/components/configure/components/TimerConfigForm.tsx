@@ -1,14 +1,16 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { validateTimerConfig } from "@/lib/configure/utils";
-import { TIMER_TYPE_LABELS } from "@/lib/enums";
-import type { AnyTimerConfig, TimerConfigFormProps } from "@/types/configure";
+import { useState } from 'react'
 
-import { CardContainer } from "@/components/ui";
-import { CommonFields } from "./CommonFields";
-import { FormActions } from "./FormActions";
-import { FormErrors } from "./FormErrors";
+import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
+
+import { validateTimerConfig } from '@/lib/configure/utils'
+import { TIMER_TYPE_LABELS } from '@/lib/enums'
+
+import { CardContainer } from '@/components/ui'
+import { CommonFields } from './CommonFields'
+import { FormActions } from './FormActions'
+import { FormErrors } from './FormErrors'
 
 export const TimerConfigForm = ({
   type,
@@ -21,37 +23,37 @@ export const TimerConfigForm = ({
   const [config, setConfig] = useState<Partial<AnyTimerConfig>>(
     initialConfig || {
       type,
-      name: "",
-    },
-  );
+      name: '',
+    }
+  )
 
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     const fullConfig = {
       ...config,
       type,
       createdAt: new Date(),
       lastUsed: new Date(),
-    } as AnyTimerConfig;
+    } as AnyTimerConfig
 
-    const validationErrors = validateTimerConfig(fullConfig);
+    const validationErrors = validateTimerConfig(fullConfig)
 
     if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      return;
+      setErrors(validationErrors)
+      return
     }
 
-    setErrors([]);
-    onStartTimer(fullConfig);
-  };
+    setErrors([])
+    onStartTimer(fullConfig)
+  }
 
   const handleSave = () => {
     if (!config.name) {
-      setErrors(["Timer name is required for saving"]);
-      return;
+      setErrors(['Timer name is required for saving'])
+      return
     }
 
     const fullConfig = {
@@ -60,37 +62,37 @@ export const TimerConfigForm = ({
       id: config.id || generateId(),
       createdAt: new Date(),
       lastUsed: new Date(),
-    } as AnyTimerConfig;
+    } as AnyTimerConfig
 
-    const validationErrors = validateTimerConfig(fullConfig);
+    const validationErrors = validateTimerConfig(fullConfig)
 
     if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      return;
+      setErrors(validationErrors)
+      return
     }
 
-    setErrors([]);
+    setErrors([])
 
     if (onSaveAsPredefined && !isPredefined) {
-      onSaveAsPredefined(fullConfig);
+      onSaveAsPredefined(fullConfig)
     } else if (onSave) {
-      onSave(fullConfig);
+      onSave(fullConfig)
     }
-  };
+  }
 
   const updateConfig = (updates: Partial<AnyTimerConfig>) => {
-    setConfig((prev) => ({ ...prev, ...updates } as AnyTimerConfig));
-    setErrors([]);
-  };
+    setConfig((prev) => ({ ...prev, ...updates }) as AnyTimerConfig)
+    setErrors([])
+  }
 
   return (
     <CardContainer>
       <div className="mb-6">
-        <h2 className="mb-2 text-xl font-semibold text-gray-900">
+        <h2 className="text-foreground mb-2 text-xl font-semibold">
           Configure {TIMER_TYPE_LABELS[type]} Timer
         </h2>
         {isPredefined && (
-          <p className="text-sm text-gray-600">
+          <p className="text-accent-foreground text-sm">
             Customizing a predefined style. Changes will not affect the original.
           </p>
         )}
@@ -109,10 +111,10 @@ export const TimerConfigForm = ({
         />
       </form>
     </CardContainer>
-  );
-};
+  )
+}
 
 // Helper function to generate ID
 const generateId = (): string => {
-  return Math.random().toString(36).substr(2, 9);
-};
+  return Math.random().toString(36).substring(2, 9)
+}

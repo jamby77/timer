@@ -1,98 +1,99 @@
-import type { IntervalConfig } from "@/types/configure";
+import type { IntervalConfig } from '@/types/configure'
+
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 
 interface IntervalFieldsProps {
-  config: Partial<IntervalConfig>;
-  onChange: (updates: Partial<IntervalConfig>) => void;
+  config: Partial<IntervalConfig>
+  onChange: (updates: Partial<IntervalConfig>) => void
 }
 
 export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
   return (
-    <div className="space-y-4">
+    <FieldGroup>
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Work Duration (seconds)
-          </label>
-          <input
+        <Field>
+          <FieldLabel htmlFor="workDuration">Work Duration (seconds)</FieldLabel>
+          <Input
+            id="workDuration"
+            name="workDuration"
             type="number"
             min="1"
-            value={config.workDuration || ""}
+            value={config.workDuration || ''}
             onChange={(e) => onChange({ workDuration: parseInt(e.target.value) || 0 })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="20"
             required
           />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Rest Duration (seconds)
-          </label>
-          <input
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="restDuration">Rest Duration (seconds)</FieldLabel>
+          <Input
+            id="restDuration"
+            name="restDuration"
             type="number"
             min="0"
-            value={config.restDuration || ""}
+            value={config.restDuration || ''}
             onChange={(e) => onChange({ restDuration: parseInt(e.target.value) || 0 })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="10"
             required
           />
-        </div>
+        </Field>
       </div>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">Number of Intervals</label>
-        <input
+      <Field>
+        <FieldLabel htmlFor="intervals">Number of Intervals</FieldLabel>
+        <Input
+          id="intervals"
+          name="intervals"
           type="number"
           min="1"
           max="1000"
-          value={config.intervals || ""}
+          value={config.intervals || ''}
           onChange={(e) => onChange({ intervals: parseInt(e.target.value) || 0 })}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           placeholder="8"
           required
         />
-      </div>
+      </Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Work Label (optional)
-          </label>
-          <input
+        <Field>
+          <FieldLabel htmlFor="workLabel">Work Label (optional)</FieldLabel>
+          <Input
+            id="workLabel"
+            name="workLabel"
             type="text"
-            value={config.workLabel || ""}
+            value={config.workLabel || ''}
             onChange={(e) => onChange({ workLabel: e.target.value })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="Work"
           />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Rest Label (optional)
-          </label>
-          <input
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="restLabel">Rest Label (optional)</FieldLabel>
+          <Input
+            id="restLabel"
+            name="restLabel"
             type="text"
-            value={config.restLabel || ""}
+            value={config.restLabel || ''}
             onChange={(e) => onChange({ restLabel: e.target.value })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="Rest"
           />
-        </div>
+        </Field>
       </div>
-
-      <div className="flex items-center space-x-4">
-        <label className="flex items-center">
-          <input
-            type="checkbox"
+      <FieldGroup>
+        <Field orientation="horizontal">
+          <Checkbox
+            id="skipLastRest"
+            name="skipLastRest"
             checked={config.skipLastRest || false}
-            onChange={(e) => onChange({ skipLastRest: e.target.checked })}
-            className="mr-2"
+            onCheckedChange={(state) => {
+              // Treat indeterminate as false
+              onChange({ skipLastRest: state === true })
+            }}
           />
-          <span className="text-sm text-gray-700">Skip last rest period</span>
-        </label>
-      </div>
-    </div>
-  );
-};
+          <FieldLabel htmlFor="skipLastRest">Skip last rest period</FieldLabel>
+        </Field>
+      </FieldGroup>
+    </FieldGroup>
+  )
+}
