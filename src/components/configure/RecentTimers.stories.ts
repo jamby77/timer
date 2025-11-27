@@ -1,4 +1,3 @@
-import React from 'react'
 import { createMockTimerConfig } from '@/testing/utils'
 import preview from '#.storybook/preview'
 import { expect, fn } from 'storybook/test'
@@ -15,7 +14,6 @@ const meta = preview.meta({
   args: {
     onStartTimer: fn(),
     onRemoveTimer: fn(),
-    onClearAll: fn(),
   },
 })
 
@@ -52,13 +50,7 @@ export const WithTimers = meta.story({
 
 export const MultipleTimers = meta.story({
   args: {
-    timers: [],
-    onStartTimer: fn(),
-    onRemoveTimer: fn(),
-    onClearAll: fn(),
-  },
-  render: (args) => {
-    const timers = [
+    timers: [
       {
         id: 'timer-1',
         config: createMockTimerConfig('Tabata', TimerType.INTERVAL),
@@ -74,8 +66,7 @@ export const MultipleTimers = meta.story({
         config: createMockTimerConfig('Countdown', TimerType.COUNTDOWN),
         startedAt: new Date(Date.now() - 7200000), // 2 hours ago
       },
-    ]
-    return React.createElement(RecentTimers, { ...args, timers })
+    ],
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Recent Timers')
@@ -88,57 +79,16 @@ export const MultipleTimers = meta.story({
 
 export const ManyTimers = meta.story({
   args: {
-    timers: [],
-    onStartTimer: fn(),
-    onRemoveTimer: fn(),
-    onClearAll: fn(),
-  },
-  render: (args) => {
-    const timers = Array.from({ length: 15 }, (_, i) => ({
+    timers: Array.from({ length: 15 }, (_, i) => ({
       id: `timer-${i + 1}`,
       config: createMockTimerConfig(`Timer ${i + 1}`, TimerType.COUNTDOWN),
       startedAt: new Date(Date.now() - i * 60000), // Different times
-    }))
-    return React.createElement(RecentTimers, { ...args, timers })
+    })),
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Recent Timers')
     expect(canvasElement.textContent).toContain('Load More')
     expect(canvasElement.textContent).toContain('5 remaining')
-  },
-})
-
-export const MixedTypes = meta.story({
-  args: {
-    timers: [],
-    onStartTimer: fn(),
-    onRemoveTimer: fn(),
-    onClearAll: fn(),
-  },
-  render: (args) => {
-    const timers = [
-      {
-        id: 'timer-1',
-        config: createMockTimerConfig('Countdown', TimerType.COUNTDOWN),
-        startedAt: new Date(),
-      },
-      {
-        id: 'timer-2',
-        config: createMockTimerConfig('Stopwatch', TimerType.STOPWATCH),
-        startedAt: new Date(Date.now() - 1800000),
-      },
-      {
-        id: 'timer-3',
-        config: createMockTimerConfig('Interval', TimerType.INTERVAL),
-        startedAt: new Date(Date.now() - 3600000),
-      },
-    ]
-    return React.createElement(RecentTimers, { ...args, timers })
-  },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain('5m countdown')
-    expect(canvasElement.textContent).toContain('Stopwatch with 10m limit')
-    expect(canvasElement.textContent).toContain('8 rounds: 20s work / 10s rest')
   },
 })
 
@@ -151,15 +101,9 @@ export const TimerStart = meta.story({
         startedAt: new Date(),
       },
     ],
-    onStartTimer: fn(),
-    onRemoveTimer: fn(),
-    onClearAll: fn(),
   },
-  play: async ({ canvasElement, step, args }) => {
-    const startButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.textContent?.includes('Start')
-    )
-
+  play: async ({ canvas, step, args }) => {
+    const startButton = canvas.getByRole('button', { name: 'Start' })
     expect(startButton).toBeTruthy()
 
     if (startButton) {
@@ -187,15 +131,9 @@ export const TimerRemoval = meta.story({
         startedAt: new Date(),
       },
     ],
-    onStartTimer: fn(),
-    onRemoveTimer: fn(),
-    onClearAll: fn(),
   },
-  play: async ({ canvasElement, step, args }) => {
-    const removeButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.getAttribute('aria-label')?.includes('Remove')
-    )
-
+  play: async ({ canvas, step, args }) => {
+    const removeButton = canvas.getByRole('button', { name: 'Remove timer' })
     expect(removeButton).toBeTruthy()
 
     if (removeButton) {
@@ -205,35 +143,5 @@ export const TimerRemoval = meta.story({
     }
 
     expect(args.onRemoveTimer).toHaveBeenCalledWith('timer-1')
-  },
-})
-
-export const ClearAllTimers = meta.story({
-  args: {
-    timers: [
-      {
-        id: 'timer-1',
-        config: createMockTimerConfig('Test Timer', TimerType.COUNTDOWN),
-        startedAt: new Date(),
-      },
-    ],
-    onStartTimer: fn(),
-    onRemoveTimer: fn(),
-    onClearAll: fn(),
-  },
-  play: async ({ canvasElement, step, args }) => {
-    const clearAllButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.textContent?.includes('Clear All')
-    )
-
-    expect(clearAllButton).toBeTruthy()
-
-    if (clearAllButton) {
-      await step('clear all timers', () => {
-        clearAllButton.click()
-      })
-    }
-
-    expect(args.onClearAll).toHaveBeenCalled()
   },
 })

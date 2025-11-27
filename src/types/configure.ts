@@ -85,7 +85,6 @@ export type AnyTimerConfig =
   | WorkRestConfig
   | ComplexConfig
 
-
 // Predefined timer style
 export interface PredefinedStyle<T extends AnyTimerConfig> {
   id: string
@@ -107,7 +106,6 @@ export interface RecentTimersProps {
   timers: RecentTimer[]
   onStartTimer: (config: AnyTimerConfig, isPredefined?: boolean) => void
   onRemoveTimer: (timerId: string) => void
-  onClearAll: () => void
 }
 
 export interface TimerTypeSelectorProps {

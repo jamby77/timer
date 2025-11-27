@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { PlayIcon, X } from 'lucide-react'
 
 import { RecentTimersProps } from '@/types/configure'
@@ -25,27 +24,18 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 
-export const RecentTimers = ({
-  timers,
-  onStartTimer,
-  onRemoveTimer,
-  onClearAll,
-}: RecentTimersProps) => {
-  const [visibleCount, setVisibleCount] = useState(10)
-
+const visibleCount = 10
+export const RecentTimers = ({ timers, onStartTimer, onRemoveTimer }: RecentTimersProps) => {
   const displayTimers = timers.slice(0, visibleCount)
-  const hasMore = timers.length > visibleCount
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + 10, timers.length))
-  }
 
   if (timers.length === 0) {
     return (
       <CardContainer>
         <div className="py-8 text-center">
-          <h2 className="mb-2 text-xl font-semibold text-gray-900">No Recent Timers</h2>
-          <p className="text-gray-600">Start a timer to see it appear here for quick access.</p>
+          <h2 className="text-foreground mb-2 text-xl font-semibold">No Recent Timers</h2>
+          <p className="text-muted-foreground">
+            Start a timer to see it appear here for quick access.
+          </p>
         </div>
       </CardContainer>
     )
@@ -58,7 +48,10 @@ export const RecentTimers = ({
     >
       <CarouselContent>
         {displayTimers.map((timer) => (
-          <CarouselItem key={timer.id} className="basis-[200px] md:basis-1/3 lg:basis-1/5">
+          <CarouselItem
+            key={timer.id}
+            className="min-w-52 basis-[max-content] md:basis-1/3 lg:basis-1/5"
+          >
             <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
           </CarouselItem>
         ))}
