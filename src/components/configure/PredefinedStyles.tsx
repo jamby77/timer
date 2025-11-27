@@ -3,7 +3,16 @@
 import { PredefinedStylesProps } from '@/types/configure'
 import { getConfigSummary } from '@/lib/configure/utils'
 
-import { ButtonLegacy, CardContainer } from '@/components/ui'
+import { CardContainer } from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import PlayIcon from '@/icons/PlayIcon'
 
 export const PredefinedStyles = ({
@@ -14,7 +23,7 @@ export const PredefinedStyles = ({
   return (
     <CardContainer>
       <div className="mb-6">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">Predefined Styles</h2>
+        <h2 className="mb-4 text-xl font-semibold">Presets</h2>
 
         {/* Styles list */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -49,27 +58,28 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
   }
 
   return (
-    <div
-      className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow hover:shadow-md"
-      onClick={handleCardClick}
-    >
-      <div className="mb-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">{style.name}</h3>
+    <Card onClick={handleCardClick}>
+      <CardHeader>
+        <CardTitle>
+          <h3 className="text-card-foreground font-semibold">{style.name}</h3>
           {style.isBuiltIn && (
-            <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">Built-in</span>
+            <span className="text-muted-foreground rounded py-1 text-sm">Built-in</span>
           )}
-        </div>
-        <p className="mb-2 text-sm text-gray-600">{style.description}</p>
-        <p className="text-xs text-gray-500">{getConfigSummary(style.config)}</p>
-      </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>
+          <p className="mb-2 text-sm">{style.description}</p>
+          <p className="text-sm">{getConfigSummary(style.config)}</p>
+        </CardDescription>
 
-      <div className="flex items-center justify-between">
-        <ButtonLegacy size="sm" onClick={handleStartClick} className="flex items-center gap-2">
-          <PlayIcon className="h-4 w-4" />
-          Start
-        </ButtonLegacy>
-      </div>
-    </div>
+        <CardAction className="flex items-center justify-between">
+          <Button size="sm" onClick={handleStartClick}>
+            <PlayIcon className="h-4 w-4" />
+            Start
+          </Button>
+        </CardAction>
+      </CardContent>
+    </Card>
   )
 }
