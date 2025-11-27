@@ -5,9 +5,8 @@ import { PlayIcon, X } from 'lucide-react'
 
 import { RecentTimersProps } from '@/types/configure'
 import { formatRelativeTime, getConfigSummary } from '@/lib/configure/utils'
-import { cn } from '@/lib/utils'
 
-import { ButtonLegacy, CardContainer } from '@/components/ui'
+import { CardContainer } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -18,6 +17,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 
 export const RecentTimers = ({
   timers,
@@ -46,66 +52,20 @@ export const RecentTimers = ({
   }
 
   return (
-    <CardContainer>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Recent Timers</h2>
-        {timers.length > 0 && (
-          <Button variant="destructive" size="sm" onClick={onClearAll}>
-            Clear All
-          </Button>
-        )}
-      </div>
-
-      {/* Desktop: Grid layout */}
-      <div className="mb-6 hidden gap-4 lg:grid lg:grid-cols-2 xl:grid-cols-3">
+    <Carousel
+      className="w-full max-w-[210px] sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
+      opts={{ align: 'start' }}
+    >
+      <CarouselContent>
         {displayTimers.map((timer) => (
-          <TimerCard
-            key={timer.id}
-            timer={timer}
-            onStartTimer={onStartTimer}
-            onRemoveTimer={onRemoveTimer}
-          />
+          <CarouselItem key={timer.id} className="basis-[200px] md:basis-1/3 lg:basis-1/5">
+            <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
+          </CarouselItem>
         ))}
-      </div>
-
-      {/* Mobile: Horizontal scroll layout */}
-      <div className="lg:hidden">
-        <div
-          className={cn(
-            'flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4',
-            'scrollbar-width-none [&::-webkit-scrollbar]:hidden'
-          )}
-        >
-          {displayTimers.map((timer) => (
-            <div key={timer.id} className="w-80 flex-none snap-start">
-              <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
-            </div>
-          ))}
-        </div>
-
-        {/* Scroll indicators for mobile */}
-        <div className="mt-2 flex justify-center gap-1 lg:hidden">
-          {timers.map((_, index) => (
-            <div
-              key={index}
-              className={cn('h-1 w-8 rounded-full transition-colors', {
-                'bg-blue-500': index < 3,
-                'bg-gray-300': index >= 3,
-              })}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Load more button */}
-      {hasMore && (
-        <div className="mt-6 text-center">
-          <ButtonLegacy variant="outline" onClick={handleLoadMore} className="w-full sm:w-auto">
-            Load More ({timers.length - visibleCount} remaining)
-          </ButtonLegacy>
-        </div>
-      )}
-    </CardContainer>
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
   )
 }
 
@@ -125,7 +85,7 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
   }
 
   return (
-    <Card className="py-4">
+    <Card className="cursor-grab py-4 active:cursor-grabbing">
       <CardHeader className="px-4">
         <CardTitle>
           <h3>{timer.config.name}</h3>
@@ -150,11 +110,13 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
 
       <CardContent className="px-4">
         <CardDescription>
-          <p>{getConfigSummary(timer.config)}</p>
+          <p className="truncate">{getConfigSummary(timer.config)}</p>
         </CardDescription>
       </CardContent>
       <CardFooter className="justify-between gap-4 px-4">
-        <span className="text-muted-foreground text-xs">{formatRelativeTime(timer.startedAt)}</span>
+        <span className="text-muted-foreground truncate text-xs">
+          {formatRelativeTime(timer.startedAt)}
+        </span>
         <CardAction>
           <Button size="sm" onClick={handleStart}>
             <PlayIcon size={4} className="fill-tm-play stroke-card" />
