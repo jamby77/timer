@@ -1,11 +1,10 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import PlayIcon from "@/icons/PlayIcon";
-import { getConfigSummary } from "@/lib/configure/utils";
-import { PredefinedStylesProps } from "@/types/configure";
+import { PredefinedStylesProps } from '@/types/configure'
+import { getConfigSummary } from '@/lib/configure/utils'
 
-import { ButtonLegacy, CardContainer } from "@/components/ui";
+import { ButtonLegacy, CardContainer } from '@/components/ui'
+import PlayIcon from '@/icons/PlayIcon'
 
 export const PredefinedStyles = ({
   styles,
@@ -30,24 +29,24 @@ export const PredefinedStyles = ({
         </div>
       </div>
     </CardContainer>
-  );
-};
+  )
+}
 
 interface StyleCardProps {
-  style: PredefinedStylesProps["styles"][0];
-  onSelect: () => void;
-  onStart: () => void;
+  style: PredefinedStylesProps['styles'][0]
+  onSelect: () => void
+  onStart: () => void
 }
 
 const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
   const handleCardClick = () => {
-    onSelect();
-  };
+    onSelect()
+  }
 
   const handleStartClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onStart();
-  };
+    e.stopPropagation()
+    onStart()
+  }
 
   return (
     <div
@@ -72,5 +71,5 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
         </ButtonLegacy>
       </div>
     </div>
-  );
-};
+  )
+}

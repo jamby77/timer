@@ -1,12 +1,13 @@
-import PlayIcon from "@/icons/PlayIcon";
+import { PlayIcon } from 'lucide-react'
 
-import { ButtonLegacy } from "@/components/ui";
+import { ButtonLegacy } from '@/components/ui'
+import { Button } from '@/components/ui/button'
 
 interface FormActionsProps {
-  isPredefined: boolean;
-  onSaveAsPredefined?: ((config: any) => void) | undefined;
-  onSave?: ((config: any) => void) | undefined;
-  onHandleSave: () => void;
+  isPredefined: boolean
+  onSaveAsPredefined?: ((config: any) => void) | undefined
+  onSave?: ((config: any) => void) | undefined
+  onHandleSave: () => void
 }
 
 export const FormActions = ({
@@ -17,22 +18,22 @@ export const FormActions = ({
 }: FormActionsProps) => {
   return (
     <div className="flex gap-3 pt-4">
-      <ButtonLegacy type="submit" className="flex items-center gap-2">
-        <PlayIcon className="h-4 w-4" />
+      <Button variant="default" type="submit" size="lg">
+        <PlayIcon size={4} strokeWidth={0} className="fill-background" />
         Start Timer
-      </ButtonLegacy>
+      </Button>
 
       {!isPredefined && onSaveAsPredefined && (
-        <ButtonLegacy type="button" variant="outline" onClick={onHandleSave}>
+        <Button type="button" variant="outline" onClick={onHandleSave} size="lg">
           Save as Predefined
-        </ButtonLegacy>
+        </Button>
       )}
 
       {onSave && (
-        <ButtonLegacy type="button" variant="outline" onClick={onHandleSave}>
+        <Button type="button" variant="secondary" onClick={onHandleSave} size="lg">
           Save Changes
-        </ButtonLegacy>
+        </Button>
       )}
     </div>
-  );
-};
+  )
+}

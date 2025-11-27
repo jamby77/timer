@@ -25,6 +25,7 @@ const meta = preview.meta({
     onStartTimer: fn(),
     onSaveAsPredefined: fn(),
     onSave: fn(),
+    isPredefined: false,
   },
 })
 
@@ -84,9 +85,7 @@ export const WorkRestRatio = meta.story({
 export const WorkRestFixed = meta.story({
   args: {
     type: TimerType.WORKREST,
-  },
-  render: (args) => {
-    const initialConfig = {
+    initialConfig: {
       id: 'fixed-rest-timer',
       name: 'Fixed Rest Timer',
       type: TimerType.WORKREST,
@@ -96,8 +95,7 @@ export const WorkRestFixed = meta.story({
       maxRounds: 10,
       createdAt: new Date(),
       lastUsed: new Date(),
-    } as AnyTimerConfig
-    return <TimerConfigForm {...args} initialConfig={initialConfig} />
+    },
   },
   play: async ({ canvas }) => {
     const title = canvas.getByRole('heading', { name: /configure work/i })

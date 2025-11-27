@@ -1,10 +1,7 @@
 import React from 'react'
 import { mockStyles } from '@/testing/mocks'
-import { createMockTimerConfig } from '@/testing/utils'
 import preview from '#.storybook/preview'
 import { expect, fn } from 'storybook/test'
-
-import { TimerType } from '@/types/configure'
 
 import { PredefinedStyles } from './PredefinedStyles'
 
