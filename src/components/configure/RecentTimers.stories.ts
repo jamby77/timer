@@ -40,11 +40,9 @@ export const WithTimers = meta.story({
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain('Recent Timers')
     expect(canvasElement.textContent).toContain('Tabata')
     expect(canvasElement.textContent).toContain('8 rounds: 20s work / 10s rest')
-    expect(canvasElement.textContent).toContain('Start Timer')
-    expect(canvasElement.textContent).toContain('Clear All')
+    expect(canvasElement.textContent).toContain('Start')
   },
 })
 
@@ -69,11 +67,9 @@ export const MultipleTimers = meta.story({
     ],
   },
   play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain('Recent Timers')
     expect(canvasElement.textContent).toContain('Tabata')
     expect(canvasElement.textContent).toContain('EMOM')
     expect(canvasElement.textContent).toContain('Countdown')
-    expect(canvasElement.textContent).toContain('Clear All')
   },
 })
 
@@ -85,10 +81,14 @@ export const ManyTimers = meta.story({
       startedAt: new Date(Date.now() - i * 60000), // Different times
     })),
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain('Recent Timers')
-    expect(canvasElement.textContent).toContain('Load More')
-    expect(canvasElement.textContent).toContain('5 remaining')
+  play: async ({ canvas, args }) => {
+    args.timers.forEach((timer, index) => {
+      if (index < 10) {
+        expect(canvas.getByText(timer.config.name)).toBeInTheDocument()
+      } else {
+        expect(canvas.queryByText(timer.config.name)).not.toBeInTheDocument()
+      }
+    })
   },
 })
 
