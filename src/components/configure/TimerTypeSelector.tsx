@@ -4,7 +4,7 @@ import cx from 'clsx'
 
 import type { TimerTypeSelectorProps } from '@/types/configure'
 
-import { TIMER_TYPE_LABELS, TIMER_TYPE_ICONS, TimerType } from '@/lib/enums'
+import { TIMER_TYPE_ICONS, TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
 
 import { CardContainer } from '@/components/ui'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'

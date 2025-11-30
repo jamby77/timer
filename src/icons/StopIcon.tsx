@@ -11,5 +11,5 @@ export default function StopIcon(props: any) {
     >
       <path d="M240-240v-480h480v480H240Z" />
     </svg>
-  );
+  )
 }

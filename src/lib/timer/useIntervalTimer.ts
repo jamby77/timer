@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import type { TimerStep } from './TimerManager'
 import type { IntervalConfig } from './types'
 

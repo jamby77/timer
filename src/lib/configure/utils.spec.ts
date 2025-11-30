@@ -225,9 +225,7 @@ describe('utils', () => {
       const invalidResult = validateTimerConfig(invalidConfig)
       expect(invalidResult).toContain('workDuration: Work duration must be greater than 0')
       expect(invalidResult).toContain('restDuration: Rest duration must be 0 or greater')
-      expect(invalidResult).toContain(
-        'intervals: Number of intervals must be greater than 0'
-      )
+      expect(invalidResult).toContain('intervals: Number of intervals must be greater than 0')
     })
 
     it('validates work/rest timers', () => {

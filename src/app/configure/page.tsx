@@ -1,32 +1,33 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { getPredefinedStyles } from "@/lib/configure/presets";
-import { storage } from "@/lib/configure/storage";
-import { TimerConfigHash } from "@/lib/timer/TimerConfigHash";
-import { AnyTimerConfig, PredefinedStyle, RecentTimer, TimerType } from "@/types/configure";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-import { PredefinedStyles } from "@/components/configure/PredefinedStyles";
-import { RecentTimers } from "@/components/configure/RecentTimers";
-import { TimerConfigForm } from "@/components/configure/TimerConfigForm";
-import { TimerTypeSelector } from "@/components/configure/TimerTypeSelector";
+import { AnyTimerConfig, PredefinedStyle, RecentTimer, TimerType } from '@/types/configure'
+import { PREDEFINED_STYLES } from '@/lib/configure/presets'
+import { storage } from '@/lib/configure/storage'
+import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
+
+import { TimerConfigForm } from '@/components/configure/components'
+import { PredefinedStyles } from '@/components/configure/PredefinedStyles'
+import { RecentTimers } from '@/components/configure/RecentTimers'
+import { TimerTypeSelector } from '@/components/configure/TimerTypeSelector'
 
 export default function ConfigurePage() {
-  const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([]);
-  const [selectedType, setSelectedType] = useState<TimerType | null>(null);
+  const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([])
+  const [selectedType, setSelectedType] = useState<TimerType | null>(null)
   const [selectedPredefined, setSelectedPredefined] =
-    useState<PredefinedStyle<AnyTimerConfig> | null>(null);
-  const router = useRouter();
+    useState<PredefinedStyle<AnyTimerConfig> | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     // Load recent timers on mount
-    const timers = storage.getRecentTimers();
-    setRecentTimers(timers);
-  }, []);
+    const timers = storage.getRecentTimers()
+    setRecentTimers(timers)
+  }, [])
 
   const handleStartTimer = (config: AnyTimerConfig, isPredefined: boolean = false) => {
-    let finalConfig: AnyTimerConfig;
+    let finalConfig: AnyTimerConfig
 
     if (isPredefined) {
       // For predefined configs: copy and add runtime timestamps
@@ -35,7 +36,7 @@ export default function ConfigurePage() {
         id: TimerConfigHash.generateTimerId(config),
         createdAt: new Date(),
         lastUsed: new Date(),
-      };
+      }
     } else {
       // For custom configs: ensure ID exists
       finalConfig = {
@@ -43,42 +44,42 @@ export default function ConfigurePage() {
         id: config.id || TimerConfigHash.generateTimerId(config),
         createdAt: config.createdAt || new Date(),
         lastUsed: new Date(),
-      };
+      }
     }
 
     // Add to recent timers
-    storage.addRecentTimer(finalConfig);
-    setRecentTimers(storage.getRecentTimers());
+    storage.addRecentTimer(finalConfig)
+    setRecentTimers(storage.getRecentTimers())
 
     // Navigate to appropriate timer page
     switch (finalConfig.type) {
       case TimerType.COUNTDOWN:
-        router.push(`/timer/countdown?id=${finalConfig.id}`);
-        break;
+        router.push(`/timer/countdown?id=${finalConfig.id}`)
+        break
       case TimerType.STOPWATCH:
-        router.push(`/timer/stopwatch?id=${finalConfig.id}`);
-        break;
+        router.push(`/timer/stopwatch?id=${finalConfig.id}`)
+        break
       case TimerType.INTERVAL:
-        router.push(`/timer/interval?id=${finalConfig.id}`);
-        break;
+        router.push(`/timer/interval?id=${finalConfig.id}`)
+        break
       case TimerType.WORKREST:
-        router.push(`/timer/workrest?id=${finalConfig.id}`);
-        break;
+        router.push(`/timer/workrest?id=${finalConfig.id}`)
+        break
       case TimerType.COMPLEX:
-        router.push(`/timer/complex?id=${finalConfig.id}`);
-        break;
+        router.push(`/timer/complex?id=${finalConfig.id}`)
+        break
     }
-  };
+  }
 
   const handleRemoveTimer = (timerId: string) => {
-    storage.removeTimer(timerId);
-    setRecentTimers(storage.getRecentTimers());
-  };
+    storage.removeTimer(timerId)
+    setRecentTimers(storage.getRecentTimers())
+  }
 
   const handleClearAll = () => {
-    storage.clearRecentTimers();
-    setRecentTimers([]);
-  };
+    storage.clearRecentTimers()
+    setRecentTimers([])
+  }
 
   return (
     <div className="min-h-screen py-8">
@@ -95,7 +96,6 @@ export default function ConfigurePage() {
           timers={recentTimers}
           onStartTimer={handleStartTimer}
           onRemoveTimer={handleRemoveTimer}
-          onClearAll={handleClearAll}
         />
 
         {/* Timer Type Selection */}
@@ -106,7 +106,7 @@ export default function ConfigurePage() {
         {/* Predefined Styles */}
         <div className="mt-8">
           <PredefinedStyles
-            styles={getPredefinedStyles()}
+            styles={PREDEFINED_STYLES}
             onSelectStyle={setSelectedPredefined}
             onStartTimer={(config) => handleStartTimer(config, true)}
           />
@@ -122,12 +122,12 @@ export default function ConfigurePage() {
               onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
               onSaveAsPredefined={(config) => {
                 // TODO: Implement save as predefined functionality
-                console.log("Save as predefined:", config);
+                console.log('Save as predefined:', config)
               }}
             />
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }

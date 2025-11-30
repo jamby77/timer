@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @plugin 'tailwindcss-animate';
 
@@ -65,18 +65,23 @@
 
 .animated-border-card {
   background:
-          linear-gradient(45deg, var(--color-slate-900), var(--color-slate-800) 50%, var(--color-slate-900)) padding-box,
-          conic-gradient(
-                  from var(--border-angle),
-                  var(--color-tm-work-bg) 80%,
-                  var(--color-tm-rest-bg) 86%,
-                  var(--color-tm-pause) 90%,
-                  var(--color-tm-rest-bg) 94%,
-                  var(--color-tm-work-bg)
-          ) border-box;
+    linear-gradient(
+        45deg,
+        var(--color-slate-900),
+        var(--color-slate-800) 50%,
+        var(--color-slate-900)
+      )
+      padding-box,
+    conic-gradient(
+        from var(--border-angle),
+        var(--color-tm-work-bg) 80%,
+        var(--color-tm-rest-bg) 86%,
+        var(--color-tm-pause) 90%,
+        var(--color-tm-rest-bg) 94%,
+        var(--color-tm-work-bg)
+      )
+      border-box;
 }
-
-
 
 @property --border-angle {
   inherits: false;
@@ -147,7 +152,7 @@
   --sidebar-ring: oklch(0.704 0.04 256.788);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
-  
+
   /* Timer colors - Light theme */
   --tm-work-fg: oklch(0.945 0.015 142.3);
   --tm-work-bg: oklch(0.714 0.188 143.292);
@@ -163,11 +168,11 @@
   /* Laps colors */
   --lap-best-fg: oklch(0.536 0.177 142.602);
   --lap-last-fg: oklch(0.425 0.254 272.823);
-  
+
   /* Progress colors - Light theme */
   --tm-pr-work-bg: oklch(0.405 0.07 142.3);
   --tm-pr-rest-bg: oklch(0.466 0.096 76.172);
-  --progress-indicator-color: var(--primary)
+  --progress-indicator-color: var(--primary);
 }
 
 .dark {
@@ -203,7 +208,7 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
-  
+
   /* Timer colors - Dark theme */
   --tm-work-bg: oklch(0.714 0.188 143.292 / 0.3);
   --tm-work-fg: oklch(0.845 0.03 142.3);
@@ -220,7 +225,7 @@
   /* Laps colors */
   /*--lap-best-fg: oklch(0.208 0.042 265.755);*/
   /*--lap-last-fg: oklch(0.208 0.042 265.755);*/
-  
+
   /* Progress colors - Dark theme */
   --tm-pr-work-bg: oklch(0.61 0.089 142.515);
   --tm-pr-rest-bg: oklch(0.822 0.062 87.373);

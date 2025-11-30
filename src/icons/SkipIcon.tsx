@@ -10,5 +10,5 @@ export default function SkipIcon(props: any) {
     >
       <path d="m6 18 8.5-6L6 6zM16 6v12h2V6z"></path>
     </svg>
-  );
+  )
 }

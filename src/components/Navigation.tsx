@@ -1,22 +1,23 @@
-"use client";
+'use client'
 
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from '@/lib/utils'
+
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export const Navigation = () => {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/configure", label: "Configure" },
-    { href: "/timer/countdown", label: "Countdown" },
-    { href: "/timer/stopwatch", label: "Stopwatch" },
-    { href: "/timer/interval", label: "Interval" },
-    { href: "/timer/workrest", label: "Work/Rest" },
-  ];
+    { href: '/', label: 'Home' },
+    { href: '/configure', label: 'Configure' },
+    { href: '/timer/countdown', label: 'Countdown' },
+    { href: '/timer/stopwatch', label: 'Stopwatch' },
+    { href: '/timer/interval', label: 'Interval' },
+    { href: '/timer/workrest', label: 'Work/Rest' },
+  ]
 
   return (
     <nav className="border-border bg-background text-foreground border-b shadow-sm">
@@ -24,28 +25,28 @@ export const Navigation = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex space-x-8">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                    'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     {
-                      "text-foreground border-blue-500": isActive,
-                      "text-muted-foreground hover:border-muted hover:text-foreground h border-transparent":
+                      'text-foreground border-blue-500': isActive,
+                      'text-muted-foreground hover:border-muted hover:text-foreground h border-transparent':
                         pathname !== item.href,
-                    },
+                    }
                   )}
                 >
                   {item.label}
                 </Link>
-              );
+              )
             })}
           </div>
           <ThemeToggle />
         </div>
       </div>
     </nav>
-  );
-};
+  )
+}

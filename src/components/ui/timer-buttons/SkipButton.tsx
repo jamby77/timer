@@ -1,22 +1,22 @@
-import SkipIcon from "@/icons/SkipIcon";
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils'
 
-import { BaseButton } from "./BaseButton";
+import SkipIcon from '@/icons/SkipIcon'
+import { BaseButton } from './BaseButton'
 
 interface SkipButtonProps {
-  onClick: () => void;
-  title?: string;
-  label?: string;
-  disabled?: boolean;
-  className?: string;
+  onClick: () => void
+  title?: string
+  label?: string
+  disabled?: boolean
+  className?: string
 }
 
 export const SkipButton = ({
   onClick,
-  title = "Skip",
-  label = "Skip to next",
+  title = 'Skip',
+  label = 'Skip to next',
   disabled = false,
-  className = "",
+  className = '',
 }: SkipButtonProps) => {
   return (
     <BaseButton
@@ -24,9 +24,9 @@ export const SkipButton = ({
       title={title}
       label={label}
       disabled={disabled}
-      className={cn("bg-tm-skip hover:bg-tm-skip/80 focus:ring-tm-skip", className)}
+      className={cn('bg-tm-skip hover:bg-tm-skip/80 focus:ring-tm-skip', className)}
     >
       <SkipIcon className="h-6 w-6" />
     </BaseButton>
-  );
-};
+  )
+}

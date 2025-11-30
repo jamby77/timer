@@ -101,8 +101,15 @@ export interface RecentTimer {
   startedAt: Date
 }
 
-// Component prop types
+/**
+ * Props for RecentTimers component
+ *
+ * @property {RecentTimer[]} timers - List of recent timers
+ * @property {(config: AnyTimerConfig, isPredefined?: boolean) => void} onStartTimer - Callback when a timer is started
+ * @property {(timerId: string) => void} onRemoveTimer - Callback when a timer is removed
+ */
 export interface RecentTimersProps {
+  /** List of recent timers */
   timers: RecentTimer[]
   onStartTimer: (config: AnyTimerConfig, isPredefined?: boolean) => void
   onRemoveTimer: (timerId: string) => void

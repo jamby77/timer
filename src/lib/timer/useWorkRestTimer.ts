@@ -14,10 +14,7 @@ const MAX_RATIO = 10000 // 100.0 stored as integer
 const REST_DELAY_MS = 100 // 100ms delay before rest starts
 const MAX_ROUNDS = 1000 // Maximum consecutive work/rest cycles
 
-export const useWorkRestTimer = ({ 
-  config = {},
-  onLapRecorded 
-}: WorkRestTimerOptions = {}): [
+export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOptions = {}): [
   WorkRestTimerState,
   WorkRestTimerActions,
 ] => {
@@ -118,7 +115,7 @@ export const useWorkRestTimer = ({
   const startRestPhase = useCallback(
     (workDuration: number, ratio: number) => {
       let restDuration: number
-      
+
       // Calculate rest duration based on mode
       if (state.restMode === WorkRestMode.FIXED && state.fixedRestDuration) {
         restDuration = state.fixedRestDuration * 1000 // Convert seconds to milliseconds

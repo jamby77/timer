@@ -11,5 +11,5 @@ export default function PlayIcon(props: any) {
     >
       <path d="M320-203v-560l440 280-440 280Z" />
     </svg>
-  );
+  )
 }

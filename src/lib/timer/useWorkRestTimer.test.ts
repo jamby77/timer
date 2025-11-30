@@ -18,7 +18,7 @@ describe('useWorkRestTimer', () => {
     act(() => {
       result.current[1].stopWork()
     })
-    
+
     // Wait for REST_DELAY_MS (100ms) + small buffer for rest phase to start
     await act(() => sleep(150))
   }

@@ -1,10 +1,10 @@
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes } from 'react'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 
 type BaseButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  label?: string;
-};
+  label?: string
+}
 
 export const BaseButton = ({
   onClick,
@@ -28,5 +28,5 @@ export const BaseButton = ({
     >
       {children}
     </Button>
-  );
-};
+  )
+}

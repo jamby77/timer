@@ -11,13 +11,15 @@ const meta = preview.meta({
     selectedType: {
       control: 'select',
       options: [
-        null,
         TimerType.COUNTDOWN,
         TimerType.STOPWATCH,
         TimerType.INTERVAL,
         TimerType.WORKREST,
         TimerType.COMPLEX,
       ],
+    },
+    onTypeSelect: {
+      control: false,
     },
   },
   args: {

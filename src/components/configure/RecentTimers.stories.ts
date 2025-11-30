@@ -9,9 +9,14 @@ import { RecentTimers } from './RecentTimers'
 const meta = preview.meta({
   component: RecentTimers,
   argTypes: {
-    timers: { control: 'object' },
+    timers: {
+      description: 'List of recent timers',
+    },
+    onStartTimer: { action: 'start timer' },
+    onRemoveTimer: { action: 'remove timer' },
   },
   args: {
+    timers: [],
     onStartTimer: fn(),
     onRemoveTimer: fn(),
   },

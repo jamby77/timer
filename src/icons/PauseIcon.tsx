@@ -11,5 +11,5 @@ export default function PauseIcon(props: any) {
     >
       <path d="M555-200v-560h175v560H555Zm-325 0v-560h175v560H230Z" />
     </svg>
-  );
+  )
 }

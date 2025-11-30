@@ -1,7 +1,7 @@
 ---
 trigger: always_on
-description: 
-globs: 
+description:
+globs:
 ---
 
 # Project Rules
@@ -11,10 +11,10 @@ If you need to use external tools, plan in advance whch ones you need and combin
 
 This project uses `pnpm` package manager, if any commands related to packages need to be executed, use pnpm
 
-
 ## Testing Rules
 
 ### NO MOCKING WITHOUT EXPLICIT PERMISSION
+
 - **NEVER mock any functionality without asking first**
 - Always test real functionality when possible
 - Only mock when absolutely necessary and with explicit approval
@@ -22,6 +22,7 @@ This project uses `pnpm` package manager, if any commands related to packages ne
 - Test actual behavior, not simulated behavior
 
 ### General Development
+
 - Prefer real functionality over mocks
 - Test the actual implementation, not artificial scenarios
 - If mocking is needed, justify it and get approval first

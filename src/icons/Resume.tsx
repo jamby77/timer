@@ -12,5 +12,5 @@ export default function ResumeIcon(props: any) {
       <path d="M240-240v-480h60v480h-60Zm174 0 385-240-385-240v480Z" />
       <path d="M240-240v-480h60v480h-60Zm174 0 385-240-385-240v480Z" />
     </svg>
-  );
+  )
 }

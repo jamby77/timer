@@ -150,28 +150,28 @@ describe('Timer', () => {
 
   it('should return initial time correctly', async () => {
     const timer = new Timer(3000)
-    
+
     expect(timer.getInitialTime()).toBe(3000)
-    
+
     // Start and let it run a bit
     timer.start()
     await sleep(100)
-    
+
     // Initial time should remain unchanged
     expect(timer.getInitialTime()).toBe(3000)
   })
 
   it('should set time manually', () => {
     const timer = new Timer(5000)
-    
+
     // Set time to different value
     timer.setTime(2500)
     expect(timer.getTime()).toBe(2500)
-    
+
     // Set time to zero
     timer.setTime(0)
     expect(timer.getTime()).toBe(0)
-    
+
     // Set time to negative (should allow negative values)
     timer.setTime(-100)
     expect(timer.getTime()).toBe(-100)
@@ -181,18 +181,18 @@ describe('Timer', () => {
     const onTick = vi.fn()
     const onComplete = vi.fn()
     const timer = new Timer(1000)
-    
+
     // Update with new options
     timer.updateOptions({
       onTick,
       onComplete,
       debug: true,
     })
-    
+
     // Start timer to trigger callback
     timer.start()
     await sleep(100)
-    
+
     // Check that new callbacks are set (they may or may not be called depending on timing)
     expect(typeof onTick).toBe('function')
     expect(typeof onComplete).toBe('function')
@@ -200,13 +200,13 @@ describe('Timer', () => {
 
   it('should destroy timer without errors', () => {
     const timer = new Timer(5000)
-    
+
     // Start timer
     timer.start()
-    
+
     // Destroy timer - should not throw any errors
     expect(() => timer.destroy()).not.toThrow()
-    
+
     // Timer should still be accessible after destroy
     expect(timer.getTime()).toBe(5000)
     expect(timer.getState()).toBe(TimerState.Running) // State doesn't change on destroy
@@ -214,15 +214,15 @@ describe('Timer', () => {
 
   it('should handle double click on start (start called twice)', async () => {
     const timer = new Timer(5000, { debug: true })
-    
+
     // First start
     timer.start()
     expect(timer.getState()).toBe(TimerState.Running)
-    
+
     // Second start (double click) - should not cause issues
     timer.start()
     expect(timer.getState()).toBe(TimerState.Running)
-    
+
     // Timer should still be counting normally
     await sleep(200) // Give more time for counting to start
     expect(timer.getTime()).toBeLessThan(5000)
@@ -231,22 +231,22 @@ describe('Timer', () => {
 
   it('should handle double click on pause (pause called twice)', async () => {
     const timer = new Timer(5000, { debug: true })
-    
+
     timer.start()
     await sleep(100)
-    
+
     // First pause
     timer.pause()
     expect(timer.getState()).toBe(TimerState.Paused)
     const pausedTime = timer.getTime()
-    
+
     // Second pause (double click) - should not cause issues
     timer.pause()
     expect(timer.getState()).toBe(TimerState.Paused)
-    
+
     // Time should remain unchanged after double pause
     expect(timer.getTime()).toBe(pausedTime)
-    
+
     // Wait to ensure timer doesn't continue
     await sleep(100)
     expect(timer.getTime()).toBe(pausedTime)
@@ -254,20 +254,20 @@ describe('Timer', () => {
 
   it('should handle rapid start-pause-start sequence', async () => {
     const timer = new Timer(5000, { debug: true })
-    
+
     // Start
     timer.start()
     expect(timer.getState()).toBe(TimerState.Running)
-    
+
     // Quick pause
     timer.pause()
     expect(timer.getState()).toBe(TimerState.Paused)
     const pausedTime = timer.getTime()
-    
+
     // Quick start again (resume)
     timer.start()
     expect(timer.getState()).toBe(TimerState.Running)
-    
+
     // Timer should resume counting from paused time
     await sleep(200) // Give more time for counting to resume
     expect(timer.getTime()).toBeLessThan(pausedTime)
@@ -276,24 +276,24 @@ describe('Timer', () => {
 
   it('should handle rapid pause-start-pause sequence', async () => {
     const timer = new Timer(5000, { debug: true })
-    
+
     timer.start()
     await sleep(100)
-    
+
     // Pause
     timer.pause()
     expect(timer.getState()).toBe(TimerState.Paused)
-    
+
     // Quick start
     timer.start()
     expect(timer.getState()).toBe(TimerState.Running)
-    
+
     // Quick pause again
     timer.pause()
     expect(timer.getState()).toBe(TimerState.Paused)
-    
+
     const finalPausedTime = timer.getTime()
-    
+
     // Wait to ensure timer doesn't continue
     await sleep(100)
     expect(timer.getTime()).toBe(finalPausedTime)
