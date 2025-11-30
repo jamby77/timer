@@ -775,7 +775,7 @@ export const storage = {
 ```tsx
 export default function ConfigurePage() {
   const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([]);
-  const [selectedType, setSelectedType] = useState<TimerType | null>(null);
+  const [selectedTimer, setSelectedType] = useState<TimerType | null>(null);
   
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -792,13 +792,13 @@ export default function ConfigurePage() {
       />
       
       <TimerTypeSelector 
-        selectedType={selectedType}
-        onTypeSelect={setSelectedType}
+        selectedTimer={selectedTimer}
+        onTimerSelect={setSelectedType}
       />
       
-      {selectedType && (
+      {selectedTimer && (
         <TimerConfigForm 
-          type={selectedType}
+          type={selectedTimer}
           onSave={handleSaveConfig}
           onStart={handleStartTimer}
         />
@@ -995,8 +995,8 @@ const TIMER_TYPES = [
 ] as const;
 
 const TimerTypeSelector = ({
-  selectedType,
-  onTypeSelect,
+  selectedTimer,
+  onTimerSelect,
 }: TimerTypeSelectorProps) => (
   <section>
     <h2>Timer Type</h2>
@@ -1005,9 +1005,9 @@ const TimerTypeSelector = ({
         <TimerCard
           key={type}
           className={cx("cursor-pointer transition-colors", {
-            "ring-2 ring-blue-500": selectedType === type,
+            "ring-2 ring-blue-500": selectedTimer === type,
           })}
-          onClick={() => onTypeSelect(type)}
+          onClick={() => onTimerSelect(type)}
         >
           <h3>{name}</h3>
           <p className="text-sm text-gray-600">{description}</p>
@@ -1953,7 +1953,7 @@ const EditStyleModal = ({
 ```tsx
 export default function ConfigurePage() {
   const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([]);
-  const [selectedType, setSelectedType] = useState<TimerType | null>(null);
+  const [selectedTimer, setSelectedType] = useState<TimerType | null>(null);
   const [editingStyle, setEditingStyle] = useState<PredefinedStyle | null>(null);
   const [userPredefinedStyles, setUserPredefinedStyles] = useState<PredefinedStyle[]>([]);
   
@@ -2013,13 +2013,13 @@ export default function ConfigurePage() {
       />
       
       <TimerTypeSelector 
-        selectedType={selectedType}
-        onTypeSelect={setSelectedType}
+        selectedTimer={selectedTimer}
+        onTimerSelect={setSelectedType}
       />
       
-      {selectedType && (
+      {selectedTimer && (
         <TimerConfigForm 
-          type={selectedType}
+          type={selectedTimer}
           onSave={handleSaveConfig}
           onSaveAsPredefined={handleSaveAsPredefined}
           onStart={handleStartTimer}
@@ -2555,14 +2555,14 @@ export default function ConfigurePage() {
       
       {!selectedPredefined && (
         <TimerTypeSelector
-          selectedType={selectedType}
-          onTypeSelect={setSelectedType}
+          selectedTimer={selectedTimer}
+          onTimerSelect={setSelectedType}
         />
       )}
       
-      {selectedType && !selectedPredefined && (
+      {selectedTimer && !selectedPredefined && (
         <TimerConfigForm
-          type={selectedType}
+          type={selectedTimer}
           onStart={handleStartCustomTimer}
           onSaveAsPredefined={handleSaveAsPredefined}
         />

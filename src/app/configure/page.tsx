@@ -8,15 +8,15 @@ import { PREDEFINED_STYLES } from '@/lib/configure/presets'
 import { storage } from '@/lib/configure/storage'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
-import { TimerConfigForm } from '@/components/configure/components'
 import { PredefinedStyles } from '@/components/configure/PredefinedStyles'
 import { RecentTimers } from '@/components/configure/RecentTimers'
+import { TimerConfig } from '@/components/configure/TimerConfig'
 import { TimerTypeSelector } from '@/components/configure/TimerTypeSelector'
 import { PageContainer } from '@/components/PageContainer'
 
 export default function ConfigurePage() {
   const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([])
-  const [selectedType, setSelectedType] = useState<TimerType | null>(null)
+  const [selectedTimer, setSelectedTimer] = useState<TimerType | null>(null)
   const [selectedPredefined, setSelectedPredefined] =
     useState<PredefinedStyle<AnyTimerConfig> | null>(null)
   const router = useRouter()
@@ -77,14 +77,20 @@ export default function ConfigurePage() {
     setRecentTimers(storage.getRecentTimers())
   }
 
+  const handleToggleSelectedTimer = (timer: TimerType) => {
+    if (selectedTimer === timer) {
+      setSelectedTimer(null)
+    } else {
+      setSelectedTimer(timer)
+    }
+  }
+
   return (
     <PageContainer>
-      <div className="mx-auto max-w-7xl space-y-2 px-4 sm:px-6 md:space-y-4 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-2 px-4 sm:px-6 md:space-y-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-foreground text-3xl font-bold">Configure Timer</h1>
-          <p className="text-muted-foreground mt-2">
-            Create custom timers or choose from predefined styles
-          </p>
+          <p className="text-muted-foreground mt-2">Create custom timers or choose from a preset</p>
         </div>
 
         {/* Recent Timers Section */}
@@ -97,23 +103,26 @@ export default function ConfigurePage() {
         {/* Main Content Area */}
         <div className="lg:grid lg:grid-cols-12 lg:gap-6">
           {/* Main Column - Timer Type Selection */}
-          <div className="lg:col-span-8">
-            <TimerTypeSelector selectedType={selectedType} onTypeSelect={setSelectedType} />
-            
+          <div className="space-y-6 lg:col-span-8">
+            <TimerTypeSelector
+              selectedTimer={selectedTimer}
+              onTimerSelect={handleToggleSelectedTimer}
+            />
+
             {/* Configuration Form - appears below timer type when selected */}
-            {(selectedType || selectedPredefined) && (
-              <div className="mt-6">
-                <TimerConfigForm
-                  type={selectedType || selectedPredefined?.config.type || TimerType.COUNTDOWN}
-                  initialConfig={selectedPredefined?.config}
-                  isPredefined={!!selectedPredefined}
-                  onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
-                  onSaveAsPredefined={(config) => {
-                    // TODO: Implement save as predefined functionality
-                    console.log('Save as predefined:', config)
-                  }}
-                />
-              </div>
+            {(selectedTimer || selectedPredefined) && (
+              <TimerConfig
+                open={true}
+                onOpenChange={() => {}}
+                type={selectedTimer || selectedPredefined?.config.type || TimerType.COUNTDOWN}
+                initialConfig={selectedPredefined?.config}
+                isPredefined={!!selectedPredefined}
+                onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
+                onSaveAsPredefined={(config) => {
+                  // TODO: Implement save as predefined functionality
+                  console.log('Save as predefined:', config)
+                }}
+              />
             )}
           </div>
 

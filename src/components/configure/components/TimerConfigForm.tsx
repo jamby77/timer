@@ -86,7 +86,7 @@ export const TimerConfigForm = ({
   }
 
   return (
-    <CardContainer>
+    <div className="mx-auto h-full max-w-2xl overflow-hidden overflow-y-auto p-4">
       <div className="mb-6">
         <h2 className="text-foreground mb-2 text-xl font-semibold">
           Configure {TIMER_TYPE_LABELS[type]} Timer
@@ -110,7 +110,7 @@ export const TimerConfigForm = ({
           onHandleSave={handleSave}
         />
       </form>
-    </CardContainer>
+    </div>
   )
 }
 

@@ -116,8 +116,8 @@ export interface RecentTimersProps {
 }
 
 export interface TimerTypeSelectorProps {
-  selectedType: TimerType | null
-  onTypeSelect: (type: TimerType) => void
+  selectedTimer: TimerType | null
+  onTimerSelect: (type: TimerType) => void
 }
 
 export interface PredefinedStylesProps {

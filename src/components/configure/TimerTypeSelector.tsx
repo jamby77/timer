@@ -41,7 +41,7 @@ const TIMER_TYPES = [
     icon: TIMER_TYPE_ICONS[TimerType.COMPLEX],
   },
 ] as const
-export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelectorProps) => {
+export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSelectorProps) => {
   return (
     <CardContainer>
       <h2 className="mb-6 text-xl font-semibold">Timer Type</h2>
@@ -50,10 +50,10 @@ export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelec
           <Card
             key={type}
             className={cx('cursor-pointer transition-colors', {
-              'ring-accent-foreground ring': selectedType === type,
+              'ring-accent-foreground ring': selectedTimer === type,
             })}
-            onClick={() => onTypeSelect(type)}
-            data-selected={selectedType === type}
+            onClick={() => onTimerSelect(type)}
+            data-selected={selectedTimer === type}
           >
             <CardHeader>
               <div
