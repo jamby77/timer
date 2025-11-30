@@ -13,10 +13,6 @@ export const Navigation = () => {
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/configure', label: 'Configure' },
-    { href: '/timer/countdown', label: 'Countdown' },
-    { href: '/timer/stopwatch', label: 'Stopwatch' },
-    { href: '/timer/interval', label: 'Interval' },
-    { href: '/timer/workrest', label: 'Work/Rest' },
   ]
 
   return (

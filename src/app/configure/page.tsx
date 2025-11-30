@@ -48,26 +48,27 @@ export default function ConfigurePage() {
       }
     }
 
-    // Add to recent timers
+    // Store timer configuration and add to recent timers
+    storage.storeTimerConfig(finalConfig)
     storage.addRecentTimer(finalConfig)
     setRecentTimers(storage.getRecentTimers())
 
     // Navigate to appropriate timer page
     switch (finalConfig.type) {
       case TimerType.COUNTDOWN:
-        router.push(`/timer/countdown?id=${finalConfig.id}`)
+        router.push(`/?id=${finalConfig.id}`)
         break
       case TimerType.STOPWATCH:
-        router.push(`/timer/stopwatch?id=${finalConfig.id}`)
+        router.push(`/?id=${finalConfig.id}`)
         break
       case TimerType.INTERVAL:
-        router.push(`/timer/interval?id=${finalConfig.id}`)
+        router.push(`/?id=${finalConfig.id}`)
         break
       case TimerType.WORKREST:
-        router.push(`/timer/workrest?id=${finalConfig.id}`)
+        router.push(`/?id=${finalConfig.id}`)
         break
       case TimerType.COMPLEX:
-        router.push(`/timer/complex?id=${finalConfig.id}`)
+        router.push(`/?id=${finalConfig.id}`)
         break
     }
   }

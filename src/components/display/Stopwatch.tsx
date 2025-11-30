@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 
+import { StopwatchConfig } from '@/types/configure'
 import { formatTime, getStatusMessage, TimerState, useStopwatch } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
@@ -10,22 +11,16 @@ import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
+
 interface StopwatchProps {
-  /** Label for the stopwatch */
-  label?: string
-  /** Maximum time in seconds the stopwatch will run (default: 1 year) */
-  timeLimit?: number
+  config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
   onStateChange?: (state: TimerState) => void
-  /** Optional message to show when timer completes */
-  completionMessage?: string
 }
 
 export function Stopwatch({
-  label = 'Stopwatch',
-  timeLimit = 0,
+  config: { timeLimit = 0, completionMessage, name = 'Stopwatch' },
   onStateChange,
-  completionMessage,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
 
@@ -66,7 +61,7 @@ export function Stopwatch({
 
   return (
     <TimerContainer>
-      <TimerCard label={label} state={state} time={formatTime(time)} subtitle={timeLimitDisplay}>
+      <TimerCard label={name} state={state} time={formatTime(time)} subtitle={timeLimitDisplay}>
         <TimerButton
           state={state}
           onStart={start}

@@ -1,19 +1,17 @@
+import { SyntheticEvent } from 'react'
 import { PlayIcon } from 'lucide-react'
 
-import { ButtonLegacy } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 
 interface FormActionsProps {
-  isPredefined: boolean
-  onSaveAsPredefined?: ((config: any) => void) | undefined
-  onSave?: ((config: any) => void) | undefined
-  onHandleSave: () => void
+  enableSaveAsPredefined: boolean
+  enableSave: boolean
+  onHandleSave: (e: SyntheticEvent) => void
 }
 
 export const FormActions = ({
-  isPredefined,
-  onSaveAsPredefined,
-  onSave,
+  enableSaveAsPredefined,
+  enableSave,
   onHandleSave,
 }: FormActionsProps) => {
   return (
@@ -23,13 +21,13 @@ export const FormActions = ({
         Start Timer
       </Button>
 
-      {!isPredefined && onSaveAsPredefined && (
+      {!enableSaveAsPredefined && (
         <Button type="button" variant="outline" onClick={onHandleSave} size="lg">
           Save as Predefined
         </Button>
       )}
 
-      {onSave && (
+      {enableSave && (
         <Button type="button" variant="secondary" onClick={onHandleSave} size="lg">
           Save Changes
         </Button>

@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
-import { CardContainer } from '@/components/ui'
 import { CommonFields } from './CommonFields'
 import { FormActions } from './FormActions'
 import { FormErrors } from './FormErrors'
@@ -29,7 +29,7 @@ export const TimerConfigForm = ({
 
   const [errors, setErrors] = useState<string[]>([])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
 
     const fullConfig = {
@@ -38,6 +38,7 @@ export const TimerConfigForm = ({
       createdAt: new Date(),
       lastUsed: new Date(),
     } as AnyTimerConfig
+    fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
 
     const validationErrors = validateTimerConfig(fullConfig)
 
@@ -48,36 +49,6 @@ export const TimerConfigForm = ({
 
     setErrors([])
     onStartTimer(fullConfig)
-  }
-
-  const handleSave = () => {
-    if (!config.name) {
-      setErrors(['Timer name is required for saving'])
-      return
-    }
-
-    const fullConfig = {
-      ...config,
-      type,
-      id: config.id || generateId(),
-      createdAt: new Date(),
-      lastUsed: new Date(),
-    } as AnyTimerConfig
-
-    const validationErrors = validateTimerConfig(fullConfig)
-
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors)
-      return
-    }
-
-    setErrors([])
-
-    if (onSaveAsPredefined && !isPredefined) {
-      onSaveAsPredefined(fullConfig)
-    } else if (onSave) {
-      onSave(fullConfig)
-    }
   }
 
   const updateConfig = (updates: Partial<AnyTimerConfig>) => {
@@ -104,17 +75,11 @@ export const TimerConfigForm = ({
         <CommonFields config={config} onChange={updateConfig} type={type} />
 
         <FormActions
-          isPredefined={isPredefined}
-          onSaveAsPredefined={onSaveAsPredefined}
-          onSave={onSave}
-          onHandleSave={handleSave}
+          enableSaveAsPredefined={isPredefined && !!onSaveAsPredefined}
+          enableSave={!!onSave}
+          onHandleSave={handleSubmit}
         />
       </form>
     </div>
   )
-}
-
-// Helper function to generate ID
-const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 9)
 }

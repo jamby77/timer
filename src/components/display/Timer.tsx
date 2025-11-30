@@ -3,6 +3,7 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import { CountdownConfig } from '@/types/configure'
 import { formatTime, TimerState, useTimer } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
@@ -12,20 +13,13 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface TimerProps {
-  /** Duration in seconds */
-  duration: number
-  /** Label for the timer (e.g., "Work", "Rest", "On", "Off") */
-  label?: string
-  /** Optional message to show when timer completes */
-  completionMessage?: string
+  config: CountdownConfig
   /** Optional callback when timer state changes */
   onStateChange?: (state: TimerState) => void
 }
 
 export const Timer = ({
-  duration,
-  label = 'Timer!!',
-  completionMessage,
+  config: { duration, completionMessage, name = 'Timer' },
   onStateChange,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
@@ -67,7 +61,7 @@ export const Timer = ({
 
   return (
     <TimerContainer>
-      <TimerCard label={label} state={state} time={formatTime(time)}>
+      <TimerCard label={name} state={state} time={formatTime(time)}>
         <TimerButton
           state={state}
           onStart={start}

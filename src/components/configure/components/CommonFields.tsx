@@ -44,7 +44,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
     <FieldGroup>
       {/* Timer Name */}
       <Field>
-        <FieldLabel htmlFor="duration">Timer Name</FieldLabel>
+        <FieldLabel htmlFor="duration">Timer Name*</FieldLabel>
         <Input
           id="timerName"
           name="timerName"
