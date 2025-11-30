@@ -8,7 +8,7 @@ import { TimerTypeSelector } from './TimerTypeSelector'
 const meta = preview.meta({
   component: TimerTypeSelector,
   argTypes: {
-    selectedType: {
+    selectedTimer: {
       control: 'select',
       options: [
         TimerType.COUNTDOWN,
@@ -18,19 +18,19 @@ const meta = preview.meta({
         TimerType.COMPLEX,
       ],
     },
-    onTypeSelect: {
+    onTimerSelect: {
       control: false,
     },
   },
   args: {
-    selectedType: null,
-    onTypeSelect: fn(),
+    selectedTimer: null,
+    onTimerSelect: fn(),
   },
 })
 
 export const Default = meta.story({
   args: {
-    selectedType: null,
+    selectedTimer: null,
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Timer Type')
@@ -49,7 +49,7 @@ export const Default = meta.story({
 
 export const CountdownSelected = meta.story({
   args: {
-    selectedType: TimerType.COUNTDOWN,
+    selectedTimer: TimerType.COUNTDOWN,
   },
   play: async ({ canvasElement }) => {
     // Check that Countdown is highlighted (has ring class)
