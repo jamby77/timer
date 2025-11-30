@@ -1,9 +1,11 @@
 import { z } from 'zod'
 
-import type { AnyTimerConfig } from '@/types/configure'
+import type { AnyTimerConfig, ComplexConfig } from '@/types/configure'
 
 import { TimerType, WorkRestMode } from '@/types/configure'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
+
 
 // Zod schemas for timer configuration validation
 
@@ -220,4 +222,19 @@ export const cloneTimerConfig = (config: AnyTimerConfig): AnyTimerConfig => {
     cloned.lastUsed = new Date(cloned.lastUsed)
   }
   return cloned
+}
+
+export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
+  const fullConfig = {
+    ...config,
+    type: TimerType.COMPLEX,
+    createdAt: new Date(),
+    lastUsed: new Date(),
+  } as ComplexConfig
+
+  fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
+
+  const validationErrors = validateTimerConfig(fullConfig)
+
+  return { config: fullConfig, errors: validationErrors }
 }

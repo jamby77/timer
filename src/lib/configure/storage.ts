@@ -1,8 +1,13 @@
-import type { AnyTimerConfig, RecentTimer, StorageManager } from '@/types/configure'
+import { AnyTimerConfig, PredefinedStyle, RecentTimer, StorageManager } from '@/types/configure';
+
+
+
+
 
 class LocalTimerStorage implements StorageManager {
   private readonly RECENT_TIMERS_KEY = 'recent_timers'
   private readonly TIMER_PREFIX = 'timer_'
+  private readonly PRESET_PREFIX = 'preset_'
   private readonly MAX_RECENT_TIMERS = 10
 
   /**
@@ -110,6 +115,89 @@ class LocalTimerStorage implements StorageManager {
       return config.id
     } catch (error) {
       console.error('Failed to store timer config:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Store a timer preset configuration
+   */
+  storePreset<T extends AnyTimerConfig>(config: PredefinedStyle<T>): string {
+    try {
+      const preset = {
+        ...config,
+        isPreset: true,
+        createdAt: new Date(),
+      }
+      localStorage.setItem(this.PRESET_PREFIX + config.id, JSON.stringify(preset))
+      return config.id
+    } catch (error) {
+      console.error('Failed to store preset:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get all stored preset configurations
+   */
+  getAllPresets<T extends AnyTimerConfig>(): Array<{ id: string; config: PredefinedStyle<T> }> {
+    try {
+      const presets: Array<{ id: string; config: PredefinedStyle<T> }> = []
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key?.startsWith(this.PRESET_PREFIX)) {
+          const presetId = key.replace(this.PRESET_PREFIX, '')
+          const stored = localStorage.getItem(key)
+          if (stored) {
+            const config = JSON.parse(stored)
+            presets.push({
+              id: presetId,
+              config: {
+                ...config,
+                createdAt: new Date(config.createdAt),
+                lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
+              },
+            })
+          }
+        }
+      }
+
+      return presets
+    } catch (error) {
+      console.error('Failed to load presets:', error)
+      return []
+    }
+  }
+
+  /**
+   * Get a specific preset by ID
+   */
+  getPreset<T extends AnyTimerConfig>(presetId: string): PredefinedStyle<T> | null {
+    try {
+      const stored = localStorage.getItem(this.PRESET_PREFIX + presetId)
+      if (!stored) return null
+
+      const config = JSON.parse(stored)
+      return {
+        ...config,
+        createdAt: new Date(config.createdAt),
+        lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
+      }
+    } catch (error) {
+      console.error('Failed to load preset:', error)
+      return null
+    }
+  }
+
+  /**
+   * Remove a preset by ID
+   */
+  removePreset(presetId: string): void {
+    try {
+      localStorage.removeItem(this.PRESET_PREFIX + presetId)
+    } catch (error) {
+      console.error('Failed to remove preset:', error)
       throw error
     }
   }
