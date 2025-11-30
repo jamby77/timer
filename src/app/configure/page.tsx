@@ -94,35 +94,40 @@ export default function ConfigurePage() {
           onRemoveTimer={handleRemoveTimer}
         />
 
-        {/* Timer Type Selection */}
-        <div>
-          <TimerTypeSelector selectedType={selectedType} onTypeSelect={setSelectedType} />
-        </div>
-
-        {/* Predefined Styles */}
-        <div>
-          <PredefinedStyles
-            styles={PREDEFINED_STYLES}
-            onSelectStyle={setSelectedPredefined}
-            onStartTimer={(config) => handleStartTimer(config, true)}
-          />
-        </div>
-
-        {/* Configuration Form */}
-        {(selectedType || selectedPredefined) && (
-          <div>
-            <TimerConfigForm
-              type={selectedType || selectedPredefined?.config.type || TimerType.COUNTDOWN}
-              initialConfig={selectedPredefined?.config}
-              isPredefined={!!selectedPredefined}
-              onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
-              onSaveAsPredefined={(config) => {
-                // TODO: Implement save as predefined functionality
-                console.log('Save as predefined:', config)
-              }}
-            />
+        {/* Main Content Area */}
+        <div className="lg:grid lg:grid-cols-12 lg:gap-6">
+          {/* Main Column - Timer Type Selection */}
+          <div className="lg:col-span-8">
+            <TimerTypeSelector selectedType={selectedType} onTypeSelect={setSelectedType} />
+            
+            {/* Configuration Form - appears below timer type when selected */}
+            {(selectedType || selectedPredefined) && (
+              <div className="mt-6">
+                <TimerConfigForm
+                  type={selectedType || selectedPredefined?.config.type || TimerType.COUNTDOWN}
+                  initialConfig={selectedPredefined?.config}
+                  isPredefined={!!selectedPredefined}
+                  onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
+                  onSaveAsPredefined={(config) => {
+                    // TODO: Implement save as predefined functionality
+                    console.log('Save as predefined:', config)
+                  }}
+                />
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Sidebar - Predefined Styles */}
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-8">
+              <PredefinedStyles
+                styles={PREDEFINED_STYLES}
+                onSelectStyle={setSelectedPredefined}
+                onStartTimer={(config) => handleStartTimer(config, true)}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </PageContainer>
   )

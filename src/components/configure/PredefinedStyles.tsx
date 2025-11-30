@@ -26,7 +26,7 @@ export const PredefinedStyles = ({
         <h2 className="mb-4 text-xl font-semibold">Presets</h2>
 
         {/* Styles list */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4">
           {styles.map((style) => (
             <StyleCard
               key={style.id}
@@ -63,7 +63,7 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
         <CardTitle>
           <h3 className="text-card-foreground font-semibold">{style.name}</h3>
           {style.isBuiltIn && (
-            <span className="text-muted-foreground rounded py-1 text-sm">Built-in</span>
+            <span className="text-muted-foreground rounded py-1 text-xs font-thin">(Built-in)</span>
           )}
         </CardTitle>
       </CardHeader>
