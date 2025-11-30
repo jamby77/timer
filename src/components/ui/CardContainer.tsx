@@ -10,7 +10,10 @@ interface CardContainerProps {
 export function CardContainer({ children, className, onClick }: CardContainerProps) {
   return (
     <div
-      className={cx('border-accent bg-background rounded-lg border p-6 shadow-md', className)}
+      className={cx(
+        'border-accent bg-background rounded-lg border p-2 shadow-md md:p-6',
+        className
+      )}
       onClick={onClick}
     >
       {children}

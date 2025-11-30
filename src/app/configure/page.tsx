@@ -12,6 +12,7 @@ import { TimerConfigForm } from '@/components/configure/components'
 import { PredefinedStyles } from '@/components/configure/PredefinedStyles'
 import { RecentTimers } from '@/components/configure/RecentTimers'
 import { TimerTypeSelector } from '@/components/configure/TimerTypeSelector'
+import { PageContainer } from '@/components/PageContainer'
 
 export default function ConfigurePage() {
   const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([])
@@ -76,17 +77,12 @@ export default function ConfigurePage() {
     setRecentTimers(storage.getRecentTimers())
   }
 
-  const handleClearAll = () => {
-    storage.clearRecentTimers()
-    setRecentTimers([])
-  }
-
   return (
-    <div className="min-h-screen py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <PageContainer>
+      <div className="mx-auto max-w-7xl space-y-2 px-4 sm:px-6 md:space-y-4 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Configure Timer</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-foreground text-3xl font-bold">Configure Timer</h1>
+          <p className="text-muted-foreground mt-2">
             Create custom timers or choose from predefined styles
           </p>
         </div>
@@ -99,12 +95,12 @@ export default function ConfigurePage() {
         />
 
         {/* Timer Type Selection */}
-        <div className="mt-8">
+        <div>
           <TimerTypeSelector selectedType={selectedType} onTypeSelect={setSelectedType} />
         </div>
 
         {/* Predefined Styles */}
-        <div className="mt-8">
+        <div>
           <PredefinedStyles
             styles={PREDEFINED_STYLES}
             onSelectStyle={setSelectedPredefined}
@@ -114,7 +110,7 @@ export default function ConfigurePage() {
 
         {/* Configuration Form */}
         {(selectedType || selectedPredefined) && (
-          <div className="mt-8">
+          <div>
             <TimerConfigForm
               type={selectedType || selectedPredefined?.config.type || TimerType.COUNTDOWN}
               initialConfig={selectedPredefined?.config}
@@ -128,6 +124,6 @@ export default function ConfigurePage() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   )
 }

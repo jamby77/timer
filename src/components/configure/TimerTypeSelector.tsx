@@ -45,7 +45,7 @@ export const TimerTypeSelector = ({ selectedType, onTypeSelect }: TimerTypeSelec
   return (
     <CardContainer>
       <h2 className="mb-6 text-xl font-semibold">Timer Type</h2>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid w-full grid-cols-3 gap-4">
         {TIMER_TYPES.map(({ type, name, description, icon: Icon }) => (
           <Card
             key={type}

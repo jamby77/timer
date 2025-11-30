@@ -21,7 +21,7 @@ export default definePreview({
     }),
     (Story) => {
       return (
-        <main className="bg-background text-foreground rounded-lg p-10">
+        <main className="bg-background text-foreground rounded-lg p-2 md:p-4 lg:p-10">
           <Story />
         </main>
       )
