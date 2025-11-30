@@ -12,6 +12,7 @@ import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
+
 interface TimerProps {
   config: CountdownConfig
   /** Optional callback when timer state changes */
@@ -61,7 +62,12 @@ export const Timer = ({
 
   return (
     <TimerContainer>
-      <TimerCard label={name} state={state} time={formatTime(time)}>
+      <TimerCard
+        label={name}
+        state={state}
+        time={formatTime(time)}
+        isWork={state === TimerState.Running}
+      >
         <TimerButton
           state={state}
           onStart={start}

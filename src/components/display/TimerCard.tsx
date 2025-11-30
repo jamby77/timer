@@ -31,7 +31,7 @@ export const TimerCard = ({ label, state, time, children, subtitle, isWork }: Ca
     <ShadcnCard
       className={cn('rounded-lg border-none px-2', {
         'bg-tm-work-bg': isWork,
-        'bg-tm-rest-bg': !isWork && isWork !== undefined,
+        'bg-tm-rest-bg': !isWork && isWork !== undefined && state !== TimerState.Idle,
       })}
     >
       <CardHeader className="space-y-2">

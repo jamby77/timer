@@ -11,7 +11,6 @@ import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
-
 interface StopwatchProps {
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
@@ -61,7 +60,13 @@ export function Stopwatch({
 
   return (
     <TimerContainer>
-      <TimerCard label={name} state={state} time={formatTime(time)} subtitle={timeLimitDisplay}>
+      <TimerCard
+        label={name}
+        isWork={state === TimerState.Running}
+        state={state}
+        time={formatTime(time)}
+        subtitle={timeLimitDisplay}
+      >
         <TimerButton
           state={state}
           onStart={start}
