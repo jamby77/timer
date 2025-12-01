@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { secondsToTimerPickerTime, TimerPickerTime, timerPickerTimeToSeconds } from '@/lib/timer'
+import { cn } from '@/lib/utils'
 
-import { Label } from '@/components/ui/label'
 import { TimePickerInput } from '@/components/ui/time-picker-input'
 
 interface TimePickerProps {
@@ -30,23 +30,24 @@ export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps
   }, [time, onTimeChange])
 
   return (
-    <div className="flex items-end gap-2">
-      <div className="grid place-items-center gap-1 text-center">
-        <Label htmlFor="hours" className="text-xs">
-          Hours
-        </Label>
+    <div
+      className={cn(
+        'border-input flex w-fit grow-0 items-center justify-start overflow-hidden rounded-lg border shadow-sm',
+        'focus-within:ring-ring focus-within:ring-1 focus-within:outline-none'
+      )}
+    >
+      <div className="p-0">
         <TimePickerInput
           picker="hours"
           time={time}
           setTime={setTime}
           ref={hourRef}
           onRightFocus={() => minuteRef.current?.focus()}
+          className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"
         />
       </div>
-      <div className="grid gap-1 text-center">
-        <Label htmlFor="minutes" className="text-xs">
-          Minutes
-        </Label>
+      <div className="h-9 px-1 text-2xl">:</div>
+      <div className="p-0">
         <TimePickerInput
           picker="minutes"
           time={time}
@@ -54,18 +55,18 @@ export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps
           ref={minuteRef}
           onLeftFocus={() => hourRef.current?.focus()}
           onRightFocus={() => secondRef.current?.focus()}
+          className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"
         />
       </div>
-      <div className="grid gap-1 text-center">
-        <Label htmlFor="seconds" className="text-xs">
-          Seconds
-        </Label>
+      <div className="h-9 px-1 text-2xl">:</div>
+      <div className="p-0">
         <TimePickerInput
           picker="seconds"
           time={time}
           setTime={setTime}
           ref={secondRef}
           onLeftFocus={() => minuteRef.current?.focus()}
+          className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"
         />
       </div>
     </div>
