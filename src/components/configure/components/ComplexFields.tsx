@@ -35,8 +35,10 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
       config: {
         type: TimerType.COUNTDOWN,
         duration: 60,
-        name: `Phase ${phases.length + 1}`,
+        name: '',
         id: `phase-${Date.now()}`,
+        createdAt: new Date(),
+        lastUsed: new Date(),
       },
       order: phases.length,
     }
@@ -82,7 +84,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
   const updatePhaseConfig = (phaseId: string, configUpdates: Partial<PhaseTimerConfig>) => {
     const updatedPhases = phases.map((phase) =>
       phase.id === phaseId
-        ? { ...phase, config: { ...phase.config, ...configUpdates } }
+        ? { ...phase, config: { ...phase.config, ...configUpdates } as PhaseTimerConfig }
         : phase
     )
     onChange({ phases: updatedPhases })
@@ -170,22 +172,26 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                       value={phase.type}
                       onValueChange={(value: TimerType) => {
                         const newType = value as TimerType
-                        let newConfig: AnyTimerConfig
+                        let newConfig: PhaseTimerConfig
 
                         switch (newType) {
                           case TimerType.COUNTDOWN:
                             newConfig = {
                               type: TimerType.COUNTDOWN,
                               duration: 60,
-                              name: phase.name,
+                              name: '',
                               id: phase.id,
+                              createdAt: new Date(),
+                              lastUsed: new Date(),
                             }
                             break
                           case TimerType.STOPWATCH:
                             newConfig = {
                               type: TimerType.STOPWATCH,
-                              name: phase.name,
+                              name: '',
                               id: phase.id,
+                              createdAt: new Date(),
+                              lastUsed: new Date(),
                             }
                             break
                           case TimerType.INTERVAL:
@@ -194,8 +200,10 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                               workDuration: 30,
                               restDuration: 10,
                               intervals: 3,
-                              name: phase.name,
+                              name: '',
                               id: phase.id,
+                              createdAt: new Date(),
+                              lastUsed: new Date(),
                             }
                             break
                           case TimerType.WORKREST:
@@ -205,16 +213,20 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                               maxRounds: 5,
                               restMode: 'ratio' as any,
                               ratio: 2,
-                              name: phase.name,
+                              name: '',
                               id: phase.id,
+                              createdAt: new Date(),
+                              lastUsed: new Date(),
                             }
                             break
                           default:
                             newConfig = {
                               type: TimerType.COUNTDOWN,
                               duration: 60,
-                              name: phase.name,
+                              name: '',
                               id: phase.id,
+                              createdAt: new Date(),
+                              lastUsed: new Date(),
                             }
                         }
 
