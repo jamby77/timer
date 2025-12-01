@@ -7,13 +7,22 @@ import type { AnyTimerConfig, ComplexConfig, ComplexPhase } from '@/types/config
 
 import { generateTimerName } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
+import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { FieldGroup } from '@/components/ui/field'
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -21,6 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CountdownFields } from '@/components/configure/components/CountdownFields'
+import { IntervalFields } from '@/components/configure/components/IntervalFields'
+import { StopwatchFields } from '@/components/configure/components/StopwatchFields'
+import { WorkRestFields } from '@/components/configure/components/WorkRestFields'
 
 // Type for phase configurations (excluding ComplexConfig to prevent nesting)
 type PhaseTimerConfig = Exclude<AnyTimerConfig, ComplexConfig>
@@ -153,9 +166,9 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
     <FieldGroup className="space-y-4">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label className="text-base font-medium">Timer Phases</Label>
+          <h3>Timer Phases</h3>
           <Button onClick={addPhase} size="sm" variant="outline">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus size={16} className="mr-2" />
             Add Phase
           </Button>
         </div>
@@ -172,7 +185,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
           <Card key={phase.id} className="relative">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <GripVertical className="text-muted-foreground h-4 w-4" />
+                <GripVertical className="text-muted-foreground" size={16} />
                 <CardTitle className="text-sm">{phase.name}</CardTitle>
                 <span className="text-muted-foreground text-xs">
                   ({TIMER_TYPE_LABELS[phase.type]})
@@ -183,8 +196,9 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     size="sm"
                     variant="ghost"
                     disabled={index === 0}
+                    className={cn('disabled:cursor-not-allowed disabled:opacity-50')}
                   >
-                    <ChevronUp className="h-4 w-4" />
+                    <ChevronUp size={16} />
                   </Button>
                   <Button
                     onClick={() => movePhase(phase.id, 'down')}
@@ -192,14 +206,14 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     variant="ghost"
                     disabled={index === phases.length - 1}
                   >
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown size={16} />
                   </Button>
                   <Button
                     onClick={() => setEditingPhaseId(editingPhaseId === phase.id ? null : phase.id)}
                     size="sm"
                     variant="ghost"
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit size={16} />
                   </Button>
                   <Button
                     onClick={() => removePhase(phase.id)}
@@ -207,16 +221,16 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     variant="ghost"
                     className="text-destructive hover:text-destructive"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 size={16} />
                   </Button>
                 </div>
               </div>
             </CardHeader>
 
             <CardContent className="pt-0">
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor={`phase-type-${phase.id}`}>Timer Type</Label>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor={`phase-type-${phase.id}`}>Timer Type</FieldLabel>
                   <Select
                     value={phase.type}
                     onValueChange={(value: TimerType) => {
@@ -239,149 +253,63 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     <SelectContent>
                       {Object.entries(TIMER_TYPE_LABELS)
                         .filter(([type]) => type !== 'COMPLEX')
-                        .map(([type, label]) => (
+                        .map(([type, FieldLabel]) => (
                           <SelectItem key={type} value={type}>
-                            {label}
+                            {FieldLabel}
                           </SelectItem>
                         ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </Field>
 
                 {editingPhaseId === phase.id && (
-                  <div className="border-t pt-3">
-                    <Label className="text-sm font-medium">Phase Configuration</Label>
-                    <div className="mt-2 space-y-2">
+                  <FieldGroup>
+                    <FieldSet>
+                      <FieldLegend>Phase Configuration</FieldLegend>
                       {phase.type === TimerType.COUNTDOWN && (
-                        <div>
-                          <Label htmlFor={`phase-duration-${phase.id}`}>Duration (seconds)</Label>
-                          <Input
-                            id={`phase-duration-${phase.id}`}
-                            type="number"
-                            value={(phase.config as any).duration || 60}
-                            onChange={(e) =>
-                              updatePhaseConfig(phase.id, {
-                                duration: parseInt(e.target.value) || 60,
-                              })
-                            }
-                            min="1"
-                          />
-                        </div>
+                        <CountdownFields
+                          config={phase.config as any}
+                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
+                        />
                       )}
 
                       {phase.type === TimerType.STOPWATCH && (
-                        <div>
-                          <Label htmlFor={`phase-timelimit-${phase.id}`}>
-                            Time Limit (seconds, optional)
-                          </Label>
-                          <Input
-                            id={`phase-timelimit-${phase.id}`}
-                            type="number"
-                            value={(phase.config as any).timeLimit || ''}
-                            onChange={(e) =>
-                              updatePhaseConfig(phase.id, {
-                                timeLimit: e.target.value ? parseInt(e.target.value) : undefined,
-                              })
-                            }
-                            min="1"
-                            placeholder="No limit"
-                          />
-                        </div>
+                        <StopwatchFields
+                          config={phase.config as any}
+                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
+                        />
                       )}
 
                       {phase.type === TimerType.INTERVAL && (
-                        <div className="grid grid-cols-3 gap-2">
-                          <div>
-                            <Label htmlFor={`phase-work-${phase.id}`}>Work (s)</Label>
-                            <Input
-                              id={`phase-work-${phase.id}`}
-                              type="number"
-                              value={(phase.config as any).workDuration || 30}
-                              onChange={(e) =>
-                                updatePhaseConfig(phase.id, {
-                                  workDuration: parseInt(e.target.value) || 30,
-                                })
-                              }
-                              min="1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`phase-rest-${phase.id}`}>Rest (s)</Label>
-                            <Input
-                              id={`phase-rest-${phase.id}`}
-                              type="number"
-                              value={(phase.config as any).restDuration || 10}
-                              onChange={(e) =>
-                                updatePhaseConfig(phase.id, {
-                                  restDuration: parseInt(e.target.value) || 10,
-                                })
-                              }
-                              min="1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`phase-intervals-${phase.id}`}>Intervals</Label>
-                            <Input
-                              id={`phase-intervals-${phase.id}`}
-                              type="number"
-                              value={(phase.config as any).intervals || 3}
-                              onChange={(e) =>
-                                updatePhaseConfig(phase.id, {
-                                  intervals: parseInt(e.target.value) || 3,
-                                })
-                              }
-                              min="1"
-                            />
-                          </div>
-                        </div>
+                        <IntervalFields
+                          config={phase.config as any}
+                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
+                        />
                       )}
 
                       {phase.type === TimerType.WORKREST && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label htmlFor={`phase-maxwork-${phase.id}`}>Max Work (s)</Label>
-                            <Input
-                              id={`phase-maxwork-${phase.id}`}
-                              type="number"
-                              value={(phase.config as any).maxWorkTime || 300}
-                              onChange={(e) =>
-                                updatePhaseConfig(phase.id, {
-                                  maxWorkTime: parseInt(e.target.value) || 300,
-                                })
-                              }
-                              min="1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`phase-rounds-${phase.id}`}>Max Rounds</Label>
-                            <Input
-                              id={`phase-rounds-${phase.id}`}
-                              type="number"
-                              value={(phase.config as any).maxRounds || 5}
-                              onChange={(e) =>
-                                updatePhaseConfig(phase.id, {
-                                  maxRounds: parseInt(e.target.value) || 5,
-                                })
-                              }
-                              min="1"
-                            />
-                          </div>
-                        </div>
+                        <WorkRestFields
+                          config={phase.config as any}
+                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
+                        />
                       )}
-                    </div>
-                  </div>
+                    </FieldSet>
+                  </FieldGroup>
                 )}
-
+                <FieldSeparator />
                 {/* Generated Timer Name */}
-                <div className="border-t pt-3">
-                  <Label className="text-sm font-medium">Timer Name</Label>
-                  <Input
-                    value={phase.name}
-                    onChange={(e) => updatePhase(phase.id, { name: e.target.value })}
-                    placeholder="Enter timer name"
-                  />
-                </div>
-              </div>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="phase-name">Timer Name</FieldLabel>
+                    <Input
+                      id="phase-name"
+                      value={phase.name}
+                      onChange={(e) => updatePhase(phase.id, { name: e.target.value })}
+                      placeholder="Enter timer name"
+                    />
+                  </Field>
+                </FieldGroup>
+              </FieldGroup>
             </CardContent>
           </Card>
         ))}
@@ -391,38 +319,40 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Complex Timer Options</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 pt-0">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="auto-advance" className="text-sm font-medium">
-                    Auto-advance phases
-                  </Label>
-                  <p className="text-muted-foreground text-xs">
-                    Automatically move to next phase when current completes
-                  </p>
-                </div>
-                <Checkbox
-                  id="auto-advance"
-                  checked={config.autoAdvance ?? true}
-                  onCheckedChange={(checked) => onChange({ autoAdvance: Boolean(checked) })}
-                />
-              </div>
+            <CardContent>
+              <FieldGroup>
+                <Field orientation="responsive">
+                  <Checkbox
+                    id="auto-advance"
+                    checked={config.autoAdvance ?? true}
+                    onCheckedChange={(checked) => onChange({ autoAdvance: Boolean(checked) })}
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor="auto-advance">Auto-advance phases</FieldLabel>
+                    <FieldDescription>
+                      Automatically move to next phase when current completes
+                    </FieldDescription>
+                  </FieldContent>
+                </Field>
 
-              <div>
-                <Label htmlFor="overall-timelimit">Overall Time Limit (seconds, optional)</Label>
-                <Input
-                  id="overall-timelimit"
-                  type="number"
-                  value={config.overallTimeLimit || ''}
-                  onChange={(e) =>
-                    onChange({
-                      overallTimeLimit: e.target.value ? parseInt(e.target.value) : undefined,
-                    })
-                  }
-                  min="1"
-                  placeholder="No limit"
-                />
-              </div>
+                <Field>
+                  <FieldLabel htmlFor="overall-timelimit">
+                    Overall Time Limit (seconds, optional)
+                  </FieldLabel>
+                  <Input
+                    id="overall-timelimit"
+                    type="number"
+                    value={config.overallTimeLimit || ''}
+                    onChange={(e) =>
+                      onChange({
+                        overallTimeLimit: e.target.value ? parseInt(e.target.value) : undefined,
+                      })
+                    }
+                    min="1"
+                    placeholder="No limit"
+                  />
+                </Field>
+              </FieldGroup>
             </CardContent>
           </Card>
         )}
