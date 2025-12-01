@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react'
 
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 
+import { TimerType } from '@/types/configure'
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
@@ -23,7 +24,18 @@ export const TimerConfigForm = ({
   const [config, setConfig] = useState<Partial<AnyTimerConfig>>(
     initialConfig || {
       type,
-      name: '',
+      name:
+        type === TimerType.COUNTDOWN
+          ? 'Countdown'
+          : type === TimerType.STOPWATCH
+            ? 'Stopwatch'
+            : type === TimerType.INTERVAL
+              ? 'Interval'
+              : type === TimerType.WORKREST
+                ? 'Work/Rest'
+                : type === TimerType.COMPLEX
+                  ? 'Complex Timer (0 phases, 0s)'
+                  : 'Timer',
     }
   )
 

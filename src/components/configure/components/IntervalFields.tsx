@@ -10,6 +10,9 @@ interface IntervalFieldsProps {
 }
 
 export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
+  const placeholderMessage = 'Time is up!'
+  const workPlaceholder = 'Work'
+  const restPlaceholder = 'Rest'
   return (
     <FieldGroup>
       <div className="grid grid-cols-2 gap-4">
@@ -63,9 +66,9 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             id="workLabel"
             name="workLabel"
             type="text"
-            value={config.workLabel || ''}
+            value={config.workLabel || workPlaceholder}
             onChange={(e) => onChange({ workLabel: e.target.value })}
-            placeholder="Work"
+            placeholder={workPlaceholder}
           />
         </Field>
         <Field>
@@ -74,9 +77,9 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             id="restLabel"
             name="restLabel"
             type="text"
-            value={config.restLabel || ''}
+            value={config.restLabel || restPlaceholder}
             onChange={(e) => onChange({ restLabel: e.target.value })}
-            placeholder="Rest"
+            placeholder={restPlaceholder}
           />
         </Field>
       </div>

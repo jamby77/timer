@@ -25,7 +25,7 @@ export const TimerConfig = ({
 
   if (isLaptop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={onOpenChange} modal>
         <DialogContent className="overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Configure</DialogTitle>

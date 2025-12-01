@@ -267,18 +267,31 @@ export const generateComplexTimerName = (config: Partial<ComplexConfig>): string
 export const generateTimerName = (config: AnyTimerConfig): string => {
   switch (config.type) {
     case TimerType.COUNTDOWN:
-      return `Countdown (${formatDuration((config as any).duration)})`
+      const duration = (config as any).duration
+      return duration ? `Countdown (${formatDuration(duration)})` : 'Countdown'
     case TimerType.STOPWATCH:
-      if ((config as any).timeLimit) {
-        return `Stopwatch (cap. ${formatDuration((config as any).timeLimit)})`
+      const timeLimit = (config as any).timeLimit
+      if (timeLimit) {
+        return `Stopwatch (cap. ${formatDuration(timeLimit)})`
       }
       return 'Stopwatch'
     case TimerType.INTERVAL:
       const intervalConfig = config as any
-      return `Interval (${intervalConfig.workDuration}s work / ${intervalConfig.restDuration}s rest × ${intervalConfig.intervals})`
+      const workDuration = intervalConfig.workDuration || 0
+      const restDuration = intervalConfig.restDuration || 0
+      const intervals = intervalConfig.intervals || 0
+      if (workDuration && restDuration && intervals) {
+        return `Interval (${workDuration}s work / ${restDuration}s rest × ${intervals})`
+      }
+      return 'Interval'
     case TimerType.WORKREST:
       const workRestConfig = config as any
-      return `Work/Rest (${formatDuration(workRestConfig.maxWorkTime)} max work / ${workRestConfig.maxRounds} rounds)`
+      const maxWorkTime = workRestConfig.maxWorkTime || 0
+      const maxRounds = workRestConfig.maxRounds || 0
+      if (maxWorkTime && maxRounds) {
+        return `Work/Rest (${formatDuration(maxWorkTime)} max work / ${maxRounds} rounds)`
+      }
+      return 'Work/Rest'
     case TimerType.COMPLEX:
       return generateComplexTimerName(config as ComplexConfig)
     default:

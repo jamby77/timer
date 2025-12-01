@@ -9,6 +9,7 @@ interface StopwatchFieldsProps {
 }
 
 export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
+  const placeholderMessage = 'Time limit reached'
   return (
     <FieldGroup>
       <Field>
@@ -31,9 +32,9 @@ export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
           id="completionMessage"
           name="completionMessage"
           type="text"
-          value={config.completionMessage || ''}
+          value={config.completionMessage || placeholderMessage}
           onChange={(e) => onChange({ completionMessage: e.target.value })}
-          placeholder="Time limit reached"
+          placeholder={placeholderMessage}
         />
       </Field>
     </FieldGroup>

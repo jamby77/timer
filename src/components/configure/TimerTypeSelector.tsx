@@ -34,22 +34,16 @@ const TIMER_TYPES = [
     description: 'Ratio-based timer',
     icon: TIMER_TYPE_ICONS[TimerType.WORKREST],
   },
-  {
-    type: TimerType.COMPLEX,
-    name: TIMER_TYPE_LABELS[TimerType.COMPLEX],
-    description: 'Multi-sequence timer combining different types',
-    icon: TIMER_TYPE_ICONS[TimerType.COMPLEX],
-  },
 ] as const
 export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSelectorProps) => {
   return (
     <CardContainer>
       <h2 className="mb-6 text-xl font-semibold">Timer Type</h2>
-      <div className="grid w-full grid-cols-3 gap-4">
+      <div className="grid w-full grid-cols-2 gap-4">
         {TIMER_TYPES.map(({ type, name, description, icon: Icon }) => (
           <Card
             key={type}
-            className={cx('cursor-pointer transition-colors', {
+            className={cx('cursor-pointer transition-colors hover:opacity-80', {
               'ring-accent-foreground ring': selectedTimer === type,
             })}
             onClick={() => onTimerSelect(type)}

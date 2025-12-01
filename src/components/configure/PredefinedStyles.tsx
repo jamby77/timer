@@ -1,5 +1,7 @@
 'use client'
 
+import { MouseEvent } from 'react'
+
 import { PredefinedStylesProps } from '@/types/configure'
 import { getConfigSummary } from '@/lib/configure/utils'
 
@@ -52,13 +54,13 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
     onSelect()
   }
 
-  const handleStartClick = (e: React.MouseEvent) => {
+  const handleStartClick = (e: MouseEvent) => {
     e.stopPropagation()
     onStart()
   }
 
   return (
-    <Card onClick={handleCardClick}>
+    <Card onClick={handleCardClick} className="cursor-pointer transition-colors hover:opacity-80">
       <CardHeader>
         <CardTitle>
           <h3 className="text-card-foreground font-semibold">{style.name}</h3>

@@ -114,7 +114,12 @@ export default function ConfigurePage() {
             {(selectedTimer || selectedPredefined) && (
               <TimerConfig
                 open={true}
-                onOpenChange={() => {}}
+                onOpenChange={(isOpen) => {
+                  if (!isOpen) {
+                    setSelectedTimer(null)
+                    setSelectedPredefined(null)
+                  }
+                }}
                 type={selectedTimer || selectedPredefined?.config.type || TimerType.COUNTDOWN}
                 initialConfig={selectedPredefined?.config}
                 isPredefined={!!selectedPredefined}
