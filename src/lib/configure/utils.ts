@@ -238,3 +238,50 @@ export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
 
   return { config: fullConfig, errors: validationErrors }
 }
+
+// Helper function to generate complex timer names
+export const generateComplexTimerName = (config: Partial<ComplexConfig>): string => {
+  const phaseCount = config.phases?.length || 0
+  const totalDuration = config.phases?.reduce((total, phase) => {
+    switch (phase.config.type) {
+      case TimerType.COUNTDOWN:
+        return total + (phase.config as any).duration
+      case TimerType.INTERVAL:
+        const workDuration = (phase.config as any).workDuration || 0
+        const restDuration = (phase.config as any).restDuration || 0
+        const intervals = (phase.config as any).intervals || 1
+        return total + (workDuration + restDuration) * intervals - restDuration
+      case TimerType.STOPWATCH:
+        return total + ((phase.config as any).timeLimit || 0)
+      case TimerType.WORKREST:
+        return total + 0 // Complex to calculate, skip for now
+      default:
+        return total
+    }
+  }, 0) || 0
+
+  return `Complex Timer (${phaseCount} phases, ${formatDuration(totalDuration)})`
+}
+
+// Helper function to generate timer names for individual timer types
+export const generateTimerName = (config: AnyTimerConfig): string => {
+  switch (config.type) {
+    case TimerType.COUNTDOWN:
+      return `Countdown (${formatDuration((config as any).duration)})`
+    case TimerType.STOPWATCH:
+      if ((config as any).timeLimit) {
+        return `Stopwatch (cap. ${formatDuration((config as any).timeLimit)})`
+      }
+      return 'Stopwatch'
+    case TimerType.INTERVAL:
+      const intervalConfig = config as any
+      return `Interval (${intervalConfig.workDuration}s work / ${intervalConfig.restDuration}s rest × ${intervalConfig.intervals})`
+    case TimerType.WORKREST:
+      const workRestConfig = config as any
+      return `Work/Rest (${formatDuration(workRestConfig.maxWorkTime)} max work / ${workRestConfig.maxRounds} rounds)`
+    case TimerType.COMPLEX:
+      return generateComplexTimerName(config as ComplexConfig)
+    default:
+      return 'Timer'
+  }
+}

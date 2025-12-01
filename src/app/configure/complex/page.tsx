@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation'
 import type { ComplexConfig, PredefinedStyle } from '@/types/configure'
 
 import { storage } from '@/lib/configure/storage'
-import { formatDuration, processTimerConfig } from '@/lib/configure/utils'
-import { TIMER_TYPE_ICONS, TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
+import { formatDuration, generateComplexTimerName, processTimerConfig } from '@/lib/configure/utils'
+import { TimerType } from '@/lib/enums'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,20 +23,50 @@ import {
 import { Label } from '@/components/ui/label'
 import { ComplexFields } from '@/components/configure/components/ComplexFields'
 import { FormErrors } from '@/components/configure/components/FormErrors'
+import { PhaseSummary } from '@/components/configure/components/PhaseSummary'
 import { PageContainer } from '@/components/PageContainer'
+
+const calculateDuration = (config: Partial<ComplexConfig>) => {
+  if (!config.phases || config.phases.length === 0) return 0
+
+  return config.phases.reduce((total, phase) => {
+    switch (phase.config.type) {
+      case TimerType.COUNTDOWN:
+        return total + (phase.config as any).duration
+      case TimerType.INTERVAL:
+        const workDuration = (phase.config as any).workDuration || 0
+        const restDuration = (phase.config as any).restDuration || 0
+        const intervals = (phase.config as any).intervals || 1
+        return total + (workDuration + restDuration) * intervals - restDuration
+      case TimerType.STOPWATCH:
+        return total + ((phase.config as any).timeLimit || 0)
+      case TimerType.WORKREST:
+        // This is complex to calculate, return 0 for now
+        return total + 0
+      default:
+        return total
+    }
+  }, 0)
+}
 
 export default function ConfigureComplexTimerPage() {
   const router = useRouter()
   const [config, setConfig] = useState<Partial<ComplexConfig>>({
     type: TimerType.COMPLEX,
-    name: '',
+    name: 'Complex Timer (0 phases, 0s)',
     phases: [],
     autoAdvance: true,
   })
   const [errors, setErrors] = useState<string[]>([])
 
   const updateConfig = (updates: Partial<ComplexConfig>) => {
-    setConfig((prev) => ({ ...prev, ...updates }))
+    const newConfig = { ...config, ...updates }
+    // Auto-generate name if it's currently a generated name or empty
+    const shouldUpdateName = !config.name || config.name === generateComplexTimerName(config)
+    if (shouldUpdateName && (updates.phases || updates.type)) {
+      newConfig.name = generateComplexTimerName(newConfig)
+    }
+    setConfig(newConfig)
     setErrors([])
   }
 
@@ -93,26 +123,7 @@ export default function ConfigureComplexTimerPage() {
   }
 
   const totalDuration = useMemo(() => {
-    if (!config.phases || config.phases.length === 0) return 0
-
-    return config.phases.reduce((total, phase) => {
-      switch (phase.config.type) {
-        case TimerType.COUNTDOWN:
-          return total + (phase.config as any).duration
-        case TimerType.INTERVAL:
-          const workDuration = (phase.config as any).workDuration || 0
-          const restDuration = (phase.config as any).restDuration || 0
-          const intervals = (phase.config as any).intervals || 1
-          return total + (workDuration + restDuration) * intervals - restDuration
-        case TimerType.STOPWATCH:
-          return total + ((phase.config as any).timeLimit || 0)
-        case TimerType.WORKREST:
-          // This is complex to calculate, return 0 for now
-          return total + 0
-        default:
-          return total
-      }
-    }, 0)
+    return calculateDuration(config)
   }, [config])
 
   return (
@@ -137,7 +148,57 @@ export default function ConfigureComplexTimerPage() {
           </div>
         </div>
 
-        {/* Timer Overview */}
+        {/* Form Errors */}
+        <FormErrors errors={errors} />
+
+        {/* Phase Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Layers className="h-5 w-5" />
+              Phase Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ComplexFields config={config} onChange={updateConfig} />
+          </CardContent>
+        </Card>
+
+        {/* Phase Summary */}
+        {config.phases && config.phases.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Phase Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PhaseSummary phases={config.phases || []} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Timer Name */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Layers size={20} />
+              Timer Name
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Field>
+              <Label htmlFor="timer-name">Timer Name*</Label>
+              <Input
+                id="timer-name"
+                value={config.name || ''}
+                onChange={(e) => updateConfig({ name: e.target.value })}
+                placeholder="Enter timer name"
+                required
+              />
+            </Field>
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -146,17 +207,7 @@ export default function ConfigureComplexTimerPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <Field>
-                <Label htmlFor="timer-name">Timer Name*</Label>
-                <Input
-                  id="timer-name"
-                  value={config.name || ''}
-                  onChange={(e) => updateConfig({ name: e.target.value })}
-                  placeholder="Enter timer name"
-                  required
-                />
-              </Field>
+            <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field>
                 <Label>Total Phases</Label>
                 <InputGroup>
@@ -188,81 +239,8 @@ export default function ConfigureComplexTimerPage() {
                 </InputGroup>
               </Field>
             </FieldGroup>
-          </CardContent>
-        </Card>
 
-        {/* Form Errors */}
-        <FormErrors errors={errors} />
-
-        {/* Phase Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Layers className="h-5 w-5" />
-              Phase Configuration
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ComplexFields config={config} onChange={updateConfig} />
-          </CardContent>
-        </Card>
-
-        {/* Phase Summary */}
-        {config.phases && config.phases.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Phase Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {config.phases.map((phase, index) => {
-                  const Icon = TIMER_TYPE_ICONS[phase.type]
-                  return (
-                    <div key={phase.id} className="flex items-center gap-3 rounded-lg border p-3">
-                      <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full">
-                        <span className="text-sm font-medium">{index + 1}</span>
-                      </div>
-                      <Icon className="text-muted-foreground h-4 w-4" />
-                      <div className="flex-1">
-                        <div className="font-medium">{phase.name}</div>
-                        <div className="text-muted-foreground text-sm">
-                          {TIMER_TYPE_LABELS[phase.type]}
-                          {phase.type === TimerType.COUNTDOWN && (
-                            <span> - {(phase.config as any).duration}s</span>
-                          )}
-                          {phase.type === TimerType.INTERVAL && (
-                            <span>
-                              {' '}
-                              - {(phase.config as any).workDuration}s work /{' '}
-                              {(phase.config as any).restDuration}s rest ×{' '}
-                              {(phase.config as any).intervals}
-                            </span>
-                          )}
-                          {phase.type === TimerType.STOPWATCH &&
-                            (phase.config as any).timeLimit && (
-                              <span> - {(phase.config as any).timeLimit}s limit</span>
-                            )}
-                          {phase.type === TimerType.WORKREST && (
-                            <span>
-                              {' '}
-                              - {(phase.config as any).maxWorkTime}s max work /{' '}
-                              {(phase.config as any).maxRounds} rounds
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Actions */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col justify-end gap-3 sm:flex-row">
+            <div className="flex flex-col justify-end gap-3 border-t pt-4 sm:flex-row">
               <Button
                 variant="outline"
                 onClick={handleSaveAsPreset}
