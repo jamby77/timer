@@ -11,7 +11,6 @@ import { generateTimerName } from '@/lib/configure/utils'
 
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { ComplexFields } from './ComplexFields'
 import { CountdownFields } from './CountdownFields'
 import { IntervalFields } from './IntervalFields'
 import { StopwatchFields } from './StopwatchFields'
@@ -57,20 +56,34 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
     <FieldGroup>
       {/* Type-specific fields */}
       {renderFormFields()}
+      <FieldGroup>
+        {/* Completion Message */}
+        <Field>
+          <FieldLabel htmlFor="completionMessage">Completion Message (optional)</FieldLabel>
+          <Input
+            id="completionMessage"
+            name="completionMessage"
+            type="text"
+            value={config.completionMessage || 'Time is up!'}
+            onChange={(e) => onChange({ completionMessage: e.target.value })}
+            placeholder="Time is up!"
+          />
+        </Field>
 
-      {/* Timer Name */}
-      <Field>
-        <FieldLabel htmlFor="timerName">Timer Name*</FieldLabel>
-        <Input
-          id="timerName"
-          name="timerName"
-          type="text"
-          value={config.name || ''}
-          onChange={(e) => onChange({ name: e.target.value })}
-          placeholder="Enter timer name"
-          required
-        />
-      </Field>
+        {/* Timer Name */}
+        <Field>
+          <FieldLabel htmlFor="timerName">Timer Name*</FieldLabel>
+          <Input
+            id="timerName"
+            name="timerName"
+            type="text"
+            value={config.name || ''}
+            onChange={(e) => onChange({ name: e.target.value })}
+            placeholder="Enter timer name"
+            required
+          />
+        </Field>
+      </FieldGroup>
     </FieldGroup>
   )
 }

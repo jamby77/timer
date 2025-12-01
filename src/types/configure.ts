@@ -11,19 +11,18 @@ export interface TimerConfig {
   createdAt?: Date
   countdownBeforeStart?: number // seconds
   lastUsed?: Date
+  completionMessage?: string
 }
 
 // Specific timer type configurations
 export interface CountdownConfig extends TimerConfig {
   type: TimerType.COUNTDOWN
   duration: number // seconds
-  completionMessage?: string
 }
 
 export interface StopwatchConfig extends TimerConfig {
   type: TimerType.STOPWATCH
   timeLimit?: number // seconds (optional)
-  completionMessage?: string
 }
 
 export interface IntervalConfig extends TimerConfig {

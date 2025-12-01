@@ -10,7 +10,6 @@ interface IntervalFieldsProps {
 }
 
 export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
-  const placeholderMessage = 'Time is up!'
   const workPlaceholder = 'Work'
   const restPlaceholder = 'Rest'
   return (

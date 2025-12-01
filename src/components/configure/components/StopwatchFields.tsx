@@ -9,7 +9,6 @@ interface StopwatchFieldsProps {
 }
 
 export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
-  const placeholderMessage = 'Time limit reached'
   return (
     <FieldGroup>
       <Field>
@@ -23,18 +22,6 @@ export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
           value={config.timeLimit || ''}
           onChange={(e) => onChange({ timeLimit: parseInt(e.target.value) || undefined })}
           placeholder="Leave empty for no limit"
-        />
-      </Field>
-
-      <Field>
-        <FieldLabel htmlFor="completionMessage">Completion Message (optional)</FieldLabel>
-        <Input
-          id="completionMessage"
-          name="completionMessage"
-          type="text"
-          value={config.completionMessage || placeholderMessage}
-          onChange={(e) => onChange({ completionMessage: e.target.value })}
-          placeholder={placeholderMessage}
         />
       </Field>
     </FieldGroup>

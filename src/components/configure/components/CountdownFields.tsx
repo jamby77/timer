@@ -9,7 +9,6 @@ interface CountdownFieldsProps {
 }
 
 export const CountdownFields = ({ config, onChange }: CountdownFieldsProps) => {
-  const placeholderMessage = 'Time is up!'
   return (
     <FieldGroup>
       <FieldSet>
@@ -25,17 +24,6 @@ export const CountdownFields = ({ config, onChange }: CountdownFieldsProps) => {
             required
             id="duration"
             name="duration"
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="completionMessage">Completion Message (optional)</FieldLabel>
-          <Input
-            type="text"
-            value={config.completionMessage || placeholderMessage}
-            onChange={(e) => onChange({ completionMessage: e.target.value })}
-            placeholder={placeholderMessage}
-            id="completionMessage"
-            name="completionMessage"
           />
         </Field>
       </FieldSet>
