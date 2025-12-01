@@ -2,6 +2,7 @@ import type { CountdownConfig } from '@/types/configure'
 
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { TimePicker } from '@/components/configure/components/TimePicker'
 
 interface CountdownFieldsProps {
   config: Partial<CountdownConfig>
@@ -12,18 +13,15 @@ export const CountdownFields = ({ config, onChange }: CountdownFieldsProps) => {
   return (
     <FieldGroup>
       <FieldSet>
-        <Field>
-          <FieldLabel htmlFor="duration">Duration (seconds)</FieldLabel>
-          <Input
-            type="number"
-            min="1"
-            max="86400"
-            value={config.duration || ''}
-            onChange={(e) => onChange({ duration: parseInt(e.target.value) || 0 })}
-            placeholder="300"
-            required
-            id="duration"
-            name="duration"
+        <Field orientation="responsive">
+          <FieldLabel htmlFor="duration">
+            Duration <span className="text-muted-foreground text-xs">(HH:MM:SS)</span>
+          </FieldLabel>
+          <TimePicker
+            max={86400}
+            min={1}
+            initialSeconds={config.duration || 0}
+            onTimeChange={(seconds) => onChange({ duration: seconds })}
           />
         </Field>
       </FieldSet>

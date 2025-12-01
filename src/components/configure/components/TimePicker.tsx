@@ -8,11 +8,13 @@ import { cn } from '@/lib/utils'
 import { TimePickerInput } from '@/components/ui/time-picker-input'
 
 interface TimePickerProps {
+  max?: number
+  min?: number
   initialSeconds?: number
   onTimeChange?: (seconds: number) => void
 }
 
-export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps) => {
+export const TimePicker = ({ initialSeconds = 0, min, max, onTimeChange }: TimePickerProps) => {
   const minuteRef = useRef<HTMLInputElement>(null)
   const hourRef = useRef<HTMLInputElement>(null)
   const secondRef = useRef<HTMLInputElement>(null)
@@ -21,18 +23,36 @@ export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps
 
   // Update time when initialSeconds changes
   useEffect(() => {
+    console.log('update on initialSeconds')
     setTime(secondsToTimerPickerTime(initialSeconds))
-  }, [initialSeconds])
+  }, [])
 
-  // Call onTimeChange whenever time changes
-  useEffect(() => {
-    onTimeChange?.(timerPickerTimeToSeconds(time))
-  }, [time, onTimeChange])
+  // Validate and clamp time within min/max bounds
+  const validateTime = (newTime: TimerPickerTime): TimerPickerTime => {
+    let clampedSeconds = timerPickerTimeToSeconds(newTime)
+
+    if (min !== undefined && clampedSeconds < min) {
+      clampedSeconds = min
+    }
+    if (max !== undefined && clampedSeconds > max) {
+      clampedSeconds = max
+    }
+
+    return secondsToTimerPickerTime(clampedSeconds)
+  }
+
+  // Handle time changes with validation
+  const handleTimeChange = (newTime: TimerPickerTime) => {
+    const validatedTime = validateTime(newTime)
+    setTime(validatedTime)
+    onTimeChange?.(timerPickerTimeToSeconds(newTime))
+  }
 
   return (
     <div
       className={cn(
-        'border-input flex w-fit grow-0 items-center justify-start overflow-hidden rounded-lg border shadow-sm',
+        'border-input flex w-fit! grow-0 items-center justify-start',
+        'overflow-hidden rounded-lg border shadow-sm',
         'focus-within:ring-ring focus-within:ring-1 focus-within:outline-none'
       )}
     >
@@ -40,7 +60,7 @@ export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps
         <TimePickerInput
           picker="hours"
           time={time}
-          setTime={setTime}
+          setTime={handleTimeChange}
           ref={hourRef}
           onRightFocus={() => minuteRef.current?.focus()}
           className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"
@@ -51,7 +71,7 @@ export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps
         <TimePickerInput
           picker="minutes"
           time={time}
-          setTime={setTime}
+          setTime={handleTimeChange}
           ref={minuteRef}
           onLeftFocus={() => hourRef.current?.focus()}
           onRightFocus={() => secondRef.current?.focus()}
@@ -63,7 +83,7 @@ export const TimePicker = ({ initialSeconds = 0, onTimeChange }: TimePickerProps
         <TimePickerInput
           picker="seconds"
           time={time}
-          setTime={setTime}
+          setTime={handleTimeChange}
           ref={secondRef}
           onLeftFocus={() => minuteRef.current?.focus()}
           className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"

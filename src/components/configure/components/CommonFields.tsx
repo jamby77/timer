@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import type {
   AnyTimerConfig,
   CountdownConfig,
@@ -23,20 +25,25 @@ interface CommonFieldsProps {
 }
 
 export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
-  const handleConfigChange = (updates: Partial<AnyTimerConfig>) => {
-    const newConfig = { ...config, ...updates }
-    // Auto-generate name if it's currently a generated name or empty
-    const currentName = config.name || ''
-    const generatedName = generateTimerName({ ...config, type } as AnyTimerConfig)
-    const shouldUpdateName = !currentName || currentName === generatedName
-    if (shouldUpdateName && (updates.type || Object.keys(updates).some((key) => key !== 'name'))) {
-      const finalConfig = { ...newConfig, type: newConfig.type || type }
-      newConfig.name = generateTimerName(finalConfig as AnyTimerConfig)
-    }
-    // Use any to bypass type checking issues with the onChange callback
-    onChange(newConfig as any)
-  }
-
+  const handleConfigChange = useCallback(
+    (updates: Partial<AnyTimerConfig>) => {
+      const newConfig = { ...config, ...updates }
+      // Auto-generate name if it's currently a generated name or empty
+      const currentName = config.name || ''
+      const generatedName = generateTimerName({ ...config, type } as AnyTimerConfig)
+      const shouldUpdateName = !currentName || currentName === generatedName
+      if (
+        shouldUpdateName &&
+        (updates.type || Object.keys(updates).some((key) => key !== 'name'))
+      ) {
+        const finalConfig = { ...newConfig, type: newConfig.type || type }
+        newConfig.name = generateTimerName(finalConfig as AnyTimerConfig)
+      }
+      // Use any to bypass type checking issues with the onChange callback
+      onChange(newConfig as any)
+    },
+    [onChange, config, type]
+  )
   const renderFormFields = () => {
     switch (type) {
       case TimerType.COUNTDOWN:
