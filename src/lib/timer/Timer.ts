@@ -16,6 +16,10 @@ export class Timer {
   private readonly debug: boolean = false
   private readonly updateInterval: number = 100 // Update UI every 100ms
 
+  // Enhanced pause tracking
+  private pauseDurations: number[] = []
+  private pauseStartTime: number | null = null
+
   constructor(
     private readonly initialTime: number,
     options?: TimerOptions
@@ -76,6 +80,14 @@ export class Timer {
       return
     }
 
+    // If resuming from pause, record the pause duration
+    if (this.state === TimerState.Paused && this.pauseStartTime !== null) {
+      const pauseDuration = performance.now() - this.pauseStartTime
+      this.pauseDurations.push(pauseDuration)
+      this.pauseStartTime = null
+      this.options?.onPauseCountChange?.(this.getPauseCount(), this.getTotalPausedTime())
+    }
+
     this.startTime = performance.now()
     this.lastTickTime = null
     this.state = TimerState.Running
@@ -92,10 +104,14 @@ export class Timer {
       return
     }
 
+    // Start tracking pause time
+    this.pauseStartTime = performance.now()
+
     this.cleanup()
     this.state = TimerState.Paused
     this.log('State changed to Paused, time: ' + this.time + 'ms')
     this.options?.onStateChange?.(this.state, this.totalElapsedTime)
+    this.options?.onPauseCountChange?.(this.getPauseCount(), this.getTotalPausedTime())
   }
 
   public reset() {
@@ -104,9 +120,12 @@ export class Timer {
     this.startTime = null
     this.lastTickTime = null
     this.totalElapsedTime = 0
+    this.pauseDurations = []
+    this.pauseStartTime = null
     this.state = TimerState.Idle
     this.options?.onTick?.(this.time, this.totalElapsedTime)
     this.options?.onStateChange?.(this.state, this.totalElapsedTime)
+    this.options?.onPauseCountChange?.(this.getPauseCount(), this.getTotalPausedTime())
   }
 
   public getState(): TimerState {
@@ -129,6 +148,33 @@ export class Timer {
     this.time = newTime
   }
 
+  // Enhanced pause tracking methods
+  public getPauseCount(): number {
+    return this.pauseDurations.length
+  }
+
+  public getTotalPausedTime(): number {
+    // Calculate total from completed pauses
+    const totalFromCompleted = this.pauseDurations.reduce((sum, duration) => sum + duration, 0)
+
+    // If currently paused, include current pause duration
+    if (this.state === TimerState.Paused && this.pauseStartTime !== null) {
+      const currentPauseDuration = performance.now() - this.pauseStartTime
+      return totalFromCompleted + currentPauseDuration
+    }
+
+    return totalFromCompleted
+  }
+
+  public getPauseDurations(): number[] {
+    return [...this.pauseDurations] // Return copy to prevent external modification
+  }
+
+  public getAveragePauseTime(): number {
+    if (this.getPauseCount() === 0) return 0
+    return this.getTotalPausedTime() / this.getPauseCount()
+  }
+
   public updateOptions(newOptions: Partial<TimerOptions>) {
     this.options = {
       ...this.options,
@@ -138,6 +184,39 @@ export class Timer {
 
   public destroy() {
     this.cleanup()
+  }
+
+  // Serialization methods
+  public serialize(): string {
+    return JSON.stringify({
+      time: this.time,
+      state: this.state,
+      startTime: this.startTime,
+      totalElapsedTime: this.totalElapsedTime,
+      initialTime: this.initialTime,
+      pauseDurations: this.pauseDurations,
+      pauseStartTime: this.pauseStartTime,
+    })
+  }
+
+  public static deserialize(data: string): Timer {
+    const parsed = JSON.parse(data)
+    const timer = new Timer(parsed.initialTime)
+
+    // Restore timer state
+    timer.time = parsed.time
+    timer.state = parsed.state
+    timer.startTime = parsed.startTime
+    timer.totalElapsedTime = parsed.totalElapsedTime
+    timer.pauseDurations = parsed.pauseDurations || []
+    timer.pauseStartTime = parsed.pauseStartTime || null
+
+    // Notify callbacks of restored state
+    timer.options?.onTick?.(timer.time, timer.totalElapsedTime)
+    timer.options?.onStateChange?.(timer.state, timer.totalElapsedTime)
+    timer.options?.onPauseCountChange?.(timer.getPauseCount(), timer.getTotalPausedTime())
+
+    return timer
   }
 
   private cleanup() {

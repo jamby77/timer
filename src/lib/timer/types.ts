@@ -59,6 +59,7 @@ export interface TimerOptions {
   onComplete?: (totalElapsedTime: number) => void
   onStateChange?: (state: TimerState, totalElapsedTime: number) => void
   debug?: boolean
+  onPauseCountChange?: (pauseCount: number, totalPausedTime: number) => void
 }
 
 export interface TimerControls {
