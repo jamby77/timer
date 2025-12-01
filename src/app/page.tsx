@@ -90,7 +90,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-10 p-4">
+    <div className="flex h-full flex-col items-center justify-center gap-10 p-4">
       {renderTimer()}
     </div>
   )

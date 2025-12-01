@@ -5,6 +5,7 @@ import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
 import { ThemeProvider } from '@/providers/theme-provider'
+import { cn } from '@/lib/utils'
 
 import { Toaster } from '@/components/ui/sonner'
 import { Navigation } from '@/components/Navigation'
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={cn('flex h-full min-h-screen flex-col', inter.className)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -27,7 +28,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           disableTransitionOnChange
         >
           <Navigation />
-          <main className="bg-background">{children}</main>
+          <main className="bg-background inset-0 h-full grow">{children}</main>
           <Toaster position="top-center" duration={10000} richColors />
         </ThemeProvider>
       </body>
