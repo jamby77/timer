@@ -1,7 +1,6 @@
 import type { CountdownConfig } from '@/types/configure'
 
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
 import { TimePicker } from '@/components/configure/components/TimePicker'
 
 interface CountdownFieldsProps {
