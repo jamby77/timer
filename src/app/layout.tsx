@@ -20,7 +20,10 @@ export const metadata: Metadata = {
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('flex h-full min-h-screen flex-col', inter.className)}>
+      <body
+        className={cn('flex h-full min-h-screen flex-col', inter.className)}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

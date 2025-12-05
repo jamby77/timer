@@ -7,11 +7,12 @@ import { Theme, THEME_LABELS } from '@/lib/enums'
 
 import { Button } from '@/components/ui/button'
 
+const themes = [Theme.LIGHT, Theme.DARK, Theme.SYSTEM]
+
 export const ThemeToggle = () => {
   const { setTheme, theme } = useTheme()
 
   const rotateTheme = () => {
-    const themes = [Theme.LIGHT, Theme.DARK, Theme.SYSTEM]
     const currentIndex = themes.indexOf(theme as Theme)
     const nextIndex = (currentIndex + 1) % themes.length
     setTheme(themes[nextIndex])
@@ -26,7 +27,7 @@ export const ThemeToggle = () => {
       case Theme.SYSTEM:
         return <Monitor className="h-[1.2rem] w-[1.2rem]" />
       default:
-        return <Sun className="h-[1.2rem] w-[1.2rem]" />
+        return null
     }
   }
 
