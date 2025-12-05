@@ -8,14 +8,37 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { cn } from '@/lib/utils'
 
 import { Toaster } from '@/components/ui/sonner'
-import { InstallPrompt } from '@/components/InstallPrompt'
 import { Navigation } from '@/components/Navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Timer App',
+  title: {
+    template: '%s | Advanced Workout Timer | %s',
+    default: 'Advanced Workout Timer',
+  },
   description: 'A versatile timer application for workouts and productivity',
+  metadataBase: new URL('http://localhost:3000'),
+  keywords: ['fitness', 'health', 'utilities'],
+  icons: {
+    icon: {
+      url: '/favicon.svg',
+      sizes: 'any',
+      type: 'image/svg+xml',
+    },
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+    other: {
+      rel: 'icon',
+      url: '/favicon-96x96.png',
+      sizes: '96x96',
+      type: 'image/png',
+    },
+  },
+  appleWebApp: {
+    title: 'Advanced Workout Timer',
+    statusBarStyle: 'black-translucent',
+  },
 }
 
 const Layout = ({ children }: { children: ReactNode }) => {
