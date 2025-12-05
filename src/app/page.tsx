@@ -10,6 +10,7 @@ import { Interval } from '@/components/display/Interval'
 import { Stopwatch } from '@/components/display/Stopwatch'
 import { Timer } from '@/components/display/Timer'
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
+import { InstallPrompt } from '@/components/InstallPrompt'
 
 export default function Home() {
   const router = useRouter()
@@ -92,6 +93,7 @@ export default function Home() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-10 p-4">
       {renderTimer()}
+      <InstallPrompt />
     </div>
   )
 }

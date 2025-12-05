@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { cn } from '@/lib/utils'
 
 import { Toaster } from '@/components/ui/sonner'
+import { InstallPrompt } from '@/components/InstallPrompt'
 import { Navigation } from '@/components/Navigation'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -31,6 +32,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           disableTransitionOnChange
         >
           <Navigation />
+
           <main className="bg-background inset-0 h-full grow">{children}</main>
           <Toaster position="top-center" duration={10000} richColors />
         </ThemeProvider>

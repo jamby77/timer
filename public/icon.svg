@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer Circle -->
+    <circle cx="256" cy="256" r="248" fill="#0F172A" stroke="#E2E8F0" stroke-width="16"/>
+
+    <!-- Inner Circle -->
+    <circle cx="256" cy="256" r="200" fill="#1E293B" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 4"/>
+
+    <!-- Stopwatch Glass -->
+    <circle cx="256" cy="256" r="160" fill="#0F172A"  />
+
+    <!-- Clock Hands -->
+    <line x1="256" y1="256" x2="256" y2="70" stroke="#F59E0B" stroke-width="16" stroke-linecap="round"/>
+    <path d="M256 256L336 192" stroke="#F59E0B" stroke-width="20" stroke-linecap="round"/>
+
+    <!-- Center Dot -->
+    <circle cx="256" cy="256" r="24" fill="#F59E0B"/>
+</svg>
