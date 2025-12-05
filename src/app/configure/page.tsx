@@ -88,18 +88,20 @@ export default function ConfigurePage() {
 
   return (
     <PageContainer>
-      <div className="mx-auto max-w-7xl space-y-2 px-4 sm:px-6 md:space-y-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-foreground text-3xl font-bold">Configure Timer</h1>
+      <div className="mx-auto max-w-7xl space-y-4 px-4 sm:px-6 md:space-y-6 lg:px-8">
+        {/* Recent Timers Section */}
+        <div className="text-center">
+          <h5 className="text-muted-foreground text-lg font-bold">Recent Timers</h5>
+          <RecentTimers
+            timers={recentTimers}
+            onStartTimer={handleStartTimer}
+            onRemoveTimer={handleRemoveTimer}
+          />
+        </div>
+        <div>
+          <h1 className="text-foreground text-center text-xl uppercase">Configure Timer</h1>
           <p className="text-muted-foreground mt-2">Create custom timers or choose from a preset</p>
         </div>
-
-        {/* Recent Timers Section */}
-        <RecentTimers
-          timers={recentTimers}
-          onStartTimer={handleStartTimer}
-          onRemoveTimer={handleRemoveTimer}
-        />
 
         {/* Main Content Area */}
         <div className="lg:grid lg:grid-cols-12 lg:gap-6">

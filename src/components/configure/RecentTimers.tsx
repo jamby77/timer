@@ -42,23 +42,25 @@ export const RecentTimers = ({ timers, onStartTimer, onRemoveTimer }: RecentTime
   }
 
   return (
-    <Carousel
-      className="w-full max-w-[210px] sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
-      opts={{ align: 'start' }}
-    >
-      <CarouselContent>
-        {displayTimers.map((timer) => (
-          <CarouselItem
-            key={timer.id}
-            className="min-w-52 basis-[max-content] md:basis-1/3 lg:basis-1/5"
-          >
-            <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
+    <div className="flex w-full items-center justify-center">
+      <Carousel
+        className="relative w-full max-w-60 sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
+        opts={{ align: 'start' }}
+      >
+        <CarouselContent>
+          {displayTimers.map((timer) => (
+            <CarouselItem
+              key={timer.id}
+              className="min-w-52 basis-[250px] md:basis-1/3 lg:basis-1/5"
+            >
+              <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
   )
 }
 
