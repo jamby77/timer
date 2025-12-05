@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useMemo, useState } from 'react'
+import { useTouchDevice } from '@/hooks/use-touch-device'
 
 import type { InputHTMLAttributes, KeyboardEvent } from 'react'
 
@@ -42,6 +43,8 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
     ref
   ) => {
     const [flag, setFlag] = useState<boolean>(false)
+    const isTouchDevice = useTouchDevice()
+    console.log({ isTouchDevice })
 
     /**
      * allow the user to enter the second digit within 2 seconds

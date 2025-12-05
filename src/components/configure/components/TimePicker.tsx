@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 
-import { secondsToTimerPickerTime, TimerPickerTime, timerPickerTimeToSeconds } from '@/lib/timer'
+import type { TimerPickerTime } from '@/lib/timer'
+
+import { secondsToTimerPickerTime, timerPickerTimeToSeconds } from '@/lib/timer'
 import { cn } from '@/lib/utils'
 
 import { TimePickerInput } from '@/components/ui/time-picker-input'
@@ -18,7 +20,6 @@ export const TimePicker = ({ initialSeconds = 0, min, max, onTimeChange }: TimeP
   const minuteRef = useRef<HTMLInputElement>(null)
   const hourRef = useRef<HTMLInputElement>(null)
   const secondRef = useRef<HTMLInputElement>(null)
-
   const [time, setTime] = useState<TimerPickerTime>(() => secondsToTimerPickerTime(initialSeconds))
 
   // Update time when initialSeconds changes
