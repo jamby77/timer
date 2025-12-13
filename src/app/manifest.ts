@@ -47,7 +47,7 @@ export default function manifest(): MetadataRoute.Manifest {
       },
       {
         src: '/screenshots/app-desktop.png',
-        sizes: '1920x884',
+        sizes: '1920x857',
         type: 'image/png',
         form_factor: 'wide',
         label: 'Timer running',
