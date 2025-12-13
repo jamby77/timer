@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     default: 'Advanced Workout Timer',
   },
   description: 'A versatile timer application for workouts and productivity',
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   keywords: ['fitness', 'health', 'utilities'],
   icons: {
     icon: {

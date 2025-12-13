@@ -191,30 +191,33 @@ export class Timer {
     return JSON.stringify({
       time: this.time,
       state: this.state,
-      startTime: this.startTime,
       totalElapsedTime: this.totalElapsedTime,
       initialTime: this.initialTime,
       pauseDurations: this.pauseDurations,
-      pauseStartTime: this.pauseStartTime,
     })
   }
 
-  public static deserialize(data: string): Timer {
+  public static deserialize(data: string, options?: TimerOptions): Timer {
     const parsed = JSON.parse(data)
-    const timer = new Timer(parsed.initialTime)
+    const timer = new Timer(parsed.initialTime, options)
 
     // Restore timer state
     timer.time = parsed.time
     timer.state = parsed.state
-    timer.startTime = parsed.startTime
     timer.totalElapsedTime = parsed.totalElapsedTime
     timer.pauseDurations = parsed.pauseDurations || []
-    timer.pauseStartTime = parsed.pauseStartTime || null
 
-    // Notify callbacks of restored state
-    timer.options?.onTick?.(timer.time, timer.totalElapsedTime)
-    timer.options?.onStateChange?.(timer.state, timer.totalElapsedTime)
-    timer.options?.onPauseCountChange?.(timer.getPauseCount(), timer.getTotalPausedTime())
+    // `startTime` / `pauseStartTime` are based on `performance.now()` and are not stable across
+    // sessions. If the persisted state was `running`, we can only safely restore as `paused`.
+    if (timer.state === TimerState.Running) {
+      timer.state = TimerState.Paused
+    }
+
+    if (timer.state === TimerState.Paused) {
+      timer.pauseStartTime = performance.now()
+    } else {
+      timer.pauseStartTime = null
+    }
 
     return timer
   }

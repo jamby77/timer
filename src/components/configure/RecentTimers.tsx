@@ -89,14 +89,14 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
           {/* Remove button */}
           <Button
             aria-label="Remove timer"
-            aria-labelledby="remove-timer"
+            aria-labelledby={`remove-timer-${timer.id}`}
             size="icon"
             onClick={handleRemove}
             className="rounded-full"
             variant="destructive"
           >
             <X size={4} />
-            <span className="sr-only" id="remove-timer">
+            <span className="sr-only" id={`remove-timer-${timer.id}`}>
               Remove timer
             </span>
           </Button>

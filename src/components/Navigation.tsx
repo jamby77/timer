@@ -30,7 +30,7 @@ export const Navigation = () => {
                     'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     {
                       'text-foreground border-blue-500': isActive,
-                      'text-muted-foreground hover:border-muted hover:text-foreground h border-transparent':
+                      'text-muted-foreground hover:border-muted hover:text-foreground border-transparent':
                         pathname !== item.href,
                     }
                   )}

@@ -42,6 +42,7 @@ storybook-static
 src/stories/*
 !src/stories/timers/
 !src/stories/timers/**
+!src/stories/Configure.mdx
 
 median*
 
