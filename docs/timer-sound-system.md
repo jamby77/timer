@@ -18,11 +18,11 @@ Sounds are generated in code (Web Audio API) rather than shipping audio files.
 Modern browsers require a user gesture (tap/click) before audio output starts.
 
 - `AudioContext` often starts in `suspended` state.
-- The app must call a dedicated `unlock()`/`resume()` from a user gesture.
+- The app must call a dedicated `init()`/`resume()` from a user gesture.
 
 Recommended UX:
-- First press of “Start” (or an explicit “Enable sound” button) should attempt to unlock audio.
-- If audio is disabled in the config, do not unlock.
+- First press of “Start” (or an explicit “Enable sound” button) should attempt to init audio.
+- If audio is disabled in the config, do not init.
 
 ### iOS silent mode
 On iOS, web audio is typically affected by the hardware mute switch / silent mode.
@@ -56,7 +56,7 @@ This keeps UI components and timer logic free from Web Audio concerns.
 
 ### Responsibilities
 - Create and own a single `AudioContext`
-- Expose `unlock()` / `resume()` for user-gesture initialization
+- Expose `init()` / `resume()` for user-gesture initialization
 - Own a master `GainNode` for volume + mute
 - Provide primitive helpers:
   - `playTone({ frequencyHz, durationMs, type, gain, whenMs? })`
@@ -168,7 +168,7 @@ Where:
   - `intervalEndBeep?: boolean`
   - `tick?: boolean`
 - Optional tick config:
-  - `tickHz?: number` (default 1)
+  - `tickEverySeconds?: number` (default 1)
 
 ### Common vs interval
 - `TimerConfig` gets `sound?: SoundConfig`
@@ -206,7 +206,7 @@ If `soundOverrides` exists, SoundManager merges:
 ### Phase 2 (polish)
 - Add configuration UI fields and persist in stored configs
 - Add per-timer enable/mute controls
-- Add a tiny in-app “test sound” button in config UI (calls unlock + plays a preview cue)
+- Add a tiny in-app “test sound” button in config UI (calls init + plays a preview cue)
 
 ## Testing / verification
 
@@ -224,7 +224,7 @@ Prefer pure-function tests for:
 - Android Chrome:
   - Same as above
 - Desktop (Chrome/Safari/Firefox):
-  - Ensure AudioContext unlock works
+  - Ensure AudioContext init works
   - Ensure volume/mute behaves
 
 ## Open questions

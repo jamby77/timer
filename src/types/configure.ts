@@ -3,6 +3,18 @@ import { TimerType, WorkRestMode } from '@/lib/enums'
 // Re-export enums for backward compatibility
 export { TimerType, WorkRestMode }
 
+export interface SoundConfig {
+  enabled: boolean
+  volume: number
+  countdownBeeps?: number
+  startBeep?: boolean
+  finishBeep?: boolean
+  intervalStartBeep?: boolean
+  intervalEndBeep?: boolean
+  tick?: boolean
+  tickEverySeconds?: number
+}
+
 // Timer configuration base interface
 export interface TimerConfig {
   id: string
@@ -12,6 +24,7 @@ export interface TimerConfig {
   countdownBeforeStart?: number // seconds
   lastUsed?: Date
   completionMessage?: string
+  sound?: SoundConfig
 }
 
 // Specific timer type configurations
