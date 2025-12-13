@@ -5,7 +5,7 @@ import cx from 'clsx'
 
 import type { IntervalConfig } from '@/lib/timer/types'
 
-import { formatTime, getStatusMessage } from '@/lib/timer'
+import { formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
 import { useIntervalTimer } from '@/lib/timer/useIntervalTimer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
@@ -65,7 +65,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
     reset()
   }, [timerState, currentStep, timeLeft, reset, addLap])
 
-  const status = getStatusMessage(timerState)
+  const isRunning = timerState === TimerState.Running
 
   const getProgress = () => {
     if (!currentStep) return 0
@@ -85,18 +85,19 @@ export function Interval({ intervalConfig }: IntervalProps) {
     timerState === TimerState.Paused
 
   return (
-    <TimerContainer>
+    <TimerContainer fullscreen={isRunning}>
       <TimerCard
         label={currentStep?.label || 'Interval Timer'}
         state={timerState}
         time={formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
         isWork={currentStep?.isWork}
+        fullscreen={isRunning}
       >
         <Progress
           value={getProgress()}
           className={cx('mb-4', {
-            invisible: !currentStep,
+            invisible: !currentStep || isRunning,
             '[--progress-indicator-color:var(--tm-pr-work-bg)]': currentStep?.isWork,
             '[--progress-indicator-color:var(--tm-pr-rest-bg)]': !currentStep?.isWork,
           })}
@@ -130,7 +131,14 @@ export function Interval({ intervalConfig }: IntervalProps) {
           />
         </div>
       </TimerCard>
-      <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
+      {!isRunning && (
+        <LapHistory
+          laps={laps}
+          onClearHistory={clearHistory}
+          bestLap={bestLap}
+          lastLap={lastLap}
+        />
+      )}
     </TimerContainer>
   )
 }

@@ -50,6 +50,8 @@ export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
   const showStopButton = isWorkPhase
   const showPauseButton = showStopButton && isRunningState
 
+  const fullscreen = !isIdlePhase && !isPausedState
+
   const handleStop = useCallback(() => {
     if (showPauseButton) {
       actions.stopWork()
@@ -67,18 +69,19 @@ export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
   const currentRatio = (state.ratio / 100).toFixed(2)
 
   return (
-    <TimerContainer>
+    <TimerContainer fullscreen={fullscreen}>
       <TimerCard
         label={`WORK/REST (r ${currentRatio}x)`}
         state={state.state}
         time={time}
         subtitle={`Round: ${state.rounds + 1}`}
         isWork={isWork}
+        fullscreen={fullscreen}
       >
         <Progress
           value={progress}
           className={cx('mb-4 [--progress-indicator-color:var(--tm-pr-rest-bg)]', {
-            invisible: !showProgress,
+            invisible: !showProgress || fullscreen,
           })}
         />
 
@@ -120,7 +123,14 @@ export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
             disabled={isIdlePhase}
           />
         </div>
-        <LapHistory laps={laps} lastLap={lastLap} bestLap={bestLap} onClearHistory={clearHistory} />
+        {!fullscreen && (
+          <LapHistory
+            laps={laps}
+            lastLap={lastLap}
+            bestLap={bestLap}
+            onClearHistory={clearHistory}
+          />
+        )}
       </TimerCard>
     </TimerContainer>
   )

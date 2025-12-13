@@ -19,56 +19,110 @@ interface CardProps {
   children: ReactNode
   subtitle?: ReactNode
   isWork?: boolean
+  fullscreen?: boolean
 }
 
-export const TimerCard = ({ label, state, time, children, subtitle, isWork }: CardProps) => (
-  <div
-    className={cn('sticky top-8 z-10 rounded-lg border border-transparent', {
-      'animated-border-card': isWork,
-      'animate-border': state === TimerState.Running,
-    })}
-  >
-    <Card
-      className={cn('rounded-lg border-none px-2', {
-        'bg-tm-work-bg': isWork,
-        'bg-tm-rest-bg': !isWork && isWork !== undefined && state !== TimerState.Idle,
+export const TimerCard = ({
+  label,
+  state,
+  time,
+  children,
+  subtitle,
+  isWork,
+  fullscreen = false,
+}: CardProps) => {
+  const lastDotIndex = time.lastIndexOf('.')
+  const mainTime = lastDotIndex > -1 ? time.slice(0, lastDotIndex) : time
+  const fractionalTime = lastDotIndex > -1 ? time.slice(lastDotIndex) : ''
+
+  return (
+    <div
+      className={cn('rounded-lg border border-transparent', {
+        'sticky top-8 z-10': !fullscreen,
+        'h-full w-full': fullscreen,
+        'animated-border-card': isWork,
+        'animate-border': state === TimerState.Running,
       })}
     >
-      <CardHeader className="space-y-2">
-        <CardTitle className="text-card-foreground text-center text-3xl font-bold">
-          {label}
-        </CardTitle>
-        <CardDescription className="text-card-foreground">
-          {subtitle && (
-            <p
-              className={cn('mx-auto max-w-32 text-center text-xs', {
-                invisible: !subtitle,
-              })}
-            >
-              {subtitle}
-            </p>
-          )}
-        </CardDescription>
-      </CardHeader>
+      <Card
+        className={cn('border-none', {
+          'rounded-lg px-2': !fullscreen,
+          'h-full w-full gap-0 rounded-none p-0': fullscreen,
+          'bg-tm-work-bg': isWork,
+          'bg-tm-rest-bg': !isWork && isWork !== undefined && state !== TimerState.Idle,
+        })}
+      >
+        <CardHeader className={cn('space-y-2', { 'sr-only': fullscreen })}>
+          <CardTitle
+            className={cn('text-card-foreground text-center font-bold', {
+              'text-3xl': !fullscreen,
+              'text-xl': fullscreen,
+            })}
+          >
+            {label}
+          </CardTitle>
+          <CardDescription className="text-card-foreground">
+            {subtitle && (
+              <p
+                className={cn('mx-auto max-w-32 text-center text-xs', {
+                  invisible: !subtitle,
+                })}
+              >
+                {subtitle}
+              </p>
+            )}
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent>
-        <div
-          className={cn(
-            'font-mono text-[clamp(4rem,18vw,28vh)] leading-none font-bold tabular-nums md:text-[clamp(8rem,18vw,30vh)] lg:text-[clamp(10rem,18vw,50vh)]',
-            {
-              'text-tm-work-fg': isWork,
-              'text-tm-rest-fg': !isWork && isWork !== undefined,
-              'text-foreground': isWork === undefined,
-            }
-          )}
+        <CardContent
+          className={cn({
+            'flex grow items-center justify-center px-4 md:px-8': fullscreen,
+          })}
         >
-          {time}
-        </div>
-      </CardContent>
+          <div
+            className={cn(
+              'w-full text-center font-mono leading-none font-bold tabular-nums',
+              {
+                'text-[clamp(4rem,18vw,28vh)] md:text-[clamp(8rem,18vw,30vh)] lg:text-[clamp(10rem,18vw,50vh)]':
+                  !fullscreen,
+              },
+              {
+                'text-tm-work-fg': isWork,
+                'text-tm-rest-fg': !isWork && isWork !== undefined,
+                'text-foreground': isWork === undefined,
+              }
+            )}
+          >
+            {!fullscreen && time}
 
-      <CardFooter className="grow justify-center px-0 pt-0">
-        <div className="flex max-w-8/10 grow flex-col space-x-4">{children}</div>
-      </CardFooter>
-    </Card>
-  </div>
-)
+            {fullscreen && (
+              <div className="flex w-full items-end justify-center whitespace-nowrap">
+                <span className="text-[clamp(4rem,26vw,68vh)]">{mainTime}</span>
+                {fractionalTime && (
+                  <span className="pb-[0.12em] text-[clamp(1.25rem,8vw,18vh)]">
+                    {fractionalTime}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+
+        <CardFooter
+          className={cn('justify-center px-0 pt-0', {
+            grow: !fullscreen,
+            'mt-auto px-0 pb-8 md:px-0': fullscreen,
+          })}
+        >
+          <div
+            className={cn('flex max-w-8/10 grow flex-col space-x-4', {
+              'mx-auto w-full px-4': fullscreen,
+            })}
+          >
+            {children}
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}

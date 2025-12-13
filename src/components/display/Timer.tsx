@@ -12,7 +12,6 @@ import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
-
 interface TimerProps {
   config: CountdownConfig
   /** Optional callback when timer state changes */
@@ -48,6 +47,8 @@ export const Timer = ({
       onComplete: handleComplete,
     }
   )
+
+  const isRunning = state === TimerState.Running
   const handleReset = () => {
     // Save the total elapsed time as a lap before resetting
     if (totalElapsedTime > 0) {
@@ -61,12 +62,13 @@ export const Timer = ({
   }
 
   return (
-    <TimerContainer>
+    <TimerContainer fullscreen={isRunning}>
       <TimerCard
         label={name}
         state={state}
         time={formatTime(time)}
-        isWork={state === TimerState.Running}
+        isWork={isRunning}
+        fullscreen={isRunning}
       >
         <TimerButton
           state={state}
@@ -76,7 +78,9 @@ export const Timer = ({
           onRestart={handleRestart}
         />
       </TimerCard>
-      <LapHistory laps={laps} onClearHistory={clearHistory} lastLap={lastLap} bestLap={bestLap} />
+      {!isRunning && (
+        <LapHistory laps={laps} onClearHistory={clearHistory} lastLap={lastLap} bestLap={bestLap} />
+      )}
     </TimerContainer>
   )
 }
