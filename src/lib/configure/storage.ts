@@ -1,8 +1,4 @@
-import { AnyTimerConfig, PredefinedStyle, RecentTimer, StorageManager } from '@/types/configure';
-
-
-
-
+import { AnyTimerConfig, PredefinedStyle, RecentTimer, StorageManager } from '@/types/configure'
 
 class LocalTimerStorage implements StorageManager {
   private readonly RECENT_TIMERS_KEY = 'recent_timers'
