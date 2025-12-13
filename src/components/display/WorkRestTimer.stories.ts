@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { WorkRestMode } from '@/lib/enums'
+import { TimerType } from '@/types/configure'
 
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
 
@@ -12,6 +13,9 @@ export const RatioRest = meta.story({
   args: {
     className: 'bg-red-800',
     config: {
+      id: 'workrest-story-ratio',
+      name: 'Work/Rest (Ratio)',
+      type: TimerType.WORKREST,
       ratio: 1.5,
       maxRounds: 5,
       maxWorkTime: 300,
@@ -24,7 +28,9 @@ export const FixedRest = meta.story({
   args: {
     className: 'bg-red-800',
     config: {
-      ratio: 1.5,
+      id: 'workrest-story-fixed',
+      name: 'Work/Rest (Fixed)',
+      type: TimerType.WORKREST,
       maxRounds: 5,
       maxWorkTime: 300,
       fixedRestDuration: 10,
