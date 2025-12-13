@@ -16,13 +16,41 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/web-app-manifest-192x192.png',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/web-app-manifest-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
         purpose: 'maskable',
       },
       {
         src: '/web-app-manifest-512x512.png',
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/web-app-manifest-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
         purpose: 'maskable',
+      },
+    ],
+    screenshots: [
+      {
+        src: '/screenshots/app-mobile.png',
+        sizes: '895x1920',
+        type: 'image/png',
+        form_factor: 'narrow',
+        label: 'Timer configuration',
+      },
+      {
+        src: '/screenshots/app-desktop.png',
+        sizes: '1920x884',
+        type: 'image/png',
+        form_factor: 'wide',
+        label: 'Timer running',
       },
     ],
   }

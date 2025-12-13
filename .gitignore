@@ -44,6 +44,10 @@ src/stories/*
 !src/stories/timers/**
 !src/stories/Configure.mdx
 
+# next-pwa generated artifacts
+public/sw.js
+public/workbox-*.js
+
 median*
 
 __screenshots__/
