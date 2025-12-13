@@ -49,10 +49,7 @@ export const RecentTimers = ({ timers, onStartTimer, onRemoveTimer }: RecentTime
       >
         <CarouselContent>
           {displayTimers.map((timer) => (
-            <CarouselItem
-              key={timer.id}
-              className="min-w-52 basis-[250px] md:basis-1/3 lg:basis-1/5"
-            >
+            <CarouselItem key={timer.id} className="min-w-52 basis-62.5 md:basis-1/3 lg:basis-1/5">
               <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
             </CarouselItem>
           ))}
