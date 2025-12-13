@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import cx from 'clsx'
 
-import type { IntervalConfig } from '@/lib/timer/types'
+import type { IntervalConfig } from '@/types/configure'
 
+import { useSoundManager } from '@/lib/sound/useSoundManager'
 import { formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
 import { useIntervalTimer } from '@/lib/timer/useIntervalTimer'
@@ -27,8 +28,9 @@ interface IntervalProps {
   intervalConfig: IntervalConfig
 }
 
-export function Interval({ intervalConfig }: IntervalProps) {
+export function Interval({ intervalConfig: { sound, ...intervalConfig } }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
+  const soundManager = useSoundManager(sound)
   const addLapCallback = useCallback(
     (elapsedTime: number) => {
       // Add lap with the actual elapsed time
@@ -50,6 +52,10 @@ export function Interval({ intervalConfig }: IntervalProps) {
     onWorkStepComplete: addLapCallback,
   })
 
+  useEffect(() => {
+    soundManager.syncInterval(timerState, timeLeft, currentStep?.isWork ?? null, currentStepIndex)
+  }, [soundManager, timerState, timeLeft, currentStep?.isWork, currentStepIndex])
+
   const handleRestart = useCallback(() => {
     reset()
     start()
@@ -64,6 +70,13 @@ export function Interval({ intervalConfig }: IntervalProps) {
     // Stop and reset the timer
     reset()
   }, [timerState, currentStep, timeLeft, reset, addLap])
+
+  const handleStart = useCallback(() => {
+    void (async () => {
+      await soundManager.init()
+      start()
+    })()
+  }, [soundManager, start])
 
   const isRunning = timerState === TimerState.Running
 
@@ -105,7 +118,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
         <div className="flex items-center justify-center gap-4">
           {showPlayButton ? (
             <StartButton
-              onClick={start}
+              onClick={handleStart}
               title={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
               label={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
             />
@@ -132,12 +145,7 @@ export function Interval({ intervalConfig }: IntervalProps) {
         </div>
       </TimerCard>
       {!isRunning && (
-        <LapHistory
-          laps={laps}
-          onClearHistory={clearHistory}
-          bestLap={bestLap}
-          lastLap={lastLap}
-        />
+        <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
       )}
     </TimerContainer>
   )

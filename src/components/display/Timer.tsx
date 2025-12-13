@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { CountdownConfig } from '@/types/configure'
+import { useSoundManager } from '@/lib/sound/useSoundManager'
 import { formatTime, TimerState, useTimer } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
@@ -19,14 +20,15 @@ interface TimerProps {
 }
 
 export const Timer = ({
-  config: { duration, completionMessage, name = 'Timer' },
+  config: { duration, completionMessage, name = 'Timer', sound },
   onStateChange,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
+  const soundManager = useSoundManager(sound)
 
   const handleStateChange = useCallback(
     (newState: TimerState, elapsed: number) => {
-      // When timer completes, record the full duration as a lap
+      // When a timer completes, record the full duration as a lap
       if (newState === TimerState.Completed && elapsed > 0) {
         addLap(duration * 1000)
       }
@@ -48,6 +50,10 @@ export const Timer = ({
     }
   )
 
+  useEffect(() => {
+    soundManager.syncCountdown(state, time)
+  }, [soundManager, state, time])
+
   const isRunning = state === TimerState.Running
   const handleReset = () => {
     // Save the total elapsed time as a lap before resetting
@@ -61,6 +67,11 @@ export const Timer = ({
     restart()
   }
 
+  const handleStart = useCallback(async () => {
+    await soundManager.init()
+    start()
+  }, [soundManager, start])
+
   return (
     <TimerContainer fullscreen={isRunning}>
       <TimerCard
@@ -72,7 +83,7 @@ export const Timer = ({
       >
         <TimerButton
           state={state}
-          onStart={start}
+          onStart={handleStart}
           onPause={pause}
           onReset={handleReset}
           onRestart={handleRestart}

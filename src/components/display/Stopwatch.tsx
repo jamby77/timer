@@ -1,8 +1,9 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { StopwatchConfig } from '@/types/configure'
+import { useSoundManager } from '@/lib/sound/useSoundManager'
 import { formatTime, TimerState, useStopwatch } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
@@ -18,10 +19,11 @@ interface StopwatchProps {
 }
 
 export function Stopwatch({
-  config: { timeLimit = 0, name = 'Stopwatch' },
+  config: { timeLimit = 0, name = 'Stopwatch', sound },
   onStateChange,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
+  const soundManager = useSoundManager(sound)
 
   const handleStateChange = useCallback(
     (newState: TimerState) => {
@@ -43,6 +45,10 @@ export function Stopwatch({
     onStop: handleStop,
   })
 
+  useEffect(() => {
+    soundManager.syncStopwatch(state, time)
+  }, [soundManager, state, time])
+
   const isRunning = state === TimerState.Running
 
   const handleReset = useCallback(() => {
@@ -56,6 +62,11 @@ export function Stopwatch({
   const handleRestart = useCallback(() => {
     restart()
   }, [restart])
+
+  const handleStart = useCallback(async () => {
+    await soundManager.init()
+    start()
+  }, [soundManager, start])
   const timeLimitDisplay = timeLimit ? `(Cap: ${formatTime(timeLimit * 1000)})` : undefined
 
   return (
@@ -70,19 +81,14 @@ export function Stopwatch({
       >
         <TimerButton
           state={state}
-          onStart={start}
+          onStart={handleStart}
           onPause={pause}
           onReset={handleReset}
           onRestart={handleRestart}
         />
       </TimerCard>
       {!isRunning && (
-        <LapHistory
-          laps={laps}
-          onClearHistory={clearHistory}
-          bestLap={bestLap}
-          lastLap={lastLap}
-        />
+        <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
       )}
     </TimerContainer>
   )

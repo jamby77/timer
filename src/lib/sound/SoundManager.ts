@@ -28,13 +28,7 @@ const SoundManagerConfigSchema = z.object({
 
 type SoundManagerConfig = z.infer<typeof SoundManagerConfigSchema>
 
-type PlayedCue =
-  | 'start'
-  | 'finish'
-  | 'intervalStart'
-  | 'intervalEnd'
-  | 'countdownBeep'
-  | 'tick'
+type PlayedCue = 'start' | 'finish' | 'intervalStart' | 'intervalEnd' | 'countdownBeep' | 'tick'
 
 const resolveSoundConfig = (config?: SoundConfig): SoundManagerConfig => {
   return SoundManagerConfigSchema.parse(config ?? {})
@@ -395,7 +389,7 @@ export class SoundManager {
     this.previousWorkRestRounds = rounds
   }
 
-  public async unlock(): Promise<boolean> {
+  public async init(): Promise<boolean> {
     if (!this.config.enabled) {
       return false
     }

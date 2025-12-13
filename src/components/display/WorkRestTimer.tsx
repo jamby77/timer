@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import cx from 'clsx'
 
-import type { WorkRestTimerConfig } from '@/lib/timer/types'
+import type { WorkRestConfig } from '@/types/configure'
 
+import { useSoundManager } from '@/lib/sound/useSoundManager'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
@@ -23,21 +24,27 @@ import { TimerCard } from './TimerCard'
 import { TimerContainer } from './TimerContainer'
 
 interface WorkRestTimerProps {
-  config?: WorkRestTimerConfig // Timer-specific configuration only
+  config: WorkRestConfig
 }
 
-export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
+export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
+  const soundManager = useSoundManager(sound)
 
   const [state, actions] = useWorkRestTimer({
     config,
     onLapRecorded: addLap,
   })
 
-  const handleRestart = useCallback(() => {
+  useEffect(() => {
+    soundManager.syncWorkRest(state.state, state.phase, state.currentTime, state.rounds)
+  }, [soundManager, state.state, state.phase, state.currentTime, state.rounds])
+
+  const handleRestart = useCallback(async () => {
     actions.reset()
+    await soundManager.init()
     actions.startWork()
-  }, [actions])
+  }, [actions, soundManager])
 
   const isRestPhase = state.phase === TimerPhase.Rest
   const showProgress = isRestPhase
@@ -58,11 +65,22 @@ export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
     } else if (isRestPhase) {
       actions.stopRest()
     }
-  }, [state.phase, actions, showPauseButton])
+  }, [state.phase, actions, showPauseButton, isRestPhase])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
   }, [actions])
+
+  const handleStart = useCallback(async () => {
+    await soundManager.init()
+
+    if (isIdlePhase) {
+      actions.startWork()
+      return
+    }
+
+    actions.resumeWork()
+  }, [soundManager, actions, isIdlePhase])
 
   const progress = actions.getProgress()
   const { isWork, time } = getDisplayData(state)
@@ -90,7 +108,7 @@ export function WorkRestTimer({ config = {} }: WorkRestTimerProps) {
           {showStartButton && (
             <>
               <StartButton
-                onClick={isIdlePhase ? actions.startWork : actions.resumeWork}
+                onClick={handleStart}
                 title={`${isIdlePhase ? 'Start' : 'Resume'} work`}
                 label={`${isIdlePhase ? 'Start' : 'Resume'} work`}
               />
