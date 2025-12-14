@@ -393,8 +393,10 @@ export class SoundManager {
     if (!this.config.enabled) {
       return false
     }
+    const engine = SoundEngine.getInstance()
+    const ok = await engine.init()
     this.applyEngineSettings()
-    return SoundEngine.getInstance().init()
+    return ok
   }
 
   public onStart(): void {

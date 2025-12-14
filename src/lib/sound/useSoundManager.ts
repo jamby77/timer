@@ -8,7 +8,7 @@ export const useSoundManager = (config?: SoundConfig) => {
   const manager = useRef<SoundManager | null>(null)
 
   if (manager.current === null) {
-    manager.current = new SoundManager()
+    manager.current = new SoundManager(config)
   }
   useEffect(() => {
     manager.current?.setConfig(config)

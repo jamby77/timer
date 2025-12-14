@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Advanced Workout Timer',
-    short_name: 'Timer',
+    name: 'X-Timer',
+    short_name: 'X-Timer',
     description: 'A versatile timer application for workouts and productivity',
     start_url: '/',
     display: 'standalone',

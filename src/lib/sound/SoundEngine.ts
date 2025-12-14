@@ -13,8 +13,15 @@ type AudioWindow = Window & {
   webkitAudioContext?: typeof AudioContext
 }
 
-const getAudioContextCtor = (): typeof AudioContext | undefined => {
+const hasWindow = () => {
   if (typeof window === 'undefined') {
+    return !!(globalThis && 'window' in globalThis)
+  }
+  return true
+}
+
+const getAudioContextCtor = (): typeof AudioContext | undefined => {
+  if (!hasWindow()) {
     return undefined
   }
   const w = window as AudioWindow
@@ -40,10 +47,7 @@ export class SoundEngine {
   }
 
   public isSupported(): boolean {
-    if (typeof window === 'undefined') {
-      return false
-    }
-    return typeof getAudioContextCtor() !== 'undefined'
+    return hasWindow() && typeof getAudioContextCtor() !== 'undefined'
   }
 
   public async init(): Promise<boolean> {
