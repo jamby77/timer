@@ -124,7 +124,11 @@ export function getTimeByType(time: TimerPickerTime, type: TimePickerType): stri
   }
 }
 
-export function setTimeByType(time: TimerPickerTime, value: string, type: TimePickerType): TimerPickerTime {
+export function setTimeByType(
+  time: TimerPickerTime,
+  value: string,
+  type: TimePickerType
+): TimerPickerTime {
   const newTime = { ...time }
   const numericValue = parseInt(value, 10)
 
@@ -172,7 +176,7 @@ export function secondsToTimerPickerTime(seconds: number): TimerPickerTime {
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const remainingSeconds = seconds % 60
-  
+
   return {
     hours: Math.min(99, hours), // Cap at 99 as per TimerPickerTime interface
     minutes,

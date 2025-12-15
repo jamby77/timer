@@ -19,6 +19,8 @@ export const Body = ({}) => {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
 
+  const showInstallPrompt = process.env.NODE_ENV === 'production'
+
   // Wait for component to mount to avoid hydration issues
   useEffect(() => {
     setMounted(true)
@@ -93,7 +95,7 @@ export const Body = ({}) => {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-10 p-4">
       {renderTimer()}
-      <InstallPrompt />
+      {showInstallPrompt && <InstallPrompt />}
     </div>
   )
 }

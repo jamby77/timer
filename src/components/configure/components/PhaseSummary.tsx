@@ -28,14 +28,12 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
                   <span>
                     {' '}
                     - {(phase.config as any).workDuration}s work /{' '}
-                    {(phase.config as any).restDuration}s rest ×{' '}
-                    {(phase.config as any).intervals}
+                    {(phase.config as any).restDuration}s rest × {(phase.config as any).intervals}
                   </span>
                 )}
-                {phase.type === TimerType.STOPWATCH &&
-                  (phase.config as any).timeLimit && (
-                    <span> - {(phase.config as any).timeLimit}s limit</span>
-                  )}
+                {phase.type === TimerType.STOPWATCH && (phase.config as any).timeLimit && (
+                  <span> - {(phase.config as any).timeLimit}s limit</span>
+                )}
                 {phase.type === TimerType.WORKREST && (
                   <span>
                     {' '}

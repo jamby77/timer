@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { TimerStep } from './TimerManager'
-import type { IntervalConfig } from './types'
+import type { TimerStep } from '@/lib/timer/TimerManager'
+import type { IntervalConfig } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
-
-import { StepState, TimerManager } from './TimerManager'
+import { StepState, TimerManager } from '@/lib/timer/TimerManager'
 
 function generateSteps(
   skipLastRest: boolean,
@@ -88,7 +87,6 @@ export const useIntervalTimer = ({
         // Internal state updates
         setCurrentStep(step)
         setCurrentStepIndex(stepIndex)
-        // setTimeLeft(step.duration);
         // External callback
         onStepChange?.(step, stepIndex)
       },
@@ -100,7 +98,7 @@ export const useIntervalTimer = ({
         // External callback
         onSequenceComplete?.()
       },
-      onTick: (time, _totalElapsedTime, _step) => {
+      onTick: (time) => {
         setTimeLeft(time)
       },
     })

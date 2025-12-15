@@ -14,8 +14,8 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Advanced Workout Timer | %s',
-    default: 'Advanced Workout Timer',
+    template: '%s | X-Timer | %s',
+    default: 'X-Timer',
   },
   description: 'A versatile timer application for workouts and productivity',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     },
   },
   appleWebApp: {
-    title: 'Advanced Workout Timer',
+    title: 'X-Timer',
     statusBarStyle: 'black-translucent',
   },
 }

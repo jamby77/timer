@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
 
-import type { TimerOptions } from './types'
+import type { TimerOptions } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
-
-import { Timer as TimerClass } from './Timer'
+import { Timer as TimerClass } from '@/lib/timer/Timer'
 
 interface UseTimerState {
   time: number

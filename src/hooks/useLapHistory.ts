@@ -1,10 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 
-export interface LapEntry {
-  id: string
-  lapTime: number
-  timestamp: number
-}
+import { LapEntry } from '@/types'
 
 export const useLapHistory = () => {
   const [laps, setLaps] = useState<LapEntry[]>([])

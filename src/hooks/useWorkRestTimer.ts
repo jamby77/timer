@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { WorkRestTimerActions, WorkRestTimerOptions, WorkRestTimerState } from './types'
+import type {
+  WorkRestTimerActions,
+  WorkRestTimerOptions,
+  WorkRestTimerState,
+} from '@/lib/timer/types'
 
 import { TimerPhase, TimerState, WorkRestMode } from '@/lib/enums'
-
-import { Stopwatch } from './Stopwatch'
-import { Timer } from './Timer'
+import { Stopwatch } from '@/lib/timer/Stopwatch'
+import { Timer } from '@/lib/timer/Timer'
 
 const WORK_TIME_LIMIT_MS = (99 * 60 + 99) * 1000 // 99:99 = // 6,039.000
 const DEFAULT_RATIO = 100 // 1.0 stored as integer

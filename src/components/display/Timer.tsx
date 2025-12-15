@@ -1,17 +1,16 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { CountdownConfig } from '@/types/configure'
-import { formatTime, TimerState, useTimer } from '@/lib/timer'
-import { useLapHistory } from '@/lib/timer/useLapHistory'
+import { formatTime, TimerState } from '@/lib/timer'
+import { useLapHistory, usePreStartCountdown, useSoundManager, useTimer } from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
-
 
 interface TimerProps {
   config: CountdownConfig
@@ -20,14 +19,15 @@ interface TimerProps {
 }
 
 export const Timer = ({
-  config: { duration, completionMessage, name = 'Timer' },
+  config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
+  const soundManager = useSoundManager(sound)
 
   const handleStateChange = useCallback(
     (newState: TimerState, elapsed: number) => {
-      // When timer completes, record the full duration as a lap
+      // When a timer completes, record the full duration as a lap
       if (newState === TimerState.Completed && elapsed > 0) {
         addLap(duration * 1000)
       }
@@ -41,14 +41,36 @@ export const Timer = ({
     })
   }, [completionMessage])
 
-  const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
-    duration * 1000,
-    {
-      onStateChange: handleStateChange,
-      onComplete: handleComplete,
-    }
-  )
+  const { time, state, totalElapsedTime, start, pause, reset } = useTimer(duration * 1000, {
+    onStateChange: handleStateChange,
+    onComplete: handleComplete,
+  })
+
+  const preStart = usePreStartCountdown({
+    seconds: countdownBeforeStart,
+    onComplete: () => {
+      soundManager.reset()
+      start()
+    },
+  })
+
+  useEffect(() => {
+    soundManager.syncCountdown(state, time)
+  }, [soundManager, state, time])
+
+  useEffect(() => {
+    if (!preStart.isActive) return
+    soundManager.syncPreStartCountdown(preStart.timeLeftMs)
+  }, [soundManager, preStart.isActive, preStart.timeLeftMs])
+
+  const isRunning = state === TimerState.Running
+  const isPreStarting = preStart.isActive
+  const isActive = isRunning || isPreStarting
   const handleReset = () => {
+    if (isPreStarting) {
+      preStart.reset()
+      return
+    }
     // Save the total elapsed time as a lap before resetting
     if (totalElapsedTime > 0) {
       addLap(totalElapsedTime)
@@ -57,26 +79,60 @@ export const Timer = ({
   }
 
   const handleRestart = () => {
-    restart()
+    reset()
+    if (preStart.isEnabled) {
+      preStart.start()
+      return
+    }
+    start()
   }
 
+  const handleStart = useCallback(async () => {
+    await soundManager.init()
+
+    if (isPreStarting) {
+      preStart.start()
+      return
+    }
+
+    if (state === TimerState.Idle) {
+      if (preStart.isEnabled) {
+        preStart.start()
+        return
+      }
+    }
+
+    start()
+  }, [soundManager, start, preStart, isPreStarting, state])
+
+  const handlePause = useCallback(() => {
+    if (isPreStarting) {
+      preStart.pause()
+      return
+    }
+    pause()
+  }, [isPreStarting, pause, preStart])
+
   return (
-    <TimerContainer>
+    <TimerContainer fullscreen={isActive}>
       <TimerCard
         label={name}
-        state={state}
-        time={formatTime(time)}
-        isWork={state === TimerState.Running}
+        state={isPreStarting ? preStart.state : state}
+        time={isPreStarting ? String(preStart.secondsLeft) : formatTime(time)}
+        isWork={isActive}
+        fullscreen={isActive}
       >
         <TimerButton
-          state={state}
-          onStart={start}
-          onPause={pause}
+          state={isPreStarting ? preStart.state : state}
+          onStart={handleStart}
+          onPause={handlePause}
           onReset={handleReset}
           onRestart={handleRestart}
         />
       </TimerCard>
-      <LapHistory laps={laps} onClearHistory={clearHistory} lastLap={lastLap} bestLap={bestLap} />
+      {!isRunning && (
+        <LapHistory laps={laps} onClearHistory={clearHistory} lastLap={lastLap} bestLap={bestLap} />
+      )}
     </TimerContainer>
   )
 }

@@ -34,6 +34,10 @@ This project uses `pnpm` package manager, if any commands related to packages ne
 - Write comprehensive tests for all functionality
 - Keep tests simple and focused on real behavior
 
+## Tooling
+
+For any file related tasks, try JetBrains MCP server first before resorting to other means.
+
 ## Changelog
 
 After completing a major bugfix or feature update, propose changelog message.
