@@ -5,11 +5,9 @@ import cx from 'clsx'
 
 import type { IntervalConfig } from '@/types/configure'
 
-import { useSoundManager } from '@/lib/sound/useSoundManager'
-import { formatTime, TimerState as BaseTimerState, usePreStartCountdown } from '@/lib/timer'
+import { TimerState as BaseTimerState, formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
-import { useIntervalTimer } from '@/lib/timer/useIntervalTimer'
-import { useLapHistory } from '@/lib/timer/useLapHistory'
+import { useIntervalTimer, useLapHistory, usePreStartCountdown, useSoundManager } from '@/hooks'
 
 import { Progress } from '@/components/ui/progress'
 import {
@@ -66,7 +64,15 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
       return
     }
     soundManager.syncInterval(timerState, timeLeft, currentStep?.isWork ?? null, currentStepIndex)
-  }, [soundManager, timerState, timeLeft, currentStep?.isWork, currentStepIndex, preStart.isActive, preStart.timeLeftMs])
+  }, [
+    soundManager,
+    timerState,
+    timeLeft,
+    currentStep?.isWork,
+    currentStepIndex,
+    preStart.isActive,
+    preStart.timeLeftMs,
+  ])
 
   const handleRestart = useCallback(() => {
     reset()
@@ -137,7 +143,9 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
 
   const showPlayButton = isPreStarting
     ? preStart.state !== BaseTimerState.Running
-    : timerState === TimerState.Idle || timerState === TimerState.Completed || timerState === TimerState.Paused
+    : timerState === TimerState.Idle ||
+      timerState === TimerState.Completed ||
+      timerState === TimerState.Paused
 
   return (
     <TimerContainer fullscreen={isActive}>

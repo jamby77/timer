@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { TimerState } from '@/lib/enums'
-
-import { TimerManager } from './TimerManager'
+import { TimerManager } from '@/lib/timer/TimerManager'
 
 const clampCountdownSeconds = (seconds?: number): number => {
   if (seconds === undefined) return 0

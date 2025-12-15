@@ -1,7 +1,7 @@
 import preview from '#.storybook/preview'
 
-import { WorkRestMode } from '@/lib/enums'
 import { TimerType } from '@/types/configure'
+import { WorkRestMode } from '@/lib/enums'
 
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
 

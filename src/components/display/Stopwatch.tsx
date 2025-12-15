@@ -3,9 +3,8 @@
 import { useCallback, useEffect } from 'react'
 
 import { StopwatchConfig } from '@/types/configure'
-import { useSoundManager } from '@/lib/sound/useSoundManager'
-import { formatTime, TimerState, usePreStartCountdown, useStopwatch } from '@/lib/timer'
-import { useLapHistory } from '@/lib/timer/useLapHistory'
+import { formatTime, TimerState } from '@/lib/timer'
+import { useLapHistory, usePreStartCountdown, useSoundManager, useStopwatch } from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
@@ -39,7 +38,7 @@ export function Stopwatch({
     [addLap]
   )
 
-  const { time, state, start, pause, reset, restart } = useStopwatch({
+  const { time, state, start, pause, reset } = useStopwatch({
     timeLimitMs: timeLimit * 1000,
     onStateChange: handleStateChange,
     onStop: handleStop,

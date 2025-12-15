@@ -4,9 +4,8 @@ import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { CountdownConfig } from '@/types/configure'
-import { useSoundManager } from '@/lib/sound/useSoundManager'
-import { formatTime, TimerState, usePreStartCountdown, useTimer } from '@/lib/timer'
-import { useLapHistory } from '@/lib/timer/useLapHistory'
+import { formatTime, TimerState } from '@/lib/timer'
+import { useLapHistory, usePreStartCountdown, useSoundManager, useTimer } from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
@@ -42,13 +41,10 @@ export const Timer = ({
     })
   }, [completionMessage])
 
-  const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
-    duration * 1000,
-    {
-      onStateChange: handleStateChange,
-      onComplete: handleComplete,
-    }
-  )
+  const { time, state, totalElapsedTime, start, pause, reset } = useTimer(duration * 1000, {
+    onStateChange: handleStateChange,
+    onComplete: handleComplete,
+  })
 
   const preStart = usePreStartCountdown({
     seconds: countdownBeforeStart,

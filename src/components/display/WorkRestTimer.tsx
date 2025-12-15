@@ -5,12 +5,10 @@ import cx from 'clsx'
 
 import type { WorkRestConfig } from '@/types/configure'
 
-import { useSoundManager } from '@/lib/sound/useSoundManager'
-import { TimerState as BaseTimerState, usePreStartCountdown } from '@/lib/timer'
+import { TimerState as BaseTimerState } from '@/lib/timer'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
-import { useLapHistory } from '@/lib/timer/useLapHistory'
-import { useWorkRestTimer } from '@/lib/timer/useWorkRestTimer'
+import { useLapHistory, usePreStartCountdown, useSoundManager, useWorkRestTimer } from '@/hooks'
 
 import { Progress } from '@/components/ui/progress'
 import {

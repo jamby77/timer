@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 import type { SoundConfig } from '@/types/configure'
 
-import { SoundManager } from './SoundManager'
+import { SoundManager } from '@/lib/sound/SoundManager'
 
 export const useSoundManager = (config?: SoundConfig) => {
   const manager = useRef<SoundManager | null>(null)

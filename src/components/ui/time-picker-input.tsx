@@ -1,5 +1,4 @@
 import React, { forwardRef, useEffect, useMemo, useState } from 'react'
-import { useTouchDevice } from '@/hooks/use-touch-device'
 
 import type { InputHTMLAttributes, KeyboardEvent } from 'react'
 
@@ -12,6 +11,7 @@ import {
   TimerPickerTime,
 } from '@/lib/timer'
 import { cn } from '@/lib/utils'
+import { useTouchDevice } from '@/hooks/use-touch-device'
 
 import { Input } from '@/components/ui/input'
 

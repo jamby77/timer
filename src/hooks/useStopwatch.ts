@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { StopwatchOptions as StopwatchOptionsType } from './Stopwatch'
+import type { StopwatchOptions as StopwatchOptionsType } from '@/lib/timer/Stopwatch'
 
 import { TimerState } from '@/lib/enums'
-
-import { Stopwatch } from './Stopwatch'
+import { Stopwatch } from '@/lib/timer/Stopwatch'
 
 type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange' | 'onStop'> & {
   onTick?: (elapsedTime: number) => void

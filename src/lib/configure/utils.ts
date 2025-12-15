@@ -6,7 +6,6 @@ import { TimerType, WorkRestMode } from '@/types/configure'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
-
 // Zod schemas for timer configuration validation
 
 // Base timer config schema
@@ -242,23 +241,24 @@ export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
 // Helper function to generate complex timer names
 export const generateComplexTimerName = (config: Partial<ComplexConfig>): string => {
   const phaseCount = config.phases?.length || 0
-  const totalDuration = config.phases?.reduce((total, phase) => {
-    switch (phase.config.type) {
-      case TimerType.COUNTDOWN:
-        return total + (phase.config as any).duration
-      case TimerType.INTERVAL:
-        const workDuration = (phase.config as any).workDuration || 0
-        const restDuration = (phase.config as any).restDuration || 0
-        const intervals = (phase.config as any).intervals || 1
-        return total + (workDuration + restDuration) * intervals - restDuration
-      case TimerType.STOPWATCH:
-        return total + ((phase.config as any).timeLimit || 0)
-      case TimerType.WORKREST:
-        return total + 0 // Complex to calculate, skip for now
-      default:
-        return total
-    }
-  }, 0) || 0
+  const totalDuration =
+    config.phases?.reduce((total, phase) => {
+      switch (phase.config.type) {
+        case TimerType.COUNTDOWN:
+          return total + (phase.config as any).duration
+        case TimerType.INTERVAL:
+          const workDuration = (phase.config as any).workDuration || 0
+          const restDuration = (phase.config as any).restDuration || 0
+          const intervals = (phase.config as any).intervals || 1
+          return total + (workDuration + restDuration) * intervals - restDuration
+        case TimerType.STOPWATCH:
+          return total + ((phase.config as any).timeLimit || 0)
+        case TimerType.WORKREST:
+          return total + 0 // Complex to calculate, skip for now
+        default:
+          return total
+      }
+    }, 0) || 0
 
   return `Complex Timer (${phaseCount} phases, ${formatDuration(totalDuration)})`
 }

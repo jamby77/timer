@@ -6,7 +6,6 @@ import type { VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
-
 const buttonVariants = cva(
   [
     'cursor-pointer disabled:cursor-not-allowed inline-flex items-center justify-center gap-2',

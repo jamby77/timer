@@ -2,8 +2,8 @@ import { useState } from 'react'
 import cx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 
+import { LapEntry } from '@/types'
 import { formatTime } from '@/lib/timer'
-import { LapEntry } from '@/lib/timer/useLapHistory'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
@@ -126,7 +126,7 @@ export function LapHistory({
         })}
       >
         {laps.length > 0 ? (
-          // Expanded view - show full list (only when laps exist)
+          // Expanded view - show a full list (only when laps exist)
           <div className="w-full max-w-5xl space-y-2 p-6 px-4">
             <Item className="justify-between px-4 text-lg" variant="outline">
               {lastLap && (

@@ -20,6 +20,7 @@ export default {
     '^@/types/*',
     '^@/providers/*',
     '^@/lib/*',
+    '^@/hooks/*',
     '',
     '^@/components/ui/*',
     '^@/components/*',

@@ -1,8 +1,7 @@
 'use client'
 
-import { useMediaQuery } from '@/hooks/use-media-query'
-
 import { TimerConfigFormProps } from '@/types/configure'
+import { useMediaQuery } from '@/hooks/use-media-query'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
