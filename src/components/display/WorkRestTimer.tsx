@@ -6,6 +6,7 @@ import cx from 'clsx'
 import type { WorkRestConfig } from '@/types/configure'
 
 import { useSoundManager } from '@/lib/sound/useSoundManager'
+import { TimerState as BaseTimerState, usePreStartCountdown } from '@/lib/timer'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
@@ -36,15 +37,39 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
     onLapRecorded: addLap,
   })
 
+  const preStart = usePreStartCountdown({
+    seconds: config.countdownBeforeStart,
+    onComplete: () => {
+      soundManager.reset()
+      actions.startWork()
+    },
+  })
+
   useEffect(() => {
+    if (preStart.isActive) {
+      soundManager.syncPreStartCountdown(preStart.timeLeftMs)
+      return
+    }
     soundManager.syncWorkRest(state.state, state.phase, state.currentTime, state.rounds)
-  }, [soundManager, state.state, state.phase, state.currentTime, state.rounds])
+  }, [
+    soundManager,
+    state.state,
+    state.phase,
+    state.currentTime,
+    state.rounds,
+    preStart.isActive,
+    preStart.timeLeftMs,
+  ])
 
   const handleRestart = useCallback(async () => {
     actions.reset()
     await soundManager.init()
+    if (preStart.isEnabled) {
+      preStart.start()
+      return
+    }
     actions.startWork()
-  }, [actions, soundManager])
+  }, [actions, soundManager, preStart])
 
   const isRestPhase = state.phase === TimerPhase.Rest
   const showProgress = isRestPhase
@@ -53,19 +78,27 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
   const isRunningState = state.state === TimerState.Running
   const isPausedState = state.state === TimerState.Paused
 
-  const showStartButton = isIdlePhase || isPausedState
-  const showStopButton = isWorkPhase
-  const showPauseButton = showStopButton && isRunningState
+  const isPreStarting = preStart.isActive
+  const isPreStartRunning = preStart.state === BaseTimerState.Running
+  const isPreStartPaused = preStart.state === BaseTimerState.Paused
 
-  const fullscreen = !isIdlePhase && !isPausedState
+  const showStartButton = isPreStarting ? isPreStartPaused : isIdlePhase || isPausedState
+  const showStopButton = isPreStarting ? true : isWorkPhase
+  const showPauseButton = isPreStarting ? isPreStartRunning : isWorkPhase && isRunningState
+
+  const fullscreen = (!isIdlePhase && !isPausedState) || isPreStarting
 
   const handleStop = useCallback(() => {
+    if (isPreStarting) {
+      preStart.reset()
+      return
+    }
     if (showPauseButton) {
       actions.stopWork()
     } else if (isRestPhase) {
       actions.stopRest()
     }
-  }, [state.phase, actions, showPauseButton, isRestPhase])
+  }, [isPreStarting, preStart, showPauseButton, actions, isRestPhase])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
@@ -74,26 +107,38 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
   const handleStart = useCallback(async () => {
     await soundManager.init()
 
+    if (isPreStarting) {
+      preStart.start()
+      return
+    }
+
     if (isIdlePhase) {
+      if (preStart.isEnabled) {
+        preStart.start()
+        return
+      }
       actions.startWork()
       return
     }
 
     actions.resumeWork()
-  }, [soundManager, actions, isIdlePhase])
+  }, [soundManager, actions, isIdlePhase, preStart, isPreStarting])
 
   const progress = actions.getProgress()
   const { isWork, time } = getDisplayData(state)
   const currentRatio = (state.ratio / 100).toFixed(2)
+  const displayTime = isPreStarting ? String(preStart.secondsLeft) : time
+  const displayState = isPreStarting ? preStart.state : state.state
+  const displayIsWork = isPreStarting ? undefined : isWork
 
   return (
     <TimerContainer fullscreen={fullscreen}>
       <TimerCard
         label={`WORK/REST (r ${currentRatio}x)`}
-        state={state.state}
-        time={time}
+        state={displayState}
+        time={displayTime}
         subtitle={`Round: ${state.rounds + 1}`}
-        isWork={isWork}
+        isWork={displayIsWork}
         fullscreen={fullscreen}
       >
         <Progress
@@ -109,18 +154,26 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
             <>
               <StartButton
                 onClick={handleStart}
-                title={`${isIdlePhase ? 'Start' : 'Resume'} work`}
-                label={`${isIdlePhase ? 'Start' : 'Resume'} work`}
+                title={
+                  isPreStarting ? 'Resume countdown' : `${isIdlePhase ? 'Start' : 'Resume'} work`
+                }
+                label={
+                  isPreStarting ? 'Resume countdown' : `${isIdlePhase ? 'Start' : 'Resume'} work`
+                }
               />
             </>
           )}
           {showPauseButton && (
-            <PauseButton onClick={actions.pauseWork} title="Pause work" label="Pause work" />
+            <PauseButton
+              onClick={isPreStarting ? preStart.pause : actions.pauseWork}
+              title={isPreStarting ? 'Pause countdown' : 'Pause work'}
+              label={isPreStarting ? 'Pause countdown' : 'Pause work'}
+            />
           )}
 
           {(showStopButton || showStartButton) && (
             <StopButton
-              disabled={showStartButton}
+              disabled={showStartButton && !isPreStarting}
               onClick={handleStop}
               title="Stop work"
               label="Stop work"

@@ -17,7 +17,7 @@ export const Default = meta.story({
       name: 'Timer',
       duration: 10,
       completionMessage: 'Done',
-
+      countdownBeforeStart: 15,
       sound: {
         enabled: true,
         volume: 0.7,

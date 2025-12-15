@@ -6,7 +6,7 @@ import cx from 'clsx'
 import type { IntervalConfig } from '@/types/configure'
 
 import { useSoundManager } from '@/lib/sound/useSoundManager'
-import { formatTime } from '@/lib/timer'
+import { formatTime, TimerState as BaseTimerState, usePreStartCountdown } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
 import { useIntervalTimer } from '@/lib/timer/useIntervalTimer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
@@ -52,16 +52,36 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
     onWorkStepComplete: addLapCallback,
   })
 
+  const preStart = usePreStartCountdown({
+    seconds: intervalConfig.countdownBeforeStart,
+    onComplete: () => {
+      soundManager.reset()
+      start()
+    },
+  })
+
   useEffect(() => {
+    if (preStart.isActive) {
+      soundManager.syncPreStartCountdown(preStart.timeLeftMs)
+      return
+    }
     soundManager.syncInterval(timerState, timeLeft, currentStep?.isWork ?? null, currentStepIndex)
-  }, [soundManager, timerState, timeLeft, currentStep?.isWork, currentStepIndex])
+  }, [soundManager, timerState, timeLeft, currentStep?.isWork, currentStepIndex, preStart.isActive, preStart.timeLeftMs])
 
   const handleRestart = useCallback(() => {
     reset()
+    if (preStart.isEnabled) {
+      preStart.start()
+      return
+    }
     start()
-  }, [reset, start])
+  }, [preStart, reset, start])
 
   const handleStop = useCallback(() => {
+    if (preStart.isActive) {
+      preStart.reset()
+      return
+    }
     // Record current lap if timer is running and we're in a work step
     if (timerState === TimerState.Running && currentStep?.isWork) {
       const elapsed = currentStep.duration - timeLeft
@@ -69,16 +89,39 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
     }
     // Stop and reset the timer
     reset()
-  }, [timerState, currentStep, timeLeft, reset, addLap])
+  }, [preStart, timerState, currentStep, timeLeft, reset, addLap])
 
   const handleStart = useCallback(() => {
     void (async () => {
       await soundManager.init()
+
+      if (preStart.isActive) {
+        preStart.start()
+        return
+      }
+
+      if (timerState === TimerState.Idle || timerState === TimerState.Completed) {
+        if (preStart.isEnabled) {
+          preStart.start()
+          return
+        }
+      }
+
       start()
     })()
-  }, [soundManager, start])
+  }, [soundManager, start, preStart, timerState])
 
   const isRunning = timerState === TimerState.Running
+  const isPreStarting = preStart.isActive
+  const isActive = isRunning || isPreStarting
+
+  const handlePause = useCallback(() => {
+    if (isPreStarting) {
+      preStart.pause()
+      return
+    }
+    pause()
+  }, [isPreStarting, pause, preStart])
 
   const getProgress = () => {
     if (!currentStep) return 0
@@ -92,20 +135,19 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
     return `${workSteps}/${intervalConfig.intervals}`
   }
 
-  const showPlayButton =
-    timerState === TimerState.Idle ||
-    timerState === TimerState.Completed ||
-    timerState === TimerState.Paused
+  const showPlayButton = isPreStarting
+    ? preStart.state !== BaseTimerState.Running
+    : timerState === TimerState.Idle || timerState === TimerState.Completed || timerState === TimerState.Paused
 
   return (
-    <TimerContainer fullscreen={isRunning}>
+    <TimerContainer fullscreen={isActive}>
       <TimerCard
         label={currentStep?.label || 'Interval Timer'}
-        state={timerState}
-        time={formatTime(timeLeft)}
+        state={isPreStarting ? preStart.state : timerState}
+        time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
-        isWork={currentStep?.isWork}
-        fullscreen={isRunning}
+        isWork={isPreStarting ? undefined : currentStep?.isWork}
+        fullscreen={isActive}
       >
         <Progress
           value={getProgress()}
@@ -119,11 +161,23 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
           {showPlayButton ? (
             <StartButton
               onClick={handleStart}
-              title={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
-              label={timerState === TimerState.Paused ? 'Resume intervals' : 'Start intervals'}
+              title={
+                isPreStarting
+                  ? 'Resume countdown'
+                  : timerState === TimerState.Paused
+                    ? 'Resume intervals'
+                    : 'Start intervals'
+              }
+              label={
+                isPreStarting
+                  ? 'Resume countdown'
+                  : timerState === TimerState.Paused
+                    ? 'Resume intervals'
+                    : 'Start intervals'
+              }
             />
           ) : (
-            <PauseButton onClick={pause} title="Pause intervals" label="Pause intervals" />
+            <PauseButton onClick={handlePause} title="Pause intervals" label="Pause intervals" />
           )}
           <SkipButton
             onClick={skipCurrentStep}
@@ -133,7 +187,7 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
           />
           <StopButton
             onClick={handleStop}
-            disabled={timerState !== TimerState.Running}
+            disabled={!isActive}
             title="Stop intervals"
             label="Stop intervals"
           />
@@ -144,7 +198,7 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
           />
         </div>
       </TimerCard>
-      {!isRunning && (
+      {!isActive && (
         <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
       )}
     </TimerContainer>

@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 import { CountdownConfig } from '@/types/configure'
 import { useSoundManager } from '@/lib/sound/useSoundManager'
-import { formatTime, TimerState, useTimer } from '@/lib/timer'
+import { formatTime, TimerState, usePreStartCountdown, useTimer } from '@/lib/timer'
 import { useLapHistory } from '@/lib/timer/useLapHistory'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
@@ -20,7 +20,7 @@ interface TimerProps {
 }
 
 export const Timer = ({
-  config: { duration, completionMessage, name = 'Timer', sound },
+  config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
@@ -50,12 +50,31 @@ export const Timer = ({
     }
   )
 
+  const preStart = usePreStartCountdown({
+    seconds: countdownBeforeStart,
+    onComplete: () => {
+      soundManager.reset()
+      start()
+    },
+  })
+
   useEffect(() => {
     soundManager.syncCountdown(state, time)
   }, [soundManager, state, time])
 
+  useEffect(() => {
+    if (!preStart.isActive) return
+    soundManager.syncPreStartCountdown(preStart.timeLeftMs)
+  }, [soundManager, preStart.isActive, preStart.timeLeftMs])
+
   const isRunning = state === TimerState.Running
+  const isPreStarting = preStart.isActive
+  const isActive = isRunning || isPreStarting
   const handleReset = () => {
+    if (isPreStarting) {
+      preStart.reset()
+      return
+    }
     // Save the total elapsed time as a lap before resetting
     if (totalElapsedTime > 0) {
       addLap(totalElapsedTime)
@@ -64,27 +83,53 @@ export const Timer = ({
   }
 
   const handleRestart = () => {
-    restart()
+    reset()
+    if (preStart.isEnabled) {
+      preStart.start()
+      return
+    }
+    start()
   }
 
   const handleStart = useCallback(async () => {
     await soundManager.init()
+
+    if (isPreStarting) {
+      preStart.start()
+      return
+    }
+
+    if (state === TimerState.Idle) {
+      if (preStart.isEnabled) {
+        preStart.start()
+        return
+      }
+    }
+
     start()
-  }, [soundManager, start])
+  }, [soundManager, start, preStart, isPreStarting, state])
+
+  const handlePause = useCallback(() => {
+    if (isPreStarting) {
+      preStart.pause()
+      return
+    }
+    pause()
+  }, [isPreStarting, pause, preStart])
 
   return (
-    <TimerContainer fullscreen={isRunning}>
+    <TimerContainer fullscreen={isActive}>
       <TimerCard
         label={name}
-        state={state}
-        time={formatTime(time)}
-        isWork={isRunning}
-        fullscreen={isRunning}
+        state={isPreStarting ? preStart.state : state}
+        time={isPreStarting ? String(preStart.secondsLeft) : formatTime(time)}
+        isWork={isActive}
+        fullscreen={isActive}
       >
         <TimerButton
-          state={state}
+          state={isPreStarting ? preStart.state : state}
           onStart={handleStart}
-          onPause={pause}
+          onPause={handlePause}
           onReset={handleReset}
           onRestart={handleRestart}
         />

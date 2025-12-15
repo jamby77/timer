@@ -10,7 +10,6 @@ import {
   playIntervalEndBeep,
   playIntervalStartBeep,
   playStartBeep,
-  playTick,
 } from './cues'
 import { SoundEngine } from './SoundEngine'
 
@@ -22,13 +21,11 @@ const SoundManagerConfigSchema = z.object({
   finishBeep: z.boolean().catch(true),
   intervalStartBeep: z.boolean().catch(true),
   intervalEndBeep: z.boolean().catch(true),
-  tick: z.boolean().catch(false),
-  tickEverySeconds: z.int().min(1).catch(1),
 })
 
 type SoundManagerConfig = z.infer<typeof SoundManagerConfigSchema>
 
-type PlayedCue = 'start' | 'finish' | 'intervalStart' | 'intervalEnd' | 'countdownBeep' | 'tick'
+type PlayedCue = 'start' | 'finish' | 'intervalStart' | 'intervalEnd' | 'countdownBeep'
 
 const resolveSoundConfig = (config?: SoundConfig): SoundManagerConfig => {
   return SoundManagerConfigSchema.parse(config ?? {})
@@ -38,14 +35,9 @@ export class SoundManager {
   private config: SoundManagerConfig
 
   private lastCountdownSecond: number | null = null
-  private lastTickSecond: number | null = null
 
   private lastPlayedWallClockSecond: number | null = null
   private lastPlayedCue: PlayedCue | null = null
-
-  private pendingTickTimeoutId: ReturnType<typeof setTimeout> | null = null
-  private pendingTickWallClockSecond: number | null = null
-  private pendingTickSecondBucket: number | null = null
 
   private previousTimerState: TimerState | null = null
   private previousPhase: TimerPhase | null = null
@@ -59,6 +51,14 @@ export class SoundManager {
   constructor(config?: SoundConfig) {
     this.config = resolveSoundConfig(config)
     this.applyEngineSettings()
+  }
+
+  public syncPreStartCountdown(timeLeftMs: number): void {
+    if (!this.config.enabled) {
+      return
+    }
+
+    this.onCountdownTick(timeLeftMs)
   }
 
   public setConfig(config?: SoundConfig): void {
@@ -82,20 +82,11 @@ export class SoundManager {
 
   private resetTickState(): void {
     this.lastCountdownSecond = null
-    this.lastTickSecond = null
   }
 
   private resetPlaybackState(): void {
     this.lastPlayedWallClockSecond = null
     this.lastPlayedCue = null
-
-    if (this.pendingTickTimeoutId !== null) {
-      clearTimeout(this.pendingTickTimeoutId)
-      this.pendingTickTimeoutId = null
-    }
-
-    this.pendingTickWallClockSecond = null
-    this.pendingTickSecondBucket = null
   }
 
   private hasPlayedCueThisSecond(nowSecond: number = Math.floor(Date.now() / 1000)): boolean {
@@ -109,86 +100,10 @@ export class SoundManager {
       return false
     }
 
-    if (cue !== 'tick' && this.pendingTickWallClockSecond === nowSecond) {
-      if (this.pendingTickTimeoutId !== null) {
-        clearTimeout(this.pendingTickTimeoutId)
-        this.pendingTickTimeoutId = null
-      }
-      this.pendingTickWallClockSecond = null
-      this.pendingTickSecondBucket = null
-    }
-
     play()
     this.lastPlayedWallClockSecond = nowSecond
     this.lastPlayedCue = cue
     return true
-  }
-
-  private tickIsDue(secondBucket: number): boolean {
-    const tickEverySeconds = this.config.tickEverySeconds
-
-    if (tickEverySeconds <= 0) {
-      return false
-    }
-
-    if (this.lastTickSecond === secondBucket) {
-      return false
-    }
-
-    return secondBucket % tickEverySeconds === 0
-  }
-
-  private maybeScheduleTick(secondBucket: number): void {
-    if (!this.config.enabled || !this.config.tick) {
-      return
-    }
-
-    const wallClockSecond = Math.floor(Date.now() / 1000)
-
-    if (this.hasPlayedCueThisSecond(wallClockSecond)) {
-      return
-    }
-
-    if (!this.tickIsDue(secondBucket)) {
-      return
-    }
-
-    if (this.pendingTickWallClockSecond === wallClockSecond) {
-      return
-    }
-
-    const delayMs = 50
-
-    this.pendingTickWallClockSecond = wallClockSecond
-    this.pendingTickSecondBucket = secondBucket
-    this.pendingTickTimeoutId = setTimeout(() => {
-      const scheduledSecond = wallClockSecond
-      const scheduledBucket = this.pendingTickSecondBucket
-
-      this.pendingTickTimeoutId = null
-      this.pendingTickWallClockSecond = null
-      this.pendingTickSecondBucket = null
-
-      if (Math.floor(Date.now() / 1000) !== scheduledSecond) {
-        return
-      }
-
-      if (this.hasPlayedCueThisSecond(scheduledSecond)) {
-        return
-      }
-
-      if (scheduledBucket === null) {
-        return
-      }
-
-      const played = this.tryPlayCue('tick', () => {
-        playTick()
-      })
-
-      if (played) {
-        this.lastTickSecond = scheduledBucket
-      }
-    }, delayMs)
   }
 
   private handleTimerStateTransition(
@@ -251,7 +166,6 @@ export class SoundManager {
 
     if (timerState === TimerState.Running) {
       this.onCountdownTick(timeLeftMs)
-      this.maybeScheduleTick(Math.ceil(timeLeftMs / 1000))
     }
 
     this.previousTimerState = timerState
@@ -270,10 +184,6 @@ export class SoundManager {
     }
 
     this.handleTimerStateTransition(timerState, prevState)
-
-    if (timerState === TimerState.Running) {
-      this.maybeScheduleTick(Math.floor(elapsedMs / 1000))
-    }
 
     this.previousTimerState = timerState
     this.previousStopwatchElapsedMs = elapsedMs
@@ -327,7 +237,6 @@ export class SoundManager {
 
     if (timerState === TimerState.Running) {
       this.onCountdownTick(timeLeftMs)
-      this.maybeScheduleTick(Math.ceil(timeLeftMs / 1000))
     }
 
     this.previousTimerState = timerState
@@ -376,11 +285,6 @@ export class SoundManager {
     if (timerState === TimerState.Running) {
       if (phase === TimerPhase.Rest) {
         this.onCountdownTick(currentTimeMs)
-        this.maybeScheduleTick(Math.ceil(currentTimeMs / 1000))
-      }
-
-      if (phase === TimerPhase.Work) {
-        this.maybeScheduleTick(Math.floor(currentTimeMs / 1000))
       }
     }
 

@@ -9,7 +9,6 @@ import {
   playIntervalEndBeep,
   playIntervalStartBeep,
   playStartBeep,
-  playTick,
 } from '@/lib/sound/cues'
 import { SoundEngine } from '@/lib/sound/SoundEngine'
 
@@ -56,11 +55,6 @@ export const Sounds = () => {
     playIntervalEndBeep()
   }, [initEngine])
 
-  const handlePlayTick = useCallback(async () => {
-    await initEngine()
-    playTick()
-  }, [initEngine])
-
   const handlePlayCountdown = useCallback(async () => {
     await initEngine()
     playCountdownBeep(3)
@@ -87,9 +81,6 @@ export const Sounds = () => {
       </Button>
       <Button type="button" onClick={handlePlayCountdown}>
         Countdown (3-2-1)
-      </Button>
-      <Button type="button" onClick={handlePlayTick}>
-        Tick
       </Button>
     </div>
   )
