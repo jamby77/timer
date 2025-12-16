@@ -3,10 +3,9 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Edit, GripVertical, Plus, Trash2 } from 'lucide-react'
 
-import type { AnyTimerConfig, ComplexConfig, ComplexPhase } from '@/types/configure'
+import type { ComplexConfig, ComplexPhase } from '@/types/configure'
 
-import { generateTimerName } from '@/lib/configure/utils'
-import { TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
+import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
@@ -18,72 +17,10 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { CountdownFields } from '@/components/configure/components/CountdownFields'
-import { IntervalFields } from '@/components/configure/components/IntervalFields'
-import { StopwatchFields } from '@/components/configure/components/StopwatchFields'
-import { WorkRestFields } from '@/components/configure/components/WorkRestFields'
 
-// Type for phase configurations (excluding ComplexConfig to prevent nesting)
-type PhaseTimerConfig = Exclude<AnyTimerConfig, ComplexConfig>
-
-// Helper function to create default timer configurations for each type
-const createDefaultPhaseConfig = (phaseId: string, timerType: TimerType): PhaseTimerConfig => {
-  const baseConfig = {
-    name: '',
-    id: phaseId,
-    createdAt: new Date(),
-    lastUsed: new Date(),
-  }
-
-  switch (timerType) {
-    case TimerType.COUNTDOWN:
-      return {
-        ...baseConfig,
-        type: TimerType.COUNTDOWN,
-        duration: 60,
-      }
-    case TimerType.STOPWATCH:
-      return {
-        ...baseConfig,
-        type: TimerType.STOPWATCH,
-      }
-    case TimerType.INTERVAL:
-      return {
-        ...baseConfig,
-        type: TimerType.INTERVAL,
-        workDuration: 30,
-        restDuration: 10,
-        intervals: 3,
-      }
-    case TimerType.WORKREST:
-      return {
-        ...baseConfig,
-        type: TimerType.WORKREST,
-        maxWorkTime: 300,
-        maxRounds: 5,
-        restMode: 'ratio' as any,
-        ratio: 2,
-      }
-    default:
-      return {
-        ...baseConfig,
-        type: TimerType.COUNTDOWN,
-        duration: 60,
-      }
-  }
-}
+import { ComplexPhaseDialog } from './ComplexPhaseDialog'
 
 interface ComplexFieldsProps {
   config: Partial<ComplexConfig>
@@ -92,30 +29,11 @@ interface ComplexFieldsProps {
 
 export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
   const phases = config.phases || []
-  const [editingPhaseId, setEditingPhaseId] = useState<string | null>(null)
 
-  const addPhase = () => {
-    const phaseId = `phase-${Date.now()}`
-    const defaultConfig = createDefaultPhaseConfig(phaseId, TimerType.COUNTDOWN)
-    const newPhase: ComplexPhase = {
-      id: phaseId,
-      name: generateTimerName(defaultConfig),
-      type: TimerType.COUNTDOWN,
-      config: defaultConfig,
-      order: phases.length,
-    }
+  const [addOpen, setAddOpen] = useState(false)
+  const [editPhaseId, setEditPhaseId] = useState<string | null>(null)
 
-    onChange({
-      phases: [...phases, newPhase],
-    })
-  }
-
-  const updatePhase = (phaseId: string, updates: Partial<ComplexPhase>) => {
-    const updatedPhases = phases.map((phase) =>
-      phase.id === phaseId ? { ...phase, ...updates } : phase
-    )
-    onChange({ phases: updatedPhases })
-  }
+  const editingPhase = editPhaseId ? phases.find((p) => p.id === editPhaseId) : undefined
 
   const removePhase = (phaseId: string) => {
     const updatedPhases = phases
@@ -143,22 +61,35 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
     onChange({ phases: reorderedPhases })
   }
 
-  const updatePhaseConfig = (phaseId: string, configUpdates: Partial<PhaseTimerConfig>) => {
-    const updatedPhases = phases.map((phase) => {
-      if (phase.id === phaseId) {
-        const newConfig = { ...phase.config, ...configUpdates } as PhaseTimerConfig
-        const generatedName = generateTimerName(newConfig)
-        // Only update name if it's currently a generated name or empty
-        const shouldUpdateName = !phase.name || phase.name === generateTimerName(phase.config)
+  const insertPhaseAtStart = (draft: Omit<ComplexPhase, 'order'>) => {
+    const newPhase: ComplexPhase = { ...draft, order: 0 }
+    const updatedPhases = [newPhase, ...phases].map((phase, index) => ({
+      ...phase,
+      order: index,
+    }))
+    onChange({ phases: updatedPhases })
+  }
 
-        return {
-          ...phase,
-          config: newConfig,
-          ...(shouldUpdateName && { name: generatedName }),
-        }
-      }
-      return phase
-    })
+  const insertPhaseAtEnd = (draft: Omit<ComplexPhase, 'order'>) => {
+    const newPhase: ComplexPhase = { ...draft, order: phases.length }
+    const updatedPhases = [...phases, newPhase].map((phase, index) => ({
+      ...phase,
+      order: index,
+    }))
+    onChange({ phases: updatedPhases })
+  }
+
+  const savePhase = (phaseId: string, draft: Omit<ComplexPhase, 'order'>) => {
+    const updatedPhases = phases.map((phase) =>
+      phase.id === phaseId
+        ? {
+            ...phase,
+            name: draft.name,
+            type: draft.type,
+            config: draft.config,
+          }
+        : phase
+    )
     onChange({ phases: updatedPhases })
   }
 
@@ -167,11 +98,33 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3>Timer Phases</h3>
-          <Button onClick={addPhase} size="sm" variant="outline">
+          <Button onClick={() => setAddOpen(true)} size="sm" variant="outline">
             <Plus size={16} className="mr-2" />
             Add Phase
           </Button>
         </div>
+
+        <ComplexPhaseDialog
+          mode="add"
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          phasesCount={phases.length}
+          onAddAtStart={insertPhaseAtStart}
+          onAddAtEnd={insertPhaseAtEnd}
+        />
+
+        {editingPhase && (
+          <ComplexPhaseDialog
+            mode="edit"
+            open={!!editPhaseId}
+            onOpenChange={(open) => {
+              if (!open) setEditPhaseId(null)
+            }}
+            phasesCount={phases.length}
+            phase={editingPhase}
+            onSave={savePhase}
+          />
+        )}
 
         {phases.length === 0 && (
           <div className="bg-muted rounded-md p-4 text-center">
@@ -197,6 +150,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     variant="ghost"
                     disabled={index === 0}
                     className={cn('disabled:cursor-not-allowed disabled:opacity-50')}
+                    aria-label="Move phase up"
                   >
                     <ChevronUp size={16} />
                   </Button>
@@ -205,13 +159,15 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     size="sm"
                     variant="ghost"
                     disabled={index === phases.length - 1}
+                    aria-label="Move phase down"
                   >
                     <ChevronDown size={16} />
                   </Button>
                   <Button
-                    onClick={() => setEditingPhaseId(editingPhaseId === phase.id ? null : phase.id)}
+                    onClick={() => setEditPhaseId(phase.id)}
                     size="sm"
                     variant="ghost"
+                    aria-label="Edit phase"
                   >
                     <Edit size={16} />
                   </Button>
@@ -220,97 +176,14 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     size="sm"
                     variant="ghost"
                     className="text-destructive hover:text-destructive"
+                    aria-label="Remove phase"
                   >
                     <Trash2 size={16} />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-
-            <CardContent className="pt-0">
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor={`phase-type-${phase.id}`}>Timer Type</FieldLabel>
-                  <Select
-                    value={phase.type}
-                    onValueChange={(value: TimerType) => {
-                      const newType = value as TimerType
-                      const newConfig = createDefaultPhaseConfig(phase.id, newType)
-                      const generatedName = generateTimerName(newConfig)
-                      // Only update name if it's currently a generated name or empty
-                      const shouldUpdateName =
-                        !phase.name || phase.name === generateTimerName(phase.config)
-                      updatePhase(phase.id, {
-                        type: newType,
-                        config: newConfig,
-                        ...(shouldUpdateName && { name: generatedName }),
-                      })
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(TIMER_TYPE_LABELS)
-                        .filter(([type]) => type !== 'COMPLEX')
-                        .map(([type, FieldLabel]) => (
-                          <SelectItem key={type} value={type}>
-                            {FieldLabel}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-
-                {editingPhaseId === phase.id && (
-                  <FieldGroup>
-                    <FieldSet>
-                      <FieldLegend>Phase Configuration</FieldLegend>
-                      {phase.type === TimerType.COUNTDOWN && (
-                        <CountdownFields
-                          config={phase.config as any}
-                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
-                        />
-                      )}
-
-                      {phase.type === TimerType.STOPWATCH && (
-                        <StopwatchFields
-                          config={phase.config as any}
-                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
-                        />
-                      )}
-
-                      {phase.type === TimerType.INTERVAL && (
-                        <IntervalFields
-                          config={phase.config as any}
-                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
-                        />
-                      )}
-
-                      {phase.type === TimerType.WORKREST && (
-                        <WorkRestFields
-                          config={phase.config as any}
-                          onChange={(updates) => updatePhaseConfig(phase.id, updates)}
-                        />
-                      )}
-                    </FieldSet>
-                  </FieldGroup>
-                )}
-                <FieldSeparator />
-                {/* Generated Timer Name */}
-                <FieldGroup>
-                  <Field>
-                    <FieldLabel htmlFor="phase-name">Timer Name</FieldLabel>
-                    <Input
-                      id="phase-name"
-                      value={phase.name}
-                      onChange={(e) => updatePhase(phase.id, { name: e.target.value })}
-                      placeholder="Enter timer name"
-                    />
-                  </Field>
-                </FieldGroup>
-              </FieldGroup>
-            </CardContent>
+            <CardContent className="pt-0" />
           </Card>
         ))}
 

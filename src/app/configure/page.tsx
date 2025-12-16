@@ -54,23 +54,7 @@ export default function ConfigurePage() {
     setRecentTimers(storage.getRecentTimers())
 
     // Navigate to appropriate timer page
-    switch (finalConfig.type) {
-      case TimerType.COUNTDOWN:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.STOPWATCH:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.INTERVAL:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.WORKREST:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.COMPLEX:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-    }
+    router.push(`/?id=${finalConfig.id}`)
   }
 
   const handleRemoveTimer = (timerId: string) => {
@@ -79,6 +63,10 @@ export default function ConfigurePage() {
   }
 
   const handleToggleSelectedTimer = (timer: TimerType) => {
+    if (timer === TimerType.COMPLEX) {
+      router.push('/configure/complex')
+      return
+    }
     if (selectedTimer === timer) {
       setSelectedTimer(null)
     } else {

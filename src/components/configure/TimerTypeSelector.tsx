@@ -34,7 +34,14 @@ const TIMER_TYPES = [
     description: 'Ratio-based timer',
     icon: TIMER_TYPE_ICONS[TimerType.WORKREST],
   },
+  {
+    type: TimerType.COMPLEX,
+    name: TIMER_TYPE_LABELS[TimerType.COMPLEX],
+    description: 'Complex timer with multiple phases',
+    icon: TIMER_TYPE_ICONS[TimerType.COMPLEX],
+  },
 ] as const
+
 export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSelectorProps) => {
   return (
     <CardContainer>
