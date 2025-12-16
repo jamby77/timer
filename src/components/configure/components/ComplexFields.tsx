@@ -10,7 +10,6 @@ import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Field,
   FieldContent,
@@ -18,7 +17,13 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import {
+  NativeSelect,
+  NativeSelectOptGroup,
+  NativeSelectOption,
+} from '@/components/ui/native-select'
+import { Switch } from '@/components/ui/switch'
+import { TimePicker } from '@/components/configure/components/TimePicker'
 import { ComplexPhaseDialog } from './ComplexPhaseDialog'
 
 interface ComplexFieldsProps {
@@ -199,8 +204,8 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
             </CardHeader>
             <CardContent>
               <FieldGroup>
-                <Field orientation="responsive">
-                  <Checkbox
+                <Field orientation="horizontal">
+                  <Switch
                     id="auto-advance"
                     checked={config.autoAdvance ?? true}
                     onCheckedChange={(checked) => onChange({ autoAdvance: Boolean(checked) })}
@@ -213,22 +218,73 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                   </FieldContent>
                 </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="overall-timelimit">
-                    Overall Time Limit (seconds, optional)
+                <Field orientation="vertical">
+                  <FieldLabel htmlFor="countdownBeforeStart">
+                    Pre-start countdown{' '}
+                    <span className="text-muted-foreground text-xs">(seconds)</span>
                   </FieldLabel>
-                  <Input
-                    id="overall-timelimit"
-                    type="number"
-                    value={config.overallTimeLimit || ''}
-                    onChange={(e) =>
+                  <div className="max-w-48">
+                    <NativeSelect
+                      id="countdownBeforeStart"
+                      name="countdownBeforeStart"
+                      value={String(config.countdownBeforeStart ?? 0)}
+                      onChange={(e) => {
+                        const next = parseInt(e.target.value, 10)
+                        onChange({ countdownBeforeStart: next > 0 ? next : undefined })
+                      }}
+                    >
+                      <NativeSelectOption value="0">None</NativeSelectOption>
+                      <NativeSelectOptGroup label="Quick options">
+                        <NativeSelectOption value="3">3s</NativeSelectOption>
+                        <NativeSelectOption value="5">5s</NativeSelectOption>
+                        <NativeSelectOption value="10">10s</NativeSelectOption>
+                      </NativeSelectOptGroup>
+                      <NativeSelectOptGroup label="1 - 60 sec">
+                        {Array.from({ length: 60 }, (_, i) => i + 1).map((i) => (
+                          <NativeSelectOption key={i} value={String(i)}>
+                            {i}s
+                          </NativeSelectOption>
+                        ))}
+                      </NativeSelectOptGroup>
+                    </NativeSelect>
+                  </div>
+                </Field>
+
+                <Field orientation="horizontal">
+                  <Switch
+                    id="sound-enabled"
+                    checked={config.sound?.enabled ?? false}
+                    onCheckedChange={(checked) =>
                       onChange({
-                        overallTimeLimit: e.target.value ? parseInt(e.target.value) : undefined,
+                        sound: {
+                          ...(config.sound ?? { enabled: false, volume: 0.7 }),
+                          enabled: Boolean(checked),
+                          volume: config.sound?.volume ?? 0.7,
+                        },
                       })
                     }
-                    min="1"
-                    placeholder="No limit"
                   />
+                  <FieldContent>
+                    <FieldLabel htmlFor="sound-enabled">Sounds</FieldLabel>
+                    <FieldDescription>
+                      Enable audio cues for countdown and transitions
+                    </FieldDescription>
+                  </FieldContent>
+                </Field>
+
+                <Field>
+                  <FieldLabel>
+                    <TimePicker
+                      initialSeconds={config.overallTimeLimit || 0}
+                      onTimeChange={(value) =>
+                        onChange({
+                          overallTimeLimit: value,
+                        })
+                      }
+                      min={1}
+                    />
+                    Overall Time Limit (seconds, optional)
+                  </FieldLabel>
                 </Field>
               </FieldGroup>
             </CardContent>

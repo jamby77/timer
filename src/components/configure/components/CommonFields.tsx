@@ -11,8 +11,20 @@ import type {
 import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
 
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import {
+  NativeSelect,
+  NativeSelectOptGroup,
+  NativeSelectOption,
+} from '@/components/ui/native-select'
+import { Switch } from '@/components/ui/switch'
 import { CountdownFields } from './CountdownFields'
 import { IntervalFields } from './IntervalFields'
 import { StopwatchFields } from './StopwatchFields'
@@ -64,6 +76,57 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
       {/* Type-specific fields */}
       {renderFormFields()}
       <FieldGroup>
+        <Field orientation="vertical">
+          <FieldLabel htmlFor="countdownBeforeStart">
+            Pre-start countdown <span className="text-muted-foreground text-xs">(seconds)</span>
+          </FieldLabel>
+          <div className="max-w-48">
+            <NativeSelect
+              id="countdownBeforeStart"
+              name="countdownBeforeStart"
+              value={String(config.countdownBeforeStart ?? 0)}
+              onChange={(e) => {
+                const next = parseInt(e.target.value, 10)
+                onChange({ countdownBeforeStart: next > 0 ? next : undefined })
+              }}
+            >
+              <NativeSelectOption value="0">None</NativeSelectOption>
+              <NativeSelectOptGroup label="Quick options">
+                <NativeSelectOption value="3">3s</NativeSelectOption>
+                <NativeSelectOption value="5">5s</NativeSelectOption>
+                <NativeSelectOption value="10">10s</NativeSelectOption>
+              </NativeSelectOptGroup>
+              <NativeSelectOptGroup label="1 - 60 sec">
+                {Array.from({ length: 60 }, (_, i) => i + 1).map((i) => (
+                  <NativeSelectOption key={i} value={String(i)}>
+                    {i}s
+                  </NativeSelectOption>
+                ))}
+              </NativeSelectOptGroup>
+            </NativeSelect>
+          </div>
+        </Field>
+
+        <Field orientation="horizontal">
+          <Switch
+            id="sound-enabled"
+            checked={config.sound?.enabled ?? false}
+            onCheckedChange={(checked) =>
+              onChange({
+                sound: {
+                  ...(config.sound ?? { enabled: false, volume: 0.7 }),
+                  enabled: Boolean(checked),
+                  volume: config.sound?.volume ?? 0.7,
+                },
+              })
+            }
+          />
+          <FieldContent>
+            <FieldLabel htmlFor="sound-enabled">Sounds</FieldLabel>
+            <FieldDescription>Enable audio cues for countdown and transitions</FieldDescription>
+          </FieldContent>
+        </Field>
+
         {/* Completion Message */}
         <Field>
           <FieldLabel htmlFor="completionMessage">Completion Message (optional)</FieldLabel>
