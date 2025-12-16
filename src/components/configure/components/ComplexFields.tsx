@@ -142,7 +142,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
 
         {phases.map((phase, index) => (
           <Card key={phase.id} className="relative">
-            <CardHeader className="pb-3">
+            <CardHeader>
               <div className="flex items-center gap-2">
                 <GripVertical className="text-muted-foreground" size={16} />
                 <CardTitle className="text-sm">{phase.name}</CardTitle>
@@ -189,7 +189,6 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0" />
           </Card>
         ))}
 

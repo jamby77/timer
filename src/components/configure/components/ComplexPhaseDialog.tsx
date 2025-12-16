@@ -58,7 +58,6 @@ const createPhaseId = () => `phase-${Date.now()}`
 
 export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
   const isLaptop = useMediaQuery('(min-width: 1024px)')
-  debugger
   const [phaseId, setPhaseId] = useState<string>(() => createPhaseId())
   const [draftType, setDraftType] = useState<TimerType>(TimerType.COUNTDOWN)
   const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(() =>

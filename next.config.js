@@ -4,7 +4,7 @@ const precacheRevision =
   process.env.GITHUB_SHA ||
   process.env.COMMIT_SHA ||
   process.env.npm_package_version ||
-  'dev'
+  'dev' + Date.now()
 
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
