@@ -3,6 +3,7 @@ import type { IntervalConfig } from '@/types/configure'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { TimePicker } from '@/components/configure/components/TimePicker'
 
 interface IntervalFieldsProps {
   config: Partial<IntervalConfig>
@@ -17,28 +18,18 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
       <div className="grid grid-cols-2 gap-4">
         <Field>
           <FieldLabel htmlFor="workDuration">Work Duration (seconds)</FieldLabel>
-          <Input
-            id="workDuration"
-            name="workDuration"
-            type="number"
-            min="1"
-            value={config.workDuration || ''}
-            onChange={(e) => onChange({ workDuration: parseInt(e.target.value) || 0 })}
-            placeholder="20"
-            required
+          <TimePicker
+            min={1}
+            initialSeconds={config.workDuration || 0}
+            onTimeChange={(seconds) => onChange({ workDuration: seconds })}
           />
         </Field>
         <Field>
           <FieldLabel htmlFor="restDuration">Rest Duration (seconds)</FieldLabel>
-          <Input
-            id="restDuration"
-            name="restDuration"
-            type="number"
-            min="0"
-            value={config.restDuration || ''}
-            onChange={(e) => onChange({ restDuration: parseInt(e.target.value) || 0 })}
-            placeholder="10"
-            required
+          <TimePicker
+            min={0}
+            initialSeconds={config.restDuration || 0}
+            onTimeChange={(seconds) => onChange({ restDuration: seconds })}
           />
         </Field>
       </div>

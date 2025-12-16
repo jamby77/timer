@@ -1,7 +1,7 @@
 import type { StopwatchConfig } from '@/types/configure'
 
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { TimePicker } from '@/components/configure/components/TimePicker'
 
 interface StopwatchFieldsProps {
   config: Partial<StopwatchConfig>
@@ -13,15 +13,11 @@ export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
     <FieldGroup>
       <Field>
         <FieldLabel htmlFor="timeLimit">Time Limit (seconds, optional)</FieldLabel>
-        <Input
-          id="timeLimit"
-          name="timeLimit"
-          type="number"
-          min="1"
-          max="86400"
-          value={config.timeLimit || ''}
-          onChange={(e) => onChange({ timeLimit: parseInt(e.target.value) || undefined })}
-          placeholder="Leave empty for no limit"
+        <TimePicker
+          max={86400}
+          min={1}
+          initialSeconds={config.timeLimit || 0}
+          onTimeChange={(seconds) => onChange({ timeLimit: seconds })}
         />
       </Field>
     </FieldGroup>

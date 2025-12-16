@@ -6,6 +6,7 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { TimePicker } from '@/components/configure/components/TimePicker'
 
 interface WorkRestFieldsProps {
   config: Partial<WorkRestConfig>
@@ -55,31 +56,23 @@ export const WorkRestFields = ({
       {restMode === WorkRestMode.FIXED && (
         <Field>
           <FieldLabel htmlFor="fixedRestDuration">Fixed Rest Duration (seconds)</FieldLabel>
-          <Input
-            id="fixedRestDuration"
-            name="fixedRestDuration"
-            type="number"
-            min="1"
-            value={fixedRestDuration || ''}
-            onChange={(e) => onChange({ fixedRestDuration: parseInt(e.target.value) || 0 })}
-            placeholder="30"
-            required
+          <TimePicker
+            max={86400}
+            min={1}
+            initialSeconds={fixedRestDuration || 0}
+            onTimeChange={(seconds) => onChange({ fixedRestDuration: seconds })}
           />
         </Field>
       )}
 
       <div className="grid grid-cols-2 gap-4">
         <Field>
-          <FieldLabel htmlFor="maxWorkTime">Maximum Work Time (seconds)</FieldLabel>
-          <Input
-            id="maxWorkTime"
-            name="maxWorkTime"
-            type="number"
-            min="1"
-            value={maxWorkTime || ''}
-            onChange={(e) => onChange({ maxWorkTime: parseInt(e.target.value) || 0 })}
-            placeholder="300"
-            required
+          <FieldLabel htmlFor="maxWorkTime">Work Time Limit (seconds)</FieldLabel>
+          <TimePicker
+            max={86400}
+            min={1}
+            initialSeconds={maxWorkTime || 0}
+            onTimeChange={(seconds) => onChange({ maxWorkTime: seconds })}
           />
         </Field>
         <Field>
