@@ -2,6 +2,7 @@
 
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 import { Theme, THEME_LABELS } from '@/lib/enums'
 
@@ -11,6 +12,11 @@ const themes = [Theme.LIGHT, Theme.DARK, Theme.SYSTEM]
 
 export const ThemeToggle = () => {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const rotateTheme = () => {
     const currentIndex = themes.indexOf(theme as Theme)
@@ -18,8 +24,8 @@ export const ThemeToggle = () => {
     setTheme(themes[nextIndex])
   }
 
-  const getThemeIcon = () => {
-    switch (theme) {
+  const getThemeIcon = (currentTheme: Theme) => {
+    switch (currentTheme) {
       case Theme.LIGHT:
         return <Sun />
       case Theme.DARK:
@@ -31,11 +37,13 @@ export const ThemeToggle = () => {
     }
   }
 
+  const currentTheme = mounted ? (theme as Theme) : Theme.SYSTEM
+
   return (
     <Button variant="outline" size="icon" onClick={rotateTheme}>
-      {getThemeIcon()}
+      {mounted ? getThemeIcon(currentTheme) : null}
       <span className="sr-only">
-        Toggle theme (current: {theme ? THEME_LABELS[theme as Theme] : 'System'})
+        Toggle theme (current: {THEME_LABELS[currentTheme]})
       </span>
     </Button>
   )

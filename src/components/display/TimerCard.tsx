@@ -39,7 +39,7 @@ export const TimerCard = ({
     <div
       className={cn('rounded-lg border border-transparent', {
         'sticky top-8 z-10': !fullscreen,
-        'h-full w-full': fullscreen,
+        'inset-0 h-full w-full': fullscreen,
         'animated-border-card': isWork,
         'animate-border': state === TimerState.Running,
       })}
@@ -47,21 +47,31 @@ export const TimerCard = ({
       <Card
         className={cn('border-none', {
           'rounded-lg px-2': !fullscreen,
-          'h-full w-full gap-0 rounded-none p-0': fullscreen,
+          'inset-0 h-full w-full gap-0 rounded-none! p-0': fullscreen,
           'bg-tm-work-bg': isWork,
-          'bg-tm-rest-bg': !isWork && isWork !== undefined && state !== TimerState.Idle,
+          'bg-tm-rest-bg': !isWork && isWork !== undefined,
         })}
       >
-        <CardHeader className={cn('space-y-2', { 'sr-only': fullscreen })}>
+        <CardHeader
+          className={cn(
+            'space-y-2',
+            { 'sr-only': fullscreen },
+            {
+              'text-tm-work-fg': isWork,
+              'text-tm-rest-fg': !isWork && isWork !== undefined,
+              'text-foreground': isWork === undefined,
+            }
+          )}
+        >
           <CardTitle
-            className={cn('text-card-foreground text-center font-bold', {
+            className={cn('text-center font-bold', {
               'text-3xl': !fullscreen,
               'text-xl': fullscreen,
             })}
           >
             {label}
           </CardTitle>
-          <CardDescription className="text-card-foreground">
+          <CardDescription className="text-inherit">
             {subtitle && (
               <p
                 className={cn('mx-auto max-w-32 text-center text-xs', {

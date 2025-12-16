@@ -1,12 +1,14 @@
 'use client'
 
 import { useCallback, useEffect } from 'react'
+import cx from 'clsx'
 
 import type { StopwatchConfig } from '@/types/configure'
 
 import { formatTime, TimerState } from '@/lib/timer'
 import { useLapHistory, usePreStartCountdown, useSoundManager, useStopwatch } from '@/hooks'
 
+import { Progress } from '@/components/ui/progress'
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
@@ -113,6 +115,13 @@ export function Stopwatch({
   }, [isPreStarting, pause, preStart])
   const timeLimitDisplay = timeLimit ? `(Cap: ${formatTime(timeLimit * 1000)})` : undefined
 
+  const getProgress = () => {
+    if (!timeLimit) return 0
+    const totalDuration = timeLimit * 1000
+    const elapsed = time
+    return (elapsed / totalDuration) * 100
+  }
+
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
@@ -123,6 +132,14 @@ export function Stopwatch({
         subtitle={timeLimitDisplay}
         fullscreen={isActive}
       >
+        <Progress
+          value={getProgress()}
+          className={cx('mb-4', {
+            '[--progress-indicator-color:var(--tm-pr-work-bg)]': isRunning,
+            '[--progress-indicator-color:var(--tm-pr-rest-bg)]': state === TimerState.Paused,
+            invisible: !isRunning && !(state === TimerState.Paused),
+          })}
+        />
         <TimerButton
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}
