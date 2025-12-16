@@ -9,6 +9,7 @@ import type { ComplexConfig, PredefinedStyle } from '@/types/configure'
 import { storage } from '@/lib/configure/storage'
 import { formatDuration, generateComplexTimerName, processTimerConfig } from '@/lib/configure/utils'
 import { TimerType } from '@/lib/enums'
+import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -126,6 +127,7 @@ export default function ConfigureComplexTimerPage() {
     return calculateDuration(config)
   }, [config])
 
+  const hasErrors = !!errors.length
   return (
     <PageContainer>
       <div className="mx-auto max-w-4xl space-y-6 px-4 sm:px-6 lg:px-8">
@@ -152,7 +154,7 @@ export default function ConfigureComplexTimerPage() {
         <FormErrors errors={errors} />
 
         {/* Phase Configuration */}
-        <Card>
+        <Card className={cn({ 'border-destructive': hasErrors })}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Layers className="h-5 w-5" />
@@ -166,7 +168,7 @@ export default function ConfigureComplexTimerPage() {
 
         {/* Phase Summary */}
         {config.phases && config.phases.length > 0 && (
-          <Card>
+          <Card className={cn({ 'border-destructive': hasErrors })}>
             <CardHeader>
               <CardTitle>Phase Summary</CardTitle>
             </CardHeader>
@@ -177,7 +179,7 @@ export default function ConfigureComplexTimerPage() {
         )}
 
         {/* Timer Name */}
-        <Card>
+        <Card className={cn({ 'border-destructive': hasErrors })}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Layers size={20} />
@@ -199,7 +201,7 @@ export default function ConfigureComplexTimerPage() {
         </Card>
 
         {/* Actions */}
-        <Card>
+        <Card className={cn({ 'border-destructive': hasErrors })}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Layers size={20} />
