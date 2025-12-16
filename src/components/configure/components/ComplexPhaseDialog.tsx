@@ -17,12 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
@@ -41,7 +36,6 @@ import { createDefaultPhaseConfig, PhaseTimerConfig } from './complex-phase-util
 type PhaseDraft = Omit<ComplexPhase, 'order'>
 
 interface ComplexPhaseDialogBaseProps {
-  open: boolean
   onOpenChange: (open: boolean) => void
   phasesCount: number
 }
@@ -64,7 +58,7 @@ const createPhaseId = () => `phase-${Date.now()}`
 
 export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
   const isLaptop = useMediaQuery('(min-width: 1024px)')
-
+  debugger
   const [phaseId, setPhaseId] = useState<string>(() => createPhaseId())
   const [draftType, setDraftType] = useState<TimerType>(TimerType.COUNTDOWN)
   const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(() =>
@@ -75,8 +69,6 @@ export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
   const generatedName = useMemo(() => generateTimerName(draftConfig as any), [draftConfig])
 
   useEffect(() => {
-    if (!props.open) return
-
     if (props.mode === 'edit') {
       setPhaseId(props.phase.id)
       setDraftType(props.phase.type)
@@ -91,7 +83,7 @@ export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
     setDraftType(TimerType.COUNTDOWN)
     setDraftConfig(defaultConfig)
     setDraftName(generateTimerName(defaultConfig as any))
-  }, [props.open, props.mode, props.mode === 'edit' ? props.phase.id : undefined])
+  }, [props, props.mode, props.mode === 'edit' ? props.phase.id : undefined])
 
   const renderFields = () => {
     switch (draftType) {
@@ -156,7 +148,10 @@ export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
     id: phaseId,
     name: draftName,
     type: draftType,
-    config: draftConfig as any,
+    config: {
+      ...(draftConfig as any),
+      name: draftName,
+    },
   }
 
   const close = () => props.onOpenChange(false)
@@ -222,10 +217,7 @@ export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="phase-type">Phase type</FieldLabel>
-          <Select
-            value={draftType}
-            onValueChange={(value) => handleTypeChange(value as TimerType)}
-          >
+          <Select value={draftType} onValueChange={(value) => handleTypeChange(value as TimerType)}>
             <SelectTrigger id="phase-type">
               <SelectValue />
             </SelectTrigger>
@@ -258,7 +250,7 @@ export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
 
   if (isLaptop) {
     return (
-      <Dialog open={props.open} onOpenChange={props.onOpenChange} modal>
+      <Dialog open onOpenChange={props.onOpenChange} modal>
         <DialogContent className="overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -271,7 +263,7 @@ export const ComplexPhaseDialog = (props: ComplexPhaseDialogProps) => {
   }
 
   return (
-    <Drawer open={props.open} onOpenChange={props.onOpenChange}>
+    <Drawer open onOpenChange={props.onOpenChange}>
       <DrawerContent className="overflow-hidden">
         <DrawerHeader className="text-left sm:text-center">
           <DrawerTitle>{title}</DrawerTitle>

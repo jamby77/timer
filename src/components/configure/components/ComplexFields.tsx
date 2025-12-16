@@ -19,7 +19,6 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-
 import { ComplexPhaseDialog } from './ComplexPhaseDialog'
 
 interface ComplexFieldsProps {
@@ -30,7 +29,7 @@ interface ComplexFieldsProps {
 export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
   const phases = config.phases || []
 
-  const [addOpen, setAddOpen] = useState(false)
+  const [isAddingPhase, setIsAddingPhase] = useState(false)
   const [editPhaseId, setEditPhaseId] = useState<string | null>(null)
 
   const editingPhase = editPhaseId ? phases.find((p) => p.id === editPhaseId) : undefined
@@ -98,27 +97,34 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3>Timer Phases</h3>
-          <Button onClick={() => setAddOpen(true)} size="sm" variant="outline">
+          <Button
+            onClick={() => {
+              setIsAddingPhase(true)
+            }}
+            size="lg"
+            variant="outline"
+          >
             <Plus size={16} className="mr-2" />
             Add Phase
           </Button>
         </div>
 
-        <ComplexPhaseDialog
-          mode="add"
-          open={addOpen}
-          onOpenChange={setAddOpen}
-          phasesCount={phases.length}
-          onAddAtStart={insertPhaseAtStart}
-          onAddAtEnd={insertPhaseAtEnd}
-        />
-
+        {isAddingPhase && (
+          <ComplexPhaseDialog
+            mode="add"
+            onOpenChange={setIsAddingPhase}
+            phasesCount={phases.length}
+            onAddAtStart={insertPhaseAtStart}
+            onAddAtEnd={insertPhaseAtEnd}
+          />
+        )}
         {editingPhase && (
           <ComplexPhaseDialog
             mode="edit"
-            open={!!editPhaseId}
             onOpenChange={(open) => {
-              if (!open) setEditPhaseId(null)
+              if (!open) {
+                setEditPhaseId(null)
+              }
             }}
             phasesCount={phases.length}
             phase={editingPhase}
@@ -152,7 +158,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     className={cn('disabled:cursor-not-allowed disabled:opacity-50')}
                     aria-label="Move phase up"
                   >
-                    <ChevronUp size={16} />
+                    <ChevronUp size={32} />
                   </Button>
                   <Button
                     onClick={() => movePhase(phase.id, 'down')}
@@ -161,7 +167,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     disabled={index === phases.length - 1}
                     aria-label="Move phase down"
                   >
-                    <ChevronDown size={16} />
+                    <ChevronDown size={32} />
                   </Button>
                   <Button
                     onClick={() => setEditPhaseId(phase.id)}
@@ -169,7 +175,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     variant="ghost"
                     aria-label="Edit phase"
                   >
-                    <Edit size={16} />
+                    <Edit size={32} />
                   </Button>
                   <Button
                     onClick={() => removePhase(phase.id)}
@@ -178,7 +184,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                     className="text-destructive hover:text-destructive"
                     aria-label="Remove phase"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={32} />
                   </Button>
                 </div>
               </div>
