@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useEffect } from 'react'
-import cx from 'clsx'
 
 import type { IntervalConfig } from '@/types/configure'
 
@@ -9,7 +8,7 @@ import { TimerState as BaseTimerState, formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
 import { useIntervalTimer, useLapHistory, usePreStartCountdown, useSoundManager } from '@/hooks'
 
-import { Progress } from '@/components/ui/progress'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import {
   PauseButton,
   ResetButton,
@@ -129,12 +128,12 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
     pause()
   }, [isPreStarting, pause, preStart])
 
-  const getProgress = () => {
-    if (!currentStep) return 0
-    const totalDuration = currentStep.duration
-    const elapsed = totalDuration - timeLeft
-    return (elapsed / totalDuration) * 100
-  }
+  const minTime = 0
+  const maxTime = currentStep?.duration ?? 0
+  const elapsed = currentStep ? currentStep.duration - timeLeft : 0
+  const progress = maxTime > 0 ? (elapsed / maxTime) * 100 : 0
+  const isVisible = !!currentStep && !isPreStarting && (timerState === TimerState.Running || timerState === TimerState.Paused)
+  const isWorkStep = currentStep?.isWork ?? true
 
   const getCurrentIntervalInfo = () => {
     const workSteps = Math.ceil((currentStepIndex + 1) / 2)
@@ -157,13 +156,13 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
         isWork={isPreStarting ? undefined : currentStep?.isWork}
         fullscreen={isActive}
       >
-        <Progress
-          value={getProgress()}
-          className={cx('mb-4', {
-            invisible: !currentStep || isRunning,
-            '[--progress-indicator-color:var(--tm-pr-work-bg)]': currentStep?.isWork,
-            '[--progress-indicator-color:var(--tm-pr-rest-bg)]': !currentStep?.isWork,
-          })}
+        <TimerProgressIndicator
+          progress={progress}
+          isRunning={isWorkStep}
+          isRest={!isWorkStep}
+          isVisible={isVisible}
+          minTime={minTime}
+          maxTime={maxTime}
         />
         <div className="flex items-center justify-center gap-4">
           {showPlayButton ? (

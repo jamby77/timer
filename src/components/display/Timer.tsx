@@ -8,6 +8,7 @@ import { formatTime, TimerState } from '@/lib/timer'
 import { useLapHistory, usePreStartCountdown, useSoundManager, useTimer } from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
@@ -113,6 +114,14 @@ export const Timer = ({
     pause()
   }, [isPreStarting, pause, preStart])
 
+  const durationMs = duration * 1000
+  const minTime = 0
+  const maxTime = durationMs
+  const elapsed = durationMs - time
+  const progress = durationMs > 0 ? (elapsed / durationMs) * 100 : 0
+  const isPaused = state === TimerState.Paused
+  const showProgress = !isPreStarting && (isRunning || isPaused)
+
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
@@ -122,6 +131,14 @@ export const Timer = ({
         isWork={isActive}
         fullscreen={isActive}
       >
+        <TimerProgressIndicator
+          progress={progress}
+          isRunning={isRunning}
+          isRest={isPaused}
+          isVisible={showProgress}
+          minTime={minTime}
+          maxTime={maxTime}
+        />
         <TimerButton
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}

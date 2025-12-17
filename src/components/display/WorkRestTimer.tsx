@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
-import cx from 'clsx'
+import { useCallback, useEffect } from 'react'
 
 import type { WorkRestConfig } from '@/types/configure'
 
@@ -10,7 +9,7 @@ import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
 import { useLapHistory, usePreStartCountdown, useSoundManager, useWorkRestTimer } from '@/hooks'
 
-import { Progress } from '@/components/ui/progress'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import {
   PauseButton,
   ResetButton,
@@ -129,6 +128,19 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
   const displayState = isPreStarting ? preStart.state : state.state
   const displayIsWork = isPreStarting ? undefined : isWork
 
+  const minTime = 0
+  const maxTime = (() => {
+    if (!isRestPhase) return 0
+    if (!Number.isFinite(progress) || progress <= 0) {
+      return state.currentTime
+    }
+    const denom = 1 - progress / 100
+    if (denom <= 0) return state.currentTime
+    return Math.round(state.currentTime / denom)
+  })()
+
+  const isVisible = isRestPhase && !fullscreen && !isPreStarting
+
   return (
     <TimerContainer fullscreen={fullscreen}>
       <TimerCard
@@ -139,11 +151,13 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
         isWork={displayIsWork}
         fullscreen={fullscreen}
       >
-        <Progress
-          value={progress}
-          className={cx('mb-4 [--progress-indicator-color:var(--tm-pr-rest-bg)]', {
-            invisible: !showProgress || fullscreen,
-          })}
+        <TimerProgressIndicator
+          progress={progress}
+          isRunning={false}
+          isRest={true}
+          isVisible={isVisible}
+          minTime={minTime}
+          maxTime={maxTime}
         />
 
         {/* Main Control Buttons */}
