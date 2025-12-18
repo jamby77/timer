@@ -10,6 +10,7 @@ import { Interval } from '@/components/display/Interval'
 import { Stopwatch } from '@/components/display/Stopwatch'
 import { Timer } from '@/components/display/Timer'
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
+import { ComplexTimer } from '@/components/display/ComplexTimer'
 import { InstallPrompt } from '@/components/InstallPrompt'
 
 export const Body = ({}) => {
@@ -79,6 +80,10 @@ export const Body = ({}) => {
 
     if (timerConfig.type === TimerType.WORKREST) {
       return <WorkRestTimer config={timerConfig} />
+    }
+
+    if (timerConfig.type === TimerType.COMPLEX) {
+      return <ComplexTimer config={timerConfig} />
     }
 
     // Complex timer or any other unimplemented type

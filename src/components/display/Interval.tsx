@@ -23,9 +23,11 @@ import { TimerCard } from './TimerCard'
 interface IntervalProps {
   /** Configuration for the interval timer */
   intervalConfig: IntervalConfig
+  /** Optional callback when the full interval sequence completes */
+  onComplete?: () => void
 }
 
-export function Interval({ intervalConfig: { sound, ...intervalConfig } }: IntervalProps) {
+export function Interval({ intervalConfig: { sound, ...intervalConfig }, onComplete }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
   const addLapCallback = useCallback(
@@ -47,6 +49,9 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
   } = useIntervalTimer({
     ...intervalConfig,
     onWorkStepComplete: addLapCallback,
+    onSequenceComplete: () => {
+      onComplete?.()
+    },
   })
 
   const preStart = usePreStartCountdown({

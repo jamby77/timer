@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import type { WorkRestConfig } from '@/types/configure'
 
@@ -23,11 +23,15 @@ import { TimerContainer } from './TimerContainer'
 
 interface WorkRestTimerProps {
   config: WorkRestConfig
+  /** Optional callback invoked when a full work/rest cycle completes */
+  onPhaseComplete?: () => void
 }
 
-export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerProps) {
+export function WorkRestTimer({ config: { sound, ...config }, onPhaseComplete }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
+
+  const lastCompletedRoundsRef = useRef(0)
 
   const [state, actions] = useWorkRestTimer({
     config,
@@ -57,6 +61,20 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
     preStart.isActive,
     preStart.timeLeftMs,
   ])
+
+  useEffect(() => {
+    if (!onPhaseComplete) return
+    if (state.phase !== TimerPhase.Idle) return
+    if (state.rounds <= lastCompletedRoundsRef.current) return
+    lastCompletedRoundsRef.current = state.rounds
+    onPhaseComplete()
+  }, [onPhaseComplete, state.phase, state.rounds])
+
+  useEffect(() => {
+    if (state.rounds === 0) {
+      lastCompletedRoundsRef.current = 0
+    }
+  }, [state.rounds])
 
   const handleRestart = useCallback(async () => {
     actions.reset()
