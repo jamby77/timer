@@ -9,7 +9,6 @@ import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
 import { useLapHistory, usePreStartCountdown, useSoundManager, useWorkRestTimer } from '@/hooks'
 
-import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import {
   PauseButton,
   ResetButton,
@@ -17,6 +16,7 @@ import {
   StartButton,
   StopButton,
 } from '@/components/ui/timer-buttons'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 import { TimerContainer } from './TimerContainer'
@@ -69,7 +69,6 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
   }, [actions, soundManager, preStart])
 
   const isRestPhase = state.phase === TimerPhase.Rest
-  const showProgress = isRestPhase
   const isIdlePhase = state.phase === TimerPhase.Idle
   const isWorkPhase = state.phase === TimerPhase.Work
   const isRunningState = state.state === TimerState.Running
