@@ -89,9 +89,8 @@ export const Body = ({}) => {
     // Complex timer or any other unimplemented type
     return (
       <div className="text-center">
-        <h2 className="mb-4 text-2xl font-bold">Timer: {timerConfig.name || 'Untitled'}</h2>
         <p className="text-muted-foreground">
-          Timer type {timerConfig.type} is not yet implemented in the display view.
+          This timer type is not yet implemented in the display view.
         </p>
       </div>
     )
