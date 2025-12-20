@@ -11,7 +11,7 @@ export const Navigation = () => {
   const pathname = usePathname()
 
   const navItems = [
-    { href: '/', label: 'Home' },
+    { href: '/', label: 'Run' },
     { href: '/configure', label: 'Configure' },
   ]
 

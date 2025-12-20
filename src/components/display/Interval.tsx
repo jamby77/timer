@@ -49,9 +49,7 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig }, onCompl
   } = useIntervalTimer({
     ...intervalConfig,
     onWorkStepComplete: addLapCallback,
-    onSequenceComplete: () => {
-      onComplete?.()
-    },
+    onSequenceComplete: onComplete,
   })
 
   const preStart = usePreStartCountdown({

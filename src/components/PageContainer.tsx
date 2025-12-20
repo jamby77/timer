@@ -10,6 +10,8 @@ export const PageContainer = ({
   className?: string
 }) => {
   return (
-    <div className={cn('container mx-auto min-h-screen p-1 md:py-8', className)}>{children}</div>
+    <div className={cn('container mx-auto min-h-screen p-0 md:px-2 md:py-8', className)}>
+      {children}
+    </div>
   )
 }
