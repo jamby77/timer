@@ -73,6 +73,25 @@ export default function ConfigurePage() {
       setSelectedTimer(timer)
     }
   }
+  if (selectedTimer || selectedPredefined) {
+    /* Configuration Form - appears when "timer type" is selected */
+    return (
+      <TimerConfig
+        type={selectedTimer || selectedPredefined?.config.type || TimerType.COUNTDOWN}
+        initialConfig={selectedPredefined?.config}
+        isPredefined={!!selectedPredefined}
+        onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
+        onSaveAsPredefined={(config) => {
+          // TODO: Implement save as predefined functionality
+          console.log('Save as predefined:', config)
+        }}
+        onCancel={() => {
+          setSelectedTimer(null)
+          setSelectedPredefined(null)
+        }}
+      />
+    )
+  }
 
   return (
     <PageContainer>
@@ -101,27 +120,6 @@ export default function ConfigurePage() {
               selectedTimer={selectedTimer}
               onTimerSelect={handleToggleSelectedTimer}
             />
-
-            {/* Configuration Form - appears below timer type when selected */}
-            {(selectedTimer || selectedPredefined) && (
-              <TimerConfig
-                open={true}
-                onOpenChange={(isOpen) => {
-                  if (!isOpen) {
-                    setSelectedTimer(null)
-                    setSelectedPredefined(null)
-                  }
-                }}
-                type={selectedTimer || selectedPredefined?.config.type || TimerType.COUNTDOWN}
-                initialConfig={selectedPredefined?.config}
-                isPredefined={!!selectedPredefined}
-                onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
-                onSaveAsPredefined={(config) => {
-                  // TODO: Implement save as predefined functionality
-                  console.log('Save as predefined:', config)
-                }}
-              />
-            )}
           </div>
 
           {/* Sidebar - Predefined Styles */}

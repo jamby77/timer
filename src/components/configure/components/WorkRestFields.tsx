@@ -5,6 +5,7 @@ import { WorkRestMode } from '@/types/configure'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { TimePicker } from '@/components/configure/components/TimePicker'
 
@@ -18,7 +19,7 @@ export const WorkRestFields = ({
   onChange,
 }: WorkRestFieldsProps) => {
   return (
-    <FieldGroup>
+    <FieldGroup className="px-1">
       <Field>
         <FieldLabel htmlFor="restMode">Rest Mode</FieldLabel>
         <RadioGroup
@@ -67,7 +68,7 @@ export const WorkRestFields = ({
 
       <div className="grid grid-cols-2 gap-4">
         <Field>
-          <FieldLabel htmlFor="maxWorkTime">Work Time Limit (seconds)</FieldLabel>
+          <FieldLabel htmlFor="maxWorkTime">Work Time Limit</FieldLabel>
           <TimePicker
             max={86400}
             min={1}
@@ -77,16 +78,18 @@ export const WorkRestFields = ({
         </Field>
         <Field>
           <FieldLabel htmlFor="maxRounds">Maximum Rounds</FieldLabel>
-          <Input
+          <NativeSelect
             id="maxRounds"
             name="maxRounds"
-            type="number"
-            min="1"
-            value={maxRounds || ''}
             onChange={(e) => onChange({ maxRounds: parseInt(e.target.value) || 0 })}
-            placeholder="10"
-            required
-          />
+          >
+            <NativeSelectOption value={maxRounds || ''}>Select rounds</NativeSelectOption>
+            {[...Array(100)].map((_, i) => (
+              <NativeSelectOption key={i + 1} value={i + 1}>
+                {i + 1}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
         </Field>
       </div>
     </FieldGroup>
