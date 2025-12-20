@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import { useForm } from '@tanstack/react-form'
+import { PlayIcon } from 'lucide-react'
 
 import type { SyntheticEvent } from 'react'
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
@@ -11,8 +12,8 @@ import { validateTimerConfig } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
+import { Button } from '@/components/ui/button'
 import { CommonFields } from './CommonFields'
-import { FormActions } from './FormActions'
 import { FormErrors } from './FormErrors'
 
 function getName(type: TimerType) {
@@ -35,7 +36,7 @@ export const TimerConfigForm = ({
   isPredefined = false,
   onStartTimer,
   onSaveAsPredefined,
-  onSave,
+  onCancel,
 }: TimerConfigFormProps) => {
   const initialDraft: Partial<AnyTimerConfig> = initialConfig || {
     type,
@@ -124,11 +125,30 @@ export const TimerConfigForm = ({
           )}
         />
 
-        <FormActions
-          enableSaveAsPredefined={isPredefined && !!onSaveAsPredefined}
-          enableSave={!!onSave}
-          onHandleSave={handleSubmit}
-        />
+        <div className="flex flex-col justify-between gap-4 pt-4 md:flex-row">
+          {!!onSaveAsPredefined && (
+            <form.Subscribe
+              selector={(state) => state.values.draft}
+              children={(config) => (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onSaveAsPredefined(buildFullConfig(config))}
+                  size="lg"
+                >
+                  Save as Predefined
+                </Button>
+              )}
+            />
+          )}
+          <Button variant="default" type="submit" size="lg">
+            <PlayIcon size={4} className="fill-background" />
+            Start Timer
+          </Button>
+          <Button type="button" variant="secondary" onClick={onCancel} size="lg">
+            Cancel
+          </Button>
+        </div>
       </form>
     </div>
   )

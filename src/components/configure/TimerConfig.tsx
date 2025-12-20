@@ -11,7 +11,6 @@ export const TimerConfig = ({
   isPredefined = false,
   onStartTimer,
   onSaveAsPredefined,
-  onSave,
   onCancel,
 }: TimerConfigFormProps) => {
   return (
@@ -23,7 +22,6 @@ export const TimerConfig = ({
         isPredefined={isPredefined}
         onStartTimer={onStartTimer}
         onSaveAsPredefined={onSaveAsPredefined}
-        onSave={onSave}
         onCancel={onCancel}
       />
     </PageContainer>

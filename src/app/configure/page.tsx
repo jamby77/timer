@@ -98,7 +98,9 @@ export default function ConfigurePage() {
       <div className="mx-auto max-w-7xl space-y-2 px-0 md:space-y-6 md:px-6">
         {/* Recent Timers Section */}
         <div>
-          <h5 className="text-muted-foreground text-center text-base">Recent Timers</h5>
+          <h5 className="text-muted-foreground invisible text-center text-base sm:block">
+            Recent Timers
+          </h5>
           <RecentTimers
             timers={recentTimers}
             onStartTimer={handleStartTimer}

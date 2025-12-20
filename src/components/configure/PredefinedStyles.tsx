@@ -24,11 +24,11 @@ export const PredefinedStyles = ({
 }: PredefinedStylesProps) => {
   return (
     <CardContainer>
-      <div className="mb-6">
-        <h2 className="mb-4 text-xl font-semibold">Presets</h2>
+      <div>
+        <h2 className="mb-2 text-xl font-semibold sm:m-6">Presets</h2>
 
         {/* Styles list */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-2 sm:gap-4">
           {styles.map((style) => (
             <StyleCard
               key={style.id}
