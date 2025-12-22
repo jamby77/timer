@@ -19,13 +19,9 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import {
-  NativeSelect,
-  NativeSelectOptGroup,
-  NativeSelectOption,
-} from '@/components/ui/native-select'
 import { Switch } from '@/components/ui/switch'
 import { CountdownFields } from './CountdownFields'
+import { CountdownSelector } from './CountdownSelector'
 import { IntervalFields } from './IntervalFields'
 import { StopwatchFields } from './StopwatchFields'
 import { WorkRestFields } from './WorkRestFields'
@@ -73,37 +69,32 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
 
   return (
     <FieldGroup>
+      {/* Timer Name */}
+      <Field>
+        <FieldLabel htmlFor="timerName">Timer Name*</FieldLabel>
+        <Input
+          id="timerName"
+          name="timerName"
+          type="text"
+          value={config.name || ''}
+          onChange={(e) => onChange({ name: e.target.value })}
+          placeholder="Enter timer name"
+          required
+        />
+      </Field>
       {/* Type-specific fields */}
       {renderFormFields()}
       <FieldGroup>
         <Field orientation="vertical">
-          <FieldLabel htmlFor="countdownBeforeStart">
-            Pre-start countdown <span className="text-muted-foreground text-xs">(seconds)</span>
-          </FieldLabel>
+          <FieldLabel htmlFor="countdownBeforeStart">Countdown</FieldLabel>
           <div className="max-w-48">
-            <NativeSelect
-              id="countdownBeforeStart"
-              name="countdownBeforeStart"
-              value={String(config.countdownBeforeStart ?? 0)}
+            <CountdownSelector
+              countdown={config.countdownBeforeStart}
               onChange={(e) => {
                 const next = parseInt(e.target.value, 10)
                 onChange({ countdownBeforeStart: next > 0 ? next : undefined })
               }}
-            >
-              <NativeSelectOption value="0">None</NativeSelectOption>
-              <NativeSelectOptGroup label="Quick options">
-                <NativeSelectOption value="3">3s</NativeSelectOption>
-                <NativeSelectOption value="5">5s</NativeSelectOption>
-                <NativeSelectOption value="10">10s</NativeSelectOption>
-              </NativeSelectOptGroup>
-              <NativeSelectOptGroup label="1 - 60 sec">
-                {Array.from({ length: 60 }, (_, i) => i + 1).map((i) => (
-                  <NativeSelectOption key={i} value={String(i)}>
-                    {i}s
-                  </NativeSelectOption>
-                ))}
-              </NativeSelectOptGroup>
-            </NativeSelect>
+            />
           </div>
         </Field>
 
@@ -114,7 +105,10 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
             onCheckedChange={(checked) =>
               onChange({
                 sound: {
-                  ...(config.sound ?? { enabled: false, volume: 0.7 }),
+                  ...(config.sound ?? {
+                    enabled: false,
+                    volume: 0.7,
+                  }),
                   enabled: Boolean(checked),
                   volume: config.sound?.volume ?? 0.7,
                 },
@@ -129,7 +123,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
 
         {/* Completion Message */}
         <Field>
-          <FieldLabel htmlFor="completionMessage">Completion Message (optional)</FieldLabel>
+          <FieldLabel htmlFor="completionMessage">Completion Message</FieldLabel>
           <Input
             id="completionMessage"
             name="completionMessage"
@@ -137,20 +131,6 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
             value={config.completionMessage || 'Time is up!'}
             onChange={(e) => onChange({ completionMessage: e.target.value })}
             placeholder="Time is up!"
-          />
-        </Field>
-
-        {/* Timer Name */}
-        <Field>
-          <FieldLabel htmlFor="timerName">Timer Name*</FieldLabel>
-          <Input
-            id="timerName"
-            name="timerName"
-            type="text"
-            value={config.name || ''}
-            onChange={(e) => onChange({ name: e.target.value })}
-            placeholder="Enter timer name"
-            required
           />
         </Field>
       </FieldGroup>

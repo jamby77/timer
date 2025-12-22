@@ -17,12 +17,8 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import {
-  NativeSelect,
-  NativeSelectOptGroup,
-  NativeSelectOption,
-} from '@/components/ui/native-select'
 import { Switch } from '@/components/ui/switch'
+import { CountdownSelector } from '@/components/configure/components/CountdownSelector'
 import { TimePicker } from '@/components/configure/components/TimePicker'
 import { ComplexPhaseDialog } from './ComplexPhaseDialog'
 
@@ -219,34 +215,15 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                 </Field>
 
                 <Field orientation="vertical">
-                  <FieldLabel htmlFor="countdownBeforeStart">
-                    Pre-start countdown{' '}
-                    <span className="text-muted-foreground text-xs">(seconds)</span>
-                  </FieldLabel>
+                  <FieldLabel htmlFor="countdownBeforeStart">Countdown</FieldLabel>
                   <div className="max-w-48">
-                    <NativeSelect
-                      id="countdownBeforeStart"
-                      name="countdownBeforeStart"
-                      value={String(config.countdownBeforeStart ?? 0)}
+                    <CountdownSelector
+                      countdown={config.countdownBeforeStart}
                       onChange={(e) => {
                         const next = parseInt(e.target.value, 10)
                         onChange({ countdownBeforeStart: next > 0 ? next : undefined })
                       }}
-                    >
-                      <NativeSelectOption value="0">None</NativeSelectOption>
-                      <NativeSelectOptGroup label="Quick options">
-                        <NativeSelectOption value="3">3s</NativeSelectOption>
-                        <NativeSelectOption value="5">5s</NativeSelectOption>
-                        <NativeSelectOption value="10">10s</NativeSelectOption>
-                      </NativeSelectOptGroup>
-                      <NativeSelectOptGroup label="1 - 60 sec">
-                        {Array.from({ length: 60 }, (_, i) => i + 1).map((i) => (
-                          <NativeSelectOption key={i} value={String(i)}>
-                            {i}s
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelectOptGroup>
-                    </NativeSelect>
+                    />
                   </div>
                 </Field>
 
@@ -283,7 +260,7 @@ export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
                       }
                       min={1}
                     />
-                    Overall Time Limit (seconds, optional)
+                    Overall Time Limit
                   </FieldLabel>
                 </Field>
               </FieldGroup>
