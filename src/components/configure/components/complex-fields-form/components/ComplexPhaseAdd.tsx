@@ -89,18 +89,14 @@ export const ComplexPhaseAdd = ({
       </div>
 
       <form className="flex flex-col gap-2">
-        <div className="h-full">
-          <div className="flex flex-col gap-2">
-            <ComplexBody
-              type={draftType}
-              config={draftConfig}
-              name={draftName}
-              onNameChange={setDraftName}
-              onTypeChange={handleTypeChange}
-              onConfigChange={handleConfigChange}
-            />
-          </div>
-        </div>
+        <ComplexBody
+          type={draftType}
+          config={draftConfig}
+          name={draftName}
+          onNameChange={setDraftName}
+          onTypeChange={handleTypeChange}
+          onConfigChange={handleConfigChange}
+        />
         <div className="flex flex-col gap-2">
           <Button variant="outline" onClick={onCancel}>
             Cancel

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { CircleX, MoveLeft, Save } from 'lucide-react'
 
 import type { ComplexPhase } from '@/types/configure'
 
@@ -8,7 +9,6 @@ import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
 
 import { Button } from '@/components/ui/button'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import ComplexBody from '@/components/configure/components/complex-fields-form/components/ComplexBody'
 import { createDefaultPhaseConfig, PhaseTimerConfig } from './complex-phase-utils'
 
@@ -76,30 +76,34 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
   const title = 'Edit phase'
 
   return (
-    <Drawer>
-      <DrawerContent className="overflow-hidden">
-        <DrawerHeader className="text-left sm:text-center">
-          <DrawerTitle>{title}</DrawerTitle>
-        </DrawerHeader>
-        <div className="h-full overflow-hidden overflow-y-auto p-4">
-          <div className="space-y-6">
-            <ComplexBody
-              type={draftType}
-              config={draftConfig}
-              name={draftName}
-              onNameChange={setDraftName}
-              onTypeChange={handleTypeChange}
-              onConfigChange={handleConfigChange}
-            />
-          </div>
-        </div>
-        <div className="mt-auto flex flex-col gap-2 p-4">
-          <Button variant="outline" onClick={close}>
-            Cancel
+    <div className="overflow-hidden">
+      <div className="mb-6">
+        <h2 className="text-foreground mb-2 text-xl font-semibold">
+          <Button variant="ghost" size="sm" type="button" onClick={onCancel}>
+            <MoveLeft size={4} />
+          </Button>{' '}
+          {title}
+        </h2>
+      </div>
+      <form className="flex flex-col gap-2">
+        <ComplexBody
+          type={draftType}
+          config={draftConfig}
+          name={draftName}
+          onNameChange={setDraftName}
+          onTypeChange={handleTypeChange}
+          onConfigChange={handleConfigChange}
+        />
+        <div className="flex gap-2">
+          <Button onClick={handleSave} className="grow">
+            <Save />
+            Save
           </Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button variant="secondary" onClick={close} className="grow">
+            <CircleX /> Cancel
+          </Button>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </form>
+    </div>
   )
 }
