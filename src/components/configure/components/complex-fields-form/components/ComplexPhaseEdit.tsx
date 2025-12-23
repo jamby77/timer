@@ -5,6 +5,7 @@ import type { ComplexPhase } from '@/types/configure'
 
 import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
+import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { Button } from '@/components/ui/button'
 import ComplexBody from '@/components/configure/components/complex-fields-form/components/ComplexBody'
@@ -59,6 +60,7 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
         name: draftName,
       },
     }
+    draft.config.id = TimerConfigHash.generateTimerId(draft.config)
     onSave(phase.id, draft)
     onCancel()
   }

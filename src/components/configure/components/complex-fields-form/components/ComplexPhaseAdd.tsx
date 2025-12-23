@@ -55,12 +55,16 @@ export const ComplexPhaseAdd = ({
       name: draftName,
     }
     const id = createPhaseId(config)
-    return {
+    const draft = {
       id,
       name: draftName,
       type: draftType,
       config,
     }
+
+    draft.config.id = TimerConfigHash.generateTimerId(draft.config)
+
+    return draft
   }, [draftConfig, draftName])
 
   const handleAddAtStart = () => {

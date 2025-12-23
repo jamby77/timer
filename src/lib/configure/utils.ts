@@ -261,7 +261,7 @@ export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
   } as ComplexConfig
 
   fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
-
+  console.log({ fullConfig })
   const validationErrors = validateTimerConfig(fullConfig)
 
   return { config: fullConfig, errors: validationErrors }
