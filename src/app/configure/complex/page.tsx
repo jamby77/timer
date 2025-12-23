@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowLeft, Clock, FileText, Layers, Play, Save } from 'lucide-react'
+import { Clock, FileText, Layers, MoveLeft, Play, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import type { ComplexConfig, PredefinedStyle } from '@/types/configure'
@@ -43,7 +43,7 @@ const calculateDuration = (config: Partial<ComplexConfig>) => {
         return total + ((phase.config as any).timeLimit || 0)
       case TimerType.WORKREST:
         // This is complex to calculate, return 0 for now
-        return total + 0
+        return total
       default:
         return total
     }
@@ -62,7 +62,7 @@ export default function ConfigureComplexTimerPage() {
 
   const updateConfig = (updates: Partial<ComplexConfig>) => {
     const newConfig = { ...config, ...updates }
-    // Auto-generate name if it's currently a generated name or empty
+    // Auto-generate a name if it's currently a generated name or empty
     const shouldUpdateName = !config.name || config.name === generateComplexTimerName(config)
     if (shouldUpdateName && (updates.phases || updates.type)) {
       newConfig.name = generateComplexTimerName(newConfig)
@@ -88,7 +88,7 @@ export default function ConfigureComplexTimerPage() {
     storage.storeTimerConfig(fullConfig)
     storage.addRecentTimer(fullConfig)
 
-    // Navigate to timer page
+    // Navigate to the timer page
     router.push(`/?id=${fullConfig.id}`)
   }
 
@@ -115,7 +115,7 @@ export default function ConfigureComplexTimerPage() {
       storage.storePreset(preset)
       console.log('Successfully saved preset:', preset)
 
-      // Optionally, you could show a success message or navigate
+      // Optionally, you could show a success message or navigate.
       // For now, we'll just log it
     } catch (error) {
       console.error('Failed to save preset:', error)
@@ -130,7 +130,7 @@ export default function ConfigureComplexTimerPage() {
   const hasErrors = !!errors.length
   return (
     <PageContainer>
-      <div className="mx-auto max-w-4xl space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl space-y-6 px-2 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -139,11 +139,10 @@ export default function ConfigureComplexTimerPage() {
             onClick={() => router.back()}
             className="flex items-center gap-2"
           >
-            <ArrowLeft size={4} />
-            Back
+            <MoveLeft />
           </Button>
           <div className="flex-1">
-            <h1 className="text-foreground text-3xl font-bold">Complex Timer Configuration</h1>
+            <h1 className="text-foreground text-xl font-bold">Complex Timer Configuration</h1>
             <p className="text-muted-foreground mt-2">
               Create multi-phase timers that combine different timer types in sequence
             </p>

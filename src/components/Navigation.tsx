@@ -12,7 +12,7 @@ export const Navigation = () => {
 
   const navItems = [
     { href: '/', label: 'Run' },
-    { href: '/configure', label: 'Configure' },
+    { href: '/configure', label: 'New' },
   ]
 
   return (

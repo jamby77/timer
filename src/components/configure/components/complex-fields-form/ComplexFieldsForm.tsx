@@ -1,15 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Edit, GripVertical, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, CopyPlus, Edit, GripVertical, Plus, Trash2 } from 'lucide-react'
 
 import type { ComplexConfig, ComplexPhase } from '@/types/configure'
 
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Field,
   FieldContent,
@@ -18,9 +26,10 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
+import { ComplexPhaseAdd } from '@/components/configure/components/complex-fields-form/components/ComplexPhaseAdd'
 import { CountdownSelector } from '@/components/configure/components/shared/CountdownSelector'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
-import { ComplexPhaseDialog } from './components/ComplexPhaseDialog'
+import { ComplexPhaseEdit } from './components/ComplexPhaseEdit'
 
 interface ComplexFieldsProps {
   config: Partial<ComplexConfig>
@@ -39,6 +48,24 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
     const updatedPhases = phases
       .filter((phase) => phase.id !== phaseId)
       .map((phase, index) => ({ ...phase, order: index }))
+    onChange({ phases: updatedPhases })
+  }
+  const duplicatePhase = (phaseId: string) => {
+    const phaseToDuplicate = phases.find((phase) => phase.id === phaseId)
+    if (!phaseToDuplicate) return
+    const config = { ...phaseToDuplicate.config }
+    config.name = `Copy of ${config.name}`
+    console.log(config)
+    const newId = `phase-${TimerConfigHash.generateTimerId(config)}`
+    const newName = `Copy of ${phaseToDuplicate.name}`
+    const newPhase: ComplexPhase = {
+      ...phaseToDuplicate,
+      config,
+      name: newName,
+      id: newId,
+      order: phases.length,
+    }
+    const updatedPhases = [...phases, newPhase]
     onChange({ phases: updatedPhases })
   }
 
@@ -93,6 +120,29 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
     onChange({ phases: updatedPhases })
   }
 
+  if (isAddingPhase) {
+    return (
+      <ComplexPhaseAdd
+        onCancel={() => setIsAddingPhase(false)}
+        phasesCount={phases.length}
+        onAddAtStart={insertPhaseAtStart}
+        onAddAtEnd={insertPhaseAtEnd}
+      />
+    )
+  }
+
+  if (editingPhase) {
+    return (
+      <ComplexPhaseEdit
+        onCancel={() => {
+          setEditPhaseId(null)
+        }}
+        phase={editingPhase}
+        onSave={savePhase}
+      />
+    )
+  }
+
   return (
     <FieldGroup className="space-y-4">
       <div className="space-y-4">
@@ -102,36 +152,12 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
             onClick={() => {
               setIsAddingPhase(true)
             }}
-            size="lg"
             variant="outline"
           >
             <Plus size={16} className="mr-2" />
             Add Phase
           </Button>
         </div>
-
-        {isAddingPhase && (
-          <ComplexPhaseDialog
-            mode="add"
-            onOpenChange={setIsAddingPhase}
-            phasesCount={phases.length}
-            onAddAtStart={insertPhaseAtStart}
-            onAddAtEnd={insertPhaseAtEnd}
-          />
-        )}
-        {editingPhase && (
-          <ComplexPhaseDialog
-            mode="edit"
-            onOpenChange={(open) => {
-              if (!open) {
-                setEditPhaseId(null)
-              }
-            }}
-            phasesCount={phases.length}
-            phase={editingPhase}
-            onSave={savePhase}
-          />
-        )}
 
         {phases.length === 0 && (
           <div className="bg-muted rounded-md p-4 text-center">
@@ -145,51 +171,60 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
           <Card key={phase.id} className="relative">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <GripVertical className="text-muted-foreground" size={16} />
-                <CardTitle className="text-sm">{phase.name}</CardTitle>
-                <span className="text-muted-foreground text-xs">
-                  ({TIMER_TYPE_LABELS[phase.type]})
-                </span>
-                <div className="ml-auto flex items-center gap-1">
-                  <Button
-                    onClick={() => movePhase(phase.id, 'up')}
-                    size="sm"
-                    variant="ghost"
-                    disabled={index === 0}
-                    className={cn('disabled:cursor-not-allowed disabled:opacity-50')}
-                    aria-label="Move phase up"
-                  >
-                    <ChevronUp size={32} />
-                  </Button>
-                  <Button
-                    onClick={() => movePhase(phase.id, 'down')}
-                    size="sm"
-                    variant="ghost"
-                    disabled={index === phases.length - 1}
-                    aria-label="Move phase down"
-                  >
-                    <ChevronDown size={32} />
-                  </Button>
-                  <Button
-                    onClick={() => setEditPhaseId(phase.id)}
-                    size="sm"
-                    variant="ghost"
-                    aria-label="Edit phase"
-                  >
-                    <Edit size={32} />
-                  </Button>
-                  <Button
-                    onClick={() => removePhase(phase.id)}
-                    size="sm"
-                    variant="ghost"
-                    className="text-destructive hover:text-destructive"
-                    aria-label="Remove phase"
-                  >
-                    <Trash2 size={32} />
-                  </Button>
-                </div>
+                <GripVertical className="text-muted-foreground size-5" />
+                <CardTitle className="truncate text-sm">
+                  {phase.name}{' '}
+                  <span className="text-muted-foreground hidden text-xs sm:inline">
+                    ({TIMER_TYPE_LABELS[phase.type]})
+                  </span>
+                </CardTitle>
               </div>
+              <CardAction>
+                <Button
+                  onClick={() => movePhase(phase.id, 'up')}
+                  size="sm"
+                  variant="ghost"
+                  disabled={index === 0}
+                  className={cn('disabled:cursor-not-allowed disabled:opacity-50')}
+                  aria-label="Move phase up"
+                >
+                  <ChevronUp />
+                </Button>
+                <Button
+                  onClick={() => movePhase(phase.id, 'down')}
+                  size="sm"
+                  variant="ghost"
+                  disabled={index === phases.length - 1}
+                  aria-label="Move phase down"
+                >
+                  <ChevronDown />
+                </Button>
+              </CardAction>
             </CardHeader>
+            <CardFooter className="flex items-center justify-start gap-1">
+              <Button
+                onClick={() => setEditPhaseId(phase.id)}
+                variant="ghost"
+                aria-label="Edit phase"
+              >
+                <Edit />
+              </Button>
+              <Button
+                onClick={() => duplicatePhase(phase.id)}
+                variant="ghost"
+                aria-label="Duplicate phase"
+              >
+                <CopyPlus />
+              </Button>
+              <Button
+                onClick={() => removePhase(phase.id)}
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                aria-label="Remove phase"
+              >
+                <Trash2 />
+              </Button>
+            </CardFooter>
           </Card>
         ))}
 

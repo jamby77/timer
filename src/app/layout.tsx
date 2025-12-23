@@ -45,7 +45,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={cn('flex h-full min-h-screen flex-col', inter.className)}
+        className={cn('flex h-full min-h-screen w-full flex-col', inter.className)}
         suppressHydrationWarning
       >
         <ThemeProvider

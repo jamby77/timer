@@ -14,8 +14,7 @@ export const TimerConfig = ({
   onCancel,
 }: TimerConfigFormProps) => {
   return (
-    <PageContainer className="bg-background absolute inset-0">
-      <h5 className="text-muted-foreground text-center text-base">Configure</h5>
+    <PageContainer>
       <TimerConfigForm
         type={type}
         initialConfig={initialConfig}

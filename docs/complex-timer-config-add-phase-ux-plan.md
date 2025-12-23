@@ -58,7 +58,7 @@ Responsibilities:
 - Provide the conditional footer actions (single Add when there are 0 phases; Add at start/end when there is at least 1 phase).
 
 Parent integration:
-- `ComplexFieldsForm` passes `open` / `onOpenChange`.
+- `ComplexFieldsForm` passes `open` / `onCancel`.
 - `ComplexFieldsForm` passes callbacks for affirmative actions, e.g.:
   - `onAddAtStart(draft)`
   - `onAddAtEnd(draft)`

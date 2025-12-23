@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react'
 import { useForm } from '@tanstack/react-form'
-import { PlayIcon } from 'lucide-react'
+import { CircleX, MoveLeft, PlayIcon, Save } from 'lucide-react'
 
 import type { SyntheticEvent } from 'react'
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
@@ -95,6 +95,9 @@ export const TimerConfigForm = ({
     <div className="mx-auto h-full max-w-2xl overflow-hidden overflow-y-auto p-4">
       <div className="mb-6">
         <h2 className="text-foreground mb-2 text-xl font-semibold">
+          <Button variant="ghost" size="sm" type="button" onClick={onCancel}>
+            <MoveLeft size={4} />
+          </Button>{' '}
           Configure {TIMER_TYPE_LABELS[type]} Timer
         </h2>
         {isPredefined && (
@@ -126,6 +129,14 @@ export const TimerConfigForm = ({
         />
 
         <div className="flex flex-col justify-between gap-4 pt-4 md:flex-row">
+          <Button variant="default" type="submit" size="lg">
+            <PlayIcon />
+            Start Timer
+          </Button>
+          <Button type="button" variant="secondary" onClick={onCancel} size="lg">
+            <CircleX />
+            Cancel
+          </Button>
           {!!onSaveAsPredefined && (
             <form.Subscribe
               selector={(state) => state.values.draft}
@@ -136,18 +147,12 @@ export const TimerConfigForm = ({
                   onClick={() => onSaveAsPredefined(buildFullConfig(config))}
                   size="lg"
                 >
-                  Save as Predefined
+                  <Save />
+                  Save as Preset
                 </Button>
               )}
             />
           )}
-          <Button variant="default" type="submit" size="lg">
-            <PlayIcon size={4} className="fill-background" />
-            Start Timer
-          </Button>
-          <Button type="button" variant="secondary" onClick={onCancel} size="lg">
-            Cancel
-          </Button>
         </div>
       </form>
     </div>
