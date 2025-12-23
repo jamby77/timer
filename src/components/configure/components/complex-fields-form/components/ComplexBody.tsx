@@ -32,6 +32,7 @@ export const ComplexBody = ({
   onConfigChange,
 }: ComplexBodyProps) => {
   const generatedName = generateTimerName(config)
+  console.log({ generatedName, config, name, type })
   return (
     <FieldGroup>
       <Field>

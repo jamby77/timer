@@ -26,47 +26,39 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
   )
   const [draftName, setDraftName] = useState<string>(() => generateTimerName(draftConfig as any))
 
+  const { id, type, config, name } = phase
   useEffect(() => {
-    setPhaseId(phase.id)
-    setDraftType(phase.type)
-    setDraftConfig(phase.config as PhaseTimerConfig)
-    setDraftName(phase.name)
-  }, [phase])
+    setPhaseId(id)
+    setDraftType(type)
+    setDraftConfig(config as PhaseTimerConfig)
+    setDraftName(name)
+  }, [id, type, config, name])
 
   const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
     setDraftConfig((prev) => {
       const next = { ...prev, ...updates } as PhaseTimerConfig
-      const prevGenerated = generateTimerName(prev as any)
-      const shouldUpdateName = !draftName || draftName === prevGenerated
-      if (shouldUpdateName) {
-        setDraftName(generateTimerName(next as any))
-      }
+      setDraftName(generateTimerName(next as any))
       return next
     })
   }
   const handleTypeChange = (type: TimerType) => {
     const nextConfig = createDefaultPhaseConfig(phaseId, type)
-    const prevGenerated = generateTimerName(draftConfig as any)
-    const shouldUpdateName = !draftName || draftName === prevGenerated
 
     setDraftType(type)
     setDraftConfig(nextConfig)
-    if (shouldUpdateName) {
-      setDraftName(generateTimerName(nextConfig as any))
-    }
-  }
-
-  const draft: PhaseDraft = {
-    id: phaseId,
-    name: draftName,
-    type: draftType,
-    config: {
-      ...(draftConfig as any),
-      name: draftName,
-    },
+    setDraftName(generateTimerName(nextConfig as any))
   }
 
   const handleSave = () => {
+    const draft: PhaseDraft = {
+      id: phaseId,
+      name: draftName,
+      type: draftType,
+      config: {
+        ...(draftConfig as any),
+        name: draftName,
+      },
+    }
     onSave(phase.id, draft)
     onCancel()
   }
@@ -85,9 +77,9 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
       </div>
       <form className="flex flex-col gap-2">
         <ComplexBody
-          type={draftType}
-          config={draftConfig}
-          name={draftName}
+          type={type}
+          config={config}
+          name={name}
           onNameChange={setDraftName}
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
