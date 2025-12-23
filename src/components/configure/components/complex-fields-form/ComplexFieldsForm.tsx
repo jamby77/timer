@@ -18,16 +18,16 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
-import { CountdownSelector } from '@/components/configure/components/CountdownSelector'
-import { TimePicker } from '@/components/configure/components/TimePicker'
-import { ComplexPhaseDialog } from './ComplexPhaseDialog'
+import { CountdownSelector } from '@/components/configure/components/shared/CountdownSelector'
+import { TimePicker } from '@/components/configure/components/shared/TimePicker'
+import { ComplexPhaseDialog } from './components/ComplexPhaseDialog'
 
 interface ComplexFieldsProps {
   config: Partial<ComplexConfig>
   onChange: (updates: Partial<ComplexConfig>) => void
 }
 
-export const ComplexFields = ({ config, onChange }: ComplexFieldsProps) => {
+export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
   const phases = config.phases || []
 
   const [isAddingPhase, setIsAddingPhase] = useState(false)

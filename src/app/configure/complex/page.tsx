@@ -22,9 +22,9 @@ import {
   InputGroupText,
 } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
-import { ComplexFields } from '@/components/configure/components/ComplexFields'
-import { FormErrors } from '@/components/configure/components/FormErrors'
-import { PhaseSummary } from '@/components/configure/components/PhaseSummary'
+import { ComplexFieldsForm } from '@/components/configure/components/complex-fields-form/ComplexFieldsForm'
+import { PhaseSummary } from '@/components/configure/components/complex-fields-form/components/PhaseSummary'
+import { FormErrors } from '@/components/configure/components/shared/FormErrors'
 import { PageContainer } from '@/components/PageContainer'
 
 const calculateDuration = (config: Partial<ComplexConfig>) => {
@@ -162,7 +162,7 @@ export default function ConfigureComplexTimerPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ComplexFields config={config} onChange={updateConfig} />
+            <ComplexFieldsForm config={config} onChange={updateConfig} />
           </CardContent>
         </Card>
 

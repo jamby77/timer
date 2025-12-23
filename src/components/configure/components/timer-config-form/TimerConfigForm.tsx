@@ -13,8 +13,8 @@ import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { Button } from '@/components/ui/button'
+import { FormErrors } from '@/components/configure/components'
 import { CommonFields } from './CommonFields'
-import { FormErrors } from './FormErrors'
 
 function getName(type: TimerType) {
   return type === TimerType.COUNTDOWN

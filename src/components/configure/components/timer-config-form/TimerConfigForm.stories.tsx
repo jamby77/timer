@@ -1,4 +1,3 @@
-import React from 'react'
 import preview from '#.storybook/preview'
 import { expect, fn } from 'storybook/test'
 
@@ -24,7 +23,6 @@ const meta = preview.meta({
   args: {
     onStartTimer: fn(),
     onSaveAsPredefined: fn(),
-    onSave: fn(),
     isPredefined: false,
   },
 })

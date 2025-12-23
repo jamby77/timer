@@ -6,7 +6,7 @@ import type { ComplexConfig } from '@/types/configure'
 
 import { TimerType } from '@/types/configure'
 
-import { ComplexFields } from './ComplexFields'
+import { ComplexFieldsForm } from './ComplexFieldsForm'
 
 const ComplexFieldsHarness = () => {
   const [config, setConfig] = useState<Partial<ComplexConfig>>({
@@ -18,7 +18,7 @@ const ComplexFieldsHarness = () => {
 
   return (
     <div className="w-180 max-w-full">
-      <ComplexFields
+      <ComplexFieldsForm
         config={config}
         onChange={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
       />
@@ -26,7 +26,7 @@ const ComplexFieldsHarness = () => {
   )
 }
 
-const meta = preview.meta({ component: ComplexFields })
+const meta = preview.meta({ component: ComplexFieldsForm })
 
 export const AddAndEditPhase = meta.story({
   render: () => <ComplexFieldsHarness />,

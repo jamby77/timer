@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { TimePicker } from '@/components/configure/components/TimePicker'
+import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface WorkRestFieldsProps {
   config: Partial<WorkRestConfig>

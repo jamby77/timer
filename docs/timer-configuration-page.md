@@ -1059,7 +1059,7 @@ const TimerConfigForm = ({
       case TimerType.WORKREST:
         return <WorkRestFields config={config} onChange={updateTypeConfig} />;
       case TimerType.COMPLEX:
-        return <ComplexFields config={config} onChange={updateTypeConfig} />;
+        return <ComplexFieldsForm config={config} onChange={updateTypeConfig} />;
     }
   };
   
@@ -1305,7 +1305,7 @@ interface ComplexFieldsProps {
   onChange: (config: Partial<ComplexConfig>) => void;
 }
 
-const ComplexFields = ({
+const ComplexFieldsForm = ({
   config,
   onChange,
 }: ComplexFieldsProps) => {

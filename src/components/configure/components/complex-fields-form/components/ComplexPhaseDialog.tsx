@@ -27,10 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CountdownFields } from '@/components/configure/components/CountdownFields'
-import { IntervalFields } from '@/components/configure/components/IntervalFields'
-import { StopwatchFields } from '@/components/configure/components/StopwatchFields'
-import { WorkRestFields } from '@/components/configure/components/WorkRestFields'
+import { CountdownFields } from '@/components/configure/components/shared/CountdownFields'
+import { IntervalFields } from '@/components/configure/components/shared/IntervalFields'
+import { StopwatchFields } from '@/components/configure/components/shared/StopwatchFields'
+import { WorkRestFields } from '@/components/configure/components/shared/WorkRestFields'
 import { createDefaultPhaseConfig, PhaseTimerConfig } from './complex-phase-utils'
 
 type PhaseDraft = Omit<ComplexPhase, 'order'>

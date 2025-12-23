@@ -3,7 +3,7 @@ import type { IntervalConfig } from '@/types/configure'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { TimePicker } from '@/components/configure/components/TimePicker'
+import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface IntervalFieldsProps {
   config: Partial<IntervalConfig>

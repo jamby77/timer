@@ -1,7 +1,7 @@
 import type { StopwatchConfig } from '@/types/configure'
 
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { TimePicker } from '@/components/configure/components/TimePicker'
+import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface StopwatchFieldsProps {
   config: Partial<StopwatchConfig>

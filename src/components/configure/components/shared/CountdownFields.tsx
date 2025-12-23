@@ -1,7 +1,7 @@
 import type { CountdownConfig } from '@/types/configure'
 
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field'
-import { TimePicker } from '@/components/configure/components/TimePicker'
+import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface CountdownFieldsProps {
   config: Partial<CountdownConfig>

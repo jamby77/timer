@@ -20,11 +20,13 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { CountdownFields } from './CountdownFields'
-import { CountdownSelector } from './CountdownSelector'
-import { IntervalFields } from './IntervalFields'
-import { StopwatchFields } from './StopwatchFields'
-import { WorkRestFields } from './WorkRestFields'
+import {
+  CountdownFields,
+  CountdownSelector,
+  IntervalFields,
+  StopwatchFields,
+  WorkRestFields,
+} from '@/components/configure/components'
 
 interface CommonFieldsProps {
   config: Partial<AnyTimerConfig>

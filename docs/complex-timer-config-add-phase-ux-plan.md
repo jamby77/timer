@@ -16,7 +16,7 @@ The "add" flow should let the user:
   - Add at the start
 
 ## Current State (Findings)
-- Complex timer phases are rendered in `src/components/configure/components/ComplexFields.tsx`.
+- Complex timer phases are rendered in `src/components/configure/components/ComplexFieldsForm.tsx`.
 - Phase configuration fields are currently *gated* behind an “Edit” icon toggle (`editingPhaseId`).
 - “Add Phase” currently appends a default countdown phase immediately (no modal/sheet).
 - The base configure page uses `TimerConfig` (`Dialog` on desktop, `Drawer` on smaller screens) to host the configuration form.
@@ -53,16 +53,16 @@ If there is at least 1 phase:
   - `ComplexPhaseAddDialog` (name tentative)
 
 Responsibilities:
-- Own open/close state (controlled by parent `ComplexFields`).
+- Own open/close state (controlled by parent `ComplexFieldsForm`).
 - Render `Dialog` on desktop and `Drawer` on small screens (reuse `useMediaQuery`).
 - Provide the conditional footer actions (single Add when there are 0 phases; Add at start/end when there is at least 1 phase).
 
 Parent integration:
-- `ComplexFields` passes `open` / `onOpenChange`.
-- `ComplexFields` passes callbacks for affirmative actions, e.g.:
+- `ComplexFieldsForm` passes `open` / `onOpenChange`.
+- `ComplexFieldsForm` passes callbacks for affirmative actions, e.g.:
   - `onAddAtStart(draft)`
   - `onAddAtEnd(draft)`
-- For edit mode, `ComplexFields` passes a save callback, e.g.:
+- For edit mode, `ComplexFieldsForm` passes a save callback, e.g.:
   - `onSave(phaseId, draft)`
 - `ComplexPhaseAddDialog` owns the draft state and calls the appropriate callback with the draft payload when the user confirms.
 
@@ -72,7 +72,7 @@ In `ComplexPhaseAddDialog`:
   - `draftType: TimerType` (excluding `COMPLEX`)
   - `draftConfig: PhaseTimerConfig` (created via existing `createDefaultPhaseConfig`)
   - `draftName: string` (generated via `generateTimerName`)
-- `ComplexFields` should not own draft state; it only receives the final draft via the callback and performs insertion.
+- `ComplexFieldsForm` should not own draft state; it only receives the final draft via the callback and performs insertion.
 
 Edit mode:
 - `ComplexPhaseAddDialog` supports an edit mode that initializes draft state from an existing `ComplexPhase`.
@@ -83,7 +83,7 @@ Type switching:
 - Only overwrite `draftName` if the user didn’t manually edit the name (same heuristic used elsewhere).
 
 ### 3) Insertion logic
-Add helper in `ComplexFields`:
+Add helper in `ComplexFieldsForm`:
 - `insertPhase(position: 'start' | 'end', phase: ComplexPhase)`
 
 Rules:
