@@ -1,10 +1,8 @@
 'use client'
 
-import { useCallback } from 'react'
-import { useForm } from '@tanstack/react-form'
+import { useState } from 'react'
 import { CircleX, MoveLeft, PlayIcon, Save } from 'lucide-react'
 
-import type { SyntheticEvent } from 'react'
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 
 import { TimerType } from '@/types/configure'
@@ -38,58 +36,47 @@ export const TimerConfigForm = ({
   onSaveAsPredefined,
   onCancel,
 }: TimerConfigFormProps) => {
-  const initialDraft: Partial<AnyTimerConfig> = initialConfig || {
-    type,
-    name: getName(type),
+  const [errors, setErrors] = useState<string[]>([])
+  const [config, setConfig] = useState(
+    initialConfig ||
+      ({
+        type,
+        name: getName(type),
+      } as AnyTimerConfig)
+  )
+
+  const buildFullConfig = (config: Partial<AnyTimerConfig>): AnyTimerConfig => {
+    const fullConfig = {
+      ...config,
+      type,
+      createdAt: new Date(),
+      lastUsed: new Date(),
+    } as AnyTimerConfig
+
+    fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
+    return fullConfig
   }
 
-  const buildFullConfig = useCallback(
-    (draft: Partial<AnyTimerConfig>): AnyTimerConfig => {
-      const fullConfig = {
-        ...draft,
-        type,
-        createdAt: new Date(),
-        lastUsed: new Date(),
-      } as AnyTimerConfig
+  const handleValidate = (config: Partial<AnyTimerConfig>) => {
+    const fullConfig = buildFullConfig(config)
+    const validationErrors = validateTimerConfig(fullConfig)
+    return validationErrors.length > 0 ? validationErrors : undefined
+  }
 
-      fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
-      return fullConfig
-    },
-    [type]
-  )
+  const updateConfig = (updates: Partial<AnyTimerConfig>) => {
+    setConfig((prev) => {
+      const newConfig = { ...prev, ...updates } as AnyTimerConfig
+      const errors = handleValidate(newConfig)
+      setErrors(errors || [])
 
-  const form = useForm({
-    defaultValues: {
-      draft: initialDraft,
-    },
-    validators: {
-      onSubmit: ({ value }) => {
-        const fullConfig = buildFullConfig(value.draft)
-        const validationErrors = validateTimerConfig(fullConfig)
-        return validationErrors.length > 0 ? validationErrors : undefined
-      },
-    },
-    onSubmit: ({ value }) => {
-      const fullConfig = buildFullConfig(value.draft)
-      onStartTimer(fullConfig)
-    },
-  })
+      return newConfig
+    })
+  }
 
-  const handleSubmit = useCallback(
-    (e?: SyntheticEvent) => {
-      e?.preventDefault()
-      void form.handleSubmit()
-    },
-    [form]
-  )
-
-  const updateConfig = useCallback(
-    (updates: Partial<AnyTimerConfig>) => {
-      form.setFieldValue('draft', (prev) => ({ ...prev, ...updates }) as Partial<AnyTimerConfig>)
-      form.setErrorMap({ onSubmit: undefined } as any)
-    },
-    [form]
-  )
+  const handleSubmit = (config: Partial<AnyTimerConfig>) => {
+    const fullConfig = buildFullConfig(config)
+    onStartTimer(fullConfig)
+  }
 
   return (
     <div className="mx-auto h-full max-w-2xl overflow-hidden overflow-y-auto p-4">
@@ -107,52 +94,38 @@ export const TimerConfigForm = ({
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <form.Subscribe
-          selector={(state) => state.errorMap.onSubmit}
-          children={(onSubmitError) => {
-            const errors = Array.isArray(onSubmitError)
-              ? (onSubmitError as string[])
-              : onSubmitError
-                ? [String(onSubmitError)]
-                : []
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleSubmit(config)
+        }}
+        className="space-y-6"
+      >
+        <FormErrors errors={errors} />
 
-            return <FormErrors errors={errors} />
-          }}
-        />
-
-        <form.Subscribe
-          selector={(state) => state.values.draft}
-          children={(config) => (
-            <CommonFields config={config} onChange={updateConfig} type={type} />
-          )}
-        />
+        <CommonFields config={config} onChange={updateConfig} type={type} />
 
         <div className="flex flex-col justify-between gap-4 pt-4 md:flex-row">
-          <Button variant="default" type="submit" size="lg">
+          <Button disabled={errors.length > 0} variant="default" type="submit" size="lg">
             <PlayIcon />
             Start Timer
           </Button>
+          {!!onSaveAsPredefined && (
+            <Button
+              disabled={errors.length > 0}
+              type="button"
+              variant="outline"
+              onClick={() => onSaveAsPredefined(buildFullConfig(config))}
+              size="lg"
+            >
+              <Save />
+              Save as Preset
+            </Button>
+          )}
           <Button type="button" variant="secondary" onClick={onCancel} size="lg">
             <CircleX />
             Cancel
           </Button>
-          {!!onSaveAsPredefined && (
-            <form.Subscribe
-              selector={(state) => state.values.draft}
-              children={(config) => (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onSaveAsPredefined(buildFullConfig(config))}
-                  size="lg"
-                >
-                  <Save />
-                  Save as Preset
-                </Button>
-              )}
-            />
-          )}
         </div>
       </form>
     </div>
