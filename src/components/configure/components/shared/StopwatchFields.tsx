@@ -16,7 +16,7 @@ export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
         <TimePicker
           max={86400}
           min={1}
-          initialSeconds={config.timeLimit || 0}
+          value={config.timeLimit || 0}
           onTimeChange={(seconds) => onChange({ timeLimit: seconds })}
         />
       </Field>

@@ -12,21 +12,20 @@ import { TimePickerInput } from '@/components/ui/time-picker-input'
 interface TimePickerProps {
   max?: number
   min?: number
-  initialSeconds?: number
+  value?: number
   onTimeChange?: (seconds: number) => void
 }
 
-export const TimePicker = ({ initialSeconds = 0, min, max, onTimeChange }: TimePickerProps) => {
+export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProps) => {
   const minuteRef = useRef<HTMLInputElement>(null)
   const hourRef = useRef<HTMLInputElement>(null)
   const secondRef = useRef<HTMLInputElement>(null)
-  const [time, setTime] = useState<TimerPickerTime>(() => secondsToTimerPickerTime(initialSeconds))
+  const [time, setTime] = useState<TimerPickerTime>(() => secondsToTimerPickerTime(value))
 
-  // Update time when initialSeconds changes
+  // Update time when value changes
   useEffect(() => {
-    console.log('update on initialSeconds')
-    setTime(secondsToTimerPickerTime(initialSeconds))
-  }, [])
+    setTime(secondsToTimerPickerTime(value))
+  }, [value])
 
   // Validate and clamp time within min/max bounds
   const validateTime = (newTime: TimerPickerTime): TimerPickerTime => {

@@ -55,8 +55,11 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
     if (!phaseToDuplicate) return
     const config = { ...phaseToDuplicate.config }
     config.name = `Copy of ${config.name}`
-    console.log(config)
-    const newId = `phase-${TimerConfigHash.generateTimerId(config)}`
+
+    let newId = `phase-${TimerConfigHash.generateTimerId(config)}`
+    if (phases.find((p) => p.id === newId)) {
+      newId += Date.now()
+    }
     const newName = `Copy of ${phaseToDuplicate.name}`
     const newPhase: ComplexPhase = {
       ...phaseToDuplicate,
@@ -170,7 +173,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
         {phases.map((phase, index) => (
           <Card key={phase.id} className="relative">
             <CardHeader>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-hidden">
                 <GripVertical className="text-muted-foreground size-5" />
                 <CardTitle className="truncate text-sm">
                   {phase.name}{' '}
@@ -287,7 +290,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                 <Field>
                   <FieldLabel>
                     <TimePicker
-                      initialSeconds={config.overallTimeLimit || 0}
+                      value={config.overallTimeLimit || 0}
                       onTimeChange={(value) =>
                         onChange({
                           overallTimeLimit: value,

@@ -20,7 +20,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
           <FieldLabel htmlFor="workDuration">Work Duration</FieldLabel>
           <TimePicker
             min={1}
-            initialSeconds={config.workDuration || 0}
+            value={config.workDuration || 0}
             onTimeChange={(seconds) => onChange({ workDuration: seconds })}
           />
         </Field>
@@ -28,7 +28,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
           <FieldLabel htmlFor="restDuration">Rest Duration</FieldLabel>
           <TimePicker
             min={0}
-            initialSeconds={config.restDuration || 0}
+            value={config.restDuration || 0}
             onTimeChange={(seconds) => onChange({ restDuration: seconds })}
           />
         </Field>

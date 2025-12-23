@@ -1,5 +1,3 @@
-'use client'
-
 import { useMemo, useState } from 'react'
 import { MoveLeft } from 'lucide-react'
 
@@ -98,9 +96,6 @@ export const ComplexPhaseAdd = ({
           onConfigChange={handleConfigChange}
         />
         <div className="flex flex-col gap-2">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
           {phasesCount === 0 && <Button onClick={handleAddAtStart}>Add</Button>}
           {phasesCount > 0 && (
             <>
@@ -110,6 +105,9 @@ export const ComplexPhaseAdd = ({
               </Button>
             </>
           )}
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
         </div>
       </form>
     </div>

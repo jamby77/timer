@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, useState } from 'react'
 import { CircleX, MoveLeft, Save } from 'lucide-react'
 
@@ -99,7 +97,7 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
             <Save />
             Save
           </Button>
-          <Button variant="secondary" onClick={close} className="grow">
+          <Button variant="secondary" onClick={onCancel} className="grow">
             <CircleX /> Cancel
           </Button>
         </div>
