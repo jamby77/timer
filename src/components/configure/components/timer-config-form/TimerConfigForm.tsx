@@ -75,7 +75,21 @@ export const TimerConfigForm = ({
 
   const handleSubmit = (config: Partial<AnyTimerConfig>) => {
     const fullConfig = buildFullConfig(config)
+    const validationErrors = handleValidate(fullConfig)
+    if (validationErrors) {
+      setErrors(validationErrors)
+      return
+    }
     onStartTimer(fullConfig)
+  }
+  const handleSaveAsPreset = (config: Partial<AnyTimerConfig>) => {
+    const fullConfig = buildFullConfig(config)
+    const validationErrors = handleValidate(fullConfig)
+    if (validationErrors) {
+      setErrors(validationErrors)
+      return
+    }
+    onSaveAsPredefined?.(fullConfig)
   }
 
   return (
@@ -115,7 +129,7 @@ export const TimerConfigForm = ({
               disabled={errors.length > 0}
               type="button"
               variant="outline"
-              onClick={() => onSaveAsPredefined(buildFullConfig(config))}
+              onClick={() => handleSaveAsPreset(config)}
               size="lg"
             >
               <Save />

@@ -10,11 +10,11 @@ import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 // Base timer config schema
 const baseTimerConfigSchema = z.object({
-  id: z.string().min(1, 'Timer ID is required'),
-  name: z.string().min(1, 'Timer name is required'),
+  id: z.string('Please provide timer ID').min(1, 'Timer ID is required'),
+  name: z.string('Please provide timer name').min(1, 'Timer name is required'),
   type: z.enum(TimerType),
   createdAt: z.date().optional(),
-  countdownBeforeStart: z.number().int().min(0).optional(),
+  countdownBeforeStart: z.number().int('Countdown must be an integer').min(1).optional(),
   lastUsed: z.date().optional(),
 })
 
@@ -22,8 +22,8 @@ const baseTimerConfigSchema = z.object({
 const countdownConfigSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.COUNTDOWN),
   duration: z
-    .number()
-    .int()
+    .number('Please provide valid duration')
+    .int('Duration must be an integer')
     .min(1, 'Duration must be greater than 0')
     .max(86400, 'Duration cannot exceed 24 hours'),
   completionMessage: z.string().optional(),
@@ -33,8 +33,8 @@ const countdownConfigSchema = baseTimerConfigSchema.extend({
 const stopwatchConfigSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.STOPWATCH),
   timeLimit: z
-    .number()
-    .int()
+    .number('Please provide valid time limit')
+    .int('Time limit must be an integer')
     .min(1, 'Time limit must be greater than 0')
     .max(86400, 'Time limit cannot exceed 24 hours')
     .optional(),
@@ -44,11 +44,17 @@ const stopwatchConfigSchema = baseTimerConfigSchema.extend({
 // Interval timer schema
 const intervalConfigSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.INTERVAL),
-  workDuration: z.number().int().min(1, 'Work duration must be greater than 0'),
-  restDuration: z.number().int().min(0, 'Rest duration must be 0 or greater'),
+  workDuration: z
+    .number('Work duration is required')
+    .int('Work duration must be an integer')
+    .min(1, 'Work duration must be greater than 0'),
+  restDuration: z
+    .number('Rest duration is required')
+    .int('Rest duration must be an integer')
+    .min(0, 'Rest duration must be 0 or greater'),
   intervals: z
-    .number()
-    .int()
+    .number('Number of intervals is required')
+    .int('Number of intervals must be an integer')
     .min(1, 'Number of intervals must be greater than 0')
     .max(1000, 'Number of intervals cannot exceed 1000'),
   workLabel: z.string().optional(),
@@ -59,20 +65,35 @@ const intervalConfigSchema = baseTimerConfigSchema.extend({
 // WorkRest ratio config schema
 const workRestRatioConfigSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.WORKREST),
-  maxWorkTime: z.number().int().min(1, 'Maximum work time must be greater than 0'),
-  maxRounds: z.number().int().min(1, 'Maximum rounds must be greater than 0'),
+  maxWorkTime: z
+    .number('Maximum work time is required')
+    .int('Maximum work time must be an integer')
+    .min(1, 'Maximum work time must be greater than 0'),
+  maxRounds: z
+    .number('Maximum rounds is required')
+    .int('Maximum rounds must be an integer')
+    .min(1, 'Maximum rounds must be greater than 0'),
   restMode: z.literal(WorkRestMode.RATIO),
-  ratio: z.number().min(0.1, 'Work/rest ratio must be greater than 0'),
+  ratio: z.number('Work/rest ratio is required').min(0.1, 'Work/rest ratio must be greater than 0'),
   fixedRestDuration: z.never().optional(),
 })
 
 // WorkRest fixed config schema
 const workRestFixedConfigSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.WORKREST),
-  maxWorkTime: z.number().int().min(1, 'Maximum work time must be greater than 0'),
-  maxRounds: z.number().int().min(1, 'Maximum rounds must be greater than 0'),
+  maxWorkTime: z
+    .number('Maximum work time is required')
+    .int('Maximum work time must be an integer')
+    .min(1, 'Maximum work time must be greater than 0'),
+  maxRounds: z
+    .number('Maximum rounds is required')
+    .int('Maximum rounds must be an integer')
+    .min(1, 'Maximum rounds must be greater than 0'),
   restMode: z.literal(WorkRestMode.FIXED),
-  fixedRestDuration: z.number().int().min(1, 'Fixed rest duration must be greater than 0'),
+  fixedRestDuration: z
+    .number('Fixed rest duration is required')
+    .int('Fixed rest duration must be an integer')
+    .min(1, 'Fixed rest duration must be greater than 0'),
   ratio: z.never().optional(),
 })
 
@@ -93,8 +114,8 @@ const anyTimerConfigSchema = z.discriminatedUnion('type', [
 
 // Complex phase schema (can now reference anyTimerConfigSchema)
 const complexPhaseSchema = z.object({
-  id: z.string().min(1, 'Phase ID is required'),
-  name: z.string().min(1, 'Phase name is required'),
+  id: z.string('Phase ID is required').min(1),
+  name: z.string('Phase name is required').min(1),
   type: z.enum(TimerType),
   config: z.lazy(() => anyTimerConfigSchema),
   order: z.number().int().min(0, 'Phase order must be 0 or greater'),
@@ -191,14 +212,22 @@ export const validateTimerConfig = (config: AnyTimerConfig): string[] => {
   if (result.success) {
     return []
   }
-
+  const flatError = z.flattenError(result.error)
   // Extract error messages from Zod error
   const errors: string[] = []
-  result.error.issues.forEach((issue) => {
-    // Create readable error messages from Zod issues
-    const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : ''
-    errors.push(`${path}${issue.message}`)
-  })
+  if (flatError.formErrors) {
+    errors.push(...flatError.formErrors)
+  }
+  if (flatError.fieldErrors) {
+    Object.entries(flatError.fieldErrors).forEach(([_key, value]) => {
+      errors.push(value.join(', '))
+    })
+  }
+  // result.error.issues.forEach((issue) => {
+  //   // Create readable error messages from Zod issues
+  //   const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : ''
+  //   errors.push(`${path}${issue.message}`)
+  // })
 
   return errors
 }

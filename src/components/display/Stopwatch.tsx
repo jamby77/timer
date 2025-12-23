@@ -130,14 +130,16 @@ export function Stopwatch({
         subtitle={timeLimitDisplay}
         fullscreen={isActive}
       >
-        <TimerProgressIndicator
-          progress={progress}
-          isRunning={isRunning}
-          isRest={isRest}
-          isVisible={isVisible}
-          minTime={minTime}
-          maxTime={maxTime}
-        />
+        {maxTime > minTime && (
+          <TimerProgressIndicator
+            progress={progress}
+            isRunning={isRunning}
+            isRest={isRest}
+            isVisible={isVisible}
+            minTime={minTime}
+            maxTime={maxTime}
+          />
+        )}{' '}
         <TimerButton
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}
