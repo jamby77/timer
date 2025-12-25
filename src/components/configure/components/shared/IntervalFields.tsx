@@ -56,7 +56,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             id="workLabel"
             name="workLabel"
             type="text"
-            value={config.workLabel || workPlaceholder}
+            defaultValue={config.workLabel || workPlaceholder}
             onChange={(e) => onChange({ workLabel: e.target.value })}
             placeholder={workPlaceholder}
           />
@@ -67,7 +67,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             id="restLabel"
             name="restLabel"
             type="text"
-            value={config.restLabel || restPlaceholder}
+            defaultValue={config.restLabel || restPlaceholder}
             onChange={(e) => onChange({ restLabel: e.target.value })}
             placeholder={restPlaceholder}
           />

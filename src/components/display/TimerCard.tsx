@@ -53,15 +53,11 @@ export const TimerCard = ({
         })}
       >
         <CardHeader
-          className={cn(
-            'space-y-2',
-            { 'sr-only': fullscreen },
-            {
-              'text-tm-work-fg': isWork,
-              'text-tm-rest-fg': !isWork && isWork !== undefined,
-              'text-foreground': isWork === undefined,
-            }
-          )}
+          className={cn('space-y-2', {
+            'text-tm-work-fg': isWork,
+            'text-tm-rest-fg': !isWork && isWork !== undefined,
+            'text-foreground': isWork === undefined,
+          })}
         >
           <CardTitle
             className={cn('text-center font-bold', {

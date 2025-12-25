@@ -8,7 +8,6 @@ import { TimerState as BaseTimerState, formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
 import { useIntervalTimer, useLapHistory, usePreStartCountdown, useSoundManager } from '@/hooks'
 
-import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import {
   PauseButton,
   ResetButton,
@@ -17,6 +16,7 @@ import {
   StopButton,
 } from '@/components/ui/timer-buttons'
 import { TimerContainer } from '@/components/display/TimerContainer'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 
@@ -27,7 +27,10 @@ interface IntervalProps {
   onComplete?: () => void
 }
 
-export function Interval({ intervalConfig: { sound, ...intervalConfig }, onComplete }: IntervalProps) {
+export function Interval({
+  intervalConfig: { sound, ...intervalConfig },
+  onComplete,
+}: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
   const addLapCallback = useCallback(
@@ -135,12 +138,15 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig }, onCompl
   const maxTime = currentStep?.duration ?? 0
   const elapsed = currentStep ? currentStep.duration - timeLeft : 0
   const progress = maxTime > 0 ? (elapsed / maxTime) * 100 : 0
-  const isVisible = !!currentStep && !isPreStarting && (timerState === TimerState.Running || timerState === TimerState.Paused)
+  const isVisible =
+    !!currentStep &&
+    !isPreStarting &&
+    (timerState === TimerState.Running || timerState === TimerState.Paused)
   const isWorkStep = currentStep?.isWork ?? true
 
   const getCurrentIntervalInfo = () => {
     const workSteps = Math.ceil((currentStepIndex + 1) / 2)
-    return `${workSteps}/${intervalConfig.intervals}`
+    return `${workSteps} of ${intervalConfig.intervals} rounds`
   }
 
   const showPlayButton = isPreStarting
@@ -152,7 +158,7 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig }, onCompl
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
-        label={currentStep?.label || 'Interval Timer'}
+        label={currentStep?.label || intervalConfig.name || 'Interval Timer'}
         state={isPreStarting ? preStart.state : timerState}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}

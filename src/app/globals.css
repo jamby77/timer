@@ -212,7 +212,7 @@
   /* Timer colors - Dark theme */
   --tm-work-bg: oklch(0.714 0.188 143.292 / 0.3);
   --tm-work-fg: oklch(0.845 0.03 142.3);
-  --tm-rest-bg: oklch(0.769 0.148 77.315 / 0.5);
+  --tm-rest-bg: oklch(0.665 0.104 92.847);
   --tm-rest-fg: oklch(0.845 0.03 254.3);
 
   /* Timer button colors - Light theme */

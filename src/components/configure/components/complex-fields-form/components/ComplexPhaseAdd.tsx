@@ -90,7 +90,7 @@ export const ComplexPhaseAdd = ({
         </h2>
       </div>
 
-      <form className="flex flex-col gap-2">
+      <form className="flex flex-col gap-2 md:gap-4">
         <ComplexBody
           type={draftType}
           config={draftConfig}
@@ -99,7 +99,7 @@ export const ComplexPhaseAdd = ({
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
         />
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 md:flex-row md:justify-end">
           {phasesCount === 0 && <Button onClick={handleAddAtStart}>Add</Button>}
           {phasesCount > 0 && (
             <>
@@ -109,7 +109,7 @@ export const ComplexPhaseAdd = ({
               </Button>
             </>
           )}
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="destructive" onClick={onCancel}>
             Cancel
           </Button>
         </div>
