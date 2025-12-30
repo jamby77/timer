@@ -43,7 +43,7 @@ export const timerReducer = (state: UseTimerState, action: TimerAction): UseTime
 
 export const useTimer = (
   initialTime: number,
-  { onTick, onStateChange, onComplete }: TimerOptions = {}
+  { onTick, onStateChange, onComplete, onStop }: TimerOptions = {}
 ) => {
   const [{ state, time, totalElapsedTime }, dispatch] = useReducer(timerReducer, {
     time: initialTime,
@@ -88,7 +88,8 @@ export const useTimer = (
 
   const reset = useCallback(() => {
     timerRef.current?.reset()
-  }, [])
+    onStop?.()
+  }, [onStop])
 
   const restart = useCallback(() => {
     timerRef.current?.reset()

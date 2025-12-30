@@ -25,11 +25,14 @@ interface IntervalProps {
   intervalConfig: IntervalConfig
   /** Optional callback when the full interval sequence completes */
   onComplete?: () => void
+  /** Optional callback when Stop button is clicked */
+  onStop?: () => void
 }
 
 export function Interval({
   intervalConfig: { sound, ...intervalConfig },
   onComplete,
+  onStop,
 }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -53,6 +56,7 @@ export function Interval({
     ...intervalConfig,
     onWorkStepComplete: addLapCallback,
     onSequenceComplete: onComplete,
+    onStop,
   })
 
   const preStart = usePreStartCountdown({

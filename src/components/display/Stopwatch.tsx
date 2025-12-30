@@ -17,11 +17,14 @@ interface StopwatchProps {
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
   onStateChange?: (state: TimerState) => void
+  /** Optional callback when Stop button is clicked */
+  onStop?: () => void
 }
 
 export function Stopwatch({
   config: { timeLimit = 0, name = 'Stopwatch', sound, countdownBeforeStart },
   onStateChange,
+  onStop,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -43,7 +46,8 @@ export function Stopwatch({
   const { time, state, start, pause, reset } = useStopwatch({
     timeLimitMs: timeLimit * 1000,
     onStateChange: handleStateChange,
-    onStop: handleStop,
+    onAutoStop: handleStop,
+    onStop,
   })
 
   const preStart = usePreStartCountdown({

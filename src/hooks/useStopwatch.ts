@@ -8,7 +8,8 @@ import { Stopwatch } from '@/lib/timer/Stopwatch'
 type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange' | 'onStop'> & {
   onTick?: (elapsedTime: number) => void
   onStateChange?: (state: TimerState) => void
-  onStop?: (elapsedTime: number) => void
+  onStop?: () => void
+  onAutoStop?: (elapsedTime: number) => void
 }
 
 export const useStopwatch = (options: UseStopwatchOptions = {}) => {
@@ -26,7 +27,7 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
       },
       onStop: (time) => {
         setTime(time)
-        options.onStop?.(time)
+        options.onAutoStop?.(time)
       },
       onStateChange: (newState) => {
         setState(newState)
@@ -54,7 +55,8 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
 
   const reset = useCallback(() => {
     stopwatchRef.current?.reset()
-  }, [])
+    options.onStop?.()
+  }, [options.onStop])
 
   const restart = useCallback(() => {
     stopwatchRef.current?.reset()

@@ -93,6 +93,11 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
                 handlePhaseComplete(currentPhase.id)
               }
             }}
+            onStop={() => {
+              if (config.autoAdvance ?? true) {
+                goToNextPhase()
+              }
+            }}
           />
         )
       case TimerType.STOPWATCH:
@@ -105,6 +110,11 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
                 handlePhaseComplete(currentPhase.id)
               }
             }}
+            onStop={() => {
+              if (config.autoAdvance ?? true) {
+                goToNextPhase()
+              }
+            }}
           />
         )
       case TimerType.INTERVAL:
@@ -113,6 +123,11 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             intervalConfig={timerConfig as IntervalConfig}
             onComplete={() => handlePhaseComplete(currentPhase.id)}
+            onStop={() => {
+              if (config.autoAdvance ?? true) {
+                goToNextPhase()
+              }
+            }}
           />
         )
       case TimerType.WORKREST:
@@ -121,6 +136,11 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as WorkRestConfig}
             onPhaseComplete={() => handlePhaseComplete(currentPhase.id)}
+            onStop={() => {
+              if (config.autoAdvance ?? true) {
+                goToNextPhase()
+              }
+            }}
           />
         )
       default:

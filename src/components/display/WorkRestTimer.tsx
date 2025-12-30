@@ -25,9 +25,11 @@ interface WorkRestTimerProps {
   config: WorkRestConfig
   /** Optional callback invoked when a full work/rest cycle completes */
   onPhaseComplete?: () => void
+  /** Optional callback when Stop button is clicked */
+  onStop?: () => void
 }
 
-export function WorkRestTimer({ config: { sound, ...config }, onPhaseComplete }: WorkRestTimerProps) {
+export function WorkRestTimer({ config: { sound, ...config }, onPhaseComplete, onStop }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
 
@@ -36,6 +38,7 @@ export function WorkRestTimer({ config: { sound, ...config }, onPhaseComplete }:
   const [state, actions] = useWorkRestTimer({
     config,
     onLapRecorded: addLap,
+    onStop,
   })
 
   const preStart = usePreStartCountdown({

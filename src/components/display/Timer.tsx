@@ -17,11 +17,14 @@ interface TimerProps {
   config: CountdownConfig
   /** Optional callback when timer state changes */
   onStateChange?: (state: TimerState) => void
+  /** Optional callback when Stop button is clicked */
+  onStop?: () => void
 }
 
 export const Timer = ({
   config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
+  onStop,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -45,6 +48,7 @@ export const Timer = ({
   const { time, state, totalElapsedTime, start, pause, reset } = useTimer(duration * 1000, {
     onStateChange: handleStateChange,
     onComplete: handleComplete,
+    onStop,
   })
 
   const preStart = usePreStartCountdown({

@@ -52,12 +52,14 @@ export interface WorkRestTimerActions {
 export interface WorkRestTimerOptions {
   config?: WorkRestTimerConfig // Timer-specific configuration only
   onLapRecorded?: (time: number) => void // Callback for lap recording
+  onStop?: () => void
 }
 
 export interface TimerOptions {
   onTick?: (time: number, totalElapsedTime: number) => void
   onComplete?: (totalElapsedTime: number) => void
   onStateChange?: (state: TimerState, totalElapsedTime: number) => void
+  onStop?: () => void
   debug?: boolean
   onPauseCountChange?: (pauseCount: number, totalPausedTime: number) => void
 }
@@ -86,4 +88,5 @@ export interface IntervalConfig {
   onWorkStepComplete?: (time: number) => void
   onStepChange?: (step: TimerStep | null, stepIndex: number) => void
   onSequenceComplete?: () => void
+  onStop?: () => void
 }
