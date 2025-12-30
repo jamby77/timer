@@ -18,7 +18,7 @@ export const useWakeLock = (isActive: boolean) => {
   }, [])
 
   const releaseWakeLock = useCallback(async () => {
-    if (wakeLockRef.current) {
+    if (wakeLockRef.current && !wakeLockRef.current.released) {
       await wakeLockRef.current.release()
       wakeLockRef.current = null
       console.log('Wake lock released')
