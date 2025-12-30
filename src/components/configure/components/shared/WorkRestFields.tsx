@@ -32,12 +32,12 @@ export const WorkRestFields = ({
           </div>
           <div className="flex items-center gap-2">
             <RadioGroupItem value={WorkRestMode.FIXED} id={WorkRestMode.FIXED} />
-            <Label htmlFor={WorkRestMode.FIXED}>Fixed duration</Label>
+            <Label htmlFor={WorkRestMode.FIXED}>Fixed rest</Label>
           </div>
         </RadioGroup>
       </Field>
 
-      {restMode !== WorkRestMode.FIXED && (
+      {restMode === WorkRestMode.RATIO && (
         <Field>
           <FieldLabel htmlFor="ratio">Work/Rest Ratio</FieldLabel>
           <div className="flex items-center justify-between gap-2">

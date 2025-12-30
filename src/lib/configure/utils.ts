@@ -62,39 +62,35 @@ const intervalConfigSchema = baseTimerConfigSchema.extend({
   skipLastRest: z.boolean().optional(),
 })
 
-// WorkRest ratio config schema
-const workRestRatioConfigSchema = baseTimerConfigSchema.extend({
+const workRestBaseSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.WORKREST),
   maxWorkTime: z
-    .number('Maximum work time is required')
+    .number()
     .int('Maximum work time must be an integer')
-    .min(1, 'Maximum work time must be greater than 0'),
+    .min(1, 'Maximum work time must be greater than 0')
+    .optional(),
   maxRounds: z
-    .number('Maximum rounds is required')
+    .number()
     .int('Maximum rounds must be an integer')
-    .min(1, 'Maximum rounds must be greater than 0'),
+    .min(1, 'Maximum rounds must be greater than 0')
+    .optional(),
+})
+
+// WorkRest ratio config schema
+const workRestRatioConfigSchema = workRestBaseSchema.extend({
   restMode: z.literal(WorkRestMode.RATIO),
   ratio: z.number('Work/rest ratio is required').min(0.1, 'Work/rest ratio must be greater than 0'),
   fixedRestDuration: z.never().optional(),
 })
 
 // WorkRest fixed config schema
-const workRestFixedConfigSchema = baseTimerConfigSchema.extend({
-  type: z.literal(TimerType.WORKREST),
-  maxWorkTime: z
-    .number('Maximum work time is required')
-    .int('Maximum work time must be an integer')
-    .min(1, 'Maximum work time must be greater than 0'),
-  maxRounds: z
-    .number('Maximum rounds is required')
-    .int('Maximum rounds must be an integer')
-    .min(1, 'Maximum rounds must be greater than 0'),
+const workRestFixedConfigSchema = workRestBaseSchema.extend({
   restMode: z.literal(WorkRestMode.FIXED),
+  ratio: z.never().optional(),
   fixedRestDuration: z
     .number('Fixed rest duration is required')
     .int('Fixed rest duration must be an integer')
     .min(1, 'Fixed rest duration must be greater than 0'),
-  ratio: z.never().optional(),
 })
 
 // WorkRest union schema
