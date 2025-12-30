@@ -6,7 +6,13 @@ import type { IntervalConfig } from '@/types/configure'
 
 import { TimerState as BaseTimerState, formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
-import { useIntervalTimer, useLapHistory, usePreStartCountdown, useSoundManager } from '@/hooks'
+import {
+  useIntervalTimer,
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useWakeLock,
+} from '@/hooks'
 
 import {
   PauseButton,
@@ -25,7 +31,7 @@ interface IntervalProps {
   intervalConfig: IntervalConfig
   /** Optional callback when the full interval sequence completes */
   onComplete?: () => void
-  /** Optional callback when Stop button is clicked */
+  /** Optional callback when the Stop button is clicked */
   onStop?: () => void
 }
 
@@ -38,7 +44,7 @@ export function Interval({
   const soundManager = useSoundManager(sound)
   const addLapCallback = useCallback(
     (elapsedTime: number) => {
-      // Add lap with the actual elapsed time
+      // Add a lap with the actual elapsed time
       addLap(elapsedTime)
     },
     [addLap]
@@ -129,6 +135,9 @@ export function Interval({
   const isRunning = timerState === TimerState.Running
   const isPreStarting = preStart.isActive
   const isActive = isRunning || isPreStarting
+
+  // Keep screen awake while interval timer is running
+  useWakeLock(isRunning)
 
   const handlePause = useCallback(() => {
     if (isPreStarting) {

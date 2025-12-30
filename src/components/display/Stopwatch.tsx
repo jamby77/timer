@@ -5,7 +5,13 @@ import { useCallback, useEffect } from 'react'
 import type { StopwatchConfig } from '@/types/configure'
 
 import { formatTime, TimerState } from '@/lib/timer'
-import { useLapHistory, usePreStartCountdown, useSoundManager, useStopwatch } from '@/hooks'
+import {
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useStopwatch,
+  useWakeLock,
+} from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
@@ -17,7 +23,7 @@ interface StopwatchProps {
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
   onStateChange?: (state: TimerState) => void
-  /** Optional callback when Stop button is clicked */
+  /** Optional callback when the Stop button is clicked */
   onStop?: () => void
 }
 
@@ -69,6 +75,9 @@ export function Stopwatch({
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive
   const isActive = isRunning || isPreStarting
+
+  // Keep the screen awake while stopwatch is running
+  useWakeLock(isRunning)
 
   const handleReset = useCallback(() => {
     if (isPreStarting) {

@@ -5,7 +5,13 @@ import { toast } from 'sonner'
 
 import { CountdownConfig } from '@/types/configure'
 import { formatTime, TimerState } from '@/lib/timer'
-import { useLapHistory, usePreStartCountdown, useSoundManager, useTimer } from '@/hooks'
+import {
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useTimer,
+  useWakeLock,
+} from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
@@ -17,7 +23,7 @@ interface TimerProps {
   config: CountdownConfig
   /** Optional callback when timer state changes */
   onStateChange?: (state: TimerState) => void
-  /** Optional callback when Stop button is clicked */
+  /** Optional callback when the Stop button is clicked */
   onStop?: () => void
 }
 
@@ -71,6 +77,9 @@ export const Timer = ({
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive
   const isActive = isRunning || isPreStarting
+
+  // Keep screen awake while timer is running
+  useWakeLock(isRunning)
   const handleReset = () => {
     if (isPreStarting) {
       preStart.reset()

@@ -7,7 +7,13 @@ import type { WorkRestConfig } from '@/types/configure'
 import { TimerState as BaseTimerState } from '@/lib/timer'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
-import { useLapHistory, usePreStartCountdown, useSoundManager, useWorkRestTimer } from '@/hooks'
+import {
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useWakeLock,
+  useWorkRestTimer,
+} from '@/hooks'
 
 import {
   PauseButton,
@@ -25,11 +31,15 @@ interface WorkRestTimerProps {
   config: WorkRestConfig
   /** Optional callback invoked when a full work/rest cycle completes */
   onPhaseComplete?: () => void
-  /** Optional callback when Stop button is clicked */
+  /** Optional callback when the Stop button is clicked */
   onStop?: () => void
 }
 
-export function WorkRestTimer({ config: { sound, ...config }, onPhaseComplete, onStop }: WorkRestTimerProps) {
+export function WorkRestTimer({
+  config: { sound, ...config },
+  onPhaseComplete,
+  onStop,
+}: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
 
@@ -94,6 +104,9 @@ export function WorkRestTimer({ config: { sound, ...config }, onPhaseComplete, o
   const isWorkPhase = state.phase === TimerPhase.Work
   const isRunningState = state.state === TimerState.Running
   const isPausedState = state.state === TimerState.Paused
+
+  // Keep screen awake while work/rest timer is running
+  useWakeLock(isRunningState)
 
   const isPreStarting = preStart.isActive
   const isPreStartRunning = preStart.state === BaseTimerState.Running
