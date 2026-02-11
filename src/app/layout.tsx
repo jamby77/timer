@@ -1,6 +1,7 @@
 import './globals.css'
 
 import { ReactNode } from 'react'
+import { TimerProvider } from '@/contexts/TimerContext'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
@@ -54,9 +55,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
           enableSystem
           disableTransitionOnChange
         >
-          <Navigation />
+          <TimerProvider>
+            <Navigation />
 
-          <main className="bg-background inset-0 h-full grow">{children}</main>
+            <main className="bg-background inset-0 h-full grow">{children}</main>
+          </TimerProvider>
           <Toaster position="top-center" duration={10000} richColors />
         </ThemeProvider>
       </body>

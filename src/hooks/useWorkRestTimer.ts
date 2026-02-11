@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type {
   WorkRestTimerActions,
@@ -21,7 +22,9 @@ export const useWorkRestTimer = ({
   config = {},
   onLapRecorded,
   onStop,
+  onStateChange,
 }: WorkRestTimerOptions = {}): [WorkRestTimerState, WorkRestTimerActions] => {
+  const { setTimerActive } = useTimerContext()
   const [state, setState] = useState<WorkRestTimerState>({
     phase: TimerPhase.Idle,
     ratio: Math.round((config.ratio ?? 1.0) * 100), // Convert to integer * 100
@@ -39,12 +42,20 @@ export const useWorkRestTimer = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const onLapRecordedRef = useRef(onLapRecorded)
   const onStopRef = useRef(onStop)
+  const onStateChangeRef = useRef(onStateChange)
 
   // Update the callback ref when options change
   useEffect(() => {
     onLapRecordedRef.current = onLapRecorded
     onStopRef.current = onStop
-  }, [onLapRecorded, onStop])
+    onStateChangeRef.current = onStateChange
+  }, [onLapRecorded, onStop, onStateChange])
+
+  // Update context when work/rest timer state changes
+  useEffect(() => {
+    setTimerActive(state.state === TimerState.Running || state.state === TimerState.Paused)
+    onStateChangeRef.current?.(state.state)
+  }, [state.state, setTimerActive])
 
   // Clean up the current timer and stopwatch
   const cleanupTimer = useCallback(() => {

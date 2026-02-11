@@ -5,6 +5,7 @@ import type { IntervalConfig } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
 import { StepState, TimerManager } from '@/lib/timer/TimerManager'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 function generateSteps(
   skipLastRest: boolean,
@@ -63,11 +64,17 @@ export const useIntervalTimer = ({
   onSequenceComplete,
   onStop,
 }: IntervalConfig) => {
+  const { setTimerActive } = useTimerContext()
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [timerState, setTimerState] = useState<TimerState>(TimerState.Idle)
   const [timeLeft, setTimeLeft] = useState(0)
   const managerRef = useRef<TimerManager | null>(null)
+
+  // Update context when interval timer state changes
+  useEffect(() => {
+    setTimerActive(timerState === TimerState.Running || timerState === TimerState.Paused)
+  }, [timerState, setTimerActive])
 
   managerRef.current = useMemo(() => {
     const steps = generateSteps(

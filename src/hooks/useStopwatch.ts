@@ -4,6 +4,7 @@ import type { StopwatchOptions as StopwatchOptionsType } from '@/lib/timer/Stopw
 
 import { TimerState } from '@/lib/enums'
 import { Stopwatch } from '@/lib/timer/Stopwatch'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange' | 'onStop'> & {
   onTick?: (elapsedTime: number) => void
@@ -13,9 +14,15 @@ type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange'
 }
 
 export const useStopwatch = (options: UseStopwatchOptions = {}) => {
+  const { setTimerActive } = useTimerContext()
   const [time, setTime] = useState(0)
   const [state, setState] = useState<TimerState>(TimerState.Idle)
   const stopwatchRef = useRef<Stopwatch | null>(null)
+
+  // Update context when stopwatch state changes
+  useEffect(() => {
+    setTimerActive(state === TimerState.Running || state === TimerState.Paused)
+  }, [state, setTimerActive])
 
   // Initialize stopwatch
   useEffect(() => {

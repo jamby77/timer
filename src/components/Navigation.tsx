@@ -6,9 +6,16 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 import { ThemeToggle } from '@/components/theme-toggle'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 export const Navigation = () => {
   const pathname = usePathname()
+  const { isAnyTimerActive } = useTimerContext()
+
+  // Hide navigation when any timer is active (running or paused)
+  if (isAnyTimerActive) {
+    return null
+  }
 
   const navItems = [
     { href: '/', label: 'Run' },

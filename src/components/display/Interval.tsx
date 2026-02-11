@@ -33,12 +33,15 @@ interface IntervalProps {
   onComplete?: () => void
   /** Optional callback when the Stop button is clicked */
   onStop?: () => void
+  /** Optional callback when timer state changes */
+  onStateChange?: (state: TimerState) => void
 }
 
 export function Interval({
   intervalConfig: { sound, ...intervalConfig },
   onComplete,
   onStop,
+  onStateChange,
 }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -63,6 +66,7 @@ export function Interval({
     onWorkStepComplete: addLapCallback,
     onSequenceComplete: onComplete,
     onStop,
+    onStateChange: onStateChange,
   })
 
   const preStart = usePreStartCountdown({

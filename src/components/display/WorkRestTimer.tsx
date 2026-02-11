@@ -33,12 +33,15 @@ interface WorkRestTimerProps {
   onPhaseComplete?: () => void
   /** Optional callback when the Stop button is clicked */
   onStop?: () => void
+  /** Optional callback when timer state changes */
+  onStateChange?: (state: TimerState) => void
 }
 
 export function WorkRestTimer({
   config: { sound, ...config },
   onPhaseComplete,
   onStop,
+  onStateChange,
 }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -49,6 +52,7 @@ export function WorkRestTimer({
     config,
     onLapRecorded: addLap,
     onStop,
+    onStateChange,
   })
 
   const preStart = usePreStartCountdown({

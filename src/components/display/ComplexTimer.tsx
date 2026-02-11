@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type {
   AnyTimerConfig,
@@ -24,12 +25,19 @@ interface ComplexTimerProps {
 }
 
 export function ComplexTimer({ config }: ComplexTimerProps) {
+  const { setTimerActive } = useTimerContext()
   const phases = useMemo(() => {
     return [...(config.phases ?? [])].sort((a, b) => a.order - b.order)
   }, [config.phases])
 
   const [phaseIndex, setPhaseIndex] = useState(0)
+  const [isComplexRunning, setIsComplexRunning] = useState(false)
   const lastAutoAdvancedPhaseIdRef = useRef<string | null>(null)
+
+  // Update context when complex timer state changes
+  useEffect(() => {
+    setTimerActive(isComplexRunning)
+  }, [isComplexRunning, setTimerActive])
 
   useEffect(() => {
     setPhaseIndex(0)
@@ -58,14 +66,25 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   const handlePhaseComplete = useCallback(
     (phaseId: string) => {
       const autoAdvance = config.autoAdvance ?? true
-      if (!autoAdvance) return
+      
+      // Check if this is the last phase FIRST
+      if (isLast) {
+        setIsComplexRunning(false)
+        return // Complex timer finished
+      }
+      
+      if (!autoAdvance) {
+        return
+      }
 
-      if (lastAutoAdvancedPhaseIdRef.current === phaseId) return
+      if (lastAutoAdvancedPhaseIdRef.current === phaseId) {
+        return
+      }
       lastAutoAdvancedPhaseIdRef.current = phaseId
 
       goToNextPhase()
     },
-    [config.autoAdvance, goToNextPhase]
+    [config.autoAdvance, goToNextPhase, isLast]
   )
 
   if (!phases.length) {
@@ -89,13 +108,18 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as CountdownConfig}
             onStateChange={(state) => {
+              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
               if (state === TimerState.Completed) {
                 handlePhaseComplete(currentPhase.id)
               }
             }}
             onStop={() => {
               if (config.autoAdvance ?? true) {
+                // Auto-advancing: don't set running to false to prevent flicker
                 goToNextPhase()
+              } else {
+                // Manual stop: set running to false
+                setIsComplexRunning(false)
               }
             }}
           />
@@ -106,13 +130,18 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as StopwatchConfig}
             onStateChange={(state) => {
+              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
               if (state === TimerState.Completed) {
                 handlePhaseComplete(currentPhase.id)
               }
             }}
             onStop={() => {
               if (config.autoAdvance ?? true) {
+                // Auto-advancing: don't set running to false to prevent flicker
                 goToNextPhase()
+              } else {
+                // Manual stop: set running to false
+                setIsComplexRunning(false)
               }
             }}
           />
@@ -123,9 +152,16 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             intervalConfig={timerConfig as IntervalConfig}
             onComplete={() => handlePhaseComplete(currentPhase.id)}
+            onStateChange={(state) => {
+              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
+            }}
             onStop={() => {
               if (config.autoAdvance ?? true) {
+                // Auto-advancing: don't set running to false to prevent flicker
                 goToNextPhase()
+              } else {
+                // Manual stop: set running to false
+                setIsComplexRunning(false)
               }
             }}
           />
@@ -136,9 +172,16 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as WorkRestConfig}
             onPhaseComplete={() => handlePhaseComplete(currentPhase.id)}
+            onStateChange={(state) => {
+              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
+            }}
             onStop={() => {
               if (config.autoAdvance ?? true) {
+                // Auto-advancing: don't set running to false to prevent flicker
                 goToNextPhase()
+              } else {
+                // Manual stop: set running to false
+                setIsComplexRunning(false)
               }
             }}
           />
