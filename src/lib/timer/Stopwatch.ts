@@ -1,5 +1,6 @@
+import { TimerState } from '@/lib/enums'
+
 import { Timer } from './Timer'
-import { TimerState } from './types'
 import { formatTime } from './utils'
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000 // 1 year in milliseconds

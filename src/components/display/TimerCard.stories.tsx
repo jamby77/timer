@@ -1,7 +1,7 @@
 import preview from '#.storybook/preview'
 import { fn } from 'storybook/test'
 
-import { TimerState } from '@/lib/timer'
+import { TimerState } from '@/lib/enums'
 
 import TimerButton from '@/components/display/TimerButton'
 import { TimerCard } from '@/components/display/TimerCard'

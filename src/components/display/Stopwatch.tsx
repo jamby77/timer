@@ -4,7 +4,8 @@ import { useCallback, useEffect } from 'react'
 
 import type { StopwatchConfig } from '@/types/configure'
 
-import { formatTime, TimerState } from '@/lib/timer'
+import { formatTime } from '@/lib/timer'
+import { TimerState } from '@/lib/enums'
 import {
   useLapHistory,
   usePreStartCountdown,

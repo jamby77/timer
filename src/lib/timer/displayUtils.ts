@@ -1,6 +1,6 @@
 import type { WorkRestTimerState } from './types'
 
-import { TimerPhase } from './types'
+import { TimerPhase } from '@/lib/enums'
 import { formatTime } from './utils'
 
 export interface DisplayData {
