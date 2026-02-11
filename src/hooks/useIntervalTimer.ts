@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { TimerStep } from '@/lib/timer/TimerManager'
 import type { IntervalConfig } from '@/lib/timer/types'
@@ -14,7 +14,7 @@ function generateSteps(
   workLabel: string,
   restDuration: number,
   restLabel: string,
-  onWorkStepComplete?: { (elapsedTime: number): void | undefined }
+  onWorkStepCompleteRef: React.RefObject<((elapsedTime: number) => void) | undefined>
 ) {
   const steps: TimerStep[] = []
   const restIntervals = skipLastRest ? intervals - 1 : intervals
@@ -31,10 +31,10 @@ function generateSteps(
         if (state === StepState.Complete) {
           // Use full duration when completed naturally
           const fullDuration = workDuration * 1000
-          onWorkStepComplete?.(fullDuration)
+          onWorkStepCompleteRef.current?.(fullDuration)
         } else if (state === StepState.Skip) {
           // Use actual elapsed time when skipped
-          onWorkStepComplete?.(elapsedTime)
+          onWorkStepCompleteRef.current?.(elapsedTime)
         }
       },
     })
@@ -71,12 +71,23 @@ export const useIntervalTimer = ({
   const [timeLeft, setTimeLeft] = useState(0)
   const managerRef = useRef<TimerManager | null>(null)
 
+  // Store callbacks in refs to avoid recreating the TimerManager on every render
+  const onWorkStepCompleteRef = useRef(onWorkStepComplete)
+  const onStepChangeRef = useRef(onStepChange)
+  const onSequenceCompleteRef = useRef(onSequenceComplete)
+  const onStopRef = useRef(onStop)
+  onWorkStepCompleteRef.current = onWorkStepComplete
+  onStepChangeRef.current = onStepChange
+  onSequenceCompleteRef.current = onSequenceComplete
+  onStopRef.current = onStop
+
   // Update context when interval timer state changes
   useEffect(() => {
     setTimerActive(timerState === TimerState.Running || timerState === TimerState.Paused)
   }, [timerState, setTimerActive])
 
-  managerRef.current = useMemo(() => {
+  // Create and manage the TimerManager instance
+  useEffect(() => {
     const steps = generateSteps(
       skipLastRest,
       intervals,
@@ -84,11 +95,10 @@ export const useIntervalTimer = ({
       workLabel,
       restDuration,
       restLabel,
-      onWorkStepComplete
+      onWorkStepCompleteRef
     )
 
-    // Create a single timer manager with step change handling
-    return new TimerManager({
+    const manager = new TimerManager({
       steps,
       repeat: 1,
       onStepChange: (step, stepIndex) => {
@@ -96,7 +106,7 @@ export const useIntervalTimer = ({
         setCurrentStep(step)
         setCurrentStepIndex(stepIndex)
         // External callback
-        onStepChange?.(step, stepIndex)
+        onStepChangeRef.current?.(step, stepIndex)
       },
       onSequenceComplete: () => {
         // Internal state update
@@ -104,12 +114,19 @@ export const useIntervalTimer = ({
         setCurrentStep(null)
         setCurrentStepIndex(0)
         // External callback
-        onSequenceComplete?.()
+        onSequenceCompleteRef.current?.()
       },
       onTick: (time) => {
         setTimeLeft(time)
       },
     })
+
+    managerRef.current = manager
+    setTimeLeft(manager.getCurrentStep()?.duration || 0)
+
+    return () => {
+      managerRef.current = null
+    }
   }, [
     workDuration,
     restDuration,
@@ -117,22 +134,7 @@ export const useIntervalTimer = ({
     workLabel,
     restLabel,
     skipLastRest,
-    onStepChange,
-    onSequenceComplete,
   ])
-
-  // Update the timer manager when dependencies change
-  useEffect(() => {
-    if (!managerRef.current) {
-      return
-    }
-
-    setTimeLeft(managerRef.current.getCurrentStep()?.duration || 0)
-    return () => {
-      // Clean up the old timer manager
-      managerRef.current = null
-    }
-  }, [managerRef.current])
 
   // Create stable callbacks
   const start = useCallback(() => {
@@ -157,8 +159,8 @@ export const useIntervalTimer = ({
     setCurrentStep(null)
     setCurrentStepIndex(0)
     setTimeLeft(0)
-    onStop?.()
-  }, [onStop])
+    onStopRef.current?.()
+  }, [])
 
   const skipCurrentStep = useCallback(() => {
     managerRef.current?.skipCurrentStep()

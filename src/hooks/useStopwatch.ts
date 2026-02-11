@@ -19,6 +19,16 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const [state, setState] = useState<TimerState>(TimerState.Idle)
   const stopwatchRef = useRef<Stopwatch | null>(null)
 
+  // Store callbacks in refs to avoid recreating the Stopwatch on every render
+  const onTickRef = useRef(options.onTick)
+  const onStopRef = useRef(options.onStop)
+  const onAutoStopRef = useRef(options.onAutoStop)
+  const onStateChangeRef = useRef(options.onStateChange)
+  onTickRef.current = options.onTick
+  onStopRef.current = options.onStop
+  onAutoStopRef.current = options.onAutoStop
+  onStateChangeRef.current = options.onStateChange
+
   // Update context when stopwatch state changes
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
@@ -27,18 +37,19 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   // Initialize stopwatch
   useEffect(() => {
     const stopwatch = new Stopwatch({
-      ...options,
+      timeLimitMs: options.timeLimitMs,
+      autoStart: options.autoStart,
       onTick: (time) => {
         setTime(time)
-        options.onTick?.(time)
+        onTickRef.current?.(time)
       },
       onStop: (time) => {
         setTime(time)
-        options.onAutoStop?.(time)
+        onAutoStopRef.current?.(time)
       },
       onStateChange: (newState) => {
         setState(newState)
-        options.onStateChange?.(newState)
+        onStateChangeRef.current?.(newState)
       },
     })
 
@@ -50,7 +61,7 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
       stopwatch.destroy()
       stopwatchRef.current = null
     }
-  }, [options.timeLimitMs]) // Only recreate if timeLimit changes
+  }, [options.timeLimitMs, options.autoStart])
 
   const start = useCallback(() => {
     stopwatchRef.current?.start()
@@ -62,13 +73,13 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
 
   const reset = useCallback(() => {
     stopwatchRef.current?.reset()
-    options.onStop?.()
-  }, [options.onStop])
+    onStopRef.current?.()
+  }, [])
 
   const restart = useCallback(() => {
     stopwatchRef.current?.reset()
     stopwatchRef.current?.start()
-  }, [reset, start])
+  }, [])
 
   return {
     time,

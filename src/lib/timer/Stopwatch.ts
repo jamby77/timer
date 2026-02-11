@@ -88,7 +88,9 @@ export class Stopwatch {
   }
 
   /**
-   * Stop the stopwatch and trigger onStop callback
+   * Stop the stopwatch and trigger onStop callback.
+   * Ignores stop calls when within 100ms of the time limit to avoid racing
+   * with the auto-complete callback fired by the internal Timer.
    */
   public stop(): void {
     if (!this.isRunning || this.getElapsedTime() >= this.timeLimitMs - 100) return

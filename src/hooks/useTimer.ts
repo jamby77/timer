@@ -54,6 +54,16 @@ export const useTimer = (
   })
   const timerRef = useRef<TimerClass | null>(null)
 
+  // Store callbacks in refs to avoid recreating the timer on every render
+  const onTickRef = useRef(onTick)
+  const onStateChangeRef = useRef(onStateChange)
+  const onCompleteRef = useRef(onComplete)
+  const onStopRef = useRef(onStop)
+  onTickRef.current = onTick
+  onStateChangeRef.current = onStateChange
+  onCompleteRef.current = onComplete
+  onStopRef.current = onStop
+
   // Update context when timer state changes
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
@@ -64,15 +74,15 @@ export const useTimer = (
     const timer = new TimerClass(initialTime, {
       onTick: (currentTime, elapsed) => {
         dispatch({ type: 'TICK', payload: { time: currentTime, elapsed } })
-        onTick?.(currentTime, elapsed)
+        onTickRef.current?.(currentTime, elapsed)
       },
       onStateChange: (newState, elapsed) => {
         dispatch({ type: 'STATE_CHANGE', payload: { state: newState, elapsed } })
-        onStateChange?.(newState, elapsed)
+        onStateChangeRef.current?.(newState, elapsed)
       },
       onComplete: (elapsed) => {
         dispatch({ type: 'STATE_CHANGE', payload: { state: TimerState.Completed, elapsed } })
-        onComplete?.(elapsed)
+        onCompleteRef.current?.(elapsed)
       },
     })
 
@@ -83,7 +93,7 @@ export const useTimer = (
       timer.destroy()
       timerRef.current = null
     }
-  }, [initialTime, onTick, onStateChange, onComplete])
+  }, [initialTime])
 
   const start = useCallback(() => {
     timerRef.current?.start()
@@ -95,8 +105,8 @@ export const useTimer = (
 
   const reset = useCallback(() => {
     timerRef.current?.reset()
-    onStop?.()
-  }, [onStop])
+    onStopRef.current?.()
+  }, [])
 
   const restart = useCallback(() => {
     timerRef.current?.reset()

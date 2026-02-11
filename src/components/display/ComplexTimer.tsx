@@ -91,6 +91,33 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
     [config.autoAdvance, goToNextPhase, isLast]
   )
 
+  const handlePhaseStop = useCallback(() => {
+    if (config.autoAdvance ?? true) {
+      // Auto-advancing: don't set running to false to prevent flicker
+      goToNextPhase()
+    } else {
+      // Manual stop: set running to false
+      setIsComplexRunning(false)
+    }
+  }, [config.autoAdvance, goToNextPhase])
+
+  const handlePhaseStateChange = useCallback(
+    (state: TimerState) => {
+      setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
+      if (state === TimerState.Completed) {
+        handlePhaseComplete(currentPhase.id)
+      }
+    },
+    [handlePhaseComplete, currentPhase.id]
+  )
+
+  const handlePhaseStateChangeNoComplete = useCallback(
+    (state: TimerState) => {
+      setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
+    },
+    []
+  )
+
   const renderPhaseTimer = (timerConfig: AnyTimerConfig) => {
     switch (timerConfig.type) {
       case TimerType.COUNTDOWN:
@@ -98,21 +125,8 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
           <Timer
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as CountdownConfig}
-            onStateChange={(state) => {
-              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
-              if (state === TimerState.Completed) {
-                handlePhaseComplete(currentPhase.id)
-              }
-            }}
-            onStop={() => {
-              if (config.autoAdvance ?? true) {
-                // Auto-advancing: don't set running to false to prevent flicker
-                goToNextPhase()
-              } else {
-                // Manual stop: set running to false
-                setIsComplexRunning(false)
-              }
-            }}
+            onStateChange={handlePhaseStateChange}
+            onStop={handlePhaseStop}
           />
         )
       case TimerType.STOPWATCH:
@@ -120,21 +134,8 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
           <Stopwatch
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as StopwatchConfig}
-            onStateChange={(state) => {
-              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
-              if (state === TimerState.Completed) {
-                handlePhaseComplete(currentPhase.id)
-              }
-            }}
-            onStop={() => {
-              if (config.autoAdvance ?? true) {
-                // Auto-advancing: don't set running to false to prevent flicker
-                goToNextPhase()
-              } else {
-                // Manual stop: set running to false
-                setIsComplexRunning(false)
-              }
-            }}
+            onStateChange={handlePhaseStateChange}
+            onStop={handlePhaseStop}
           />
         )
       case TimerType.INTERVAL:
@@ -143,18 +144,8 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             intervalConfig={timerConfig as IntervalConfig}
             onComplete={() => handlePhaseComplete(currentPhase.id)}
-            onStateChange={(state) => {
-              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
-            }}
-            onStop={() => {
-              if (config.autoAdvance ?? true) {
-                // Auto-advancing: don't set running to false to prevent flicker
-                goToNextPhase()
-              } else {
-                // Manual stop: set running to false
-                setIsComplexRunning(false)
-              }
-            }}
+            onStateChange={handlePhaseStateChangeNoComplete}
+            onStop={handlePhaseStop}
           />
         )
       case TimerType.WORKREST:
@@ -163,18 +154,8 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
             key={`${config.id}-${currentPhase.id}`}
             config={timerConfig as WorkRestConfig}
             onPhaseComplete={() => handlePhaseComplete(currentPhase.id)}
-            onStateChange={(state) => {
-              setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
-            }}
-            onStop={() => {
-              if (config.autoAdvance ?? true) {
-                // Auto-advancing: don't set running to false to prevent flicker
-                goToNextPhase()
-              } else {
-                // Manual stop: set running to false
-                setIsComplexRunning(false)
-              }
-            }}
+            onStateChange={handlePhaseStateChangeNoComplete}
+            onStop={handlePhaseStop}
           />
         )
       default:

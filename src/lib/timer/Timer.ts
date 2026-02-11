@@ -8,7 +8,7 @@ export class Timer {
   private time: number
   private state: TimerState = TimerState.Idle
   private startTime: number | null = null
-  private animationFrameId: number | NodeJS.Timeout | null = null
+  private animationFrameId: number | null = null
   private lastTickTime: number | null = null
   private lastUpdateTime: number = 0
   private totalElapsedTime: number = 0
@@ -224,7 +224,7 @@ export class Timer {
 
   private cleanup() {
     if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId as number)
+      cancelAnimationFrame(this.animationFrameId)
       this.animationFrameId = null
     }
     this.lastTickTime = null

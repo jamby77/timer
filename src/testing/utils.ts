@@ -1,4 +1,30 @@
+import { createElement, type ReactNode } from 'react'
+import {
+  renderHook as rtlRenderHook,
+  type RenderHookOptions,
+  type RenderHookResult,
+} from '@testing-library/react'
+
+import { TimerProvider } from '@/contexts/TimerContext'
 import { AnyTimerConfig, TimerType, WorkRestMode } from '@/types/configure'
+
+const TimerProviderWrapper = ({ children }: { children: ReactNode }) =>
+  createElement(TimerProvider, null, children)
+
+/**
+ * Wrapped renderHook that provides TimerProvider context.
+ * Use this instead of @testing-library/react's renderHook for hooks
+ * that depend on TimerContext.
+ */
+export function renderHook<TResult, TProps>(
+  callback: (props: TProps) => TResult,
+  options?: RenderHookOptions<TProps>
+): RenderHookResult<TResult, TProps> {
+  return rtlRenderHook(callback, {
+    ...options,
+    wrapper: options?.wrapper ?? (TimerProviderWrapper as any),
+  })
+}
 
 /**
  * Testing utility for waiting in async tests

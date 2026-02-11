@@ -4,8 +4,8 @@ import { useCallback, useEffect } from 'react'
 
 import type { IntervalConfig } from '@/types/configure'
 
-import { TimerState as BaseTimerState, formatTime } from '@/lib/timer'
-import { TimerState } from '@/lib/timer/types'
+import { formatTime } from '@/lib/timer'
+import { TimerState } from '@/lib/enums'
 import {
   useIntervalTimer,
   useLapHistory,
@@ -167,7 +167,7 @@ export function Interval({
   }
 
   const showPlayButton = isPreStarting
-    ? preStart.state !== BaseTimerState.Running
+    ? preStart.state !== TimerState.Running
     : timerState === TimerState.Idle ||
       timerState === TimerState.Completed ||
       timerState === TimerState.Paused

@@ -40,7 +40,7 @@ export const TimerProgressIndicator = ({
 
   return (
     <div className={cn('mb-4 flex items-center gap-2', !isVisible && 'invisible', className)}>
-      <span className="text-foreground textbase tabular-nums">{formatTime(minTime)}</span>
+      <span className="text-foreground text-base tabular-nums">{formatTime(minTime)}</span>
       <Progress value={clampedProgress} className="flex-1" style={progressStyle} />
       <span className="text-foreground text-base tabular-nums">{formatTime(maxTime)}</span>
     </div>

@@ -1,6 +1,7 @@
 import type { ComplexPhase } from '@/types/configure'
 
-import { TIMER_TYPE_ICONS, TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
+import { TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
+import { TIMER_TYPE_ICONS } from '@/lib/timer-type-icons'
 
 interface PhaseSummaryProps {
   phases: ComplexPhase[]

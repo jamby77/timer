@@ -152,7 +152,7 @@ export function Stopwatch({
             minTime={minTime}
             maxTime={maxTime}
           />
-        )}{' '}
+        )}
         <TimerButton
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}

@@ -1,5 +1,5 @@
-import { sleep } from '@/testing/utils'
-import { act, renderHook } from '@testing-library/react'
+import { renderHook, sleep } from '@/testing/utils'
+import { act } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { TimerState } from '@/lib/enums'

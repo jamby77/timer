@@ -215,8 +215,8 @@ export const validateTimerConfig = (config: AnyTimerConfig): string[] => {
     errors.push(...flatError.formErrors)
   }
   if (flatError.fieldErrors) {
-    Object.entries(flatError.fieldErrors).forEach(([_key, value]) => {
-      errors.push(value.join(', '))
+    Object.entries(flatError.fieldErrors).forEach(([key, value]) => {
+      errors.push(`${key}: ${value.join(', ')}`)
     })
   }
   // result.error.issues.forEach((issue) => {
