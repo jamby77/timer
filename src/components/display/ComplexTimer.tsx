@@ -34,6 +34,10 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   const [isComplexRunning, setIsComplexRunning] = useState(false)
   const lastAutoAdvancedPhaseIdRef = useRef<string | null>(null)
 
+  const currentPhase = phases[phaseIndex]
+  const isFirst = phaseIndex === 0
+  const isLast = phaseIndex === phases.length - 1
+
   // Update context when complex timer state changes
   useEffect(() => {
     setTimerActive(isComplexRunning)
@@ -86,19 +90,6 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
     },
     [config.autoAdvance, goToNextPhase, isLast]
   )
-
-  if (!phases.length) {
-    return (
-      <div className="text-center">
-        <h2 className="mb-4 text-2xl font-bold">{config.name || 'Complex timer'}</h2>
-        <p className="text-muted-foreground">This complex timer has no phases.</p>
-      </div>
-    )
-  }
-
-  const currentPhase = phases[phaseIndex]
-  const isFirst = phaseIndex === 0
-  const isLast = phaseIndex === phases.length - 1
 
   const renderPhaseTimer = (timerConfig: AnyTimerConfig) => {
     switch (timerConfig.type) {
