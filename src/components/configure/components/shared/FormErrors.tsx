@@ -17,8 +17,8 @@ export const FormErrors = ({ errors }: FormErrorsProps) => {
       <AlertTitle>Please fix the following errors:</AlertTitle>
       <AlertDescription>
         <ul className="list-inside list-disc text-sm">
-          {errors.map((error, index) => (
-            <li key={index}>{error}</li>
+          {errors.map((error) => (
+            <li key={error}>{error}</li>
           ))}
         </ul>
       </AlertDescription>

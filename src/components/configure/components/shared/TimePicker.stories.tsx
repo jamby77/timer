@@ -15,43 +15,26 @@ const meta: Meta<typeof TimePicker> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  render: () => {
-    const [seconds, setSeconds] = useState<number>(0)
+// Helper component for stories with state
+function TimePickerWithState({ initialTime = 0 }: { initialTime?: number }) {
+  const [seconds, setSeconds] = useState<number>(initialTime)
 
-    return (
-      <div className="p-8">
-        <TimePicker value={seconds} onTimeChange={setSeconds} />
-        <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
-      </div>
-    )
-  },
+  return (
+    <div className="p-8">
+      <TimePicker value={seconds} onTimeChange={setSeconds} />
+      <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
+    </div>
+  )
+}
+
+export const Default: Story = {
+  render: () => <TimePickerWithState />,
 }
 
 export const WithInitialTime: Story = {
-  render: () => {
-    const initialTime = 4500 // 1 hour, 15 minutes, 0 seconds
-    const [seconds, setSeconds] = useState<number>(initialTime)
-
-    return (
-      <div className="p-8">
-        <TimePicker value={seconds} onTimeChange={setSeconds} />
-        <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
-      </div>
-    )
-  },
+  render: () => <TimePickerWithState initialTime={4500} />,
 }
 
 export const ThirtyMinutes: Story = {
-  render: () => {
-    const initialTime = 1800 // 30 minutes
-    const [seconds, setSeconds] = useState<number>(initialTime)
-
-    return (
-      <div className="p-8">
-        <TimePicker value={seconds} onTimeChange={setSeconds} />
-        <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
-      </div>
-    )
-  },
+  render: () => <TimePickerWithState initialTime={1800} />,
 }

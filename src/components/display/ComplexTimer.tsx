@@ -38,7 +38,9 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   const isFirst = phaseIndex === 0
   const isLast = phaseIndex === phases.length - 1
 
-  // Update context when complex timer state changes
+  // Register timer state changes with context
+  // Note: This useEffect is necessary for side effects (context registration)
+  // React Doctor flags this as derived state, but context updates require useEffect
   useEffect(() => {
     setTimerActive(isComplexRunning)
   }, [isComplexRunning, setTimerActive])
