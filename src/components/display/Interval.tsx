@@ -1,15 +1,19 @@
 'use client'
 
 import { useCallback, useEffect } from 'react'
-import cx from 'clsx'
 
 import type { IntervalConfig } from '@/types/configure'
 
 import { TimerState as BaseTimerState, formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/timer/types'
-import { useIntervalTimer, useLapHistory, usePreStartCountdown, useSoundManager } from '@/hooks'
+import {
+  useIntervalTimer,
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useWakeLock,
+} from '@/hooks'
 
-import { Progress } from '@/components/ui/progress'
 import {
   PauseButton,
   ResetButton,
@@ -18,20 +22,32 @@ import {
   StopButton,
 } from '@/components/ui/timer-buttons'
 import { TimerContainer } from '@/components/display/TimerContainer'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 
 interface IntervalProps {
   /** Configuration for the interval timer */
   intervalConfig: IntervalConfig
+  /** Optional callback when the full interval sequence completes */
+  onComplete?: () => void
+  /** Optional callback when the Stop button is clicked */
+  onStop?: () => void
+  /** Optional callback when timer state changes */
+  onStateChange?: (state: TimerState) => void
 }
 
-export function Interval({ intervalConfig: { sound, ...intervalConfig } }: IntervalProps) {
+export function Interval({
+  intervalConfig: { sound, ...intervalConfig },
+  onComplete,
+  onStop,
+  onStateChange,
+}: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
   const addLapCallback = useCallback(
     (elapsedTime: number) => {
-      // Add lap with the actual elapsed time
+      // Add a lap with the actual elapsed time
       addLap(elapsedTime)
     },
     [addLap]
@@ -48,6 +64,9 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
   } = useIntervalTimer({
     ...intervalConfig,
     onWorkStepComplete: addLapCallback,
+    onSequenceComplete: onComplete,
+    onStop,
+    onStateChange: onStateChange,
   })
 
   const preStart = usePreStartCountdown({
@@ -121,6 +140,9 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
   const isPreStarting = preStart.isActive
   const isActive = isRunning || isPreStarting
 
+  // Keep screen awake while interval timer is running
+  useWakeLock(isRunning)
+
   const handlePause = useCallback(() => {
     if (isPreStarting) {
       preStart.pause()
@@ -129,16 +151,19 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
     pause()
   }, [isPreStarting, pause, preStart])
 
-  const getProgress = () => {
-    if (!currentStep) return 0
-    const totalDuration = currentStep.duration
-    const elapsed = totalDuration - timeLeft
-    return (elapsed / totalDuration) * 100
-  }
+  const minTime = 0
+  const maxTime = currentStep?.duration ?? 0
+  const elapsed = currentStep ? currentStep.duration - timeLeft : 0
+  const progress = maxTime > 0 ? (elapsed / maxTime) * 100 : 0
+  const isVisible =
+    !!currentStep &&
+    !isPreStarting &&
+    (timerState === TimerState.Running || timerState === TimerState.Paused)
+  const isWorkStep = currentStep?.isWork ?? true
 
   const getCurrentIntervalInfo = () => {
     const workSteps = Math.ceil((currentStepIndex + 1) / 2)
-    return `${workSteps}/${intervalConfig.intervals}`
+    return `${workSteps} of ${intervalConfig.intervals} rounds`
   }
 
   const showPlayButton = isPreStarting
@@ -150,20 +175,20 @@ export function Interval({ intervalConfig: { sound, ...intervalConfig } }: Inter
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
-        label={currentStep?.label || 'Interval Timer'}
+        label={currentStep?.label || intervalConfig.name || 'Interval Timer'}
         state={isPreStarting ? preStart.state : timerState}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
         isWork={isPreStarting ? undefined : currentStep?.isWork}
         fullscreen={isActive}
       >
-        <Progress
-          value={getProgress()}
-          className={cx('mb-4', {
-            invisible: !currentStep || isRunning,
-            '[--progress-indicator-color:var(--tm-pr-work-bg)]': currentStep?.isWork,
-            '[--progress-indicator-color:var(--tm-pr-rest-bg)]': !currentStep?.isWork,
-          })}
+        <TimerProgressIndicator
+          progress={progress}
+          isRunning={isWorkStep}
+          isRest={!isWorkStep}
+          isVisible={isVisible}
+          minTime={minTime}
+          maxTime={maxTime}
         />
         <div className="flex items-center justify-center gap-4">
           {showPlayButton ? (

@@ -5,6 +5,7 @@ import type { IntervalConfig } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
 import { StepState, TimerManager } from '@/lib/timer/TimerManager'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 function generateSteps(
   skipLastRest: boolean,
@@ -61,12 +62,19 @@ export const useIntervalTimer = ({
   onWorkStepComplete,
   onStepChange,
   onSequenceComplete,
+  onStop,
 }: IntervalConfig) => {
+  const { setTimerActive } = useTimerContext()
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [timerState, setTimerState] = useState<TimerState>(TimerState.Idle)
   const [timeLeft, setTimeLeft] = useState(0)
   const managerRef = useRef<TimerManager | null>(null)
+
+  // Update context when interval timer state changes
+  useEffect(() => {
+    setTimerActive(timerState === TimerState.Running || timerState === TimerState.Paused)
+  }, [timerState, setTimerActive])
 
   managerRef.current = useMemo(() => {
     const steps = generateSteps(
@@ -79,7 +87,7 @@ export const useIntervalTimer = ({
       onWorkStepComplete
     )
 
-    // Create single timer manager with step change handling
+    // Create a single timer manager with step change handling
     return new TimerManager({
       steps,
       repeat: 1,
@@ -121,14 +129,14 @@ export const useIntervalTimer = ({
 
     setTimeLeft(managerRef.current.getCurrentStep()?.duration || 0)
     return () => {
-      // Cleanup the old timer manager
+      // Clean up the old timer manager
       managerRef.current = null
     }
   }, [managerRef.current])
 
   // Create stable callbacks
   const start = useCallback(() => {
-    // If we're in Completed state, reset first to start fresh
+    // If we're in the Completed state, reset first to start fresh
     if (timerState === TimerState.Completed) {
       managerRef.current?.reset()
       setTimerState(TimerState.Idle)
@@ -149,11 +157,12 @@ export const useIntervalTimer = ({
     setCurrentStep(null)
     setCurrentStepIndex(0)
     setTimeLeft(0)
-  }, [])
+    onStop?.()
+  }, [onStop])
 
   const skipCurrentStep = useCallback(() => {
     managerRef.current?.skipCurrentStep()
-    // State stays Running unless sequence completes (handled by onSequenceComplete)
+    // State stays Running unless the sequence completes (handled by onSequenceComplete)
   }, [])
 
   return {

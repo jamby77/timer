@@ -41,7 +41,7 @@ export class Stopwatch {
   private readonly stateChangeCallback?: (state: TimerState) => void
 
   constructor(options: StopwatchOptions = {}) {
-    this.timeLimitMs = options.timeLimitMs ?? ONE_YEAR_MS
+    this.timeLimitMs = options.timeLimitMs || ONE_YEAR_MS
     this.stopCallback = options.onStop
     this.tickCallback = options.onTick
     this.stateChangeCallback = options.onStateChange
@@ -115,7 +115,7 @@ export class Stopwatch {
    * Check if the stopwatch is currently running
    */
   public get isRunning(): boolean {
-    return this.timer.getState() === 'running'
+    return this.timer.getState() === TimerState.Running
   }
 
   /**

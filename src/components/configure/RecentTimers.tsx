@@ -13,7 +13,6 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import {
@@ -78,11 +77,11 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
 
   return (
     <Card className="cursor-grab py-4 active:cursor-grabbing">
-      <CardHeader className="px-4">
-        <CardTitle>
-          <h3>{timer.config.name}</h3>
+      <div className="flex items-center justify-between gap-2 px-1 md:px-4">
+        <CardTitle className="max-w-32 text-left">
+          <h3 className="truncate">{timer.config.name}</h3>
         </CardTitle>
-        <CardAction>
+        <div className="inline-flex items-center">
           {/* Remove button */}
           <Button
             aria-label="Remove timer"
@@ -97,15 +96,15 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
               Remove timer
             </span>
           </Button>
-        </CardAction>
-      </CardHeader>
+        </div>
+      </div>
 
-      <CardContent className="px-4">
+      <CardContent className="px-1 md:px-4">
         <CardDescription>
           <p className="truncate">{getConfigSummary(timer.config)}</p>
         </CardDescription>
       </CardContent>
-      <CardFooter className="justify-between gap-4 px-4">
+      <CardFooter className="justify-between gap-2 px-1 md:px-4">
         <span className="text-muted-foreground truncate text-xs">
           {formatRelativeTime(timer.startedAt)}
         </span>
@@ -119,3 +118,5 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
     </Card>
   )
 }
+
+TimerCard.displayName = 'RecentTimerCard'

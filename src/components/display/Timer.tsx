@@ -5,9 +5,16 @@ import { toast } from 'sonner'
 
 import { CountdownConfig } from '@/types/configure'
 import { formatTime, TimerState } from '@/lib/timer'
-import { useLapHistory, usePreStartCountdown, useSoundManager, useTimer } from '@/hooks'
+import {
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useTimer,
+  useWakeLock,
+} from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
@@ -16,11 +23,14 @@ interface TimerProps {
   config: CountdownConfig
   /** Optional callback when timer state changes */
   onStateChange?: (state: TimerState) => void
+  /** Optional callback when the Stop button is clicked */
+  onStop?: () => void
 }
 
 export const Timer = ({
   config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
+  onStop,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -44,6 +54,7 @@ export const Timer = ({
   const { time, state, totalElapsedTime, start, pause, reset } = useTimer(duration * 1000, {
     onStateChange: handleStateChange,
     onComplete: handleComplete,
+    onStop,
   })
 
   const preStart = usePreStartCountdown({
@@ -66,6 +77,9 @@ export const Timer = ({
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive
   const isActive = isRunning || isPreStarting
+
+  // Keep screen awake while timer is running
+  useWakeLock(isRunning)
   const handleReset = () => {
     if (isPreStarting) {
       preStart.reset()
@@ -113,6 +127,14 @@ export const Timer = ({
     pause()
   }, [isPreStarting, pause, preStart])
 
+  const durationMs = duration * 1000
+  const minTime = 0
+  const maxTime = durationMs
+  const elapsed = durationMs - time
+  const progress = durationMs > 0 ? (elapsed / durationMs) * 100 : 0
+  const isPaused = state === TimerState.Paused
+  const showProgress = !isPreStarting && (isRunning || isPaused)
+
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
@@ -122,6 +144,14 @@ export const Timer = ({
         isWork={isActive}
         fullscreen={isActive}
       >
+        <TimerProgressIndicator
+          progress={progress}
+          isRunning={isRunning}
+          isRest={isPaused}
+          isVisible={showProgress}
+          minTime={minTime}
+          maxTime={maxTime}
+        />
         <TimerButton
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}

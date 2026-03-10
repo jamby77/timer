@@ -54,23 +54,7 @@ export default function ConfigurePage() {
     setRecentTimers(storage.getRecentTimers())
 
     // Navigate to appropriate timer page
-    switch (finalConfig.type) {
-      case TimerType.COUNTDOWN:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.STOPWATCH:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.INTERVAL:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.WORKREST:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-      case TimerType.COMPLEX:
-        router.push(`/?id=${finalConfig.id}`)
-        break
-    }
+    router.push(`/?id=${finalConfig.id}`)
   }
 
   const handleRemoveTimer = (timerId: string) => {
@@ -79,59 +63,65 @@ export default function ConfigurePage() {
   }
 
   const handleToggleSelectedTimer = (timer: TimerType) => {
+    if (timer === TimerType.COMPLEX) {
+      router.push('/configure/complex')
+      return
+    }
     if (selectedTimer === timer) {
       setSelectedTimer(null)
     } else {
       setSelectedTimer(timer)
     }
   }
+  if (selectedTimer || selectedPredefined) {
+    /* Configuration Form - appears when "timer type" is selected */
+    return (
+      <TimerConfig
+        type={selectedTimer || selectedPredefined?.config.type || TimerType.COUNTDOWN}
+        initialConfig={selectedPredefined?.config}
+        isPredefined={!!selectedPredefined}
+        onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
+        onSaveAsPredefined={(config) => {
+          // TODO: Implement save as predefined functionality
+          console.log('Save as predefined:', config)
+        }}
+        onCancel={() => {
+          setSelectedTimer(null)
+          setSelectedPredefined(null)
+        }}
+      />
+    )
+  }
 
   return (
     <PageContainer>
-      <div className="mx-auto max-w-7xl space-y-4 px-4 sm:px-6 md:space-y-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-2 px-0 md:space-y-6 md:px-6">
         {/* Recent Timers Section */}
-        <div className="text-center">
-          <h5 className="text-muted-foreground text-lg font-bold">Recent Timers</h5>
+        <div>
+          <h5 className="text-muted-foreground invisible text-center text-base sm:block">
+            Recent Timers
+          </h5>
           <RecentTimers
             timers={recentTimers}
             onStartTimer={handleStartTimer}
             onRemoveTimer={handleRemoveTimer}
           />
         </div>
-        <div>
+        <div className="space-y-2">
           <h1 className="text-foreground text-center text-xl uppercase">Configure Timer</h1>
-          <p className="text-muted-foreground mt-2">Create custom timers or choose from a preset</p>
+          <p className="text-muted-foreground text-center">
+            Create custom timers or choose from a preset
+          </p>
         </div>
 
         {/* Main Content Area */}
         <div className="lg:grid lg:grid-cols-12 lg:gap-6">
           {/* Main Column - Timer Type Selection */}
-          <div className="space-y-6 lg:col-span-8">
+          <div className="space-y-2 md:space-y-6 lg:col-span-8">
             <TimerTypeSelector
               selectedTimer={selectedTimer}
               onTimerSelect={handleToggleSelectedTimer}
             />
-
-            {/* Configuration Form - appears below timer type when selected */}
-            {(selectedTimer || selectedPredefined) && (
-              <TimerConfig
-                open={true}
-                onOpenChange={(isOpen) => {
-                  if (!isOpen) {
-                    setSelectedTimer(null)
-                    setSelectedPredefined(null)
-                  }
-                }}
-                type={selectedTimer || selectedPredefined?.config.type || TimerType.COUNTDOWN}
-                initialConfig={selectedPredefined?.config}
-                isPredefined={!!selectedPredefined}
-                onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
-                onSaveAsPredefined={(config) => {
-                  // TODO: Implement save as predefined functionality
-                  console.log('Save as predefined:', config)
-                }}
-              />
-            )}
           </div>
 
           {/* Sidebar - Predefined Styles */}

@@ -34,12 +34,19 @@ const TIMER_TYPES = [
     description: 'Ratio-based timer',
     icon: TIMER_TYPE_ICONS[TimerType.WORKREST],
   },
+  {
+    type: TimerType.COMPLEX,
+    name: TIMER_TYPE_LABELS[TimerType.COMPLEX],
+    description: 'Complex timer with multiple phases',
+    icon: TIMER_TYPE_ICONS[TimerType.COMPLEX],
+  },
 ] as const
+
 export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSelectorProps) => {
   return (
     <CardContainer>
-      <h2 className="mb-6 text-xl font-semibold">Timer Type</h2>
-      <div className="grid w-full grid-cols-2 gap-4">
+      <h2 className="mb-2 text-xl font-semibold sm:mb-6">Timer Type</h2>
+      <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         {TIMER_TYPES.map(({ type, name, description, icon: Icon }) => (
           <Card
             key={type}
@@ -51,14 +58,14 @@ export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSel
           >
             <CardHeader>
               <div
-                className="flex items-center justify-center gap-1 overflow-hidden md:justify-between"
+                className="flex items-center justify-start gap-2 overflow-hidden md:justify-between"
                 title={name}
               >
                 <Icon className="size-6" />
-                <h3 className="hidden truncate md:inline">{name}</h3>
+                <h3 className="truncate">{name}</h3>
               </div>
             </CardHeader>
-            <CardContent className="max-w-20 overflow-hidden md:max-w-full">
+            <CardContent className="w-full overflow-hidden md:max-w-full">
               <p className="truncate text-sm">{description}</p>
             </CardContent>
           </Card>

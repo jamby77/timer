@@ -172,7 +172,7 @@ export interface BaseTimerConfig {
   type: TimerType; // Using enum instead of string literal
   createdAt: Date;
   lastUsed: Date;
-  countdownBeforeStart?: number; // NEW: Countdown seconds before timer starts (default: 10)
+  countdown?: number; // NEW: Countdown seconds before timer starts (default: 10)
 }
 
 // Specific timer configurations (aligned with existing component props)
@@ -1059,7 +1059,7 @@ const TimerConfigForm = ({
       case TimerType.WORKREST:
         return <WorkRestFields config={config} onChange={updateTypeConfig} />;
       case TimerType.COMPLEX:
-        return <ComplexFields config={config} onChange={updateTypeConfig} />;
+        return <ComplexFieldsForm config={config} onChange={updateTypeConfig} />;
     }
   };
   
@@ -1153,8 +1153,8 @@ const CommonFields = ({
           type="number"
           min="0"
           max={TIMER_CONSTANTS.MAX_COUNTDOWN_SECONDS}
-          value={config.countdownBeforeStart || ''}
-          onChange={(e) => updateConfig({ countdownBeforeStart: e.target.value ? parseInt(e.target.value) : undefined })}
+          value={config.countdown || ''}
+          onChange={(e) => updateConfig({ countdown: e.target.value ? parseInt(e.target.value) : undefined })}
           className="w-full border rounded px-3 py-2"
           placeholder="Optional: Enter countdown seconds"
         />
@@ -1305,7 +1305,7 @@ interface ComplexFieldsProps {
   onChange: (config: Partial<ComplexConfig>) => void;
 }
 
-const ComplexFields = ({
+const ComplexFieldsForm = ({
   config,
   onChange,
 }: ComplexFieldsProps) => {
@@ -1492,7 +1492,7 @@ const getDefaultConfigForType = (type: TimerType) => {
   const defaultBaseConfig = {
     createdAt: now,
     lastUsed: now,
-    // No countdownBeforeStart - only set when user configures it
+    // No countdown - only set when user configures it
   };
   
   switch (type) {
@@ -2064,7 +2064,7 @@ const TABATA_CONFIG: TimerConfig = {
   workLabel: 'Work',
   restLabel: 'Rest',
   skipLastRest: true,
-  countdownBeforeStart: 5,
+  countdown: 5,
   // Note: createdAt and lastUsed will be set when timer is actually used
 };
 
@@ -2078,7 +2078,7 @@ const EMOM_CONFIG: TimerConfig = {
   workLabel: 'Work',
   restLabel: 'Rest',
   skipLastRest: false,
-  countdownBeforeStart: 10,
+  countdown: 10,
   // Note: createdAt and lastUsed will be set when timer is actually used
 };
 
@@ -2092,7 +2092,7 @@ const E2MOM_CONFIG: TimerConfig = {
   workLabel: 'Work',
   restLabel: 'Rest',
   skipLastRest: false,
-  countdownBeforeStart: 10,
+  countdown: 10,
   // Note: createdAt and lastUsed will be set when timer is actually used
 };
 

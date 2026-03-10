@@ -2,11 +2,19 @@
 
 import { useCallback, useEffect } from 'react'
 
-import { StopwatchConfig } from '@/types/configure'
+import type { StopwatchConfig } from '@/types/configure'
+
 import { formatTime, TimerState } from '@/lib/timer'
-import { useLapHistory, usePreStartCountdown, useSoundManager, useStopwatch } from '@/hooks'
+import {
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useStopwatch,
+  useWakeLock,
+} from '@/hooks'
 
 import { TimerContainer } from '@/components/display/TimerContainer'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
@@ -15,11 +23,14 @@ interface StopwatchProps {
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
   onStateChange?: (state: TimerState) => void
+  /** Optional callback when the Stop button is clicked */
+  onStop?: () => void
 }
 
 export function Stopwatch({
   config: { timeLimit = 0, name = 'Stopwatch', sound, countdownBeforeStart },
   onStateChange,
+  onStop,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
   const soundManager = useSoundManager(sound)
@@ -41,7 +52,8 @@ export function Stopwatch({
   const { time, state, start, pause, reset } = useStopwatch({
     timeLimitMs: timeLimit * 1000,
     onStateChange: handleStateChange,
-    onStop: handleStop,
+    onAutoStop: handleStop,
+    onStop,
   })
 
   const preStart = usePreStartCountdown({
@@ -63,6 +75,9 @@ export function Stopwatch({
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive
   const isActive = isRunning || isPreStarting
+
+  // Keep the screen awake while stopwatch is running
+  useWakeLock(isRunning)
 
   const handleReset = useCallback(() => {
     if (isPreStarting) {
@@ -112,6 +127,12 @@ export function Stopwatch({
   }, [isPreStarting, pause, preStart])
   const timeLimitDisplay = timeLimit ? `(Cap: ${formatTime(timeLimit * 1000)})` : undefined
 
+  const minTime = 0
+  const maxTime = timeLimit ? timeLimit * 1000 : 0
+  const progress = timeLimit ? (time / (timeLimit * 1000)) * 100 : 0
+  const isRest = state === TimerState.Paused
+  const isVisible = isRunning || isRest
+
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
@@ -122,6 +143,16 @@ export function Stopwatch({
         subtitle={timeLimitDisplay}
         fullscreen={isActive}
       >
+        {maxTime > minTime && (
+          <TimerProgressIndicator
+            progress={progress}
+            isRunning={isRunning}
+            isRest={isRest}
+            isVisible={isVisible}
+            minTime={minTime}
+            maxTime={maxTime}
+          />
+        )}{' '}
         <TimerButton
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}

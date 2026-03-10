@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 function NativeSelect({ className, ...props }: React.ComponentProps<'select'>) {
   return (
     <div
-      className="group/native-select relative w-fit has-[select:disabled]:opacity-50"
+      className="group/native-select relative w-auto has-[select:disabled]:opacity-50"
       data-slot="native-select-wrapper"
     >
       <select

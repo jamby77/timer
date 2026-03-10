@@ -1,7 +1,7 @@
 import type { CountdownConfig } from '@/types/configure'
 
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field'
-import { TimePicker } from '@/components/configure/components/TimePicker'
+import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface CountdownFieldsProps {
   config: Partial<CountdownConfig>
@@ -19,7 +19,7 @@ export const CountdownFields = ({ config, onChange }: CountdownFieldsProps) => {
           <TimePicker
             max={86400}
             min={1}
-            initialSeconds={config.duration || 0}
+            value={config.duration || 0}
             onTimeChange={(seconds) => onChange({ duration: seconds })}
           />
         </Field>

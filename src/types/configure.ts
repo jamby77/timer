@@ -144,7 +144,7 @@ export interface TimerConfigFormProps {
   isPredefined?: boolean
   onStartTimer: (config: AnyTimerConfig) => void
   onSaveAsPredefined?: (config: AnyTimerConfig) => void
-  onSave?: (config: AnyTimerConfig) => void
+  onCancel?: () => void
 }
 
 // Storage types

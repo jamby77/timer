@@ -1,16 +1,20 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
-import cx from 'clsx'
+import { useCallback, useEffect, useRef } from 'react'
 
 import type { WorkRestConfig } from '@/types/configure'
 
 import { TimerState as BaseTimerState } from '@/lib/timer'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/timer/types'
-import { useLapHistory, usePreStartCountdown, useSoundManager, useWorkRestTimer } from '@/hooks'
+import {
+  useLapHistory,
+  usePreStartCountdown,
+  useSoundManager,
+  useWakeLock,
+  useWorkRestTimer,
+} from '@/hooks'
 
-import { Progress } from '@/components/ui/progress'
 import {
   PauseButton,
   ResetButton,
@@ -18,21 +22,37 @@ import {
   StartButton,
   StopButton,
 } from '@/components/ui/timer-buttons'
+import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 import { TimerContainer } from './TimerContainer'
 
 interface WorkRestTimerProps {
   config: WorkRestConfig
+  /** Optional callback invoked when a full work/rest cycle completes */
+  onPhaseComplete?: () => void
+  /** Optional callback when the Stop button is clicked */
+  onStop?: () => void
+  /** Optional callback when timer state changes */
+  onStateChange?: (state: TimerState) => void
 }
 
-export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerProps) {
+export function WorkRestTimer({
+  config: { sound, ...config },
+  onPhaseComplete,
+  onStop,
+  onStateChange,
+}: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
   const soundManager = useSoundManager(sound)
+
+  const lastCompletedRoundsRef = useRef(0)
 
   const [state, actions] = useWorkRestTimer({
     config,
     onLapRecorded: addLap,
+    onStop,
+    onStateChange,
   })
 
   const preStart = usePreStartCountdown({
@@ -59,6 +79,20 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
     preStart.timeLeftMs,
   ])
 
+  useEffect(() => {
+    if (!onPhaseComplete) return
+    if (state.phase !== TimerPhase.Idle) return
+    if (state.rounds <= lastCompletedRoundsRef.current) return
+    lastCompletedRoundsRef.current = state.rounds
+    onPhaseComplete()
+  }, [onPhaseComplete, state.phase, state.rounds])
+
+  useEffect(() => {
+    if (state.rounds === 0) {
+      lastCompletedRoundsRef.current = 0
+    }
+  }, [state.rounds])
+
   const handleRestart = useCallback(async () => {
     actions.reset()
     await soundManager.init()
@@ -70,11 +104,13 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
   }, [actions, soundManager, preStart])
 
   const isRestPhase = state.phase === TimerPhase.Rest
-  const showProgress = isRestPhase
   const isIdlePhase = state.phase === TimerPhase.Idle
   const isWorkPhase = state.phase === TimerPhase.Work
   const isRunningState = state.state === TimerState.Running
   const isPausedState = state.state === TimerState.Paused
+
+  // Keep screen awake while work/rest timer is running
+  useWakeLock(isRunningState)
 
   const isPreStarting = preStart.isActive
   const isPreStartRunning = preStart.state === BaseTimerState.Running
@@ -129,6 +165,19 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
   const displayState = isPreStarting ? preStart.state : state.state
   const displayIsWork = isPreStarting ? undefined : isWork
 
+  const minTime = 0
+  const maxTime = (() => {
+    if (!isRestPhase) return 0
+    if (!Number.isFinite(progress) || progress <= 0) {
+      return state.currentTime
+    }
+    const denom = 1 - progress / 100
+    if (denom <= 0) return state.currentTime
+    return Math.round(state.currentTime / denom)
+  })()
+
+  const isVisible = isRestPhase && !fullscreen && !isPreStarting
+
   return (
     <TimerContainer fullscreen={fullscreen}>
       <TimerCard
@@ -139,11 +188,13 @@ export function WorkRestTimer({ config: { sound, ...config } }: WorkRestTimerPro
         isWork={displayIsWork}
         fullscreen={fullscreen}
       >
-        <Progress
-          value={progress}
-          className={cx('mb-4 [--progress-indicator-color:var(--tm-pr-rest-bg)]', {
-            invisible: !showProgress || fullscreen,
-          })}
+        <TimerProgressIndicator
+          progress={progress}
+          isRunning={false}
+          isRest={true}
+          isVisible={isVisible}
+          minTime={minTime}
+          maxTime={maxTime}
         />
 
         {/* Main Control Buttons */}

@@ -21,7 +21,7 @@ export const Default: Story = {
 
     return (
       <div className="p-8">
-        <TimePicker initialSeconds={seconds} onTimeChange={setSeconds} />
+        <TimePicker value={seconds} onTimeChange={setSeconds} />
         <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
       </div>
     )
@@ -35,7 +35,7 @@ export const WithInitialTime: Story = {
 
     return (
       <div className="p-8">
-        <TimePicker initialSeconds={seconds} onTimeChange={setSeconds} />
+        <TimePicker value={seconds} onTimeChange={setSeconds} />
         <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
       </div>
     )
@@ -49,7 +49,7 @@ export const ThirtyMinutes: Story = {
 
     return (
       <div className="p-8">
-        <TimePicker initialSeconds={seconds} onTimeChange={setSeconds} />
+        <TimePicker value={seconds} onTimeChange={setSeconds} />
         <div className="mt-4 text-sm text-gray-600">Current time: {seconds} seconds</div>
       </div>
     )

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type {
   WorkRestTimerActions,
@@ -17,10 +18,13 @@ const MAX_RATIO = 10000 // 100.0 stored as integer
 const REST_DELAY_MS = 100 // 100ms delay before rest starts
 const MAX_ROUNDS = 1000 // Maximum consecutive work/rest cycles
 
-export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOptions = {}): [
-  WorkRestTimerState,
-  WorkRestTimerActions,
-] => {
+export const useWorkRestTimer = ({
+  config = {},
+  onLapRecorded,
+  onStop,
+  onStateChange,
+}: WorkRestTimerOptions = {}): [WorkRestTimerState, WorkRestTimerActions] => {
+  const { setTimerActive } = useTimerContext()
   const [state, setState] = useState<WorkRestTimerState>({
     phase: TimerPhase.Idle,
     ratio: Math.round((config.ratio ?? 1.0) * 100), // Convert to integer * 100
@@ -37,13 +41,23 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
   const stopwatchRef = useRef<Stopwatch | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const onLapRecordedRef = useRef(onLapRecorded)
+  const onStopRef = useRef(onStop)
+  const onStateChangeRef = useRef(onStateChange)
 
-  // Update callback ref when options change
+  // Update the callback ref when options change
   useEffect(() => {
     onLapRecordedRef.current = onLapRecorded
-  }, [onLapRecorded])
+    onStopRef.current = onStop
+    onStateChangeRef.current = onStateChange
+  }, [onLapRecorded, onStop, onStateChange])
 
-  // Clean up current timer and stopwatch
+  // Update context when work/rest timer state changes
+  useEffect(() => {
+    setTimerActive(state.state === TimerState.Running || state.state === TimerState.Paused)
+    onStateChangeRef.current?.(state.state)
+  }, [state.state, setTimerActive])
+
+  // Clean up the current timer and stopwatch
   const cleanupTimer = useCallback(() => {
     if (timerRef.current) {
       timerRef.current.destroy()
@@ -59,7 +73,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     }
   }, [])
 
-  // Create work stopwatch
+  // Create a work stopwatch
   const createWorkStopwatch = useCallback(() => {
     cleanupTimer()
 
@@ -82,7 +96,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     return stopwatch
   }, [cleanupTimer])
 
-  // Create rest timer
+  // Create a rest timer
   const createRestTimer = useCallback(
     (duration: number) => {
       cleanupTimer()
@@ -101,7 +115,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
             state: TimerState.Idle,
             currentTime: 0,
           }))
-          // User must manually start next work phase
+          // User must manually start the next work phase
         },
         onStateChange: (newState) => {
           setState((prev) => ({ ...prev, state: newState }))
@@ -114,7 +128,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     [cleanupTimer]
   )
 
-  // Start rest phase
+  // Start the rest phase
   const startRestPhase = useCallback(
     (workDuration: number, ratio: number) => {
       let restDuration: number
@@ -176,12 +190,14 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
   const stopWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work) return
 
-    // Stop the stopwatch first to trigger onStop callback and record lap
+    // Stop the stopwatch first to trigger onStop callback and record the lap
     stopwatchRef.current?.stop()
 
     const workDuration = stopwatchRef.current?.getElapsedTime() || 0
 
     cleanupTimer()
+
+    onStopRef.current?.()
 
     // Handle zero work duration edge case
     if (workDuration === 0) {
@@ -197,7 +213,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     startRestPhase(workDuration, state.ratio)
   }, [state.phase, state.ratio, cleanupTimer, startRestPhase])
 
-  // Skip rest - automatically start next work phase
+  // Skip rest - automatically start the next work phase
   const skipRest = useCallback(() => {
     if (state.phase !== TimerPhase.Rest) return
 
@@ -222,7 +238,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
       currentTime: 0,
     }))
 
-    // Automatically start next work phase
+    // Automatically start the next work phase
     const stopwatch = createWorkStopwatch()
     stopwatch.start()
   }, [state.phase, state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch])
@@ -232,6 +248,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     if (state.phase !== TimerPhase.Rest) return
 
     cleanupTimer()
+    onStopRef.current?.()
     setState((prev) => ({
       ...prev,
       phase: TimerPhase.Idle,
@@ -240,7 +257,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     }))
   }, [state.phase, cleanupTimer])
 
-  // Adjust ratio
+  // Adjust the ratio
   const adjustRatio = useCallback(
     (delta: number) => {
       if (state.phase !== TimerPhase.Idle) return // Only allow when idle
@@ -305,13 +322,14 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
       const timeLeft = state.currentTime
       return ((duration - timeLeft) / duration) * 100
     }
-    // Work phase has no meaningful progress since duration is unknown
+    // The work phase has no meaningful progress since the duration is unknown
     return 0
   }, [state.phase, state.currentTime])
 
-  // Stop entire execution
+  // Stop the entire execution
   const stopExecution = useCallback(() => {
     cleanupTimer()
+    onStopRef.current?.()
     setState((prev) => ({
       ...prev,
       phase: TimerPhase.Idle,
@@ -320,7 +338,7 @@ export const useWorkRestTimer = ({ config = {}, onLapRecorded }: WorkRestTimerOp
     }))
   }, [cleanupTimer])
 
-  // Cleanup on unmount
+  // Cleanup on unmounting
   useEffect(() => {
     return cleanupTimer
   }, [cleanupTimer])

@@ -4,6 +4,7 @@ import type { TimerOptions } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
 import { Timer as TimerClass } from '@/lib/timer/Timer'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 interface UseTimerState {
   time: number
@@ -43,14 +44,20 @@ export const timerReducer = (state: UseTimerState, action: TimerAction): UseTime
 
 export const useTimer = (
   initialTime: number,
-  { onTick, onStateChange, onComplete }: TimerOptions = {}
+  { onTick, onStateChange, onComplete, onStop }: TimerOptions = {}
 ) => {
+  const { setTimerActive } = useTimerContext()
   const [{ state, time, totalElapsedTime }, dispatch] = useReducer(timerReducer, {
     time: initialTime,
     state: TimerState.Idle,
     totalElapsedTime: 0,
   })
   const timerRef = useRef<TimerClass | null>(null)
+
+  // Update context when timer state changes
+  useEffect(() => {
+    setTimerActive(state === TimerState.Running || state === TimerState.Paused)
+  }, [state, setTimerActive])
 
   // Initialize timer instance
   useEffect(() => {
@@ -88,7 +95,8 @@ export const useTimer = (
 
   const reset = useCallback(() => {
     timerRef.current?.reset()
-  }, [])
+    onStop?.()
+  }, [onStop])
 
   const restart = useCallback(() => {
     timerRef.current?.reset()

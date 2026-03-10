@@ -10,6 +10,7 @@ import { Interval } from '@/components/display/Interval'
 import { Stopwatch } from '@/components/display/Stopwatch'
 import { Timer } from '@/components/display/Timer'
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
+import { ComplexTimer } from '@/components/display/ComplexTimer'
 import { InstallPrompt } from '@/components/InstallPrompt'
 
 export const Body = ({}) => {
@@ -81,12 +82,15 @@ export const Body = ({}) => {
       return <WorkRestTimer config={timerConfig} />
     }
 
+    if (timerConfig.type === TimerType.COMPLEX) {
+      return <ComplexTimer config={timerConfig} />
+    }
+
     // Complex timer or any other unimplemented type
     return (
       <div className="text-center">
-        <h2 className="mb-4 text-2xl font-bold">Timer: {timerConfig.name || 'Untitled'}</h2>
         <p className="text-muted-foreground">
-          Timer type {timerConfig.type} is not yet implemented in the display view.
+          This timer type is not yet implemented in the display view.
         </p>
       </div>
     )
