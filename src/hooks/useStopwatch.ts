@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { StopwatchOptions as StopwatchOptionsType } from '@/lib/timer/Stopwatch'
 
 import { TimerState } from '@/lib/enums'
 import { Stopwatch } from '@/lib/timer/Stopwatch'
-import { useTimerContext } from '@/contexts/TimerContext'
 
 type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange' | 'onStop'> & {
   onTick?: (elapsedTime: number) => void
@@ -19,38 +19,43 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const [state, setState] = useState<TimerState>(TimerState.Idle)
   const stopwatchRef = useRef<Stopwatch | null>(null)
 
-  // Update context when stopwatch state changes
+  const onTickRef = useRef(options.onTick)
+  const onStateChangeRef = useRef(options.onStateChange)
+  const onStopRef = useRef(options.onStop)
+  const onAutoStopRef = useRef(options.onAutoStop)
+  onTickRef.current = options.onTick
+  onStateChangeRef.current = options.onStateChange
+  onStopRef.current = options.onStop
+  onAutoStopRef.current = options.onAutoStop
+
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
   }, [state, setTimerActive])
 
-  // Initialize stopwatch
   useEffect(() => {
     const stopwatch = new Stopwatch({
       ...options,
       onTick: (time) => {
         setTime(time)
-        options.onTick?.(time)
+        onTickRef.current?.(time)
       },
       onStop: (time) => {
         setTime(time)
-        options.onAutoStop?.(time)
+        onAutoStopRef.current?.(time)
       },
       onStateChange: (newState) => {
         setState(newState)
-        options.onStateChange?.(newState)
+        onStateChangeRef.current?.(newState)
       },
     })
 
-    // Store the instance
     stopwatchRef.current = stopwatch
 
-    // Cleanup on unmount
     return () => {
       stopwatch.destroy()
       stopwatchRef.current = null
     }
-  }, [options.timeLimitMs]) // Only recreate if timeLimit changes
+  }, [options.timeLimitMs])
 
   const start = useCallback(() => {
     stopwatchRef.current?.start()
@@ -62,13 +67,13 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
 
   const reset = useCallback(() => {
     stopwatchRef.current?.reset()
-    options.onStop?.()
-  }, [options.onStop])
+    onStopRef.current?.()
+  }, [])
 
   const restart = useCallback(() => {
     stopwatchRef.current?.reset()
     stopwatchRef.current?.start()
-  }, [reset, start])
+  }, [])
 
   return {
     time,

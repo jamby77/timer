@@ -1,6 +1,14 @@
+import React from 'react'
+
 import type { ComplexPhase } from '@/types/configure'
 
-import { TIMER_TYPE_ICONS, TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
+import {
+  isCountdownConfig,
+  isIntervalConfig,
+  isStopwatchConfig,
+  isWorkRestConfig,
+} from '@/types/configure'
+import { TIMER_TYPE_ICONS, TIMER_TYPE_LABELS } from '@/lib/enums'
 
 interface PhaseSummaryProps {
   phases: ComplexPhase[]
@@ -11,6 +19,7 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
     <div className="space-y-2">
       {phases.map((phase, index) => {
         const Icon = TIMER_TYPE_ICONS[phase.type]
+        const c = phase.config
         return (
           <div key={phase.id} className="flex items-center gap-3 rounded-lg border p-3">
             <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full">
@@ -21,24 +30,18 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
               <div className="font-medium">{phase.name}</div>
               <div className="text-muted-foreground text-sm">
                 {TIMER_TYPE_LABELS[phase.type]}
-                {phase.type === TimerType.COUNTDOWN && (
-                  <span> - {(phase.config as any).duration}s</span>
-                )}
-                {phase.type === TimerType.INTERVAL && (
+                {isCountdownConfig(c) && <span> - {c.duration}s</span>}
+                {isIntervalConfig(c) && (
                   <span>
                     {' '}
-                    - {(phase.config as any).workDuration}s work /{' '}
-                    {(phase.config as any).restDuration}s rest × {(phase.config as any).intervals}
+                    - {c.workDuration}s work / {c.restDuration}s rest × {c.intervals}
                   </span>
                 )}
-                {phase.type === TimerType.STOPWATCH && (phase.config as any).timeLimit && (
-                  <span> - {(phase.config as any).timeLimit}s limit</span>
-                )}
-                {phase.type === TimerType.WORKREST && (
+                {isStopwatchConfig(c) && c.timeLimit && <span> - {c.timeLimit}s limit</span>}
+                {isWorkRestConfig(c) && (
                   <span>
                     {' '}
-                    - {(phase.config as any).maxWorkTime}s max work /{' '}
-                    {(phase.config as any).maxRounds} rounds
+                    - {c.maxWorkTime}s max work / {c.maxRounds} rounds
                   </span>
                 )}
               </div>

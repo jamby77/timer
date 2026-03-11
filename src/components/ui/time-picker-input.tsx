@@ -11,7 +11,7 @@ import {
   TimerPickerTime,
 } from '@/lib/timer'
 import { cn } from '@/lib/utils'
-import { useTouchDevice } from '@/hooks/use-touch-device'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 import { Input } from '@/components/ui/input'
 
@@ -44,7 +44,6 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
   ) => {
     const [flag, setFlag] = useState<boolean>(false)
     const isTouchDevice = useTouchDevice()
-    console.log({ isTouchDevice })
 
     /**
      * allow the user to enter the second digit within 2 seconds

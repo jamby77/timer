@@ -53,7 +53,15 @@ export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSel
             className={cx('cursor-pointer transition-colors hover:opacity-80', {
               'ring-accent-foreground ring': selectedTimer === type,
             })}
+            role="button"
+            tabIndex={0}
             onClick={() => onTimerSelect(type)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onTimerSelect(type)
+              }
+            }}
             data-selected={selectedTimer === type}
           >
             <CardHeader>

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { TimerOptions } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
 import { Timer as TimerClass } from '@/lib/timer/Timer'
-import { useTimerContext } from '@/contexts/TimerContext'
 
 interface UseTimerState {
   time: number
@@ -54,36 +54,42 @@ export const useTimer = (
   })
   const timerRef = useRef<TimerClass | null>(null)
 
-  // Update context when timer state changes
+  const onTickRef = useRef(onTick)
+  const onStateChangeRef = useRef(onStateChange)
+  const onCompleteRef = useRef(onComplete)
+  const onStopRef = useRef(onStop)
+  onTickRef.current = onTick
+  onStateChangeRef.current = onStateChange
+  onCompleteRef.current = onComplete
+  onStopRef.current = onStop
+
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
   }, [state, setTimerActive])
 
-  // Initialize timer instance
   useEffect(() => {
     const timer = new TimerClass(initialTime, {
       onTick: (currentTime, elapsed) => {
         dispatch({ type: 'TICK', payload: { time: currentTime, elapsed } })
-        onTick?.(currentTime, elapsed)
+        onTickRef.current?.(currentTime, elapsed)
       },
       onStateChange: (newState, elapsed) => {
         dispatch({ type: 'STATE_CHANGE', payload: { state: newState, elapsed } })
-        onStateChange?.(newState, elapsed)
+        onStateChangeRef.current?.(newState, elapsed)
       },
       onComplete: (elapsed) => {
         dispatch({ type: 'STATE_CHANGE', payload: { state: TimerState.Completed, elapsed } })
-        onComplete?.(elapsed)
+        onCompleteRef.current?.(elapsed)
       },
     })
 
     timerRef.current = timer
 
-    // Cleanup timer on unmount
     return () => {
       timer.destroy()
       timerRef.current = null
     }
-  }, [initialTime, onTick, onStateChange, onComplete])
+  }, [initialTime])
 
   const start = useCallback(() => {
     timerRef.current?.start()
@@ -95,8 +101,8 @@ export const useTimer = (
 
   const reset = useCallback(() => {
     timerRef.current?.reset()
-    onStop?.()
-  }, [onStop])
+    onStopRef.current?.()
+  }, [])
 
   const restart = useCallback(() => {
     timerRef.current?.reset()

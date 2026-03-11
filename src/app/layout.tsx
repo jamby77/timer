@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | X-Timer | %s',
+    template: '%s | X-Timer',
     default: 'X-Timer',
   },
   description: 'A versatile timer application for workouts and productivity',

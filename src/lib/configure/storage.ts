@@ -1,4 +1,26 @@
+import { z } from 'zod'
+
 import { AnyTimerConfig, PredefinedStyle, RecentTimer, StorageManager } from '@/types/configure'
+
+const storedTimerConfigSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.string(),
+})
+
+const storedRecentTimerSchema = z.object({
+  id: z.string(),
+  config: storedTimerConfigSchema,
+  startedAt: z.union([z.string(), z.number()]),
+})
+
+const storedRecentTimersSchema = z.array(storedRecentTimerSchema)
+
+const storedPresetSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  config: storedTimerConfigSchema,
+})
 
 class LocalTimerStorage implements StorageManager {
   private readonly RECENT_TIMERS_KEY = 'recent_timers'
@@ -12,16 +34,22 @@ class LocalTimerStorage implements StorageManager {
   getRecentTimers(): RecentTimer[] {
     try {
       const stored = localStorage.getItem(this.RECENT_TIMERS_KEY)
-      if (!stored) return []
+      if (!stored) {
+        return []
+      }
 
-      const timers = JSON.parse(stored)
-      return timers.map((timer: any) => ({
+      const parsed = storedRecentTimersSchema.safeParse(JSON.parse(stored))
+      if (!parsed.success) {
+        return []
+      }
+
+      return (parsed.data as unknown as RecentTimer[]).map((timer) => ({
         ...timer,
         startedAt: new Date(timer.startedAt),
         config: {
           ...timer.config,
-          createdAt: new Date(timer.config.createdAt),
-          lastUsed: new Date(timer.config.lastUsed),
+          createdAt: timer.config.createdAt ? new Date(timer.config.createdAt) : undefined,
+          lastUsed: timer.config.lastUsed ? new Date(timer.config.lastUsed) : undefined,
         },
       }))
     } catch (error) {
@@ -88,14 +116,21 @@ class LocalTimerStorage implements StorageManager {
   getTimerConfig(timerId: string): AnyTimerConfig | null {
     try {
       const stored = localStorage.getItem(this.TIMER_PREFIX + timerId)
-      if (!stored) return null
-
-      const config = JSON.parse(stored)
-      return {
-        ...config,
-        createdAt: new Date(config.createdAt),
-        lastUsed: new Date(config.lastUsed),
+      if (!stored) {
+        return null
       }
+
+      const raw = JSON.parse(stored)
+      const parsed = storedTimerConfigSchema.safeParse(raw)
+      if (!parsed.success) {
+        return null
+      }
+
+      return {
+        ...raw,
+        createdAt: raw.createdAt ? new Date(raw.createdAt) : undefined,
+        lastUsed: raw.lastUsed ? new Date(raw.lastUsed) : undefined,
+      } as AnyTimerConfig
     } catch (error) {
       console.error('Failed to load timer config:', error)
       return null
@@ -146,15 +181,18 @@ class LocalTimerStorage implements StorageManager {
           const presetId = key.replace(this.PRESET_PREFIX, '')
           const stored = localStorage.getItem(key)
           if (stored) {
-            const config = JSON.parse(stored)
-            presets.push({
-              id: presetId,
-              config: {
-                ...config,
-                createdAt: new Date(config.createdAt),
-                lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
-              },
-            })
+            const raw = JSON.parse(stored)
+            const parsed = storedPresetSchema.safeParse(raw)
+            if (parsed.success) {
+              presets.push({
+                id: presetId,
+                config: {
+                  ...raw,
+                  createdAt: raw.createdAt ? new Date(raw.createdAt) : undefined,
+                  lastUsed: raw.lastUsed ? new Date(raw.lastUsed) : undefined,
+                },
+              })
+            }
           }
         }
       }
@@ -172,14 +210,21 @@ class LocalTimerStorage implements StorageManager {
   getPreset<T extends AnyTimerConfig>(presetId: string): PredefinedStyle<T> | null {
     try {
       const stored = localStorage.getItem(this.PRESET_PREFIX + presetId)
-      if (!stored) return null
-
-      const config = JSON.parse(stored)
-      return {
-        ...config,
-        createdAt: new Date(config.createdAt),
-        lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
+      if (!stored) {
+        return null
       }
+
+      const raw = JSON.parse(stored)
+      const parsed = storedPresetSchema.safeParse(raw)
+      if (!parsed.success) {
+        return null
+      }
+
+      return {
+        ...raw,
+        createdAt: raw.createdAt ? new Date(raw.createdAt) : undefined,
+        lastUsed: raw.lastUsed ? new Date(raw.lastUsed) : undefined,
+      } as PredefinedStyle<T>
     } catch (error) {
       console.error('Failed to load preset:', error)
       return null

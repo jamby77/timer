@@ -2,7 +2,15 @@ import { z } from 'zod'
 
 import type { AnyTimerConfig, ComplexConfig } from '@/types/configure'
 
-import { TimerType, WorkRestMode } from '@/types/configure'
+import {
+  isComplexConfig,
+  isCountdownConfig,
+  isIntervalConfig,
+  isStopwatchConfig,
+  isWorkRestConfig,
+  TimerType,
+  WorkRestMode,
+} from '@/types/configure'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
@@ -100,13 +108,12 @@ const workRestConfigSchema = z.discriminatedUnion('restMode', [
 ])
 
 // Declare anyTimerConfigSchema first with explicit type to avoid circular reference issues
-const anyTimerConfigSchema = z.discriminatedUnion('type', [
+const anyTimerConfigSchema: z.ZodType<AnyTimerConfig> = z.discriminatedUnion('type', [
   countdownConfigSchema,
   stopwatchConfigSchema,
   intervalConfigSchema,
   workRestConfigSchema,
-  // Complex config will be added after it's defined
-]) as any
+])
 
 // Complex phase schema (can now reference anyTimerConfigSchema)
 const complexPhaseSchema = z.object({
@@ -257,7 +264,6 @@ export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
   } as ComplexConfig
 
   fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
-  console.log({ fullConfig })
   const validationErrors = validateTimerConfig(fullConfig)
 
   return { config: fullConfig, errors: validationErrors }
@@ -268,21 +274,13 @@ export const generateComplexTimerName = (config: Partial<ComplexConfig>): string
   const phaseCount = config.phases?.length || 0
   const totalDuration =
     config.phases?.reduce((total, phase) => {
-      switch (phase.config.type) {
-        case TimerType.COUNTDOWN:
-          return total + (phase.config as any).duration
-        case TimerType.INTERVAL:
-          const workDuration = (phase.config as any).workDuration || 0
-          const restDuration = (phase.config as any).restDuration || 0
-          const intervals = (phase.config as any).intervals || 1
-          return total + (workDuration + restDuration) * intervals - restDuration
-        case TimerType.STOPWATCH:
-          return total + ((phase.config as any).timeLimit || 0)
-        case TimerType.WORKREST:
-          return total + 0 // Complex to calculate, skip for now
-        default:
-          return total
+      const c = phase.config
+      if (isCountdownConfig(c)) return total + c.duration
+      if (isIntervalConfig(c)) {
+        return total + (c.workDuration + c.restDuration) * c.intervals - c.restDuration
       }
+      if (isStopwatchConfig(c)) return total + (c.timeLimit || 0)
+      return total
     }, 0) || 0
 
   return `Complex Timer (${phaseCount} phases, ${formatDuration(totalDuration)})`
@@ -290,36 +288,26 @@ export const generateComplexTimerName = (config: Partial<ComplexConfig>): string
 
 // Helper function to generate timer names for individual timer types
 export const generateTimerName = (config: AnyTimerConfig): string => {
-  switch (config.type) {
-    case TimerType.COUNTDOWN:
-      const duration = (config as any).duration
-      return duration ? `Countdown (${formatDuration(duration)})` : 'Countdown'
-    case TimerType.STOPWATCH:
-      const timeLimit = (config as any).timeLimit
-      if (timeLimit) {
-        return `Stopwatch (cap. ${formatDuration(timeLimit)})`
-      }
-      return 'Stopwatch'
-    case TimerType.INTERVAL:
-      const intervalConfig = config as any
-      const workDuration = intervalConfig.workDuration || 0
-      const restDuration = intervalConfig.restDuration || 0
-      const intervals = intervalConfig.intervals || 0
-      if (workDuration && restDuration && intervals) {
-        return `Interval (${workDuration}s work / ${restDuration}s rest × ${intervals})`
-      }
-      return 'Interval'
-    case TimerType.WORKREST:
-      const workRestConfig = config as any
-      const maxWorkTime = workRestConfig.maxWorkTime || 0
-      const maxRounds = workRestConfig.maxRounds || 0
-      if (maxWorkTime && maxRounds) {
-        return `Work/Rest (${formatDuration(maxWorkTime)} max work / ${maxRounds} rounds)`
-      }
-      return 'Work/Rest'
-    case TimerType.COMPLEX:
-      return generateComplexTimerName(config as ComplexConfig)
-    default:
-      return 'Timer'
+  if (isCountdownConfig(config)) {
+    return config.duration ? `Countdown (${formatDuration(config.duration)})` : 'Countdown'
   }
+  if (isStopwatchConfig(config)) {
+    return config.timeLimit ? `Stopwatch (cap. ${formatDuration(config.timeLimit)})` : 'Stopwatch'
+  }
+  if (isIntervalConfig(config)) {
+    if (config.workDuration && config.restDuration && config.intervals) {
+      return `Interval (${config.workDuration}s work / ${config.restDuration}s rest × ${config.intervals})`
+    }
+    return 'Interval'
+  }
+  if (isWorkRestConfig(config)) {
+    if (config.maxWorkTime && config.maxRounds) {
+      return `Work/Rest (${formatDuration(config.maxWorkTime)} max work / ${config.maxRounds} rounds)`
+    }
+    return 'Work/Rest'
+  }
+  if (isComplexConfig(config)) {
+    return generateComplexTimerName(config)
+  }
+  return 'Timer'
 }

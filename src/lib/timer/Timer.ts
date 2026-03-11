@@ -29,7 +29,7 @@ export class Timer {
     this.options = options
   }
 
-  private log(message?: any) {
+  private log(message?: string) {
     if (!this.debug) return
     console.log('[Timer] ' + message)
   }

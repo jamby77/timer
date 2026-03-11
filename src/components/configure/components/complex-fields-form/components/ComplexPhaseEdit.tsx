@@ -25,7 +25,7 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
   const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(() =>
     createDefaultPhaseConfig(phaseId, TimerType.COUNTDOWN)
   )
-  const [draftName, setDraftName] = useState<string>(() => generateTimerName(draftConfig as any))
+  const [draftName, setDraftName] = useState<string>(() => generateTimerName(draftConfig))
 
   const { id, type, config, name } = phase
   useEffect(() => {
@@ -38,7 +38,7 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
   const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
     setDraftConfig((prev) => {
       const next = { ...prev, ...updates } as PhaseTimerConfig
-      setDraftName(generateTimerName(next as any))
+      setDraftName(generateTimerName(next))
       return next
     })
   }
@@ -47,20 +47,21 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
 
     setDraftType(type)
     setDraftConfig(nextConfig)
-    setDraftName(generateTimerName(nextConfig as any))
+    setDraftName(generateTimerName(nextConfig))
   }
 
   const handleSave = () => {
+    const savedConfig: PhaseTimerConfig = {
+      ...draftConfig,
+      name: draftName,
+    } as PhaseTimerConfig
+    savedConfig.id = TimerConfigHash.generateTimerId(savedConfig)
     const draft: PhaseDraft = {
       id: phaseId,
       name: draftName,
       type: draftType,
-      config: {
-        ...(draftConfig as any),
-        name: draftName,
-      },
+      config: savedConfig,
     }
-    draft.config.id = TimerConfigHash.generateTimerId(draft.config)
     onSave(phase.id, draft)
     onCancel()
   }

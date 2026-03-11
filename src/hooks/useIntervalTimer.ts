@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { TimerStep } from '@/lib/timer/TimerManager'
-import type { IntervalConfig } from '@/lib/timer/types'
+import type { IntervalTimerOptions } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
 import { StepState, TimerManager } from '@/lib/timer/TimerManager'
-import { useTimerContext } from '@/contexts/TimerContext'
 
 function generateSteps(
   skipLastRest: boolean,
@@ -63,7 +63,7 @@ export const useIntervalTimer = ({
   onStepChange,
   onSequenceComplete,
   onStop,
-}: IntervalConfig) => {
+}: IntervalTimerOptions) => {
   const { setTimerActive } = useTimerContext()
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
@@ -71,12 +71,20 @@ export const useIntervalTimer = ({
   const [timeLeft, setTimeLeft] = useState(0)
   const managerRef = useRef<TimerManager | null>(null)
 
-  // Update context when interval timer state changes
+  const onWorkStepCompleteRef = useRef(onWorkStepComplete)
+  const onStepChangeRef = useRef(onStepChange)
+  const onSequenceCompleteRef = useRef(onSequenceComplete)
+  const onStopRef = useRef(onStop)
+  onWorkStepCompleteRef.current = onWorkStepComplete
+  onStepChangeRef.current = onStepChange
+  onSequenceCompleteRef.current = onSequenceComplete
+  onStopRef.current = onStop
+
   useEffect(() => {
     setTimerActive(timerState === TimerState.Running || timerState === TimerState.Paused)
   }, [timerState, setTimerActive])
 
-  managerRef.current = useMemo(() => {
+  const manager = useMemo(() => {
     const steps = generateSteps(
       skipLastRest,
       intervals,
@@ -84,59 +92,38 @@ export const useIntervalTimer = ({
       workLabel,
       restDuration,
       restLabel,
-      onWorkStepComplete
+      (elapsedTime: number) => onWorkStepCompleteRef.current?.(elapsedTime)
     )
 
-    // Create a single timer manager with step change handling
     return new TimerManager({
       steps,
       repeat: 1,
       onStepChange: (step, stepIndex) => {
-        // Internal state updates
         setCurrentStep(step)
         setCurrentStepIndex(stepIndex)
-        // External callback
-        onStepChange?.(step, stepIndex)
+        onStepChangeRef.current?.(step, stepIndex)
       },
       onSequenceComplete: () => {
-        // Internal state update
         setTimerState(TimerState.Completed)
         setCurrentStep(null)
         setCurrentStepIndex(0)
-        // External callback
-        onSequenceComplete?.()
+        onSequenceCompleteRef.current?.()
       },
       onTick: (time) => {
         setTimeLeft(time)
       },
     })
-  }, [
-    workDuration,
-    restDuration,
-    intervals,
-    workLabel,
-    restLabel,
-    skipLastRest,
-    onStepChange,
-    onSequenceComplete,
-  ])
+  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest])
 
-  // Update the timer manager when dependencies change
   useEffect(() => {
-    if (!managerRef.current) {
-      return
-    }
-
-    setTimeLeft(managerRef.current.getCurrentStep()?.duration || 0)
+    managerRef.current = manager
+    setTimeLeft(manager.getCurrentStep()?.duration || 0)
     return () => {
-      // Clean up the old timer manager
       managerRef.current = null
     }
-  }, [managerRef.current])
+  }, [manager])
 
-  // Create stable callbacks
   const start = useCallback(() => {
-    // If we're in the Completed state, reset first to start fresh
     if (timerState === TimerState.Completed) {
       managerRef.current?.reset()
       setTimerState(TimerState.Idle)
@@ -157,8 +144,8 @@ export const useIntervalTimer = ({
     setCurrentStep(null)
     setCurrentStepIndex(0)
     setTimeLeft(0)
-    onStop?.()
-  }, [onStop])
+    onStopRef.current?.()
+  }, [])
 
   const skipCurrentStep = useCallback(() => {
     managerRef.current?.skipCurrentStep()

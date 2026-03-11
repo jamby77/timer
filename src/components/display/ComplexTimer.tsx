@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
 import type {
-  AnyTimerConfig,
   ComplexConfig,
   CountdownConfig,
   IntervalConfig,
+  PhaseConfig,
   StopwatchConfig,
   WorkRestConfig,
 } from '@/types/configure'
@@ -70,13 +70,13 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   const handlePhaseComplete = useCallback(
     (phaseId: string) => {
       const autoAdvance = config.autoAdvance ?? true
-      
+
       // Check if this is the last phase FIRST
       if (isLast) {
         setIsComplexRunning(false)
         return // Complex timer finished
       }
-      
+
       if (!autoAdvance) {
         return
       }
@@ -91,7 +91,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
     [config.autoAdvance, goToNextPhase, isLast]
   )
 
-  const renderPhaseTimer = (timerConfig: AnyTimerConfig) => {
+  const renderPhaseTimer = (timerConfig: PhaseConfig) => {
     switch (timerConfig.type) {
       case TimerType.COUNTDOWN:
         return (
@@ -203,21 +203,39 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <Button variant="outline" size="sm" disabled={isFirst} onClick={goToPrevPhase}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isFirst}
+            onClick={goToPrevPhase}
+            aria-label="Go to previous phase"
+          >
             Previous
           </Button>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={isFirst} onClick={() => goToPhase(0)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isFirst}
+              onClick={() => goToPhase(0)}
+              aria-label="Restart from first phase"
+            >
               Restart
             </Button>
-            <Button variant="outline" size="sm" disabled={isLast} onClick={goToNextPhase}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isLast}
+              onClick={goToNextPhase}
+              aria-label="Go to next phase"
+            >
               Next
             </Button>
           </div>
         </div>
       </div>
 
-      {renderPhaseTimer(currentPhase.config as AnyTimerConfig)}
+      {renderPhaseTimer(currentPhase.config)}
     </div>
   )
 }

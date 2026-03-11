@@ -48,7 +48,7 @@ export const TIMER_TYPE_LABELS: Record<TimerType, string> = {
 }
 
 // Timer type icons for UI display
-export const TIMER_TYPE_ICONS: Record<TimerType, ComponentType<any>> = {
+export const TIMER_TYPE_ICONS: Record<TimerType, ComponentType<{ className?: string }>> = {
   [TimerType.COUNTDOWN]: ClockArrowDown,
   [TimerType.STOPWATCH]: Timer,
   [TimerType.INTERVAL]: TimerReset,

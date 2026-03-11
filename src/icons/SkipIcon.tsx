@@ -1,4 +1,6 @@
-export default function SkipIcon(props: any) {
+import type { SVGProps } from 'react'
+
+export default function SkipIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       focusable="false"

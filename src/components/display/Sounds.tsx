@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from 'react'
 
-import { AirHorn } from '@/lib/sound/chatgpt'
+import { AirHorn } from '@/lib/sound/AirHorn'
 import {
   playCountdownBeep,
   playFinishBeep,

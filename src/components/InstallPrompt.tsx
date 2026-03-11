@@ -22,11 +22,14 @@ export const InstallPrompt = () => {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream)
+    setIsIOS(
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        !(window as unknown as Record<string, unknown>).MSStream
+    )
 
     const isStandaloneMode =
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true
+      (window.navigator as unknown as Record<string, unknown>).standalone === true
     setIsStandalone(isStandaloneMode)
 
     // Check if prompt was dismissed within the last 30 days
@@ -34,6 +37,11 @@ export const InstallPrompt = () => {
       const dismissedTimestamp = localStorage.getItem(DISMISSAL_STORAGE_KEY)
       if (dismissedTimestamp) {
         const dismissedTime = parseInt(dismissedTimestamp, 10)
+        if (Number.isNaN(dismissedTime)) {
+          localStorage.removeItem(DISMISSAL_STORAGE_KEY)
+          setIsVisible(true)
+          return
+        }
         const now = Date.now()
         if (now - dismissedTime < DISMISSAL_DURATION_MS) {
           setIsVisible(false)

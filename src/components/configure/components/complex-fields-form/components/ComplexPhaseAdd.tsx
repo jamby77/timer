@@ -46,26 +46,24 @@ export const ComplexPhaseAdd = ({
     const nextConfig = createDefaultPhaseConfig('', type)
     setDraftConfig(nextConfig)
     setDraftType(type)
-    setDraftName(generateTimerName(nextConfig as any))
+    setDraftName(generateTimerName(nextConfig))
   }
 
   const draft: PhaseDraft = useMemo(() => {
-    const config = {
-      ...(draftConfig as any),
+    const phaseConfig: PhaseTimerConfig = {
+      ...draftConfig,
       name: draftName,
-    }
-    const id = createPhaseId(config)
-    const draft = {
+    } as PhaseTimerConfig
+    const id = createPhaseId(phaseConfig)
+    phaseConfig.id = TimerConfigHash.generateTimerId(phaseConfig)
+
+    return {
       id,
       name: draftName,
       type: draftType,
-      config,
+      config: phaseConfig,
     }
-
-    draft.config.id = TimerConfigHash.generateTimerId(draft.config)
-
-    return draft
-  }, [draftConfig, draftName])
+  }, [draftConfig, draftName, draftType])
 
   const handleAddAtStart = () => {
     onAddAtStart(draft)

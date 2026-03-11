@@ -1,5 +1,8 @@
 // Polyfill for requestAnimationFrame and cancelAnimationFrame
-const root = typeof window !== 'undefined' ? window : (globalThis as any)
+const root: typeof globalThis & {
+  requestAnimationFrame?: typeof window.requestAnimationFrame
+  cancelAnimationFrame?: typeof window.cancelAnimationFrame
+} = typeof window !== 'undefined' ? window : globalThis
 
 if (typeof root.requestAnimationFrame === 'undefined') {
   let lastTime = 0

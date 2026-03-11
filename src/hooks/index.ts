@@ -1,11 +1,10 @@
 export { useIntervalTimer } from './useIntervalTimer'
 export { useLapHistory } from './useLapHistory'
 
-export { useMediaQuery } from './use-media-query'
 export { usePreStartCountdown } from './usePreStartCountdown'
 export { useSoundManager } from './useSoundManager'
 export { useStopwatch } from './useStopwatch'
 export { useTimer } from './useTimer'
-export { useTouchDevice } from './use-touch-device'
+export { useTouchDevice } from './useTouchDevice'
 export { useWorkRestTimer } from './useWorkRestTimer'
 export { useWakeLock } from './useWakeLock'

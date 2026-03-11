@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import type { ComplexConfig, PredefinedStyle } from '@/types/configure'
 
+import { isCountdownConfig, isIntervalConfig, isStopwatchConfig } from '@/types/configure'
 import { storage } from '@/lib/configure/storage'
 import { formatDuration, generateComplexTimerName, processTimerConfig } from '@/lib/configure/utils'
 import { TimerType } from '@/lib/enums'
@@ -31,22 +32,13 @@ const calculateDuration = (config: Partial<ComplexConfig>) => {
   if (!config.phases || config.phases.length === 0) return 0
 
   return config.phases.reduce((total, phase) => {
-    switch (phase.config.type) {
-      case TimerType.COUNTDOWN:
-        return total + (phase.config as any).duration
-      case TimerType.INTERVAL:
-        const workDuration = (phase.config as any).workDuration || 0
-        const restDuration = (phase.config as any).restDuration || 0
-        const intervals = (phase.config as any).intervals || 1
-        return total + (workDuration + restDuration) * intervals - restDuration
-      case TimerType.STOPWATCH:
-        return total + ((phase.config as any).timeLimit || 0)
-      case TimerType.WORKREST:
-        // This is complex to calculate, return 0 for now
-        return total
-      default:
-        return total
+    const c = phase.config
+    if (isCountdownConfig(c)) return total + c.duration
+    if (isIntervalConfig(c)) {
+      return total + (c.workDuration + c.restDuration) * c.intervals - c.restDuration
     }
+    if (isStopwatchConfig(c)) return total + (c.timeLimit || 0)
+    return total
   }, 0)
 }
 
@@ -113,12 +105,7 @@ export default function ConfigureComplexTimerPage() {
     try {
       // Store the preset using the storage method
       storage.storePreset(preset)
-      console.log('Successfully saved preset:', preset)
-
-      // Optionally, you could show a success message or navigate.
-      // For now, we'll just log it
-    } catch (error) {
-      console.error('Failed to save preset:', error)
+    } catch {
       setErrors(['Failed to save preset. Please try again.'])
     }
   }
@@ -138,6 +125,7 @@ export default function ConfigureComplexTimerPage() {
             size="sm"
             onClick={() => router.back()}
             className="flex items-center gap-2"
+            aria-label="Go back"
           >
             <MoveLeft />
           </Button>

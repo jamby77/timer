@@ -49,8 +49,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
         const finalConfig = { ...newConfig, type: newConfig.type || type }
         newConfig.name = generateTimerName(finalConfig as AnyTimerConfig)
       }
-      // Use any to bypass type checking issues with the onChange callback
-      onChange(newConfig as any)
+      onChange(newConfig as Partial<AnyTimerConfig>)
     },
     [onChange, config, type]
   )

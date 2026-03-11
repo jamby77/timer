@@ -60,7 +60,18 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
   }
 
   return (
-    <Card onClick={handleCardClick} className="cursor-pointer transition-colors hover:opacity-80">
+    <Card
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleCardClick()
+        }
+      }}
+      className="cursor-pointer transition-colors hover:opacity-80"
+    >
       <CardHeader>
         <CardTitle>
           <h3 className="text-card-foreground font-semibold">{style.name}</h3>

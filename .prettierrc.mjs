@@ -30,8 +30,6 @@ export default {
     '.css$',
     '',
   ],
-  importOrderSeparation: true,
-  importOrderSortSpecifiers: true,
   importOrderTypeScriptVersion: '5.9.3',
   importOrderParserPlugins: ['typescript', 'jsx'],
   tailwindFunctions: ['clsx', 'cn'],

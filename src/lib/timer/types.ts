@@ -73,7 +73,7 @@ export interface TimerControls {
   getTime: () => number
 }
 
-export interface IntervalConfig {
+export interface IntervalTimerOptions {
   /** Work duration in seconds */
   workDuration: number
   /** Rest duration in seconds */

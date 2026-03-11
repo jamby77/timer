@@ -81,9 +81,8 @@ export default function ConfigurePage() {
         initialConfig={selectedPredefined?.config}
         isPredefined={!!selectedPredefined}
         onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
-        onSaveAsPredefined={(config) => {
+        onSaveAsPredefined={(_config) => {
           // TODO: Implement save as predefined functionality
-          console.log('Save as predefined:', config)
         }}
         onCancel={() => {
           setSelectedTimer(null)
