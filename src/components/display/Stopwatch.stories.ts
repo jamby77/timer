@@ -6,6 +6,10 @@ import { Stopwatch } from '@/components/display/Stopwatch'
 
 const meta = preview.meta({
   component: Stopwatch,
+  tags: ['autodocs'],
+})
+
+export const Default = meta.story({
   args: {
     config: {
       id: 'test',
@@ -15,7 +19,4 @@ const meta = preview.meta({
       completionMessage: 'Time limit reached',
     },
   },
-  tags: ['autodocs'],
 })
-
-export const Default = meta.story()

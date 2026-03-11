@@ -92,7 +92,8 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   )
 
   const renderPhaseTimer = (timerConfig: PhaseConfig) => {
-    switch (timerConfig.type) {
+    const t = timerConfig.type
+    switch (t) {
       case TimerType.COUNTDOWN:
         return (
           <Timer
@@ -182,7 +183,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
           <div className="text-center">
             <h2 className="mb-4 text-2xl font-bold">{currentPhase.name}</h2>
             <p className="text-muted-foreground">
-              Timer type {timerConfig.type} is not supported inside a complex timer.
+              Timer type {t} is not supported inside a complex timer.
             </p>
           </div>
         )
