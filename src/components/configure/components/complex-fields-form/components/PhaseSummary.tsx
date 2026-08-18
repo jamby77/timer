@@ -8,7 +8,8 @@ import {
   isStopwatchConfig,
   isWorkRestConfig,
 } from '@/types/configure'
-import { TIMER_TYPE_ICONS, TIMER_TYPE_LABELS } from '@/lib/enums'
+import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { TIMER_TYPE_ICONS } from '@/lib/timer-type-icons'
 
 interface PhaseSummaryProps {
   phases: ComplexPhase[]

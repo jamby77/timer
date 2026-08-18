@@ -2,7 +2,7 @@ import { createMockTimerConfig } from '@/testing/utils'
 import preview from '#.storybook/preview'
 import { expect, fn } from 'storybook/test'
 
-import { TimerType } from '@/lib/timer/types'
+import { TimerType } from '@/lib/enums'
 
 import { RecentTimers } from './RecentTimers'
 

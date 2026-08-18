@@ -2,7 +2,7 @@ import preview from '#.storybook/preview'
 import { expect, fn } from 'storybook/test'
 
 import { AnyTimerConfig, WorkRestMode } from '@/types/configure'
-import { TimerType } from '@/lib/timer/types'
+import { TimerType } from '@/lib/enums'
 
 import { TimerConfigForm } from './TimerConfigForm'
 

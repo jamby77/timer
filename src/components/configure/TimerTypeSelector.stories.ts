@@ -1,7 +1,7 @@
 import preview from '#.storybook/preview'
 import { expect, fn } from 'storybook/test'
 
-import { TimerType } from '@/lib/timer/types'
+import { TimerType } from '@/lib/enums'
 
 import { TimerTypeSelector } from './TimerTypeSelector'
 

@@ -9,8 +9,8 @@ export const formatTime = (time: number): string => {
   const mins = Math.floor(totalSeconds / 60)
   const secs = totalSeconds % 60
   const msStr = milliseconds.toString().padStart(2, '0').slice(0, 2)
-  let minStr = mins.toString().padStart(2, '0')
-  let secStr = secs.toString().padStart(2, '0')
+  const minStr = mins.toString().padStart(2, '0')
+  const secStr = secs.toString().padStart(2, '0')
   return `${minStr}:${secStr}.${msStr}`
 }
 
@@ -188,15 +188,3 @@ export function timerPickerTimeToSeconds(time: TimerPickerTime): number {
   return time.hours * 3600 + time.minutes * 60 + time.seconds
 }
 
-export function getArrowByType(value: string, step: number, type: TimePickerType) {
-  switch (type) {
-    case 'minutes':
-      return getValidArrowMinuteOrSecond(value, step)
-    case 'seconds':
-      return getValidArrowMinuteOrSecond(value, step)
-    case 'hours':
-      return getValidArrowHour(value, step)
-    default:
-      return '00'
-  }
-}

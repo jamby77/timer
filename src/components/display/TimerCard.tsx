@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-interface CardProps {
+interface TimerCardProps {
   label: string
   state: TimerState
   time: string
@@ -30,7 +30,7 @@ export const TimerCard = ({
   subtitle,
   isWork,
   fullscreen = false,
-}: CardProps) => {
+}: TimerCardProps) => {
   const lastDotIndex = time.lastIndexOf('.')
   const mainTime = lastDotIndex > -1 ? time.slice(0, lastDotIndex) : time
   const fractionalTime = lastDotIndex > -1 ? time.slice(lastDotIndex) : ''

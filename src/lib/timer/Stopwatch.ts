@@ -1,5 +1,6 @@
+import { TimerState } from '@/lib/enums'
+
 import { Timer } from './Timer'
-import { TimerState } from './types'
 import { formatTime } from './utils'
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000 // 1 year in milliseconds
@@ -88,7 +89,9 @@ export class Stopwatch {
   }
 
   /**
-   * Stop the stopwatch and trigger onStop callback
+   * Stop the stopwatch and trigger onStop callback.
+   * Ignores stop calls when within 100ms of the time limit to avoid racing
+   * with the auto-complete callback fired by the internal Timer.
    */
   public stop(): void {
     if (!this.isRunning || this.getElapsedTime() >= this.timeLimitMs - 100) return

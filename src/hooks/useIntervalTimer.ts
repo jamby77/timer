@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { TimerStep } from '@/lib/timer/TimerManager'
@@ -14,7 +14,7 @@ function generateSteps(
   workLabel: string,
   restDuration: number,
   restLabel: string,
-  onWorkStepComplete?: { (elapsedTime: number): void | undefined }
+  onWorkStepCompleteRef: React.RefObject<((elapsedTime: number) => void) | undefined>
 ) {
   const steps: TimerStep[] = []
   const restIntervals = skipLastRest ? intervals - 1 : intervals
@@ -31,10 +31,10 @@ function generateSteps(
         if (state === StepState.Complete) {
           // Use full duration when completed naturally
           const fullDuration = workDuration * 1000
-          onWorkStepComplete?.(fullDuration)
+          onWorkStepCompleteRef.current?.(fullDuration)
         } else if (state === StepState.Skip) {
           // Use actual elapsed time when skipped
-          onWorkStepComplete?.(elapsedTime)
+          onWorkStepCompleteRef.current?.(elapsedTime)
         }
       },
     })
@@ -84,7 +84,7 @@ export const useIntervalTimer = ({
     setTimerActive(timerState === TimerState.Running || timerState === TimerState.Paused)
   }, [timerState, setTimerActive])
 
-  const manager = useMemo(() => {
+  useEffect(() => {
     const steps = generateSteps(
       skipLastRest,
       intervals,
@@ -92,18 +92,20 @@ export const useIntervalTimer = ({
       workLabel,
       restDuration,
       restLabel,
-      (elapsedTime: number) => onWorkStepCompleteRef.current?.(elapsedTime)
+      onWorkStepCompleteRef
     )
 
-    return new TimerManager({
+    const manager = new TimerManager({
       steps,
       repeat: 1,
       onStepChange: (step, stepIndex) => {
+        // Internal state updates
         setCurrentStep(step)
         setCurrentStepIndex(stepIndex)
         onStepChangeRef.current?.(step, stepIndex)
       },
       onSequenceComplete: () => {
+        // Internal state update
         setTimerState(TimerState.Completed)
         setCurrentStep(null)
         setCurrentStepIndex(0)
@@ -113,17 +115,17 @@ export const useIntervalTimer = ({
         setTimeLeft(time)
       },
     })
-  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest])
 
-  useEffect(() => {
     managerRef.current = manager
     setTimeLeft(manager.getCurrentStep()?.duration || 0)
+
     return () => {
       managerRef.current = null
     }
-  }, [manager])
+  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest])
 
   const start = useCallback(() => {
+    // If we're in the Completed state, reset first to start fresh
     if (timerState === TimerState.Completed) {
       managerRef.current?.reset()
       setTimerState(TimerState.Idle)

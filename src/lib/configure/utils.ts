@@ -75,13 +75,11 @@ const workRestBaseSchema = baseTimerConfigSchema.extend({
   maxWorkTime: z
     .number()
     .int('Maximum work time must be an integer')
-    .min(1, 'Maximum work time must be greater than 0')
-    .optional(),
+    .min(1, 'Maximum work time must be greater than 0'),
   maxRounds: z
     .number()
     .int('Maximum rounds must be an integer')
-    .min(1, 'Maximum rounds must be greater than 0')
-    .optional(),
+    .min(1, 'Maximum rounds must be greater than 0'),
 })
 
 // WorkRest ratio config schema
@@ -222,8 +220,8 @@ export const validateTimerConfig = (config: AnyTimerConfig): string[] => {
     errors.push(...flatError.formErrors)
   }
   if (flatError.fieldErrors) {
-    Object.entries(flatError.fieldErrors).forEach(([_key, value]) => {
-      errors.push(value.join(', '))
+    Object.entries(flatError.fieldErrors).forEach(([key, value]) => {
+      errors.push(`${key}: ${value.join(', ')}`)
     })
   }
   // result.error.issues.forEach((issue) => {

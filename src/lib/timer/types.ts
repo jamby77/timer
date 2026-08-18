@@ -11,9 +11,6 @@ export interface WorkRestTimerConfig {
   countdownBeforeStart?: number // seconds
 }
 
-// Re-export enums for backward compatibility
-export { TimerType, TimerState, TimerPhase }
-
 export interface WorkRestTimerState {
   phase: TimerPhase
   ratio: number // Work/rest multiplier (stored as integer * 100)

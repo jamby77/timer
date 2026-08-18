@@ -4,9 +4,8 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import type { WorkRestConfig } from '@/types/configure'
 
-import { TimerState as BaseTimerState } from '@/lib/timer'
 import { getDisplayData } from '@/lib/timer/displayUtils'
-import { TimerPhase, TimerState } from '@/lib/timer/types'
+import { TimerPhase, TimerState } from '@/lib/enums'
 import {
   useLapHistory,
   usePreStartCountdown,
@@ -113,8 +112,8 @@ export function WorkRestTimer({
   useWakeLock(isRunningState)
 
   const isPreStarting = preStart.isActive
-  const isPreStartRunning = preStart.state === BaseTimerState.Running
-  const isPreStartPaused = preStart.state === BaseTimerState.Paused
+  const isPreStartRunning = preStart.state === TimerState.Running
+  const isPreStartPaused = preStart.state === TimerState.Paused
 
   const showStartButton = isPreStarting ? isPreStartPaused : isIdlePhase || isPausedState
   const showStopButton = isPreStarting ? true : isWorkPhase

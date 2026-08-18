@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 
-import { TimerState } from '@/lib/timer'
+import { TimerState } from '@/lib/enums'
 
 import { PauseButton, ResetButton, StartButton, StopButton } from '@/components/ui/timer-buttons'
 

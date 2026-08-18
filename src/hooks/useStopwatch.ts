@@ -34,7 +34,8 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
 
   useEffect(() => {
     const stopwatch = new Stopwatch({
-      ...options,
+      timeLimitMs: options.timeLimitMs,
+      autoStart: options.autoStart,
       onTick: (time) => {
         setTime(time)
         onTickRef.current?.(time)
@@ -55,7 +56,7 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
       stopwatch.destroy()
       stopwatchRef.current = null
     }
-  }, [options.timeLimitMs])
+  }, [options.timeLimitMs, options.autoStart])
 
   const start = useCallback(() => {
     stopwatchRef.current?.start()
