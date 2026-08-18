@@ -3,7 +3,11 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { StepState, TimerState } from '@/lib/enums'
 
-import { TimerManager, type TimerStep } from './TimerManager'
+import {
+  type StepStateChangeCallback,
+  TimerManager,
+  type TimerStep,
+} from './TimerManager'
 
 function createStep(overrides: Partial<TimerStep> = {}): TimerStep {
   return {
@@ -140,7 +144,7 @@ describe('TimerManager', () => {
   // --- onStepStateChange ---
 
   it('should fire StepState.Start when step begins', () => {
-    const onStepStateChange = vi.fn()
+    const onStepStateChange = vi.fn<StepStateChangeCallback>()
     const step = createStep({ onStepStateChange })
     const manager = new TimerManager({ steps: [step] })
 
@@ -152,7 +156,7 @@ describe('TimerManager', () => {
   })
 
   it('should fire StepState.Pause with elapsed time', async () => {
-    const onStepStateChange = vi.fn()
+    const onStepStateChange = vi.fn<StepStateChangeCallback>()
     const step = createStep({ duration: 500, onStepStateChange })
     const manager = new TimerManager({ steps: [step] })
 
@@ -161,14 +165,14 @@ describe('TimerManager', () => {
     manager.pause()
 
     const pauseCall = onStepStateChange.mock.calls.find(
-      ([state]: [StepState]) => state === StepState.Pause
+      ([state]) => state === StepState.Pause
     )
     expect(pauseCall).toBeDefined()
     expect(pauseCall![1].elapsed).toBeGreaterThan(0)
   })
 
   it('should fire StepState.Resume when resuming', async () => {
-    const onStepStateChange = vi.fn()
+    const onStepStateChange = vi.fn<StepStateChangeCallback>()
     const step = createStep({ duration: 500, onStepStateChange })
     const manager = new TimerManager({ steps: [step] })
 
@@ -178,13 +182,13 @@ describe('TimerManager', () => {
     manager.start() // resume
 
     const resumeCall = onStepStateChange.mock.calls.find(
-      ([state]: [StepState]) => state === StepState.Resume
+      ([state]) => state === StepState.Resume
     )
     expect(resumeCall).toBeDefined()
   })
 
   it('should fire StepState.Complete when step finishes naturally', async () => {
-    const onStepStateChange = vi.fn()
+    const onStepStateChange = vi.fn<StepStateChangeCallback>()
     const step = createStep({ duration: 100, onStepStateChange })
 
     const manager = new TimerManager({ steps: [step], repeat: 1 })
@@ -192,7 +196,7 @@ describe('TimerManager', () => {
     await sleep(200)
 
     const completeCall = onStepStateChange.mock.calls.find(
-      ([state]: [StepState]) => state === StepState.Complete
+      ([state]) => state === StepState.Complete
     )
     expect(completeCall).toBeDefined()
   })
@@ -201,7 +205,7 @@ describe('TimerManager', () => {
 
   it('should skip current step and advance to next', async () => {
     const onStepChange = vi.fn()
-    const onStepStateChange = vi.fn()
+    const onStepStateChange = vi.fn<StepStateChangeCallback>()
     const step1 = createStep({
       id: 'step-1',
       label: 'Step 1',
@@ -222,7 +226,7 @@ describe('TimerManager', () => {
 
     // Should fire Skip state change with elapsed time
     const skipCall = onStepStateChange.mock.calls.find(
-      ([state]: [StepState]) => state === StepState.Skip
+      ([state]) => state === StepState.Skip
     )
     expect(skipCall).toBeDefined()
     expect(skipCall![1].elapsed).toBeGreaterThan(0)
