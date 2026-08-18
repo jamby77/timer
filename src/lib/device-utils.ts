@@ -14,6 +14,6 @@ export function isTouchDevice(): boolean {
   return (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0 ||
-    (navigator as any).msMaxTouchPoints > 0
+    ((navigator as unknown as Record<string, number>).msMaxTouchPoints ?? 0) > 0
   )
 }

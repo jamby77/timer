@@ -1,4 +1,6 @@
-export default function PauseIcon(props: any) {
+import type { SVGProps } from 'react'
+
+export default function PauseIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

@@ -1,4 +1,11 @@
-import { AnyTimerConfig } from '@/types/configure'
+import type {
+  AnyTimerConfig,
+  CountdownConfig,
+  IntervalConfig,
+  StopwatchConfig,
+  WorkRestConfig,
+} from '@/types/configure'
+
 import { TimerType } from '@/lib/enums'
 
 import {
@@ -16,13 +23,13 @@ type ComplexFieldsProps = {
 export const ComplexFields = ({ type, config, onChange }: ComplexFieldsProps) => {
   switch (type) {
     case TimerType.COUNTDOWN:
-      return <CountdownFields config={config as any} onChange={onChange} />
+      return <CountdownFields config={config as CountdownConfig} onChange={onChange} />
     case TimerType.STOPWATCH:
-      return <StopwatchFields config={config as any} onChange={onChange} />
+      return <StopwatchFields config={config as StopwatchConfig} onChange={onChange} />
     case TimerType.INTERVAL:
-      return <IntervalFields config={config as any} onChange={onChange} />
+      return <IntervalFields config={config as IntervalConfig} onChange={onChange} />
     case TimerType.WORKREST:
-      return <WorkRestFields config={config as any} onChange={onChange} />
+      return <WorkRestFields config={config as WorkRestConfig} onChange={onChange} />
     default:
       return null
   }

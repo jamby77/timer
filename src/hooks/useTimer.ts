@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { TimerOptions } from '@/lib/timer/types'
 
 import { TimerState } from '@/lib/enums'
 import { Timer as TimerClass } from '@/lib/timer/Timer'
-import { useTimerContext } from '@/contexts/TimerContext'
 
 interface UseTimerState {
   time: number
@@ -54,7 +54,6 @@ export const useTimer = (
   })
   const timerRef = useRef<TimerClass | null>(null)
 
-  // Store callbacks in refs to avoid recreating the timer on every render
   const onTickRef = useRef(onTick)
   const onStateChangeRef = useRef(onStateChange)
   const onCompleteRef = useRef(onComplete)
@@ -64,12 +63,10 @@ export const useTimer = (
   onCompleteRef.current = onComplete
   onStopRef.current = onStop
 
-  // Update context when timer state changes
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
   }, [state, setTimerActive])
 
-  // Initialize timer instance
   useEffect(() => {
     const timer = new TimerClass(initialTime, {
       onTick: (currentTime, elapsed) => {
@@ -88,7 +85,6 @@ export const useTimer = (
 
     timerRef.current = timer
 
-    // Cleanup timer on unmount
     return () => {
       timer.destroy()
       timerRef.current = null

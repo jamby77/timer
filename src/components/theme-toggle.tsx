@@ -1,8 +1,8 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
 
 import { Theme, THEME_LABELS } from '@/lib/enums'
 
@@ -42,9 +42,7 @@ export const ThemeToggle = () => {
   return (
     <Button variant="outline" size="icon" onClick={rotateTheme}>
       {mounted ? getThemeIcon(currentTheme) : null}
-      <span className="sr-only">
-        Toggle theme (current: {THEME_LABELS[currentTheme]})
-      </span>
+      <span className="sr-only">Toggle theme (current: {THEME_LABELS[currentTheme]})</span>
     </Button>
   )
 }

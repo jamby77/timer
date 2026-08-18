@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
 import type {
-  AnyTimerConfig,
   ComplexConfig,
   CountdownConfig,
   IntervalConfig,
+  PhaseConfig,
   StopwatchConfig,
   WorkRestConfig,
 } from '@/types/configure'
@@ -72,13 +72,13 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   const handlePhaseComplete = useCallback(
     (phaseId: string) => {
       const autoAdvance = config.autoAdvance ?? true
-      
+
       // Check if this is the last phase FIRST
       if (isLast) {
         setIsComplexRunning(false)
         return // Complex timer finished
       }
-      
+
       if (!autoAdvance) {
         return
       }
@@ -95,10 +95,8 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
 
   const handlePhaseStop = useCallback(() => {
     if (config.autoAdvance ?? true) {
-      // Auto-advancing: don't set running to false to prevent flicker
       goToNextPhase()
     } else {
-      // Manual stop: set running to false
       setIsComplexRunning(false)
     }
   }, [config.autoAdvance, goToNextPhase])
@@ -113,15 +111,13 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
     [handlePhaseComplete, currentPhase.id]
   )
 
-  const handlePhaseStateChangeNoComplete = useCallback(
-    (state: TimerState) => {
-      setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
-    },
-    []
-  )
+  const handlePhaseStateChangeNoComplete = useCallback((state: TimerState) => {
+    setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
+  }, [])
 
-  const renderPhaseTimer = (timerConfig: AnyTimerConfig) => {
-    switch (timerConfig.type) {
+  const renderPhaseTimer = (timerConfig: PhaseConfig) => {
+    const t = timerConfig.type
+    switch (t) {
       case TimerType.COUNTDOWN:
         return (
           <Timer
@@ -165,7 +161,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
           <div className="text-center">
             <h2 className="mb-4 text-2xl font-bold">{currentPhase.name}</h2>
             <p className="text-muted-foreground">
-              Timer type {timerConfig.type} is not supported inside a complex timer.
+              Timer type {t} is not supported inside a complex timer.
             </p>
           </div>
         )
@@ -186,21 +182,39 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <Button variant="outline" size="sm" disabled={isFirst} onClick={goToPrevPhase}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isFirst}
+            onClick={goToPrevPhase}
+            aria-label="Go to previous phase"
+          >
             Previous
           </Button>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={isFirst} onClick={() => goToPhase(0)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isFirst}
+              onClick={() => goToPhase(0)}
+              aria-label="Restart from first phase"
+            >
               Restart
             </Button>
-            <Button variant="outline" size="sm" disabled={isLast} onClick={goToNextPhase}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isLast}
+              onClick={goToNextPhase}
+              aria-label="Go to next phase"
+            >
               Next
             </Button>
           </div>
         </div>
       </div>
 
-      {renderPhaseTimer(currentPhase.config as AnyTimerConfig)}
+      {renderPhaseTimer(currentPhase.config)}
     </div>
   )
 }

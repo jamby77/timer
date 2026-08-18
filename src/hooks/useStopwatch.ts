@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { StopwatchOptions as StopwatchOptionsType } from '@/lib/timer/Stopwatch'
 
 import { TimerState } from '@/lib/enums'
 import { Stopwatch } from '@/lib/timer/Stopwatch'
-import { useTimerContext } from '@/contexts/TimerContext'
 
 type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange' | 'onStop'> & {
   onTick?: (elapsedTime: number) => void
@@ -19,22 +19,19 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const [state, setState] = useState<TimerState>(TimerState.Idle)
   const stopwatchRef = useRef<Stopwatch | null>(null)
 
-  // Store callbacks in refs to avoid recreating the Stopwatch on every render
   const onTickRef = useRef(options.onTick)
+  const onStateChangeRef = useRef(options.onStateChange)
   const onStopRef = useRef(options.onStop)
   const onAutoStopRef = useRef(options.onAutoStop)
-  const onStateChangeRef = useRef(options.onStateChange)
   onTickRef.current = options.onTick
+  onStateChangeRef.current = options.onStateChange
   onStopRef.current = options.onStop
   onAutoStopRef.current = options.onAutoStop
-  onStateChangeRef.current = options.onStateChange
 
-  // Update context when stopwatch state changes
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
   }, [state, setTimerActive])
 
-  // Initialize stopwatch
   useEffect(() => {
     const stopwatch = new Stopwatch({
       timeLimitMs: options.timeLimitMs,
@@ -53,10 +50,8 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
       },
     })
 
-    // Store the instance
     stopwatchRef.current = stopwatch
 
-    // Cleanup on unmount
     return () => {
       stopwatch.destroy()
       stopwatchRef.current = null

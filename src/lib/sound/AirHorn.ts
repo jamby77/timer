@@ -1,8 +1,13 @@
+interface WindowWithWebkit extends Window {
+  webkitAudioContext?: typeof AudioContext
+}
+
 export class AirHorn {
   public readonly ctx: AudioContext
   constructor() {
-    // @ts-ignore
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const AudioCtx =
+      window.AudioContext || (window as unknown as WindowWithWebkit).webkitAudioContext
+    this.ctx = new AudioCtx!()
   }
 
   play() {
@@ -54,7 +59,7 @@ export class AirHorn {
     // === ENVELOPE (1.5s total) ===
     const gain = ctx.createGain()
     gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.exponentialRampToValueAtTime(1.15, now + 0.03) // louder peak
+    gain.gain.exponentialRampToValueAtTime(1.15, now + 0.03)
     gain.gain.setValueAtTime(1.15, now + 1.28)
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5)
 

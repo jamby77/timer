@@ -15,7 +15,7 @@ A versatile timer application built with Next.js 16, TypeScript, and Tailwind CS
 2. **Stopwatch**: Count-up timer with optional time limit
 3. **Interval**: Work/rest cycles with customizable intervals
 4. **Work/Rest**: Ratio-based or fixed-rest duration timers
-5. **Complex**: Multi-phase timer combinations (coming soon)
+5. **Complex**: Multi-phase timer combining different timer types in sequence
 
 ### Built-in Predefined Styles
 - **Tabata**: 8 rounds of 20s work / 10s rest
@@ -41,43 +41,92 @@ A versatile timer application built with Next.js 16, TypeScript, and Tailwind CS
 src/
 ├── app/
 │   ├── configure/
-│   │   └── page.tsx                 # Main configuration page
+│   │   ├── page.tsx                 # Main configuration page
+│   │   └── complex/
+│   │       └── page.tsx             # Complex timer configuration
 │   ├── layout.tsx                   # Root layout with navigation
-│   └── page.tsx                     # Home page
+│   ├── page.tsx                     # Home page (timer display)
+│   └── manifest.ts                  # PWA manifest
 ├── components/
 │   ├── configure/
-│   │   ├── RecentTimers.tsx         # Recent timers section
-│   │   ├── RecentTimers.spec.ts     # Tests for RecentTimers
-│   │   ├── RecentTimers.stories.ts  # Storybook stories
-│   │   ├── TimerTypeSelector.tsx    # Timer type selection
-│   │   ├── TimerTypeSelector.spec.ts # Tests for TimerTypeSelector
-│   │   ├── TimerTypeSelector.stories.ts # Storybook stories
-│   │   ├── PredefinedStyles.tsx     # Predefined timer styles
-│   │   ├── PredefinedStyles.spec.ts # Tests for PredefinedStyles
-│   │   ├── PredefinedStyles.stories.ts # Storybook stories
-│   │   ├── TimerConfigForm.tsx      # Dynamic configuration form
-│   │   ├── TimerConfigForm.spec.ts  # Tests for TimerConfigForm
-│   │   └── TimerConfigForm.stories.ts # Storybook stories
-│   ├── Button.tsx                   # Reusable button component
-│   ├── TimerCard.tsx                     # Reusable card component
-│   ├── Navigation.tsx               # Main navigation
-│   └── (existing timer components...)
+│   │   ├── PredefinedStyles.tsx      # Predefined timer styles
+│   │   ├── RecentTimers.tsx          # Recent timers section
+│   │   ├── TimerConfig.tsx           # Timer config wrapper
+│   │   ├── TimerTypeSelector.tsx     # Timer type selection
+│   │   └── components/
+│   │       ├── shared/               # Shared form components
+│   │       │   ├── CountdownFields.tsx
+│   │       │   ├── IntervalFields.tsx
+│   │       │   ├── StopwatchFields.tsx
+│   │       │   ├── WorkRestFields.tsx
+│   │       │   ├── TimePicker.tsx
+│   │       │   ├── CountdownSelector.tsx
+│   │       │   └── FormErrors.tsx
+│   │       ├── timer-config-form/    # Main config form
+│   │       │   ├── TimerConfigForm.tsx
+│   │       │   └── CommonFields.tsx
+│   │       └── complex-fields-form/  # Complex timer form
+│   │           ├── ComplexFieldsForm.tsx
+│   │           └── components/
+│   │               ├── ComplexBody.tsx
+│   │               ├── ComplexFields.tsx
+│   │               ├── ComplexPhaseAdd.tsx
+│   │               ├── ComplexPhaseEdit.tsx
+│   │               └── PhaseSummary.tsx
+│   ├── display/
+│   │   ├── Timer.tsx                 # Countdown timer display
+│   │   ├── Stopwatch.tsx             # Stopwatch display
+│   │   ├── Interval.tsx              # Interval timer display
+│   │   ├── WorkRestTimer.tsx         # Work/rest timer display
+│   │   ├── ComplexTimer.tsx          # Complex multi-phase timer
+│   │   ├── TimerCard.tsx             # Shared timer card
+│   │   ├── TimerContainer.tsx        # Timer layout container
+│   │   ├── TimerProgressIndicator.tsx
+│   │   └── LapHistory.tsx
+│   ├── ui/                           # Radix-based UI primitives
+│   │   └── timer-buttons/            # Timer action buttons
+│   ├── Navigation.tsx
+│   ├── InstallPrompt.tsx             # PWA install prompt
+│   └── PageContainer.tsx
+├── contexts/
+│   └── TimerContext.tsx              # Timer active state context
+├── hooks/
+│   ├── useTimer.ts                   # Countdown timer hook
+│   ├── useStopwatch.ts               # Stopwatch hook
+│   ├── useIntervalTimer.ts           # Interval timer hook
+│   ├── useWorkRestTimer.ts           # Work/rest timer hook
+│   ├── usePreStartCountdown.ts       # Pre-start countdown hook
+│   ├── useSoundManager.ts            # Sound playback hook
+│   ├── useLapHistory.ts              # Lap history hook
+│   ├── useWakeLock.ts                # Screen wake lock hook
+│   └── useTouchDevice.ts             # Touch detection hook
 ├── lib/
 │   ├── configure/
-│   │   ├── types.ts                 # Configuration types
-│   │   ├── storage.ts               # Local storage management
-│   │   ├── storage.spec.ts          # Tests for storage utilities
-│   │   ├── presets.ts               # Predefined timer configurations
-│   │   ├── presets.spec.ts          # Tests for presets
-│   │   ├── utils.ts                 # Helper functions
-│   │   └── utils.spec.ts            # Tests for utils
-│   └── timer/
-│       ├── TimerConfigHash.ts       # Timer configuration hashing
-│       └── (existing timer utilities...)
+│   │   ├── storage.ts                # LocalStorage management
+│   │   ├── presets.ts                # Predefined timer styles
+│   │   └── utils.ts                  # Validation, formatting, config utils
+│   ├── timer/
+│   │   ├── Timer.ts                  # Timer class
+│   │   ├── Stopwatch.ts              # Stopwatch class
+│   │   ├── TimerManager.ts           # Multi-step timer manager
+│   │   ├── TimerConfigHash.ts        # Config hashing for IDs
+│   │   ├── types.ts                  # Runtime timer types
+│   │   └── utils.ts                  # Time formatting utilities
+│   ├── sound/
+│   │   ├── SoundManager.ts           # Sound playback manager
+│   │   ├── SoundEngine.ts            # Audio engine
+│   │   ├── AirHorn.ts                # Air horn sound effect
+│   │   └── cues.ts                   # Sound cue definitions
+│   └── enums.ts                      # Shared enums
 ├── types/
-│   └── configure.ts                 # Global type definitions
-└── icons/
-    └── (existing icon components...)
+│   └── configure.ts                  # Timer config types & type guards
+├── icons/                            # Custom SVG icon components
+├── providers/
+│   └── theme-provider.tsx
+└── testing/
+    ├── utils.ts                      # Test helpers (sleep, mock configs)
+    ├── mocks.ts                      # localStorage mock
+    └── storybook-mocks.ts
 ```
 
 ## Getting Started
@@ -137,9 +186,9 @@ pnpm storybook
 
 ## Contributing
 
-1. Follow the established file structure and naming conventions
-2. Create corresponding `.spec.ts` and `.stories.ts` files for new components
-3. Use TypeScript interfaces for all props and state
+1. Follow the established file structure and naming conventions (camelCase for hooks)
+2. Create corresponding `.test.ts` and `.stories.tsx` files for new components
+3. Use TypeScript interfaces for all props and state; avoid `any`
 4. Follow the existing styling patterns with Tailwind CSS
 5. Ensure all tests pass before submitting changes
 

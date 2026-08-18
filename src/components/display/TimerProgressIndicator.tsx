@@ -34,9 +34,9 @@ export const TimerProgressIndicator = ({
       ? 'var(--tm-pr-rest-bg)'
       : 'var(--tm-pr-work-bg)'
 
-  const progressStyle: CSSProperties = {
-    ['--progress-indicator-color' as any]: indicatorColor,
-  }
+  const progressStyle = {
+    '--progress-indicator-color': indicatorColor,
+  } as CSSProperties
 
   return (
     <div className={cn('mb-4 flex items-center gap-2', !isVisible && 'invisible', className)}>

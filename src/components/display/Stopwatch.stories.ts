@@ -14,9 +14,6 @@ const stopwatchConfig = {
 
 const meta = preview.meta({
   component: Stopwatch,
-  args: {
-    config: stopwatchConfig,
-  },
   tags: ['autodocs'],
 })
 

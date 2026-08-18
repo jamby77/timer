@@ -10,10 +10,8 @@ export function useTouchDevice(): boolean {
   const [touchDevice, setTouchDevice] = useState(false)
 
   useEffect(() => {
-    // Initial check
     setTouchDevice(isTouchDevice())
 
-    // Handle window resize in case of device rotation or window resizing
     const handleResize = () => {
       setTouchDevice(isTouchDevice())
     }
@@ -27,7 +25,6 @@ export function useTouchDevice(): boolean {
     window.addEventListener('touchstart', onFirstTouch, {
       once: true,
     })
-    // Cleanup
     return () => {
       window.removeEventListener('touchstart', onFirstTouch)
       window.removeEventListener('resize', handleResize)

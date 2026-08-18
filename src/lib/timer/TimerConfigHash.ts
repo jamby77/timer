@@ -26,8 +26,8 @@ export class TimerConfigHash {
   /**
    * Normalize config for consistent hashing
    */
-  private static normalizeConfig(config: AnyTimerConfig): any {
-    const normalized: any = {
+  private static normalizeConfig(config: AnyTimerConfig): Record<string, unknown> {
+    const normalized: Record<string, unknown> = {
       type: config.type,
       name: config.name.trim().toLowerCase(),
     }

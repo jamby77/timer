@@ -32,7 +32,6 @@ export const ComplexBody = ({
   onConfigChange,
 }: ComplexBodyProps) => {
   const generatedName = generateTimerName(config)
-  console.log({ generatedName, config, name, type })
   return (
     <FieldGroup>
       <Field>
@@ -56,7 +55,7 @@ export const ComplexBody = ({
       <ComplexFields
         type={type}
         config={config}
-        onChange={(updates) => onConfigChange(updates as any)}
+        onChange={(updates) => onConfigChange(updates as Partial<PhaseTimerConfig>)}
       />
 
       <Field>

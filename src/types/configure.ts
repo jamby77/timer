@@ -73,12 +73,13 @@ export interface WorkRestFixedConfig extends BaseWorkRestConfig {
 
 // Union type for WorkRest configurations
 export type WorkRestConfig = WorkRestRatioConfig | WorkRestFixedConfig
+export type PhaseConfig = CountdownConfig | StopwatchConfig | IntervalConfig | WorkRestConfig
 
 export interface ComplexPhase {
   id: string
   name: string
   type: TimerType
-  config: CountdownConfig | StopwatchConfig | IntervalConfig | WorkRestConfig
+  config: PhaseConfig
   order: number
 }
 
@@ -96,6 +97,26 @@ export type AnyTimerConfig =
   | IntervalConfig
   | WorkRestConfig
   | ComplexConfig
+
+export function isCountdownConfig(c: AnyTimerConfig | PhaseConfig): c is CountdownConfig {
+  return c.type === TimerType.COUNTDOWN
+}
+
+export function isStopwatchConfig(c: AnyTimerConfig | PhaseConfig): c is StopwatchConfig {
+  return c.type === TimerType.STOPWATCH
+}
+
+export function isIntervalConfig(c: AnyTimerConfig | PhaseConfig): c is IntervalConfig {
+  return c.type === TimerType.INTERVAL
+}
+
+export function isWorkRestConfig(c: AnyTimerConfig | PhaseConfig): c is WorkRestConfig {
+  return c.type === TimerType.WORKREST
+}
+
+export function isComplexConfig(c: AnyTimerConfig): c is ComplexConfig {
+  return c.type === TimerType.COMPLEX
+}
 
 // Predefined timer style
 export interface PredefinedStyle<T extends AnyTimerConfig> {

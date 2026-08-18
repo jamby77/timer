@@ -6,14 +6,14 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { AnyTimerConfig, TimerType } from '@/types/configure'
 import { storage } from '@/lib/configure/storage'
 
+import { ComplexTimer } from '@/components/display/ComplexTimer'
 import { Interval } from '@/components/display/Interval'
 import { Stopwatch } from '@/components/display/Stopwatch'
 import { Timer } from '@/components/display/Timer'
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
-import { ComplexTimer } from '@/components/display/ComplexTimer'
 import { InstallPrompt } from '@/components/InstallPrompt'
 
-export const Body = ({}) => {
+export const Body = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [timerConfig, setTimerConfig] = useState<AnyTimerConfig | null>(null)
