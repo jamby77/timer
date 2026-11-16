@@ -22,7 +22,10 @@ Remaining unchecked items still need verification.
 - [x] Display interval progress as `x of y rounds`.
 - [x] Display the configured Work/Rest timer name alongside the WORK/REST ratio label.
 - [x] Keep the Interval timer name visible alongside its current work/rest label.
-- [ ] Verify labels and round progress in idle, running, paused, and completed states.
+- [x] Verify Interval names and round progress in idle, running, paused, and completed states.
+  Round progress remains visible before starting and after completion. Stop restores the first
+  work duration and round; natural and skipped completion show zero and the final round.
+- [ ] Complete label verification for the other timer types across all four states.
 
 ## Related features
 
@@ -49,3 +52,9 @@ Remaining unchecked items still need verification.
 - Automatic phase startup was fixed after a real workout stalled on the first transition.
   The complete five-phase workout subsequently ran to completion without further Start presses:
   60s work, 45s rest, eight 20s/10s Tabata rounds, 60s rest, and 180s cooldown.
+
+## Interval display verification (2026-11-16)
+
+Five browser cases cover idle/running/paused/completed labels, natural and skipped completion
+with and without final rest, starting again after completion, and Stop from a later round.
+Production build, 16 interval hook tests, and 54 related Playwright checks pass.

@@ -27,9 +27,7 @@ describe('useIntervalTimer', () => {
   })
 
   it('should initialize timeLeft to first step duration', () => {
-    const { result } = renderHook(() =>
-      useIntervalTimer({ ...defaultConfig, workDuration: 5 })
-    )
+    const { result } = renderHook(() => useIntervalTimer({ ...defaultConfig, workDuration: 5 }))
 
     // First step is work, 5 seconds = 5000ms
     expect(result.current.timeLeft).toBe(5000)
@@ -98,14 +96,12 @@ describe('useIntervalTimer', () => {
     expect(result.current.timerState).toBe(TimerState.Idle)
     expect(result.current.currentStepIndex).toBe(0)
     expect(result.current.currentStep).toBeNull()
-    expect(result.current.timeLeft).toBe(0)
+    expect(result.current.timeLeft).toBe(defaultConfig.workDuration * 1000)
   })
 
   it('should call onStop when reset', () => {
     const onStop = vi.fn()
-    const { result } = renderHook(() =>
-      useIntervalTimer({ ...defaultConfig, onStop })
-    )
+    const { result } = renderHook(() => useIntervalTimer({ ...defaultConfig, onStop }))
 
     act(() => {
       result.current.start()
@@ -301,10 +297,9 @@ describe('useIntervalTimer', () => {
   // --- Config changes ---
 
   it('should recreate manager when config changes', () => {
-    const { result, rerender } = renderHook(
-      ({ config }) => useIntervalTimer(config),
-      { initialProps: { config: { ...defaultConfig, workDuration: 1 } } }
-    )
+    const { result, rerender } = renderHook(({ config }) => useIntervalTimer(config), {
+      initialProps: { config: { ...defaultConfig, workDuration: 1 } },
+    })
 
     const initialTimeLeft = result.current.timeLeft
     expect(initialTimeLeft).toBe(1000) // 1s = 1000ms
