@@ -40,14 +40,13 @@ Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.t
 - [x] Persist a dismissal count, capped at the three-dismissal threshold.
 - [x] Offer Never show again when the prompt returns after three dismissals.
 - [x] Persist and respect permanent dismissal using `pwa-install-permanently-dismissed`.
-- [ ] Persist successful installation as installCompleted and consult it on later visits.
-  The current implementation handles installation in component state and checks standalone
-  mode, but does not persist the proposed installation flag.
+- [x] Persist successful installation under `pwa-install-completed` and consult it on later visits.
+  Record browser appinstalled events and standalone mode, including display-mode changes.
+  Dismissing the browser installation dialog does not set the flag.
 
 The original proposed storage model included lastShown, dismissCount,
-permanentlyDismissed, and installCompleted. Dismissal timestamp, count, and permanent dismissal are now stored in separate keys.
-The original document marked the entire feature complete, but persistent installation tracking above
-remains unimplemented.
+permanentlyDismissed, and installCompleted. Dismissal timestamp, count, permanent dismissal, and installation completion are stored in separate keys.
+The expanded storage flow is now implemented. Device-level installation verification remains pending.
 
 ### Remaining verification
 
@@ -64,3 +63,10 @@ Three focused Chromium component tests pass for the three-dismissal threshold, p
 dismissal across remounts, legacy timestamp-only records, 30-day suppression and expiry,
 and malformed count recovery. The repository browser test configuration failed during
 dependency scanning, so these checks used a temporary configuration scoped to the component.
+
+## Installation persistence verification (2026-11-16)
+
+Six focused Chromium component tests pass, including the existing dismissal checks plus
+installation-event persistence across remounts, existing standalone installations, and
+browser install-dialog dismissal. Installation events and standalone detection were simulated;
+actual device installation remains unverified.
