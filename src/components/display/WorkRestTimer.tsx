@@ -102,13 +102,14 @@ export function WorkRestTimer({
   }, [state.rounds])
 
   const handleRestart = useCallback(async () => {
-    actions.reset()
     await soundManager.init()
+    soundManager.reset()
     if (preStart.isEnabled) {
+      actions.reset()
       preStart.start()
       return
     }
-    actions.startWork()
+    actions.restart()
   }, [actions, soundManager, preStart])
 
   const isRestPhase = state.phase === TimerPhase.Rest
@@ -136,12 +137,8 @@ export function WorkRestTimer({
       onStop?.()
       return
     }
-    if (isWorkPhase) {
-      actions.stopWork()
-    } else if (isRestPhase) {
-      actions.stopRest()
-    }
-  }, [isPreStarting, preStart, isWorkPhase, actions, isRestPhase, onStop])
+    actions.stopExecution()
+  }, [isPreStarting, preStart, actions, onStop])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
@@ -193,6 +190,26 @@ export function WorkRestTimer({
     <TimerContainer fullscreen={fullscreen || isAutoStarting}>
       <TimerCard
         header={header}
+        headerControls={
+          <div className="mt-3 flex items-center justify-center gap-3 [&>button]:size-11">
+            {isRestPhase ? (
+              <SkipButton onClick={handleSkipRest} title="Skip rest" label="Skip rest" />
+            ) : (
+              <SkipButton
+                onClick={actions.finishWork}
+                disabled={!isWorkPhase || isPreStarting}
+                title="Finish work / Start rest"
+                label="Finish work / Start rest"
+              />
+            )}
+            <ResetButton
+              onClick={handleRestart}
+              title="Restart"
+              label="Restart"
+              disabled={isIdlePhase}
+            />
+          </div>
+        }
         label={[header ? undefined : config.name, `WORK/REST (r ${currentRatio}x)`]
           .filter(Boolean)
           .join(' · ')}
@@ -212,22 +229,7 @@ export function WorkRestTimer({
         />
 
         {/* Main Control Buttons */}
-        <TimerControls
-          secondary={
-            <>
-              {isRestPhase && (
-                <SkipButton onClick={handleSkipRest} title="Skip rest" label="Skip rest" />
-              )}
-              <ResetButton
-                onClick={handleRestart}
-                title="Restart"
-                label="Restart"
-                disabled={isIdlePhase}
-              />
-              {phaseControls}
-            </>
-          }
-        >
+        <TimerControls secondary={phaseControls}>
           {showStartButton && (
             <>
               <StartButton

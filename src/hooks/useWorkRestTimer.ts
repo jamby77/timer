@@ -186,8 +186,7 @@ export const useWorkRestTimer = ({
     stopwatchRef.current?.start()
   }, [state.phase, state.state])
 
-  // Stop work
-  const stopWork = useCallback(() => {
+  const finishWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work) return
 
     // Stop the stopwatch first to trigger onStop callback and record the lap
@@ -196,8 +195,6 @@ export const useWorkRestTimer = ({
     const workDuration = stopwatchRef.current?.getElapsedTime() || 0
 
     cleanupTimer()
-
-    onStopRef.current?.()
 
     // Handle zero work duration edge case
     if (workDuration === 0) {
@@ -212,6 +209,12 @@ export const useWorkRestTimer = ({
 
     startRestPhase(workDuration, state.ratio)
   }, [state.phase, state.ratio, cleanupTimer, startRestPhase])
+
+  const stopWork = useCallback(() => {
+    if (state.phase !== TimerPhase.Work) return
+    finishWork()
+    onStopRef.current?.()
+  }, [state.phase, finishWork])
 
   // Skip rest - automatically start the next work phase
   const skipRest = useCallback(() => {
@@ -307,13 +310,29 @@ export const useWorkRestTimer = ({
     cleanupTimer()
     setState({
       phase: TimerPhase.Idle,
-      ratio: DEFAULT_RATIO,
+      ratio: Math.round((config.ratio ?? 1.0) * 100),
       rounds: 0,
-      maxRounds: MAX_ROUNDS,
+      maxRounds: Math.min(config.maxRounds ?? MAX_ROUNDS, MAX_ROUNDS),
+      maxWorkTime: config.maxWorkTime,
+      restMode: config.restMode,
+      fixedRestDuration: config.fixedRestDuration,
       state: TimerState.Idle,
       currentTime: 0,
     })
-  }, [cleanupTimer])
+  }, [
+    cleanupTimer,
+    config.ratio,
+    config.maxRounds,
+    config.maxWorkTime,
+    config.restMode,
+    config.fixedRestDuration,
+  ])
+
+  const restart = useCallback(() => {
+    reset()
+    setState((prev) => ({ ...prev, phase: TimerPhase.Work }))
+    createWorkStopwatch().start()
+  }, [reset, createWorkStopwatch])
 
   // Get progress
   const getProgress = useCallback(() => {
@@ -348,6 +367,7 @@ export const useWorkRestTimer = ({
     pauseWork,
     resumeWork,
     stopWork,
+    finishWork,
     skipRest,
     stopRest,
     adjustRatio,
@@ -355,6 +375,7 @@ export const useWorkRestTimer = ({
     resetRatio,
     setMaxRounds,
     reset,
+    restart,
     stopExecution,
     getProgress,
   }
