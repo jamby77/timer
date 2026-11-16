@@ -8,6 +8,7 @@ import type { StopwatchConfig } from '@/types/configure'
 import { TimerState } from '@/lib/enums'
 import { formatTime } from '@/lib/timer'
 import {
+  useAutoStart,
   useLapHistory,
   usePreStartCountdown,
   useSoundManager,
@@ -22,7 +23,9 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface StopwatchProps {
+  autoStart?: boolean
   header?: ReactNode
+  phaseControls?: ReactNode
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
   onStateChange?: (state: TimerState) => void
@@ -34,6 +37,8 @@ export function Stopwatch({
   config: { timeLimit = 0, name = 'Stopwatch', sound, countdownBeforeStart },
   onStateChange,
   header,
+  phaseControls,
+  autoStart = false,
   onStop,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
@@ -78,7 +83,7 @@ export function Stopwatch({
 
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive
-  const isActive = isRunning || isPreStarting
+  const isActive = isRunning || state === TimerState.Paused || isPreStarting
 
   // Keep the screen awake while stopwatch is running
   useWakeLock(isRunning)
@@ -86,6 +91,7 @@ export function Stopwatch({
   const handleReset = useCallback(() => {
     if (isPreStarting) {
       preStart.reset()
+      onStop?.()
       return
     }
     // Save the current elapsed time as a lap before resetting
@@ -93,7 +99,7 @@ export function Stopwatch({
       addLap(time)
     }
     reset()
-  }, [isPreStarting, preStart, time, reset, addLap])
+  }, [isPreStarting, preStart, time, reset, addLap, onStop])
 
   const handleRestart = useCallback(() => {
     reset()
@@ -137,15 +143,19 @@ export function Stopwatch({
   const isRest = state === TimerState.Paused
   const isVisible = isRunning || isRest
 
+  const isAutoStarting = useAutoStart(autoStart, handleStart)
+
   return (
-    <TimerContainer fullscreen={isActive} header={header}>
+    <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
+        header={header}
         label={name}
-        isWork={isActive}
+        hideLabel={Boolean(header)}
+        isWork={isActive || isAutoStarting}
         state={isPreStarting ? preStart.state : state}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(time)}
         subtitle={timeLimitDisplay}
-        fullscreen={isActive}
+        fullscreen={isActive || isAutoStarting}
       >
         {maxTime > minTime && (
           <TimerProgressIndicator
@@ -158,6 +168,7 @@ export function Stopwatch({
           />
         )}
         <TimerButton
+          phaseControls={phaseControls}
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}
           onPause={handlePause}

@@ -8,6 +8,7 @@ import type { WorkRestConfig } from '@/types/configure'
 import { TimerPhase, TimerState } from '@/lib/enums'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import {
+  useAutoStart,
   useLapHistory,
   usePreStartCountdown,
   useSoundManager,
@@ -26,9 +27,12 @@ import { TimerProgressIndicator } from '@/components/display/TimerProgressIndica
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 import { TimerContainer } from './TimerContainer'
+import { TimerControls } from './TimerControls'
 
 interface WorkRestTimerProps {
+  autoStart?: boolean
   header?: ReactNode
+  phaseControls?: ReactNode
   config: WorkRestConfig
   /** Optional callback invoked when a full work/rest cycle completes */
   onPhaseComplete?: () => void
@@ -43,6 +47,8 @@ export function WorkRestTimer({
   onPhaseComplete,
   onStop,
   header,
+  phaseControls,
+  autoStart = false,
   onStateChange,
 }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
@@ -122,11 +128,12 @@ export function WorkRestTimer({
   const showStopButton = isPreStarting ? true : isWorkPhase
   const showPauseButton = isPreStarting ? isPreStartRunning : isWorkPhase && isRunningState
 
-  const fullscreen = (!isIdlePhase && !isPausedState) || isPreStarting
+  const fullscreen = !isIdlePhase || isPreStarting
 
   const handleStop = useCallback(() => {
     if (isPreStarting) {
       preStart.reset()
+      onStop?.()
       return
     }
     if (isWorkPhase) {
@@ -134,7 +141,7 @@ export function WorkRestTimer({
     } else if (isRestPhase) {
       actions.stopRest()
     }
-  }, [isPreStarting, preStart, isWorkPhase, actions, isRestPhase])
+  }, [isPreStarting, preStart, isWorkPhase, actions, isRestPhase, onStop])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
@@ -180,15 +187,20 @@ export function WorkRestTimer({
 
   const isVisible = isRestPhase && !fullscreen && !isPreStarting
 
+  const isAutoStarting = useAutoStart(autoStart, handleStart)
+
   return (
-    <TimerContainer fullscreen={fullscreen} header={header}>
+    <TimerContainer fullscreen={fullscreen || isAutoStarting}>
       <TimerCard
-        label={[config.name, `WORK/REST (r ${currentRatio}x)`].filter(Boolean).join(' · ')}
+        header={header}
+        label={[header ? undefined : config.name, `WORK/REST (r ${currentRatio}x)`]
+          .filter(Boolean)
+          .join(' · ')}
         state={displayState}
         time={displayTime}
         subtitle={`Round: ${state.rounds + 1}`}
         isWork={displayIsWork}
-        fullscreen={fullscreen}
+        fullscreen={fullscreen || isAutoStarting}
       >
         <TimerProgressIndicator
           progress={progress}
@@ -200,7 +212,22 @@ export function WorkRestTimer({
         />
 
         {/* Main Control Buttons */}
-        <div className="flex items-center justify-center gap-4">
+        <TimerControls
+          secondary={
+            <>
+              {isRestPhase && (
+                <SkipButton onClick={handleSkipRest} title="Skip rest" label="Skip rest" />
+              )}
+              <ResetButton
+                onClick={handleRestart}
+                title="Restart"
+                label="Restart"
+                disabled={isIdlePhase}
+              />
+              {phaseControls}
+            </>
+          }
+        >
           {showStartButton && (
             <>
               <StartButton
@@ -233,18 +260,10 @@ export function WorkRestTimer({
 
           {isRestPhase && (
             <>
-              <SkipButton onClick={handleSkipRest} title="Skip rest" label="Skip rest" />
               <StopButton onClick={handleStop} title="Stop rest" label="Stop rest" />
             </>
           )}
-
-          <ResetButton
-            onClick={handleRestart}
-            title="Restart"
-            label="Restart"
-            disabled={isIdlePhase}
-          />
-        </div>
+        </TimerControls>
         {!fullscreen && (
           <LapHistory
             laps={laps}

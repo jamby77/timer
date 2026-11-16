@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/card'
 
 interface TimerCardProps {
+  header?: ReactNode
+  headerControls?: ReactNode
+  hideLabel?: boolean
   label: string
   state: TimerState
   time: string
@@ -24,6 +27,9 @@ interface TimerCardProps {
 
 export const TimerCard = ({
   label,
+  header,
+  headerControls,
+  hideLabel = false,
   state,
   time,
   children,
@@ -34,99 +40,59 @@ export const TimerCard = ({
   const lastDotIndex = time.lastIndexOf('.')
   const mainTime = lastDotIndex > -1 ? time.slice(0, lastDotIndex) : time
   const fractionalTime = lastDotIndex > -1 ? time.slice(lastDotIndex) : ''
+  const characterWidth = mainTime.length * 0.62 + fractionalTime.length * 0.18
 
   return (
-    <div
-      className={cn('rounded-lg border border-transparent', {
-        'sticky top-8 z-10': !fullscreen,
-        'inset-0 h-full w-full': fullscreen,
-        'animated-border-card': isWork,
-        'animate-border': state === TimerState.Running,
-      })}
-    >
+    <div className="flex min-h-0 w-full flex-1 flex-col" data-timer-state={state}>
       <Card
-        className={cn('border-none', {
-          'rounded-lg px-2': !fullscreen,
-          'inset-0 h-full w-full gap-0 rounded-none! p-0': fullscreen,
-          'bg-tm-work-bg': isWork,
-          'bg-tm-rest-bg': !isWork && isWork !== undefined,
+        className={cn('flex h-full min-h-0 flex-col gap-0! overflow-hidden border-0 p-0!', {
+          'rounded-none!': fullscreen,
+          'bg-tm-work-bg text-tm-work-fg': isWork,
+          'bg-tm-rest-bg text-tm-rest-fg': isWork === false,
         })}
       >
-        <CardHeader
-          className={cn('space-y-2', {
-            'text-tm-work-fg': isWork,
-            'text-tm-rest-fg': !isWork && isWork !== undefined,
-            'text-foreground': isWork === undefined,
-          })}
-        >
-          <CardTitle
-            className={cn('text-center font-bold', {
-              'text-3xl': !fullscreen,
-              'text-xl': fullscreen,
-            })}
+        {(header || !hideLabel || subtitle) && (
+          <CardHeader
+            className={cn('shrink-0 gap-1 px-4 text-center md:px-6', header ? 'py-1' : 'py-2')}
           >
-            {label}
-          </CardTitle>
-          <CardDescription className="text-inherit">
-            {subtitle && (
-              <p
-                className={cn('mx-auto max-w-32 text-center text-xs', {
-                  invisible: !subtitle,
-                })}
-              >
-                {subtitle}
-              </p>
-            )}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent
-          className={cn({
-            'flex grow items-center justify-center px-4 md:px-8': fullscreen,
-          })}
-        >
-          <div
-            className={cn(
-              'w-full text-center font-mono leading-none font-bold tabular-nums',
-              {
-                'text-[clamp(4rem,18vw,28vh)] md:text-[clamp(8rem,18vw,30vh)] lg:text-[clamp(10rem,18vw,50vh)]':
-                  !fullscreen,
-              },
-              {
-                'text-tm-work-fg': isWork,
-                'text-tm-rest-fg': !isWork && isWork !== undefined,
-                'text-foreground': isWork === undefined,
-              }
-            )}
-          >
-            {!fullscreen && time}
-
-            {fullscreen && (
-              <div className="flex w-full items-end justify-center whitespace-nowrap">
-                <span className="text-[clamp(4rem,26vw,68vh)]">{mainTime}</span>
-                {fractionalTime && (
-                  <span className="pb-[0.12em] text-[clamp(1.25rem,8vw,18vh)]">
-                    {fractionalTime}
-                  </span>
+            {header}
+            {!hideLabel && (
+              <CardTitle
+                className={cn(
+                  'truncate',
+                  subtitle
+                    ? 'text-xs leading-4 font-normal opacity-80'
+                    : 'text-base font-semibold sm:text-lg'
                 )}
-              </div>
+                title={label}
+              >
+                {label}
+              </CardTitle>
             )}
+            {subtitle && (
+              <CardDescription className="text-base leading-none font-semibold text-inherit sm:text-lg">
+                {subtitle}
+              </CardDescription>
+            )}
+            {headerControls}
+          </CardHeader>
+        )}
+        <CardContent className="min-h-0 flex-1 px-3 md:px-6">
+          <div
+            className="flex h-full w-full items-center justify-center"
+            style={{ containerType: 'size' }}
+          >
+            <div
+              className="flex items-baseline justify-center font-mono leading-none font-bold whitespace-nowrap tabular-nums"
+              style={{ fontSize: `min(${90 / characterWidth}cqw, 76cqh)` }}
+            >
+              <span>{mainTime}</span>
+              {fractionalTime && <span className="text-[0.28em] opacity-70">{fractionalTime}</span>}
+            </div>
           </div>
         </CardContent>
-
-        <CardFooter
-          className={cn('justify-center px-0 pt-0', {
-            grow: !fullscreen,
-            'mt-auto px-0 pb-8 md:px-0': fullscreen,
-          })}
-        >
-          <div
-            className={cn('flex max-w-8/10 grow flex-col space-x-4', {
-              'mx-auto w-full px-4': fullscreen,
-            })}
-          >
-            {children}
-          </div>
+        <CardFooter className="shrink-0 justify-center px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6">
+          <div className="flex w-full flex-col gap-2">{children}</div>
         </CardFooter>
       </Card>
     </div>

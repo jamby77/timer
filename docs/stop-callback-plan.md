@@ -1,6 +1,6 @@
 # Stop Callback Support
 
-Status checked against the current code on `main` on 2026-11-16.
+Status checked against the working branch on 2026-11-16.
 Callback wiring is implemented. Stop and phase-navigation checks now cover the cases below;
 natural completion and the remaining Work/Rest cases still need verification.
 
@@ -11,25 +11,26 @@ natural completion and the remaining Work/Rest cases still need verification.
 - [x] Invoke the callback from the hooks' stop/reset actions.
 - [x] Expose and forward `onStop` in Timer, Stopwatch, Interval, and WorkRestTimer.
 - [x] Pass callbacks from ComplexTimer to each supported child timer type.
-- [x] Advance to the next phase on stop when auto-advance is enabled.
-  An omitted autoAdvance setting defaults to enabled.
-- [x] Clear the complex timer's running state on stop when auto-advance is disabled.
+- [x] Stop ends the entire workout, independently of auto-advance, and restores navigation.
+- [x] Show a stopped-workout screen with Restart workout returning to the first phase idle.
+- [x] Stop during a pre-start countdown ends the entire complex workout.
 - [x] Retain natural-completion callbacks and phase advancement handling.
 
 ## Remaining verification
 
 Verified in Chromium on 2026-11-16 using `e2e/complex-stop.spec.ts`.
 
-- [x] Verify Stop advances exactly one phase with auto-advance enabled for all four timer types.
+- [x] Verify Stop ends the entire workout with auto-advance enabled for all four timer types.
   Work/Rest coverage includes both running and paused work.
-- [x] Verify Countdown, Stopwatch, and Interval Stop stay on the current phase without auto-advance.
-- [ ] Verify Work/Rest stop behavior without auto-advance.
+- [x] Verify Countdown, Stopwatch, and Interval Stop end the workout without auto-advance.
+- [x] Verify paused Work/Rest Stop ends the workout without auto-advance.
 - [x] Verify final Countdown, Stopwatch, and Interval Stop restore navigation and leave fullscreen.
 - [ ] Verify final Work/Rest stop behavior.
-- [ ] Verify natural completion still advances correctly and finishes the last phase.
+- [x] Verify natural completion across the configured countdown/Tabata workout and final cooldown.
+  Natural transitions now start the next timer automatically. Four browser tests cover startup
+  of each child timer type. Natural completion of Work/Rest phases remains to be checked.
 - [ ] Verify Work/Rest Stop work, Stop rest, and reset behavior inside a complex timer.
-  Stop work invokes onStop before transitioning to rest, so verify that advancing the
-  complex phase at this point matches the intended behavior.
+  Stop work now unmounts the child timer and ends the entire workout; Stop rest remains to be checked.
 
 ## Implementation references
 
@@ -48,6 +49,5 @@ Verified in Chromium on 2026-11-16 using `e2e/complex-stop.spec.ts`.
 - Remove each timer's active registration when it unmounts so an old phase cannot keep navigation hidden.
 - Clear complex running state when selecting another phase, which starts idle.
 - Enable Stop work while paused and route it to the work-stop action.
-- Fifteen browser checks cover Stop behavior above and skipping active phases for all four types.
-  Tests used the running localhost development server via a temporary configuration because
-  the initial run against the configured 127.0.0.1 address stalled before hydration.
+- Browser checks cover whole-workout Stop, restarting after Stop, paused and pre-start Stop,
+  and skipping active phases. Tests use a localhost production server.

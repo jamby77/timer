@@ -8,6 +8,7 @@ import type { IntervalConfig } from '@/types/configure'
 import { TimerState } from '@/lib/enums'
 import { formatTime } from '@/lib/timer'
 import {
+  useAutoStart,
   useIntervalTimer,
   useLapHistory,
   usePreStartCountdown,
@@ -26,9 +27,12 @@ import { TimerContainer } from '@/components/display/TimerContainer'
 import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
+import { TimerControls } from './TimerControls'
 
 interface IntervalProps {
+  autoStart?: boolean
   header?: ReactNode
+  phaseControls?: ReactNode
   /** Configuration for the interval timer */
   intervalConfig: IntervalConfig
   /** Optional callback when the full interval sequence completes */
@@ -44,6 +48,8 @@ export function Interval({
   onComplete,
   onStop,
   header,
+  phaseControls,
+  autoStart = false,
   onStateChange,
 }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
@@ -97,7 +103,7 @@ export function Interval({
   ])
 
   const handleRestart = useCallback(() => {
-    reset()
+    reset(false)
     if (preStart.isEnabled) {
       preStart.start()
       return
@@ -108,6 +114,7 @@ export function Interval({
   const handleStop = useCallback(() => {
     if (preStart.isActive) {
       preStart.reset()
+      onStop?.()
       return
     }
     // Record current lap if timer is running and we're in a work step
@@ -117,7 +124,7 @@ export function Interval({
     }
     // Stop and reset the timer
     reset()
-  }, [preStart, timerState, currentStep, timeLeft, reset, addLap])
+  }, [preStart, timerState, currentStep, timeLeft, reset, addLap, onStop])
 
   const handleStart = useCallback(() => {
     void (async () => {
@@ -141,7 +148,7 @@ export function Interval({
 
   const isRunning = timerState === TimerState.Running
   const isPreStarting = preStart.isActive
-  const isActive = isRunning || isPreStarting
+  const isActive = isRunning || timerState === TimerState.Paused || isPreStarting
 
   // Keep screen awake while interval timer is running
   useWakeLock(isRunning)
@@ -175,17 +182,37 @@ export function Interval({
       timerState === TimerState.Completed ||
       timerState === TimerState.Paused
 
+  const isAutoStarting = useAutoStart(autoStart, handleStart)
+
   return (
-    <TimerContainer fullscreen={isActive} header={header}>
+    <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
+        header={header}
+        headerControls={
+          <div className="mt-3 flex items-center justify-center gap-3 [&>button]:size-11">
+            <SkipButton
+              onClick={skipCurrentStep}
+              disabled={timerState !== TimerState.Running}
+              title="Skip current interval"
+              label="Skip current interval"
+            />
+            <ResetButton
+              onClick={handleRestart}
+              title="Restart intervals"
+              label="Restart intervals"
+            />
+          </div>
+        }
         label={
-          [intervalConfig.name, currentStep?.label].filter(Boolean).join(' · ') || 'Interval Timer'
+          [header ? undefined : intervalConfig.name, currentStep?.label]
+            .filter(Boolean)
+            .join(' · ') || 'Interval Timer'
         }
         state={isPreStarting ? preStart.state : timerState}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
         isWork={isPreStarting ? undefined : currentStep?.isWork}
-        fullscreen={isActive}
+        fullscreen={isActive || isAutoStarting}
       >
         <TimerProgressIndicator
           progress={progress}
@@ -195,7 +222,7 @@ export function Interval({
           minTime={minTime}
           maxTime={maxTime}
         />
-        <div className="flex items-center justify-center gap-4">
+        <TimerControls secondary={phaseControls}>
           {showPlayButton ? (
             <StartButton
               onClick={handleStart}
@@ -217,24 +244,13 @@ export function Interval({
           ) : (
             <PauseButton onClick={handlePause} title="Pause intervals" label="Pause intervals" />
           )}
-          <SkipButton
-            onClick={skipCurrentStep}
-            disabled={timerState !== TimerState.Running}
-            title="Skip current interval"
-            label="Skip current interval"
-          />
           <StopButton
             onClick={handleStop}
             disabled={!isActive}
             title="Stop intervals"
             label="Stop intervals"
           />
-          <ResetButton
-            onClick={handleRestart}
-            title="Restart intervals"
-            label="Restart intervals"
-          />
-        </div>
+        </TimerControls>
       </TimerCard>
       {!isActive && (
         <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
