@@ -115,6 +115,52 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
     setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
   }, [])
 
+  const phaseHeader = (
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold">{config.name || 'Complex timer'}</div>
+          <div className="text-muted-foreground truncate text-xs">{currentPhase.name}</div>
+        </div>
+        <div className="text-muted-foreground shrink-0 text-xs">
+          Phase {phaseIndex + 1}/{phases.length}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isFirst}
+          onClick={goToPrevPhase}
+          aria-label="Go to previous phase"
+        >
+          Previous
+        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isFirst}
+            onClick={() => goToPhase(0)}
+            aria-label="Restart from first phase"
+          >
+            Restart
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isLast}
+            onClick={goToNextPhase}
+            aria-label="Go to next phase"
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
   const renderPhaseTimer = (timerConfig: PhaseConfig) => {
     const t = timerConfig.type
     switch (t) {
@@ -122,6 +168,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
         return (
           <Timer
             key={`${config.id}-${currentPhase.id}`}
+            header={phaseHeader}
             config={timerConfig as CountdownConfig}
             onStateChange={handlePhaseStateChange}
             onStop={handlePhaseStop}
@@ -131,6 +178,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
         return (
           <Stopwatch
             key={`${config.id}-${currentPhase.id}`}
+            header={phaseHeader}
             config={timerConfig as StopwatchConfig}
             onStateChange={handlePhaseStateChange}
             onStop={handlePhaseStop}
@@ -140,6 +188,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
         return (
           <Interval
             key={`${config.id}-${currentPhase.id}`}
+            header={phaseHeader}
             intervalConfig={timerConfig as IntervalConfig}
             onComplete={() => handlePhaseComplete(currentPhase.id)}
             onStateChange={handlePhaseStateChangeNoComplete}
@@ -150,6 +199,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
         return (
           <WorkRestTimer
             key={`${config.id}-${currentPhase.id}`}
+            header={phaseHeader}
             config={timerConfig as WorkRestConfig}
             onPhaseComplete={() => handlePhaseComplete(currentPhase.id)}
             onStateChange={handlePhaseStateChangeNoComplete}
@@ -168,53 +218,5 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
     }
   }
 
-  return (
-    <div className="flex w-full flex-col gap-4">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{config.name || 'Complex timer'}</div>
-            <div className="text-muted-foreground truncate text-xs">{currentPhase.name}</div>
-          </div>
-          <div className="text-muted-foreground shrink-0 text-xs">
-            Phase {phaseIndex + 1}/{phases.length}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isFirst}
-            onClick={goToPrevPhase}
-            aria-label="Go to previous phase"
-          >
-            Previous
-          </Button>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isFirst}
-              onClick={() => goToPhase(0)}
-              aria-label="Restart from first phase"
-            >
-              Restart
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isLast}
-              onClick={goToNextPhase}
-              aria-label="Go to next phase"
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {renderPhaseTimer(currentPhase.config)}
-    </div>
-  )
+  return renderPhaseTimer(currentPhase.config)
 }

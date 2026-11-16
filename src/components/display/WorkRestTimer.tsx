@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 
+import type { ReactNode } from 'react'
 import type { WorkRestConfig } from '@/types/configure'
 
 import { TimerPhase, TimerState } from '@/lib/enums'
@@ -27,6 +28,7 @@ import { TimerCard } from './TimerCard'
 import { TimerContainer } from './TimerContainer'
 
 interface WorkRestTimerProps {
+  header?: ReactNode
   config: WorkRestConfig
   /** Optional callback invoked when a full work/rest cycle completes */
   onPhaseComplete?: () => void
@@ -40,6 +42,7 @@ export function WorkRestTimer({
   config: { sound, ...config },
   onPhaseComplete,
   onStop,
+  header,
   onStateChange,
 }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
@@ -178,7 +181,7 @@ export function WorkRestTimer({
   const isVisible = isRestPhase && !fullscreen && !isPreStarting
 
   return (
-    <TimerContainer fullscreen={fullscreen}>
+    <TimerContainer fullscreen={fullscreen} header={header}>
       <TimerCard
         label={[config.name, `WORK/REST (r ${currentRatio}x)`].filter(Boolean).join(' · ')}
         state={displayState}

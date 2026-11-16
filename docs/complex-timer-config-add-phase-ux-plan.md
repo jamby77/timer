@@ -8,10 +8,11 @@ Checked items reflect source inspection. Runtime and visual verification remain 
 - [x] Show the complex timer name, current phase name, and phase position in the header.
 - [x] Provide a Next button to skip to the next phase, disabled on the last phase.
 - [x] Provide Previous and Restart controls.
-- [ ] Keep phase information and skip controls accessible while the child timer is fullscreen.
-  The header is outside the child TimerContainer, whose fixed fullscreen overlay covers it
-  during execution. Existing header controls do not complete this requirement.
-- [ ] Verify phase names and skipping across all four supported child timer types while running.
+- [x] Keep phase information and skip controls accessible while the child timer is fullscreen.
+  Pass the phase header into the child TimerContainer and reserve space above the timer card.
+- [x] Verify phase names and skipping across all four supported child timer types while running.
+  Chromium checks on 2026-11-16 covered 390px and 1280px widths, Next, last-phase disabling,
+  Previous, and Restart. Wake-lock permission was denied and the existing fallback ran.
 
 ## Timer labels
 

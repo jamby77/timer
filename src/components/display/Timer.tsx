@@ -3,9 +3,11 @@
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
+import type { ReactNode } from 'react'
+
 import { CountdownConfig } from '@/types/configure'
-import { formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/enums'
+import { formatTime } from '@/lib/timer'
 import {
   useLapHistory,
   usePreStartCountdown,
@@ -21,6 +23,7 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface TimerProps {
+  header?: ReactNode
   config: CountdownConfig
   /** Optional callback when timer state changes */
   onStateChange?: (state: TimerState) => void
@@ -31,6 +34,7 @@ interface TimerProps {
 export const Timer = ({
   config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
+  header,
   onStop,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
@@ -137,7 +141,7 @@ export const Timer = ({
   const showProgress = !isPreStarting && (isRunning || isPaused)
 
   return (
-    <TimerContainer fullscreen={isActive}>
+    <TimerContainer fullscreen={isActive} header={header}>
       <TimerCard
         label={name}
         state={isPreStarting ? preStart.state : state}
