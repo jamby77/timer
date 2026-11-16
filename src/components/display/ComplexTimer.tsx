@@ -53,6 +53,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   const goToPhase = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(index, phases.length - 1))
+      setIsComplexRunning(false)
       setPhaseIndex(clamped)
       lastAutoAdvancedPhaseIdRef.current = null
     },
@@ -60,11 +61,13 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   )
 
   const goToNextPhase = useCallback(() => {
+    setIsComplexRunning(false)
     setPhaseIndex((prev) => Math.min(prev + 1, phases.length - 1))
     lastAutoAdvancedPhaseIdRef.current = null
   }, [phases.length])
 
   const goToPrevPhase = useCallback(() => {
+    setIsComplexRunning(false)
     setPhaseIndex((prev) => Math.max(prev - 1, 0))
     lastAutoAdvancedPhaseIdRef.current = null
   }, [])

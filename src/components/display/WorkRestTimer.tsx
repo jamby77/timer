@@ -129,12 +129,12 @@ export function WorkRestTimer({
       preStart.reset()
       return
     }
-    if (showPauseButton) {
+    if (isWorkPhase) {
       actions.stopWork()
     } else if (isRestPhase) {
       actions.stopRest()
     }
-  }, [isPreStarting, preStart, showPauseButton, actions, isRestPhase])
+  }, [isPreStarting, preStart, isWorkPhase, actions, isRestPhase])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
@@ -224,7 +224,7 @@ export function WorkRestTimer({
 
           {(showStopButton || showStartButton) && (
             <StopButton
-              disabled={showStartButton && !isPreStarting}
+              disabled={isIdlePhase && !isPreStarting}
               onClick={handleStop}
               title="Stop work"
               label="Stop work"
