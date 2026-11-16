@@ -107,6 +107,7 @@ export const useIntervalTimer = ({
       onSequenceComplete: () => {
         // Internal state update
         setTimerState(TimerState.Completed)
+        setTimeLeft(0)
         setCurrentStep(null)
         setCurrentStepIndex(0)
         onSequenceCompleteRef.current?.()
@@ -146,7 +147,7 @@ export const useIntervalTimer = ({
     setTimerState(TimerState.Idle)
     setCurrentStep(null)
     setCurrentStepIndex(0)
-    setTimeLeft(0)
+    setTimeLeft(managerRef.current?.getCurrentStep()?.duration ?? 0)
     if (notifyStop) onStopRef.current?.()
   }, [])
 

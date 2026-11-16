@@ -172,7 +172,10 @@ export function Interval({
   const isWorkStep = currentStep?.isWork ?? true
 
   const getCurrentIntervalInfo = () => {
-    const workSteps = Math.ceil((currentStepIndex + 1) / 2)
+    const workSteps =
+      timerState === TimerState.Completed
+        ? intervalConfig.intervals
+        : Math.ceil((currentStepIndex + 1) / 2)
     return `${workSteps} of ${intervalConfig.intervals} rounds`
   }
 
@@ -210,7 +213,7 @@ export function Interval({
         }
         state={isPreStarting ? preStart.state : timerState}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
-        subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
+        subtitle={getCurrentIntervalInfo()}
         isWork={isPreStarting ? undefined : currentStep?.isWork}
         fullscreen={isActive || isAutoStarting}
       >
