@@ -58,3 +58,13 @@ Remaining unchecked items still need verification.
 Five browser cases cover idle/running/paused/completed labels, natural and skipped completion
 with and without final rest, starting again after completion, and Stop from a later round.
 Production build, 16 interval hook tests, and 54 related Playwright checks pass.
+
+## Completed phase restart (2026-11-16)
+
+- [x] Restart a completed Countdown or Stopwatch phase without stopping the complex workout.
+- [x] Honor the configured pre-start countdown when restarting a completed phase.
+
+Eight browser regressions cover both timer types, final phases and manual advancement,
+with and without pre-start countdowns. Each checks restart, pause/resume, and completion
+again in the same phase. All eight reproduced the stop bug before the fix; 47 related
+Playwright cases and the production build pass after the fix.

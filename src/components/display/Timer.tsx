@@ -61,17 +61,20 @@ export const Timer = ({
     })
   }, [completionMessage])
 
-  const { time, state, totalElapsedTime, start, pause, reset } = useTimer(duration * 1000, {
-    onStateChange: handleStateChange,
-    onComplete: handleComplete,
-    onStop,
-  })
+  const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
+    duration * 1000,
+    {
+      onStateChange: handleStateChange,
+      onComplete: handleComplete,
+      onStop,
+    }
+  )
 
   const preStart = usePreStartCountdown({
     seconds: countdownBeforeStart,
     onComplete: () => {
       soundManager.reset()
-      start()
+      restart()
     },
   })
 
@@ -104,12 +107,11 @@ export const Timer = ({
   }
 
   const handleRestart = () => {
-    reset()
     if (preStart.isEnabled) {
       preStart.start()
       return
     }
-    start()
+    restart()
   }
 
   const handleStart = useCallback(async () => {
