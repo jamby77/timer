@@ -1,122 +1,59 @@
-# Navigation Hiding & PWA Install Prompt Improvements
+# Navigation Hiding and PWA Install Prompt
 
-## Overview
-Two UX improvements: hide navigation during timer execution and
-implement smart PWA install prompt behavior with dismiss functionality.
+Status checked against the current code on `main` on 2026-11-16.
+Checked items reflect source inspection. Runtime verification remains pending.
 
-## 1. Navigation Hiding During Timer Execution
+## Navigation hiding
 
-### Requirements
-- When any timer is running (active state), hide the main navigation
-- Navigation should reappear when timer is stopped or completed (paused should keep nav hidden)
-- Applies to all timer types: Timer, Stopwatch, Interval, WorkRestTimer, ComplexTimer
+### Implemented
 
-### Implementation Approach
+- [x] Provide shared isAnyTimerActive state through TimerContext and TimerProvider.
+- [x] Update active state from Countdown, Stopwatch, Interval, and Work/Rest hooks.
+- [x] Track complex timer activity in ComplexTimer.
+- [x] Hide Navigation when the shared active state is true.
+- [x] Treat running and paused states as active, and idle/completed states as inactive.
 
-#### Option A: Global State Management
-```typescript
-// Create a global timer state context
-const TimerContext = createContext({
-  isAnyTimerRunning: false,
-  setTimerRunning: (running: boolean) => {}
-});
+### Remaining verification
 
-// Navigation component checks this state
-const Navigation = () => {
-  const { isAnyTimerRunning } = useContext(TimerContext);
-  
-  if (isAnyTimerRunning) return null;
-  
-  return (
-    <nav className="navigation">
-      {/* navigation content */}
-    </nav>
-  );
-};
-```
+- [ ] Verify navigation hides during running and paused states for every timer type.
+- [ ] Verify navigation returns after stop, reset, and natural completion.
+- [ ] Verify complex phase transitions and final-phase stopping/completion.
+- [ ] Verify refresh and multiple-tab behavior, as requested in the original plan.
 
-#### Option B: Component-level Prop Drilling
-- Pass `hideNavigation` prop to layout from active timer components
-- Use callback to notify parent components of timer state changes
+Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.tsx`,
+`src/components/Navigation.tsx`, the timer hooks, and `src/components/display/ComplexTimer.tsx`.
 
-#### Option C: URL-based Detection
-- Check current route for timer patterns (`/timer/*`, `/complex/*`)
-- Less ideal as it doesn't account for actual timer state
+## PWA install prompt
 
-### Files to Modify
-- `/src/app/layout.tsx` - Navigation visibility logic
-- `/src/components/Navigation.tsx` - Conditional rendering
-- `/src/components/display/*.tsx` - All timer components to emit state
-- `/src/hooks/use*.ts` - All timer hooks to expose running state
+### Implemented
 
-## 2. PWA Install Prompt with Smart Dismiss
+- [x] Provide an X button to dismiss the prompt.
+- [x] Persist the dismissal timestamp under `pwa-install-dismissed` in localStorage.
+- [x] Suppress the prompt for 30 days after dismissal.
+- [x] Re-evaluate expiry when the component mounts, allowing eligible prompts to reappear.
+- [x] Suppress the prompt in standalone mode.
+- [x] Show iOS installation instructions or a browser-provided installation action.
+- [x] Handle appinstalled and display-mode changes in component state.
 
-### Current Behavior
-- iOS/macOS install prompt appears
-- No dismiss option
-- No persistence of user choice
+### Remaining from the original expanded design
 
-### ✅ **Implemented**
-2. **PWA Install Prompt with Smart Dismiss**
-   - Added dismiss button with X icon to InstallPrompt component
-   - Implemented localStorage timestamp storage for dismissal tracking
-   - 30-day dismissal duration logic implemented
-   - Component respects both standalone mode and dismissal status
-   - Automatic re-show after 30 days if not installed
+- [ ] Persist a dismissal count.
+- [ ] Offer Never show again after three dismissals.
+- [ ] Persist and respect a permanentlyDismissed flag.
+- [ ] Persist successful installation as installCompleted and consult it on later visits.
+  The current implementation handles installation in component state and checks standalone
+  mode, but does not persist the proposed installation flag.
 
-### Implementation Strategy
+The original proposed storage model included lastShown, dismissCount,
+permanentlyDismissed, and installCompleted. Only a dismissal timestamp is currently stored.
+The original document marked the entire feature complete, but the expanded flow above
+remains unimplemented.
 
-#### Storage Schema
-```typescript
-interface PWAInstallState {
-  lastShown: timestamp;
-  dismissCount: number;
-  permanentlyDismissed: boolean;
-  installCompleted: boolean;
-}
-```
+### Remaining verification
 
-#### Display Logic
-```typescript
-const shouldShowInstallPrompt = () => {
-  const state = getPWAInstallState();
-  
-  // Don't show if already installed
-  if (state.installCompleted) return false;
-  
-  // Don't show if permanently dismissed
-  if (state.permanentlyDismissed) return false;
-  
-  // Don't show if dismissed within last 30 days
-  if (state.lastShown && (Date.now() - state.lastShown) < 30 * 24 * 60 * 60 * 1000) {
-    return false;
-  }
-  
-  // Show if eligible for PWA and not recently dismissed
-  return isPWAElegible();
-};
-```
+- [ ] Verify dismissal survives reload and suppresses the prompt for 30 days.
+- [ ] Verify an expired dismissal permits the prompt on a subsequent mount.
+- [ ] Verify standalone mode and successful browser installation hide the prompt.
+- [ ] Verify the iOS instructions and browser installation flow on supported devices.
 
-#### UX Flow
-1. **Initial Prompt**: Show install prompt with "Install" and "Dismiss" buttons
-2. **Dismiss Action**: 
-   - Store dismissal timestamp
-   - Increment dismiss count
-   - Hide prompt for 30 days
-   - After 3 dismissals, offer "Never show again" option
-3. **Install Action**: 
-   - Trigger PWA install flow
-   - Mark as installed if successful
-4. **Permanent Dismiss**: 
-   - Set `permanentlyDismissed = true`
-   - Never show again
-
-
-
-## Implementation Priority
-1. **✅ Completed**: Navigation hiding (impacts all timer usage) - **IMPLEMENTED**
-2. **✅ Completed**: PWA install prompt improvements with smart dismiss - **IMPLEMENTED**
-
-## Testing Considerations
-- Test navigation hiding across all timer types
-- Test edge cases (browser refresh, multiple tabs)
+Implementation reference: `src/components/InstallPrompt.tsx`.

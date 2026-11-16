@@ -1,13 +1,39 @@
-# TODO
-- [ ] fix overlay for complex timer display
-  - [ ] Add skip button
-  - [ ] Add info for the current phase
-    - [ ] if there is a name for it, display it
+# Complex Timer Display and Timer Labels
 
-- [ ] fix display for timers
-  - [ ] if there is a timer name, display it
-  - [ ] if it is an interval, display `x of y`
+Status checked against the current code on `main` on 2026-11-16.
+Checked items reflect source inspection. Runtime and visual verification remain pending.
 
-## Related Features
-- [ ] Navigation hiding during timer execution (see `navigation-hiding-pwa-install.md`)
-- [ ] PWA install prompt improvements with smart dismiss (see `navigation-hiding-pwa-install.md`)
+## Complex timer display
+
+- [x] Show the complex timer name, current phase name, and phase position in the header.
+- [x] Provide a Next button to skip to the next phase, disabled on the last phase.
+- [x] Provide Previous and Restart controls.
+- [ ] Keep phase information and skip controls accessible while the child timer is fullscreen.
+  The header is outside the child TimerContainer, whose fixed fullscreen overlay covers it
+  during execution. Existing header controls do not complete this requirement.
+- [ ] Verify phase names and skipping across all four supported child timer types while running.
+
+## Timer labels
+
+- [x] Display configured names for Countdown and Stopwatch.
+- [x] Display interval progress as `x of y rounds`.
+- [ ] Display the configured Work/Rest timer name. Its card currently uses a fixed WORK/REST label.
+- [ ] Keep the Interval timer name visible alongside its current work/rest label.
+  The current card prioritizes the step label and uses the timer name only as a fallback.
+- [ ] Verify labels and round progress in idle, running, paused, and completed states.
+
+## Related features
+
+- [x] Implement navigation hiding while timers are running or paused.
+- [x] Implement a persistent 30-day PWA install prompt dismissal.
+- [ ] Complete the expanded PWA dismissal flow and runtime verification described in
+  [Navigation Hiding and PWA Install Prompt](navigation-hiding-pwa-install.md).
+
+## Implementation references
+
+- `src/components/display/ComplexTimer.tsx`
+- `src/components/display/TimerContainer.tsx`
+- `src/components/display/Timer.tsx`
+- `src/components/display/Stopwatch.tsx`
+- `src/components/display/Interval.tsx`
+- `src/components/display/WorkRestTimer.tsx`

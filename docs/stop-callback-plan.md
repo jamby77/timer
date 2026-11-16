@@ -1,78 +1,40 @@
-# Plan: Add Stop Callback Support to Timer Components
+# Stop Callback Support
 
-## Overview
-Add `onStop` callback support to all timer hooks and propagate it through the component hierarchy. 
-This will allow ComplexTimer to detect when Stop buttons are clicked and advance phases accordingly 
-when auto-advance is enabled.
+Status checked against the current code on `main` on 2026-11-16.
+Callback wiring is implemented. Behavioral verification remains pending.
 
-## Affected Components
-- Timer (uses `useTimer`)
-- Stopwatch (uses `useStopwatch`)
-- Interval (uses `useIntervalTimer`)
-- WorkRestTimer (uses `useWorkRestTimer`)
-- ComplexTimer (consumes the callbacks)
+## Implemented
 
-## Implementation Steps
+- [x] Accept an optional `onStop` callback in useTimer, useStopwatch,
+  useIntervalTimer, and useWorkRestTimer.
+- [x] Invoke the callback from the hooks' stop/reset actions.
+- [x] Expose and forward `onStop` in Timer, Stopwatch, Interval, and WorkRestTimer.
+- [x] Pass callbacks from ComplexTimer to each supported child timer type.
+- [x] Advance to the next phase on stop when auto-advance is enabled.
+  An omitted autoAdvance setting defaults to enabled.
+- [x] Clear the complex timer's running state on stop when auto-advance is disabled.
+- [x] Retain natural-completion callbacks and phase advancement handling.
 
-### 1. Update Timer Hooks
-Add `onStop?: () => void` parameter to each timer hook:
+## Remaining verification
 
-- `useTimer(options: { onStop?: () => void })`
-- `useStopwatch(options: { onStop?: () => void })`
-- `useIntervalTimer(options: { onStop?: () => void })`
-- `useWorkRestTimer(options: { onStop?: () => void })`
+These checks have not been run as part of this status update.
 
-Call `onStop()` when the respective stop/reset action is triggered by user interaction.
+- [ ] Verify Stop advances exactly one phase with auto-advance enabled for each timer type.
+- [ ] Verify Stop stays on the current phase with auto-advance disabled.
+- [ ] Verify stopping the final phase leaves the timer inactive and restores navigation.
+- [ ] Verify natural completion still advances correctly and finishes the last phase.
+- [ ] Verify Work/Rest Stop work, Stop rest, and reset behavior inside a complex timer.
+  Stop work invokes onStop before transitioning to rest, so verify that advancing the
+  complex phase at this point matches the intended behavior.
 
-### 2. Update Timer Component Interfaces
-Add `onStop?: () => void` prop to each timer component:
+## Implementation references
 
-```typescript
-interface TimerProps {
-  config: CountdownConfig
-  onStateChange?: (state: TimerState) => void
-  onStop?: () => void  // NEW
-}
-
-interface StopwatchProps {
-  config: StopwatchConfig
-  onStateChange?: (state: TimerState) => void
-  onStop?: () => void  // NEW
-}
-
-interface IntervalProps {
-  intervalConfig: IntervalConfig
-  onComplete?: () => void
-  onStop?: () => void  // NEW
-}
-
-interface WorkRestTimerProps {
-  config: WorkRestConfig
-  onPhaseComplete?: () => void
-  onStop?: () => void  // NEW
-}
-```
-
-### 3. Wire Callbacks in Components
-- Pass `onStop` prop to the respective hook in each component
-- Call `onStop()` when Stop button is clicked (after internal stop logic)
-
-### 4. Update ComplexTimer
-- Pass `onStop` callback to each timer component in `renderPhaseTimer`
-- In the callback, check `config.autoAdvance` and call `goToNextPhase()` if true
-
-### 5. Testing
-- Verify Stop button triggers advancement when auto-advance is enabled
-- Ensure natural completion still works as before
-- Test all timer types (countdown, stopwatch, interval, work-rest)
-
-## Files to Modify
-- `/src/hooks/useTimer.ts`
-- `/src/hooks/useStopwatch.ts`
-- `/src/hooks/useIntervalTimer.ts`
-- `/src/hooks/useWorkRestTimer.ts`
-- `/src/components/display/Timer.tsx`
-- `/src/components/display/Stopwatch.tsx`
-- `/src/components/display/Interval.tsx`
-- `/src/components/display/WorkRestTimer.tsx`
-- `/src/components/display/ComplexTimer.tsx`
+- `src/hooks/useTimer.ts`
+- `src/hooks/useStopwatch.ts`
+- `src/hooks/useIntervalTimer.ts`
+- `src/hooks/useWorkRestTimer.ts`
+- `src/components/display/Timer.tsx`
+- `src/components/display/Stopwatch.tsx`
+- `src/components/display/Interval.tsx`
+- `src/components/display/WorkRestTimer.tsx`
+- `src/components/display/ComplexTimer.tsx`
