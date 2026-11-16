@@ -17,9 +17,8 @@ Checked items reflect source inspection. Runtime and visual verification remain 
 
 - [x] Display configured names for Countdown and Stopwatch.
 - [x] Display interval progress as `x of y rounds`.
-- [ ] Display the configured Work/Rest timer name. Its card currently uses a fixed WORK/REST label.
-- [ ] Keep the Interval timer name visible alongside its current work/rest label.
-  The current card prioritizes the step label and uses the timer name only as a fallback.
+- [x] Display the configured Work/Rest timer name alongside the WORK/REST ratio label.
+- [x] Keep the Interval timer name visible alongside its current work/rest label.
 - [ ] Verify labels and round progress in idle, running, paused, and completed states.
 
 ## Related features

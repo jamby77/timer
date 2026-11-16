@@ -4,8 +4,8 @@ import { useCallback, useEffect } from 'react'
 
 import type { IntervalConfig } from '@/types/configure'
 
-import { formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/enums'
+import { formatTime } from '@/lib/timer'
 import {
   useIntervalTimer,
   useLapHistory,
@@ -175,7 +175,9 @@ export function Interval({
   return (
     <TimerContainer fullscreen={isActive}>
       <TimerCard
-        label={currentStep?.label || intervalConfig.name || 'Interval Timer'}
+        label={
+          [intervalConfig.name, currentStep?.label].filter(Boolean).join(' · ') || 'Interval Timer'
+        }
         state={isPreStarting ? preStart.state : timerState}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
         subtitle={currentStep ? `${getCurrentIntervalInfo()}` : undefined}
