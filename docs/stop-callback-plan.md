@@ -33,8 +33,8 @@ Verified in Chromium on 2026-11-16 using `e2e/complex-stop.spec.ts`.
   Restart resets the round and elapsed time, starts work again, and retains the configured
   ratio, rest mode, rest duration, maximum rounds, and work limit.
 - [x] Verify standalone Work/Rest Restart from rest returns to a fresh work round.
-- [ ] Verify Work/Rest Stop rest inside a complex timer.
-  Stop work now unmounts the child timer and ends the entire workout.
+- [x] Verify Work/Rest Stop rest inside a complex timer.
+  Stop ends the entire workout; Finish work / Start rest transitions within the current phase.
 
 ## Implementation references
 
@@ -65,3 +65,13 @@ action now resets and starts atomically. Reset restores the saved configuration.
 Validation: 23 hook tests and 50 Chromium browser checks pass, including four new
 Work/Rest restart checks covering standalone and complex timers while running or paused.
 The standalone checks also verify fixed-duration rest after restart and restarting from rest.
+
+## Separate Work/Rest controls
+
+Finish work / Start rest, Skip rest, and Restart appear beneath the round count,
+above the digits. Finish work records elapsed work and starts the configured rest without
+calling the workout Stop callback. It works from running and paused work. The bottom
+Stop button ends the timer in both standalone and complex workouts.
+
+Four Chromium checks cover fixed and ratio rest from running/paused work, skipping rest
+into round 2, restarting, and stopping the whole workout during rest.

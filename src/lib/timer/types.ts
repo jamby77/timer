@@ -29,6 +29,7 @@ export interface WorkRestTimerActions {
   pauseWork: () => void
   resumeWork: () => void
   stopWork: () => void
+  finishWork: () => void
 
   // Rest phase controls
   skipRest: () => void

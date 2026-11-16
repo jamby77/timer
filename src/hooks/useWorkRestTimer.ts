@@ -186,8 +186,7 @@ export const useWorkRestTimer = ({
     stopwatchRef.current?.start()
   }, [state.phase, state.state])
 
-  // Stop work
-  const stopWork = useCallback(() => {
+  const finishWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work) return
 
     // Stop the stopwatch first to trigger onStop callback and record the lap
@@ -196,8 +195,6 @@ export const useWorkRestTimer = ({
     const workDuration = stopwatchRef.current?.getElapsedTime() || 0
 
     cleanupTimer()
-
-    onStopRef.current?.()
 
     // Handle zero work duration edge case
     if (workDuration === 0) {
@@ -212,6 +209,12 @@ export const useWorkRestTimer = ({
 
     startRestPhase(workDuration, state.ratio)
   }, [state.phase, state.ratio, cleanupTimer, startRestPhase])
+
+  const stopWork = useCallback(() => {
+    if (state.phase !== TimerPhase.Work) return
+    finishWork()
+    onStopRef.current?.()
+  }, [state.phase, finishWork])
 
   // Skip rest - automatically start the next work phase
   const skipRest = useCallback(() => {
@@ -364,6 +367,7 @@ export const useWorkRestTimer = ({
     pauseWork,
     resumeWork,
     stopWork,
+    finishWork,
     skipRest,
     stopRest,
     adjustRatio,
