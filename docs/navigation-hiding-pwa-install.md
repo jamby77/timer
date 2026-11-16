@@ -34,6 +34,8 @@ Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.t
 - [x] Suppress the prompt in standalone mode.
 - [x] Show iOS installation instructions or a browser-provided installation action.
 - [x] Handle appinstalled and display-mode changes in component state.
+- [x] Sync dismissal, permanent dismissal, installation status, and dismissal count
+  across open tabs using localStorage events. Refresh preferences when storage is cleared.
 
 ### Remaining from the original expanded design
 
@@ -50,9 +52,11 @@ The expanded storage flow is now implemented. Device-level installation verifica
 
 ### Remaining verification
 
-- [ ] Verify dismissal survives reload and suppresses the prompt for 30 days.
-- [ ] Verify an expired dismissal permits the prompt on a subsequent mount.
-- [ ] Verify standalone mode and successful browser installation hide the prompt.
+- [x] Verify dismissal survives reload and suppresses the prompt for 30 days.
+  Reload is covered by the production browser checks; expiry timing by component tests.
+- [x] Verify an expired dismissal permits the prompt on a subsequent mount (component test).
+- [x] Verify standalone mode and successful browser installation hide the prompt.
+  Standalone detection and installation events are simulated, not actual device installs.
 - [ ] Verify the iOS instructions and browser installation flow on supported devices.
 
 Implementation reference: `src/components/InstallPrompt.tsx`.
@@ -70,3 +74,14 @@ Six focused Chromium component tests pass, including the existing dismissal chec
 installation-event persistence across remounts, existing standalone installations, and
 browser install-dialog dismissal. Installation events and standalone detection were simulated;
 actual device installation remains unverified.
+
+## Cross-tab preference verification (2026-11-16)
+
+Four production Chromium checks cover temporary/permanent dismissal and installation status
+across two open tabs and reloads, dismissal-count updates, preference resets, and unrelated
+storage changes. All six existing install-prompt component tests also pass.
+
+Run `pnpm exec playwright test --config playwright.pwa.config.ts`. This builds the production
+app and starts an isolated server on port 3007 (`PLAYWRIGHT_PWA_PORT` overrides the port).
+Production-only tests are excluded from the normal development-server test configuration.
+Browser installation events are simulated; supported-device installation remains unverified.

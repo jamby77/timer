@@ -48,11 +48,15 @@ export const InstallPrompt = () => {
 
     // Check if prompt was dismissed within the last 30 days
     const checkDismissalStatus = () => {
-      if (localStorage.getItem(INSTALL_COMPLETED_STORAGE_KEY) === 'true') return
-      if (localStorage.getItem(PERMANENT_DISMISSAL_STORAGE_KEY) === 'true') return
-
       const storedCount = Number(localStorage.getItem(DISMISSAL_COUNT_STORAGE_KEY))
       setDismissCount(Number.isSafeInteger(storedCount) && storedCount > 0 ? storedCount : 0)
+      if (
+        localStorage.getItem(INSTALL_COMPLETED_STORAGE_KEY) === 'true' ||
+        localStorage.getItem(PERMANENT_DISMISSAL_STORAGE_KEY) === 'true'
+      ) {
+        setIsVisible(false)
+        return
+      }
       const dismissedTimestamp = localStorage.getItem(DISMISSAL_STORAGE_KEY)
       if (dismissedTimestamp) {
         const dismissedTime = parseInt(dismissedTimestamp, 10)
@@ -70,12 +74,31 @@ export const InstallPrompt = () => {
       setIsVisible(true)
     }
 
-    try {
-      checkDismissalStatus()
-    } catch (error) {
-      console.error('Failed to load install prompt preferences:', error)
-      setIsVisible(true)
+    const refreshPreferences = () => {
+      try {
+        checkDismissalStatus()
+      } catch (error) {
+        console.error('Failed to load install prompt preferences:', error)
+        setIsVisible(true)
+      }
     }
+
+    const storageHandler = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage) return
+      if (
+        event.key === null ||
+        [
+          DISMISSAL_STORAGE_KEY,
+          DISMISSAL_COUNT_STORAGE_KEY,
+          PERMANENT_DISMISSAL_STORAGE_KEY,
+          INSTALL_COMPLETED_STORAGE_KEY,
+        ].includes(event.key)
+      ) {
+        refreshPreferences()
+      }
+    }
+
+    refreshPreferences()
 
     if (isStandaloneMode) recordInstallation()
 
@@ -97,11 +120,13 @@ export const InstallPrompt = () => {
 
     window.addEventListener('beforeinstallprompt', beforeInstallPromptHandler)
     window.addEventListener('appinstalled', appInstalledHandler)
+    window.addEventListener('storage', storageHandler)
     displayModeMediaQuery.addEventListener('change', displayModeChangeHandler)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', beforeInstallPromptHandler)
       window.removeEventListener('appinstalled', appInstalledHandler)
+      window.removeEventListener('storage', storageHandler)
       displayModeMediaQuery.removeEventListener('change', displayModeChangeHandler)
     }
   }, [])
