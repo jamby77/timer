@@ -548,3 +548,55 @@ describe('useWorkRestTimer', () => {
     expect(result.current[0].ratio).toBe(150) // Original ratio maintained
   })
 })
+
+describe('configured work limit', () => {
+  it('records one lap and starts fixed rest without stopping the workout', async () => {
+    const onLapRecorded = vi.fn()
+    const onStop = vi.fn()
+    const { result } = renderHook(() =>
+      useWorkRestTimer({
+        config: {
+          maxWorkTime: 0.2,
+          maxRounds: 2,
+          restMode: WorkRestMode.FIXED,
+          fixedRestDuration: 2,
+        },
+        onLapRecorded,
+        onStop,
+      })
+    )
+    act(() => result.current[1].startWork())
+    await act(async () => {
+      await sleep(450)
+    })
+    expect(result.current[0].phase).toBe(TimerPhase.Rest)
+    expect(result.current[0].state).toBe(TimerState.Running)
+    expect(onLapRecorded).toHaveBeenCalledExactlyOnceWith(200)
+    expect(onStop).not.toHaveBeenCalled()
+  })
+
+  it('records paused work once when finished manually', async () => {
+    const onLapRecorded = vi.fn()
+    const onStop = vi.fn()
+    const { result } = renderHook(() =>
+      useWorkRestTimer({
+        config: { maxWorkTime: 10, restMode: WorkRestMode.FIXED, fixedRestDuration: 2 },
+        onLapRecorded,
+        onStop,
+      })
+    )
+    act(() => result.current[1].startWork())
+    await act(async () => {
+      await sleep(150)
+    })
+    act(() => result.current[1].pauseWork())
+    act(() => result.current[1].finishWork())
+    await act(async () => {
+      await sleep(150)
+    })
+    expect(result.current[0].phase).toBe(TimerPhase.Rest)
+    expect(onLapRecorded).toHaveBeenCalledTimes(1)
+    expect(onLapRecorded.mock.calls[0][0]).toBeGreaterThan(0)
+    expect(onStop).not.toHaveBeenCalled()
+  })
+})

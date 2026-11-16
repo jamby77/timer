@@ -89,3 +89,15 @@ into round 2, restarting, and stopping the whole workout during rest.
 Validation: production build, 23 hook tests, and 65 distinct Chromium checks passed across
 the regression and focused follow-up runs. Eight new completion cases cover standalone,
 complex, final-phase, and disabled-auto-advance behavior with natural and skipped rests.
+
+## Configured Work/Rest time limit (2026-11-16)
+
+- [x] Apply the configured maximum work duration to the work stopwatch, retaining
+  the existing maximum as the fallback and upper bound.
+- [x] Automatically record completed work and start fixed or ratio-based rest at the limit.
+- [x] Keep automatic work completion separate from the whole-workout Stop callback.
+- [x] Preserve pause/resume and restart behavior, and record manually finished paused work once.
+
+Validation: production build, TypeScript, 25 Chromium hook tests, and 70 Playwright checks
+pass. New browser cases cover automatic fixed/ratio rest in standalone and complex timers,
+plus pausing and restarting the work limit. Complex advancement still waits for the final rest.
