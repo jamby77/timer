@@ -37,16 +37,16 @@ Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.t
 
 ### Remaining from the original expanded design
 
-- [ ] Persist a dismissal count.
-- [ ] Offer Never show again after three dismissals.
-- [ ] Persist and respect a permanentlyDismissed flag.
+- [x] Persist a dismissal count, capped at the three-dismissal threshold.
+- [x] Offer Never show again when the prompt returns after three dismissals.
+- [x] Persist and respect permanent dismissal using `pwa-install-permanently-dismissed`.
 - [ ] Persist successful installation as installCompleted and consult it on later visits.
   The current implementation handles installation in component state and checks standalone
   mode, but does not persist the proposed installation flag.
 
 The original proposed storage model included lastShown, dismissCount,
-permanentlyDismissed, and installCompleted. Only a dismissal timestamp is currently stored.
-The original document marked the entire feature complete, but the expanded flow above
+permanentlyDismissed, and installCompleted. Dismissal timestamp, count, and permanent dismissal are now stored in separate keys.
+The original document marked the entire feature complete, but persistent installation tracking above
 remains unimplemented.
 
 ### Remaining verification
@@ -57,3 +57,10 @@ remains unimplemented.
 - [ ] Verify the iOS instructions and browser installation flow on supported devices.
 
 Implementation reference: `src/components/InstallPrompt.tsx`.
+
+## Dismissal verification (2026-11-16)
+
+Three focused Chromium component tests pass for the three-dismissal threshold, permanent
+dismissal across remounts, legacy timestamp-only records, 30-day suppression and expiry,
+and malformed count recovery. The repository browser test configuration failed during
+dependency scanning, so these checks used a temporary configuration scoped to the component.
