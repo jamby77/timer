@@ -1,6 +1,15 @@
 'use client'
 
-import { createContext, ReactNode, useCallback, useContext, useId, useRef, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react'
 
 interface TimerContextType {
   isAnyTimerActive: boolean
@@ -20,12 +29,15 @@ export const useTimerContext = () => {
     throw new Error('useTimerContext must be used within a TimerProvider')
   }
   const timerId = useId()
+  const { registerTimer } = context
+
+  useEffect(() => () => registerTimer(timerId, false), [registerTimer, timerId])
 
   const setTimerActive = useCallback(
     (active: boolean) => {
-      context.registerTimer(timerId, active)
+      registerTimer(timerId, active)
     },
-    [context, timerId]
+    [registerTimer, timerId]
   )
 
   return {

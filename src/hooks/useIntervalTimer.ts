@@ -120,6 +120,7 @@ export const useIntervalTimer = ({
     setTimeLeft(manager.getCurrentStep()?.duration || 0)
 
     return () => {
+      manager.reset()
       managerRef.current = null
     }
   }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest])
@@ -140,13 +141,13 @@ export const useIntervalTimer = ({
     setTimerState(TimerState.Paused)
   }, [])
 
-  const reset = useCallback(() => {
+  const reset = useCallback((notifyStop = true) => {
     managerRef.current?.reset()
     setTimerState(TimerState.Idle)
     setCurrentStep(null)
     setCurrentStepIndex(0)
     setTimeLeft(0)
-    onStopRef.current?.()
+    if (notifyStop) onStopRef.current?.()
   }, [])
 
   const skipCurrentStep = useCallback(() => {

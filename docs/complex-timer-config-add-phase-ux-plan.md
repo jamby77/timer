@@ -1,7 +1,8 @@
 # Complex Timer Display and Timer Labels
 
 Status checked against the current code on `main` on 2026-11-16.
-Checked items reflect source inspection. Runtime and visual verification remain pending.
+Checked items reflect source inspection and the runtime checks described below.
+Remaining unchecked items still need verification.
 
 ## Complex timer display
 
@@ -9,7 +10,8 @@ Checked items reflect source inspection. Runtime and visual verification remain 
 - [x] Provide a Next button to skip to the next phase, disabled on the last phase.
 - [x] Provide Previous and Restart controls.
 - [x] Keep phase information and skip controls accessible while the child timer is fullscreen.
-  Pass the phase header into the child TimerContainer and reserve space above the timer card.
+  Render workout and phase information inside the timer card header, with phase controls
+  alongside timer controls at the bottom.
 - [x] Verify phase names and skipping across all four supported child timer types while running.
   Chromium checks on 2026-11-16 covered 390px and 1280px widths, Next, last-phase disabling,
   Previous, and Restart. Wake-lock permission was denied and the existing fallback ran.
@@ -37,3 +39,13 @@ Checked items reflect source inspection. Runtime and visual verification remain 
 - `src/components/display/Stopwatch.tsx`
 - `src/components/display/Interval.tsx`
 - `src/components/display/WorkRestTimer.tsx`
+
+## Mobile layout follow-up
+
+- [x] Keep running and paused timers edge-to-edge, with phase information inside the timer header.
+- [x] Size clock digits from available content space so landscape controls remain visible.
+- [x] Keep phase and timer controls together at the bottom.
+- [x] Enlarge workout/phase information and add spacing without changing the clock geometry.
+- Automatic phase startup was fixed after a real workout stalled on the first transition.
+  The complete five-phase workout subsequently ran to completion without further Start presses:
+  60s work, 45s rest, eight 20s/10s Tabata rounds, 60s rest, and 180s cooldown.

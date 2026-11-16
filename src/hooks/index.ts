@@ -1,3 +1,4 @@
+export { useAutoStart } from './useAutoStart'
 export { useIntervalTimer } from './useIntervalTimer'
 export { useLapHistory } from './useLapHistory'
 

@@ -9,6 +9,7 @@ import { CountdownConfig } from '@/types/configure'
 import { TimerState } from '@/lib/enums'
 import { formatTime } from '@/lib/timer'
 import {
+  useAutoStart,
   useLapHistory,
   usePreStartCountdown,
   useSoundManager,
@@ -23,7 +24,9 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface TimerProps {
+  autoStart?: boolean
   header?: ReactNode
+  phaseControls?: ReactNode
   config: CountdownConfig
   /** Optional callback when timer state changes */
   onStateChange?: (state: TimerState) => void
@@ -35,6 +38,8 @@ export const Timer = ({
   config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
   header,
+  phaseControls,
+  autoStart = false,
   onStop,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
@@ -81,13 +86,14 @@ export const Timer = ({
 
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive
-  const isActive = isRunning || isPreStarting
+  const isActive = isRunning || state === TimerState.Paused || isPreStarting
 
   // Keep screen awake while timer is running
   useWakeLock(isRunning)
   const handleReset = () => {
     if (isPreStarting) {
       preStart.reset()
+      onStop?.()
       return
     }
     // Save the total elapsed time as a lap before resetting
@@ -140,14 +146,18 @@ export const Timer = ({
   const isPaused = state === TimerState.Paused
   const showProgress = !isPreStarting && (isRunning || isPaused)
 
+  const isAutoStarting = useAutoStart(autoStart, handleStart)
+
   return (
-    <TimerContainer fullscreen={isActive} header={header}>
+    <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
+        header={header}
         label={name}
+        hideLabel={Boolean(header)}
         state={isPreStarting ? preStart.state : state}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(time)}
-        isWork={isActive}
-        fullscreen={isActive}
+        isWork={isActive || isAutoStarting}
+        fullscreen={isActive || isAutoStarting}
       >
         <TimerProgressIndicator
           progress={progress}
@@ -158,6 +168,7 @@ export const Timer = ({
           maxTime={maxTime}
         />
         <TimerButton
+          phaseControls={phaseControls}
           state={isPreStarting ? preStart.state : state}
           onStart={handleStart}
           onPause={handlePause}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
+import { RotateCcw, SkipBack, SkipForward } from 'lucide-react'
 
 import type {
   ComplexConfig,
@@ -31,6 +32,9 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   }, [config.phases])
 
   const [phaseIndex, setPhaseIndex] = useState(0)
+  const [phaseRun, setPhaseRun] = useState(0)
+  const [isStopped, setIsStopped] = useState(false)
+  const [autoStartPhase, setAutoStartPhase] = useState(false)
   const [isComplexRunning, setIsComplexRunning] = useState(false)
   const lastAutoAdvancedPhaseIdRef = useRef<string | null>(null)
 
@@ -46,25 +50,34 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   }, [isComplexRunning, setTimerActive])
 
   useEffect(() => {
+    setAutoStartPhase(false)
     setPhaseIndex(0)
+    setIsStopped(false)
     lastAutoAdvancedPhaseIdRef.current = null
   }, [config.id])
 
   const goToPhase = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(index, phases.length - 1))
+      setIsComplexRunning(false)
+      setAutoStartPhase(false)
       setPhaseIndex(clamped)
+      setPhaseRun((run) => run + 1)
       lastAutoAdvancedPhaseIdRef.current = null
     },
     [phases.length]
   )
 
   const goToNextPhase = useCallback(() => {
+    setIsComplexRunning(false)
+    setAutoStartPhase(false)
     setPhaseIndex((prev) => Math.min(prev + 1, phases.length - 1))
     lastAutoAdvancedPhaseIdRef.current = null
   }, [phases.length])
 
   const goToPrevPhase = useCallback(() => {
+    setIsComplexRunning(false)
+    setAutoStartPhase(false)
     setPhaseIndex((prev) => Math.max(prev - 1, 0))
     lastAutoAdvancedPhaseIdRef.current = null
   }, [])
@@ -89,17 +102,16 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
       lastAutoAdvancedPhaseIdRef.current = phaseId
 
       goToNextPhase()
+      setAutoStartPhase(true)
     },
     [config.autoAdvance, goToNextPhase, isLast]
   )
 
   const handlePhaseStop = useCallback(() => {
-    if (config.autoAdvance ?? true) {
-      goToNextPhase()
-    } else {
-      setIsComplexRunning(false)
-    }
-  }, [config.autoAdvance, goToNextPhase])
+    setAutoStartPhase(false)
+    setIsComplexRunning(false)
+    setIsStopped(true)
+  }, [])
 
   const handlePhaseStateChange = useCallback(
     (state: TimerState) => {
@@ -116,49 +128,57 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   }, [])
 
   const phaseHeader = (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold">{config.name || 'Complex timer'}</div>
-          <div className="text-muted-foreground truncate text-xs">{currentPhase.name}</div>
-        </div>
-        <div className="text-muted-foreground shrink-0 text-xs">
-          Phase {phaseIndex + 1}/{phases.length}
-        </div>
+    <div className="grid h-11 w-full grid-cols-3 items-start gap-x-3 pt-3">
+      <div className="truncate text-left text-base leading-5 opacity-75" title={config.name}>
+        {config.name || 'Complex timer'}
       </div>
-
-      <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={isFirst}
-          onClick={goToPrevPhase}
-          aria-label="Go to previous phase"
-        >
-          Previous
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isFirst}
-            onClick={() => goToPhase(0)}
-            aria-label="Restart from first phase"
-          >
-            Restart
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isLast}
-            onClick={goToNextPhase}
-            aria-label="Go to next phase"
-          >
-            Next
-          </Button>
-        </div>
+      <div
+        className="truncate text-center text-xl leading-5 font-semibold"
+        title={currentPhase.name}
+      >
+        {currentPhase.name}
+      </div>
+      <div className="text-right text-lg leading-5 opacity-75">
+        Phase {phaseIndex + 1}/{phases.length}
       </div>
     </div>
+  )
+
+  const phaseControls = (
+    <>
+      <Button
+        className="text-foreground"
+        variant="outline"
+        size="icon"
+        disabled={isFirst}
+        onClick={goToPrevPhase}
+        aria-label="Go to previous phase"
+        title="Previous phase"
+      >
+        <SkipBack />
+      </Button>
+      <Button
+        className="text-foreground"
+        variant="outline"
+        size="icon"
+        onClick={() => goToPhase(0)}
+        aria-label="Restart from first phase"
+        title="Restart workout"
+      >
+        <RotateCcw />
+      </Button>
+      <Button
+        className="text-foreground"
+        variant="outline"
+        size="icon"
+        disabled={isLast}
+        onClick={goToNextPhase}
+        aria-label="Go to next phase"
+        title="Next phase"
+      >
+        <SkipForward />
+      </Button>
+    </>
   )
 
   const renderPhaseTimer = (timerConfig: PhaseConfig) => {
@@ -167,8 +187,10 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
       case TimerType.COUNTDOWN:
         return (
           <Timer
-            key={`${config.id}-${currentPhase.id}`}
+            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
             header={phaseHeader}
+            phaseControls={phaseControls}
+            autoStart={autoStartPhase}
             config={timerConfig as CountdownConfig}
             onStateChange={handlePhaseStateChange}
             onStop={handlePhaseStop}
@@ -177,8 +199,10 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
       case TimerType.STOPWATCH:
         return (
           <Stopwatch
-            key={`${config.id}-${currentPhase.id}`}
+            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
             header={phaseHeader}
+            phaseControls={phaseControls}
+            autoStart={autoStartPhase}
             config={timerConfig as StopwatchConfig}
             onStateChange={handlePhaseStateChange}
             onStop={handlePhaseStop}
@@ -187,8 +211,10 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
       case TimerType.INTERVAL:
         return (
           <Interval
-            key={`${config.id}-${currentPhase.id}`}
+            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
             header={phaseHeader}
+            phaseControls={phaseControls}
+            autoStart={autoStartPhase}
             intervalConfig={timerConfig as IntervalConfig}
             onComplete={() => handlePhaseComplete(currentPhase.id)}
             onStateChange={handlePhaseStateChangeNoComplete}
@@ -198,8 +224,10 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
       case TimerType.WORKREST:
         return (
           <WorkRestTimer
-            key={`${config.id}-${currentPhase.id}`}
+            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
             header={phaseHeader}
+            phaseControls={phaseControls}
+            autoStart={autoStartPhase}
             config={timerConfig as WorkRestConfig}
             onPhaseComplete={() => handlePhaseComplete(currentPhase.id)}
             onStateChange={handlePhaseStateChangeNoComplete}
@@ -216,6 +244,23 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
           </div>
         )
     }
+  }
+
+  if (isStopped) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-12 text-center">
+        <h2 className="text-2xl font-semibold">{config.name || 'Complex timer'}</h2>
+        <p role="status">Workout stopped</p>
+        <Button
+          onClick={() => {
+            goToPhase(0)
+            setIsStopped(false)
+          }}
+        >
+          Restart workout
+        </Button>
+      </div>
+    )
   }
 
   return renderPhaseTimer(currentPhase.config)
