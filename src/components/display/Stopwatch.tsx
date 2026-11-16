@@ -58,7 +58,7 @@ export function Stopwatch({
     [addLap]
   )
 
-  const { time, state, start, pause, reset } = useStopwatch({
+  const { time, state, start, pause, reset, restart } = useStopwatch({
     timeLimitMs: timeLimit * 1000,
     onStateChange: handleStateChange,
     onAutoStop: handleStop,
@@ -69,7 +69,7 @@ export function Stopwatch({
     seconds: countdownBeforeStart,
     onComplete: () => {
       soundManager.reset()
-      start()
+      restart()
     },
   })
 
@@ -102,13 +102,12 @@ export function Stopwatch({
   }, [isPreStarting, preStart, time, reset, addLap, onStop])
 
   const handleRestart = useCallback(() => {
-    reset()
     if (preStart.isEnabled) {
       preStart.start()
       return
     }
-    start()
-  }, [preStart, reset, start])
+    restart()
+  }, [preStart, restart])
 
   const handleStart = useCallback(async () => {
     await soundManager.init()
