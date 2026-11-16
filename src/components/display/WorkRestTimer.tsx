@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import type { WorkRestConfig } from '@/types/configure'
 
-import { getDisplayData } from '@/lib/timer/displayUtils'
 import { TimerPhase, TimerState } from '@/lib/enums'
+import { getDisplayData } from '@/lib/timer/displayUtils'
 import {
   useLapHistory,
   usePreStartCountdown,
@@ -180,7 +180,7 @@ export function WorkRestTimer({
   return (
     <TimerContainer fullscreen={fullscreen}>
       <TimerCard
-        label={`WORK/REST (r ${currentRatio}x)`}
+        label={[config.name, `WORK/REST (r ${currentRatio}x)`].filter(Boolean).join(' · ')}
         state={displayState}
         time={displayTime}
         subtitle={`Round: ${state.rounds + 1}`}
