@@ -1,7 +1,7 @@
 # Navigation Hiding and PWA Install Prompt
 
 Status checked against the current code on `main` on 2026-11-16.
-Checked items reflect source inspection. Runtime verification remains pending.
+Checked items reflect source inspection and the runtime verification described below.
 
 ## Navigation hiding
 
@@ -13,12 +13,12 @@ Checked items reflect source inspection. Runtime verification remains pending.
 - [x] Hide Navigation when the shared active state is true.
 - [x] Treat running and paused states as active, and idle/completed states as inactive.
 
-### Remaining verification
+### Runtime verification
 
-- [ ] Verify navigation hides during running and paused states for every timer type.
-- [ ] Verify navigation returns after stop, reset, and natural completion.
-- [ ] Verify complex phase transitions and final-phase stopping/completion.
-- [ ] Verify refresh and multiple-tab behavior, as requested in the original plan.
+- [x] Verify navigation hides during running and paused states for every timer type.
+- [x] Verify navigation returns after stop, reset, and natural completion.
+- [x] Verify complex phase transitions and final-phase stopping/completion.
+- [x] Verify refresh and multiple-tab behavior, as requested in the original plan.
 
 Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.tsx`,
 `src/components/Navigation.tsx`, the timer hooks, and `src/components/display/ComplexTimer.tsx`.
@@ -35,7 +35,7 @@ Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.t
 - [x] Show iOS installation instructions or a browser-provided installation action.
 - [x] Handle appinstalled and display-mode changes in component state.
 - [x] Sync dismissal, permanent dismissal, installation status, and dismissal count
-  across open tabs using localStorage events. Refresh preferences when storage is cleared.
+      across open tabs using localStorage events. Refresh preferences when storage is cleared.
 
 ### Remaining from the original expanded design
 
@@ -43,8 +43,8 @@ Implementation references are `src/contexts/TimerContext.tsx`, `src/app/layout.t
 - [x] Offer Never show again when the prompt returns after three dismissals.
 - [x] Persist and respect permanent dismissal using `pwa-install-permanently-dismissed`.
 - [x] Persist successful installation under `pwa-install-completed` and consult it on later visits.
-  Record browser appinstalled events and standalone mode, including display-mode changes.
-  Dismissing the browser installation dialog does not set the flag.
+      Record browser appinstalled events and standalone mode, including display-mode changes.
+      Dismissing the browser installation dialog does not set the flag.
 
 The original proposed storage model included lastShown, dismissCount,
 permanentlyDismissed, and installCompleted. Dismissal timestamp, count, permanent dismissal, and installation completion are stored in separate keys.
@@ -53,10 +53,10 @@ The expanded storage flow is now implemented. Device-level installation verifica
 ### Remaining verification
 
 - [x] Verify dismissal survives reload and suppresses the prompt for 30 days.
-  Reload is covered by the production browser checks; expiry timing by component tests.
+      Reload is covered by the production browser checks; expiry timing by component tests.
 - [x] Verify an expired dismissal permits the prompt on a subsequent mount (component test).
 - [x] Verify standalone mode and successful browser installation hide the prompt.
-  Standalone detection and installation events are simulated, not actual device installs.
+      Standalone detection and installation events are simulated, not actual device installs.
 - [ ] Verify the iOS instructions and browser installation flow on supported devices.
 
 Implementation reference: `src/components/InstallPrompt.tsx`.
@@ -85,3 +85,18 @@ Run `pnpm exec playwright test --config playwright.pwa.config.ts`. This builds t
 app and starts an isolated server on port 3007 (`PLAYWRIGHT_PWA_PORT` overrides the port).
 Production-only tests are excluded from the normal development-server test configuration.
 Browser installation events are simulated; supported-device installation remains unverified.
+
+## Navigation lifecycle verification (2026-11-16)
+
+Fifteen Chromium browser tests cover Countdown, Stopwatch, Interval, Work/Rest, and Complex:
+idle navigation, hiding while running and paused, restoration after Stop and natural completion,
+starting again after Stop, and independent navigation in two tabs. Reloading a running or paused
+timer resets its in-memory activity to idle and restores navigation; configuration remains saved.
+Activity is local to each tab, so starting or pausing a timer does not hide navigation in another tab.
+
+The complex natural-completion case checks navigation stays hidden after automatic advancement
+and returns after the final phase. Another 39 existing browser tests cover all child timer types,
+manual skipping, first-phase restart, Stop while paused or pre-starting, and final-phase Stop.
+All 54 checks pass against the production app. No runtime code change was needed.
+
+Run `pnpm exec playwright test e2e/navigation-lifecycle.spec.ts e2e/complex-stop.spec.ts e2e/complex-auto-start.spec.ts`.
