@@ -52,7 +52,7 @@ async function openComplex(
   await expect(page.locator('html')).toHaveAttribute('data-fullscreen', 'true')
 }
 
-for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL']) {
+for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
   test(`${type} Stop ends the entire complex workout`, async ({ page }) => {
     await openComplex(page, type, true)
     await page.getByRole('button', { name: /^Stop/i }).first().click()

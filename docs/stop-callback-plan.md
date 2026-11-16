@@ -2,7 +2,7 @@
 
 Status checked against the working branch on 2026-11-16.
 Callback wiring is implemented. Stop and phase-navigation checks now cover the cases below;
-natural completion and the remaining Work/Rest cases still need verification.
+Work/Rest round completion and final-phase stop checks are covered below.
 
 ## Implemented
 
@@ -25,10 +25,11 @@ Verified in Chromium on 2026-11-16 using `e2e/complex-stop.spec.ts`.
 - [x] Verify Countdown, Stopwatch, and Interval Stop end the workout without auto-advance.
 - [x] Verify paused Work/Rest Stop ends the workout without auto-advance.
 - [x] Verify final Countdown, Stopwatch, and Interval Stop restore navigation and leave fullscreen.
-- [ ] Verify final Work/Rest stop behavior.
+- [x] Verify final Work/Rest stop behavior.
 - [x] Verify natural completion across the configured countdown/Tabata workout and final cooldown.
   Natural transitions now start the next timer automatically. Four browser tests cover startup
-  of each child timer type. Natural completion of Work/Rest phases remains to be checked.
+  of each child timer type. Work/Rest now advances only after its configured round count.
+  Natural and skipped rest completion are verified with auto-advance enabled and disabled.
 - [x] Verify Work/Rest Restart from running and paused states inside a complex timer.
   Restart resets the round and elapsed time, starts work again, and retains the configured
   ratio, rest mode, rest duration, maximum rounds, and work limit.
@@ -75,3 +76,16 @@ Stop button ends the timer in both standalone and complex workouts.
 
 Four Chromium checks cover fixed and ratio rest from running/paused work, skipping rest
 into round 2, restarting, and stopping the whole workout during rest.
+
+## Work/Rest round completion (2026-11-16)
+
+- Complete Work/Rest only when the final configured rest finishes or is skipped.
+- Keep intermediate rounds within the current complex phase. Natural rest still waits
+  for Start work; Skip rest starts the next work round immediately.
+- Do not start an extra work round when skipping the final rest.
+- Restore navigation on standalone/final-phase completion and keep the displayed round
+  at the configured maximum. Start begins a fresh session afterward.
+
+Validation: production build, 23 hook tests, and 65 distinct Chromium checks passed across
+the regression and focused follow-up runs. Eight new completion cases cover standalone,
+complex, final-phase, and disabled-auto-advance behavior with natural and skipped rests.
