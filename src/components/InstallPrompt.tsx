@@ -15,6 +15,7 @@ interface BeforeInstallPromptEvent extends Event {
 const DISMISSAL_STORAGE_KEY = 'pwa-install-dismissed'
 const DISMISSAL_COUNT_STORAGE_KEY = 'pwa-install-dismiss-count'
 const PERMANENT_DISMISSAL_STORAGE_KEY = 'pwa-install-permanently-dismissed'
+const INSTALL_COMPLETED_STORAGE_KEY = 'pwa-install-completed'
 const DISMISSAL_DURATION_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
 export const InstallPrompt = () => {
@@ -35,8 +36,19 @@ export const InstallPrompt = () => {
       (window.navigator as unknown as Record<string, unknown>).standalone === true
     setIsStandalone(isStandaloneMode)
 
+    const recordInstallation = () => {
+      setIsVisible(false)
+      setDeferredPrompt(null)
+      try {
+        localStorage.setItem(INSTALL_COMPLETED_STORAGE_KEY, 'true')
+      } catch (error) {
+        console.error('Failed to save installation status:', error)
+      }
+    }
+
     // Check if prompt was dismissed within the last 30 days
     const checkDismissalStatus = () => {
+      if (localStorage.getItem(INSTALL_COMPLETED_STORAGE_KEY) === 'true') return
       if (localStorage.getItem(PERMANENT_DISMISSAL_STORAGE_KEY) === 'true') return
 
       const storedCount = Number(localStorage.getItem(DISMISSAL_COUNT_STORAGE_KEY))
@@ -65,19 +77,22 @@ export const InstallPrompt = () => {
       setIsVisible(true)
     }
 
+    if (isStandaloneMode) recordInstallation()
+
     const beforeInstallPromptHandler = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
     }
 
     const appInstalledHandler = () => {
-      setDeferredPrompt(null)
+      recordInstallation()
       setIsStandalone(true)
     }
 
     const displayModeMediaQuery = window.matchMedia('(display-mode: standalone)')
     const displayModeChangeHandler = (event: MediaQueryListEvent) => {
       setIsStandalone(event.matches)
+      if (event.matches) recordInstallation()
     }
 
     window.addEventListener('beforeinstallprompt', beforeInstallPromptHandler)
