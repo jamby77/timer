@@ -240,10 +240,16 @@ describe('useWorkRestTimer', () => {
     expect(result.current[0].rounds).toBe(0) // Should not have completed the round since we stopped manually
   })
 
-  it('should reset to initial state', async () => {
+  it('should reset to configured initial state', async () => {
     const { result } = renderHook(() =>
       useWorkRestTimer({
-        config: { ratio: 1.5, maxRounds: 5 },
+        config: {
+          ratio: 1.5,
+          maxRounds: 5,
+          maxWorkTime: 30,
+          restMode: WorkRestMode.FIXED,
+          fixedRestDuration: 20,
+        },
       })
     )
 
@@ -273,7 +279,11 @@ describe('useWorkRestTimer', () => {
 
     expect(result.current[0].phase).toBe(TimerPhase.Idle)
     expect(result.current[0].state).toBe(TimerState.Idle)
-    expect(result.current[0].ratio).toBe(100) // Should reset to default ratio
+    expect(result.current[0].ratio).toBe(150)
+    expect(result.current[0].maxRounds).toBe(5)
+    expect(result.current[0].maxWorkTime).toBe(30)
+    expect(result.current[0].restMode).toBe(WorkRestMode.FIXED)
+    expect(result.current[0].fixedRestDuration).toBe(20)
     expect(result.current[0].rounds).toBe(0)
     expect(result.current[0].currentTime).toBe(0)
   })

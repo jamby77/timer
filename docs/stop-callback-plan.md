@@ -29,8 +29,12 @@ Verified in Chromium on 2026-11-16 using `e2e/complex-stop.spec.ts`.
 - [x] Verify natural completion across the configured countdown/Tabata workout and final cooldown.
   Natural transitions now start the next timer automatically. Four browser tests cover startup
   of each child timer type. Natural completion of Work/Rest phases remains to be checked.
-- [ ] Verify Work/Rest Stop work, Stop rest, and reset behavior inside a complex timer.
-  Stop work now unmounts the child timer and ends the entire workout; Stop rest remains to be checked.
+- [x] Verify Work/Rest Restart from running and paused states inside a complex timer.
+  Restart resets the round and elapsed time, starts work again, and retains the configured
+  ratio, rest mode, rest duration, maximum rounds, and work limit.
+- [x] Verify standalone Work/Rest Restart from rest returns to a fresh work round.
+- [ ] Verify Work/Rest Stop rest inside a complex timer.
+  Stop work now unmounts the child timer and ends the entire workout.
 
 ## Implementation references
 
@@ -51,3 +55,13 @@ Verified in Chromium on 2026-11-16 using `e2e/complex-stop.spec.ts`.
 - Enable Stop work while paused and route it to the work-stop action.
 - Browser checks cover whole-workout Stop, restarting after Stop, paused and pre-start Stop,
   and skipping active phases. Tests use a localhost production server.
+
+## Work/Rest restart follow-up (2026-11-16)
+
+Restart previously reset configuration to defaults and called startWork through a callback
+that still captured the running/paused phase, leaving the timer idle. A dedicated restart
+action now resets and starts atomically. Reset restores the saved configuration.
+
+Validation: 23 hook tests and 50 Chromium browser checks pass, including four new
+Work/Rest restart checks covering standalone and complex timers while running or paused.
+The standalone checks also verify fixed-duration rest after restart and restarting from rest.

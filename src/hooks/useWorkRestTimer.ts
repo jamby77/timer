@@ -307,13 +307,29 @@ export const useWorkRestTimer = ({
     cleanupTimer()
     setState({
       phase: TimerPhase.Idle,
-      ratio: DEFAULT_RATIO,
+      ratio: Math.round((config.ratio ?? 1.0) * 100),
       rounds: 0,
-      maxRounds: MAX_ROUNDS,
+      maxRounds: Math.min(config.maxRounds ?? MAX_ROUNDS, MAX_ROUNDS),
+      maxWorkTime: config.maxWorkTime,
+      restMode: config.restMode,
+      fixedRestDuration: config.fixedRestDuration,
       state: TimerState.Idle,
       currentTime: 0,
     })
-  }, [cleanupTimer])
+  }, [
+    cleanupTimer,
+    config.ratio,
+    config.maxRounds,
+    config.maxWorkTime,
+    config.restMode,
+    config.fixedRestDuration,
+  ])
+
+  const restart = useCallback(() => {
+    reset()
+    setState((prev) => ({ ...prev, phase: TimerPhase.Work }))
+    createWorkStopwatch().start()
+  }, [reset, createWorkStopwatch])
 
   // Get progress
   const getProgress = useCallback(() => {
@@ -355,6 +371,7 @@ export const useWorkRestTimer = ({
     resetRatio,
     setMaxRounds,
     reset,
+    restart,
     stopExecution,
     getProgress,
   }

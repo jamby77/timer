@@ -102,13 +102,14 @@ export function WorkRestTimer({
   }, [state.rounds])
 
   const handleRestart = useCallback(async () => {
-    actions.reset()
     await soundManager.init()
+    soundManager.reset()
     if (preStart.isEnabled) {
+      actions.reset()
       preStart.start()
       return
     }
-    actions.startWork()
+    actions.restart()
   }, [actions, soundManager, preStart])
 
   const isRestPhase = state.phase === TimerPhase.Rest

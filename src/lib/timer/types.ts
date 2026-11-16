@@ -41,6 +41,7 @@ export interface WorkRestTimerActions {
   setMaxRounds: (maxRounds: number) => void // Set max rounds (capped at MAX_ROUNDS)
 
   // System controls
+  restart: () => void
   reset: () => void
   stopExecution: () => void // Stop entire session and return to idle
   getProgress: () => number // Progress percentage (0-100)
