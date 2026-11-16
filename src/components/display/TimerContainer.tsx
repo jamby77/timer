@@ -6,9 +6,11 @@ import { cn } from '@/lib/utils'
 
 export const TimerContainer = ({
   children,
+  header,
   fullscreen = false,
 }: {
   children: ReactNode
+  header?: ReactNode
   fullscreen?: boolean
 }) => {
   useEffect(() => {
@@ -31,7 +33,8 @@ export const TimerContainer = ({
         'fixed inset-0 z-9999 max-h-none items-stretch gap-0 overflow-hidden p-0': fullscreen,
       })}
     >
-      {children}
+      {header && <div className="bg-background text-foreground w-full shrink-0 p-3">{header}</div>}
+      {fullscreen && header ? <div className="min-h-0 flex-1">{children}</div> : children}
     </div>
   )
 }

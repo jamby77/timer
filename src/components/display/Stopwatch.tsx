@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect } from 'react'
 
+import type { ReactNode } from 'react'
 import type { StopwatchConfig } from '@/types/configure'
 
-import { formatTime } from '@/lib/timer'
 import { TimerState } from '@/lib/enums'
+import { formatTime } from '@/lib/timer'
 import {
   useLapHistory,
   usePreStartCountdown,
@@ -21,6 +22,7 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface StopwatchProps {
+  header?: ReactNode
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
   onStateChange?: (state: TimerState) => void
@@ -31,6 +33,7 @@ interface StopwatchProps {
 export function Stopwatch({
   config: { timeLimit = 0, name = 'Stopwatch', sound, countdownBeforeStart },
   onStateChange,
+  header,
   onStop,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
@@ -135,7 +138,7 @@ export function Stopwatch({
   const isVisible = isRunning || isRest
 
   return (
-    <TimerContainer fullscreen={isActive}>
+    <TimerContainer fullscreen={isActive} header={header}>
       <TimerCard
         label={name}
         isWork={isActive}

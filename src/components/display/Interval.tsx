@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from 'react'
 
+import type { ReactNode } from 'react'
 import type { IntervalConfig } from '@/types/configure'
 
 import { TimerState } from '@/lib/enums'
@@ -27,6 +28,7 @@ import { LapHistory } from './LapHistory'
 import { TimerCard } from './TimerCard'
 
 interface IntervalProps {
+  header?: ReactNode
   /** Configuration for the interval timer */
   intervalConfig: IntervalConfig
   /** Optional callback when the full interval sequence completes */
@@ -41,6 +43,7 @@ export function Interval({
   intervalConfig: { sound, ...intervalConfig },
   onComplete,
   onStop,
+  header,
   onStateChange,
 }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
@@ -173,7 +176,7 @@ export function Interval({
       timerState === TimerState.Paused
 
   return (
-    <TimerContainer fullscreen={isActive}>
+    <TimerContainer fullscreen={isActive} header={header}>
       <TimerCard
         label={
           [intervalConfig.name, currentStep?.label].filter(Boolean).join(' · ') || 'Interval Timer'
