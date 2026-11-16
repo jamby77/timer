@@ -107,17 +107,20 @@ export const useWorkRestTimer = ({
           setState((prev) => ({ ...prev, currentTime: timeLeft }))
         },
         onComplete: () => {
-          // Rest completed, return to idle state
-          setState((prev) => ({
-            ...prev,
-            phase: TimerPhase.Idle, // Stay in idle, not work
-            rounds: prev.rounds + 1,
-            state: TimerState.Idle,
-            currentTime: 0,
-          }))
-          // User must manually start the next work phase
+          setState((prev) => {
+            const rounds = prev.rounds + 1
+            const completed = rounds >= prev.maxRounds
+            return {
+              ...prev,
+              phase: completed ? TimerPhase.Completed : TimerPhase.Idle,
+              rounds,
+              state: completed ? TimerState.Completed : TimerState.Idle,
+              currentTime: 0,
+            }
+          })
         },
         onStateChange: (newState) => {
+          if (newState === TimerState.Completed) return
           setState((prev) => ({ ...prev, state: newState }))
         },
       })
@@ -221,13 +224,14 @@ export const useWorkRestTimer = ({
     if (state.phase !== TimerPhase.Rest) return
 
     // Check if max rounds reached
-    if (state.rounds >= state.maxRounds) {
+    if (state.rounds + 1 >= state.maxRounds) {
       cleanupTimer()
       setState((prev) => ({
         ...prev,
-        phase: TimerPhase.Idle,
-        state: TimerState.Idle,
+        phase: TimerPhase.Completed,
+        state: TimerState.Completed,
         currentTime: 0,
+        rounds: prev.rounds + 1,
       }))
       return
     }

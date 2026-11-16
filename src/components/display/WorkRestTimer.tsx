@@ -89,7 +89,7 @@ export function WorkRestTimer({
 
   useEffect(() => {
     if (!onPhaseComplete) return
-    if (state.phase !== TimerPhase.Idle) return
+    if (state.phase !== TimerPhase.Completed) return
     if (state.rounds <= lastCompletedRoundsRef.current) return
     lastCompletedRoundsRef.current = state.rounds
     onPhaseComplete()
@@ -114,6 +114,7 @@ export function WorkRestTimer({
 
   const isRestPhase = state.phase === TimerPhase.Rest
   const isIdlePhase = state.phase === TimerPhase.Idle
+  const isCompletedPhase = state.phase === TimerPhase.Completed
   const isWorkPhase = state.phase === TimerPhase.Work
   const isRunningState = state.state === TimerState.Running
   const isPausedState = state.state === TimerState.Paused
@@ -125,11 +126,13 @@ export function WorkRestTimer({
   const isPreStartRunning = preStart.state === TimerState.Running
   const isPreStartPaused = preStart.state === TimerState.Paused
 
-  const showStartButton = isPreStarting ? isPreStartPaused : isIdlePhase || isPausedState
+  const showStartButton = isPreStarting
+    ? isPreStartPaused
+    : isIdlePhase || isCompletedPhase || isPausedState
   const showStopButton = isPreStarting ? true : isWorkPhase
   const showPauseButton = isPreStarting ? isPreStartRunning : isWorkPhase && isRunningState
 
-  const fullscreen = !isIdlePhase || isPreStarting
+  const fullscreen = (!isIdlePhase && !isCompletedPhase) || isPreStarting
 
   const handleStop = useCallback(() => {
     if (isPreStarting) {
@@ -152,6 +155,16 @@ export function WorkRestTimer({
       return
     }
 
+    if (isCompletedPhase) {
+      if (preStart.isEnabled) {
+        actions.reset()
+        preStart.start()
+      } else {
+        actions.restart()
+      }
+      return
+    }
+
     if (isIdlePhase) {
       if (preStart.isEnabled) {
         preStart.start()
@@ -162,7 +175,7 @@ export function WorkRestTimer({
     }
 
     actions.resumeWork()
-  }, [soundManager, actions, isIdlePhase, preStart, isPreStarting])
+  }, [soundManager, actions, isIdlePhase, isCompletedPhase, preStart, isPreStarting])
 
   const progress = actions.getProgress()
   const { isWork, time } = getDisplayData(state)
@@ -215,7 +228,7 @@ export function WorkRestTimer({
           .join(' · ')}
         state={displayState}
         time={displayTime}
-        subtitle={`Round: ${state.rounds + 1}`}
+        subtitle={`Round: ${Math.min(state.rounds + 1, state.maxRounds)}`}
         isWork={displayIsWork}
         fullscreen={fullscreen || isAutoStarting}
       >
@@ -235,10 +248,14 @@ export function WorkRestTimer({
               <StartButton
                 onClick={handleStart}
                 title={
-                  isPreStarting ? 'Resume countdown' : `${isIdlePhase ? 'Start' : 'Resume'} work`
+                  isPreStarting
+                    ? 'Resume countdown'
+                    : `${isIdlePhase || isCompletedPhase ? 'Start' : 'Resume'} work`
                 }
                 label={
-                  isPreStarting ? 'Resume countdown' : `${isIdlePhase ? 'Start' : 'Resume'} work`
+                  isPreStarting
+                    ? 'Resume countdown'
+                    : `${isIdlePhase || isCompletedPhase ? 'Start' : 'Resume'} work`
                 }
               />
             </>
@@ -253,7 +270,7 @@ export function WorkRestTimer({
 
           {(showStopButton || showStartButton) && (
             <StopButton
-              disabled={isIdlePhase && !isPreStarting}
+              disabled={(isIdlePhase || isCompletedPhase) && !isPreStarting}
               onClick={handleStop}
               title="Stop work"
               label="Stop work"
