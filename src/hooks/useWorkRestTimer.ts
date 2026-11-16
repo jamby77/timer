@@ -73,29 +73,6 @@ export const useWorkRestTimer = ({
     }
   }, [])
 
-  // Create a work stopwatch
-  const createWorkStopwatch = useCallback(() => {
-    cleanupTimer()
-
-    const stopwatch = new Stopwatch({
-      timeLimitMs: WORK_TIME_LIMIT_MS,
-      onTick: (elapsedTime) => {
-        // Update currentTime to trigger re-renders
-        setState((prev) => ({ ...prev, currentTime: elapsedTime }))
-      },
-      onStop: (elapsedTime) => {
-        // Record lap - state transitions handled by action functions
-        onLapRecordedRef.current?.(elapsedTime)
-      },
-      onStateChange: (newState) => {
-        setState((prev) => ({ ...prev, state: newState }))
-      },
-    })
-
-    stopwatchRef.current = stopwatch
-    return stopwatch
-  }, [cleanupTimer])
-
   // Create a rest timer
   const createRestTimer = useCallback(
     (duration: number) => {
@@ -161,6 +138,32 @@ export const useWorkRestTimer = ({
     [createRestTimer, state.restMode, state.fixedRestDuration]
   )
 
+  const createWorkStopwatch = useCallback(() => {
+    cleanupTimer()
+    const workLimit =
+      state.maxWorkTime && state.maxWorkTime > 0
+        ? Math.min(state.maxWorkTime * 1000, WORK_TIME_LIMIT_MS)
+        : WORK_TIME_LIMIT_MS
+
+    const stopwatch = new Stopwatch({
+      timeLimitMs: workLimit,
+      onTick: (elapsedTime) => {
+        setState((prev) => ({ ...prev, currentTime: elapsedTime }))
+      },
+      onStop: (elapsedTime) => {
+        onLapRecordedRef.current?.(elapsedTime)
+        startRestPhase(elapsedTime, state.ratio)
+      },
+      onStateChange: (newState) => {
+        if (newState === TimerState.Completed) return
+        setState((prev) => ({ ...prev, state: newState }))
+      },
+    })
+
+    stopwatchRef.current = stopwatch
+    return stopwatch
+  }, [cleanupTimer, startRestPhase, state.maxWorkTime, state.ratio])
+
   // Start work
   const startWork = useCallback(() => {
     if (state.phase !== TimerPhase.Idle) return
@@ -190,12 +193,11 @@ export const useWorkRestTimer = ({
   }, [state.phase, state.state])
 
   const finishWork = useCallback(() => {
-    if (state.phase !== TimerPhase.Work) return
+    if (state.phase !== TimerPhase.Work || timeoutRef.current) return
 
-    // Stop the stopwatch first to trigger onStop callback and record the lap
-    stopwatchRef.current?.stop()
-
+    stopwatchRef.current?.pause()
     const workDuration = stopwatchRef.current?.getElapsedTime() || 0
+    onLapRecordedRef.current?.(workDuration)
 
     cleanupTimer()
 
