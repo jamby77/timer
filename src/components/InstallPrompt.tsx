@@ -13,6 +13,8 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISSAL_STORAGE_KEY = 'pwa-install-dismissed'
+const DISMISSAL_COUNT_STORAGE_KEY = 'pwa-install-dismiss-count'
+const PERMANENT_DISMISSAL_STORAGE_KEY = 'pwa-install-permanently-dismissed'
 const DISMISSAL_DURATION_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
 export const InstallPrompt = () => {
@@ -20,6 +22,7 @@ export const InstallPrompt = () => {
   const [isStandalone, setIsStandalone] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [dismissCount, setDismissCount] = useState(0)
 
   useEffect(() => {
     setIsIOS(
@@ -34,6 +37,10 @@ export const InstallPrompt = () => {
 
     // Check if prompt was dismissed within the last 30 days
     const checkDismissalStatus = () => {
+      if (localStorage.getItem(PERMANENT_DISMISSAL_STORAGE_KEY) === 'true') return
+
+      const storedCount = Number(localStorage.getItem(DISMISSAL_COUNT_STORAGE_KEY))
+      setDismissCount(Number.isSafeInteger(storedCount) && storedCount > 0 ? storedCount : 0)
       const dismissedTimestamp = localStorage.getItem(DISMISSAL_STORAGE_KEY)
       if (dismissedTimestamp) {
         const dismissedTime = parseInt(dismissedTimestamp, 10)
@@ -51,7 +58,12 @@ export const InstallPrompt = () => {
       setIsVisible(true)
     }
 
-    checkDismissalStatus()
+    try {
+      checkDismissalStatus()
+    } catch (error) {
+      console.error('Failed to load install prompt preferences:', error)
+      setIsVisible(true)
+    }
 
     const beforeInstallPromptHandler = (e: Event) => {
       e.preventDefault()
@@ -88,9 +100,24 @@ export const InstallPrompt = () => {
   }
 
   const handleDismiss = () => {
-    // Store dismissal timestamp
-    localStorage.setItem(DISMISSAL_STORAGE_KEY, Date.now().toString())
+    const nextCount = Math.min(dismissCount + 1, 3)
+    setDismissCount(nextCount)
     setIsVisible(false)
+    try {
+      localStorage.setItem(DISMISSAL_STORAGE_KEY, Date.now().toString())
+      localStorage.setItem(DISMISSAL_COUNT_STORAGE_KEY, nextCount.toString())
+    } catch (error) {
+      console.error('Failed to save install prompt dismissal:', error)
+    }
+  }
+
+  const handlePermanentDismiss = () => {
+    setIsVisible(false)
+    try {
+      localStorage.setItem(PERMANENT_DISMISSAL_STORAGE_KEY, 'true')
+    } catch (error) {
+      console.error('Failed to save permanent install prompt dismissal:', error)
+    }
   }
 
   if (isStandalone || !isVisible) {
@@ -130,6 +157,11 @@ export const InstallPrompt = () => {
           </Button>
         )}
       </div>
+      {dismissCount >= 3 && (
+        <Button size="sm" variant="ghost" onClick={handlePermanentDismiss}>
+          Never show again
+        </Button>
+      )}
     </div>
   )
 }
