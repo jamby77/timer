@@ -70,3 +70,19 @@ describe('committed timer callbacks', () => {
     expect(result.current.currentStepIndex).toBe(0)
   })
 })
+
+it('reports Interval state changes to the current parent callback', () => {
+  const onStateChange = vi.fn()
+  const { result } = renderHook(() =>
+    useIntervalTimer({
+      workDuration: 10,
+      restDuration: 5,
+      intervals: 2,
+      onStateChange,
+    })
+  )
+  act(() => result.current.start())
+  expect(onStateChange).toHaveBeenLastCalledWith(TimerState.Running)
+  act(() => result.current.pause())
+  expect(onStateChange).toHaveBeenLastCalledWith(TimerState.Paused)
+})
