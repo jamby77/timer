@@ -153,3 +153,45 @@ it.each(['timeout', 'blur', 'arrow'])('starts a fresh numeric entry after %s', (
     vi.useRealTimers()
   }
 })
+
+it.each([
+  { picker: 'seconds', entry: '05', expected: 5, display: '05' },
+  { picker: 'minutes', entry: '05', expected: 300, display: '05' },
+  { picker: 'hours', entry: '05', expected: 18000, display: '05' },
+  { picker: 'seconds', entry: '99', expected: 59, display: '59' },
+  { picker: 'hours', entry: '999', expected: 356400, display: '99' },
+  { picker: 'seconds', entry: '', expected: 0, display: '00' },
+])('accepts native $picker input $entry', ({ picker, entry, expected, display }) => {
+  const onTimeChange = vi.fn()
+  const { container } = render(<TimePicker value={0} onTimeChange={onTimeChange} />)
+  const input = container.querySelector<HTMLInputElement>(`input[name=${picker}]`)!
+  fireEvent.change(input, { target: { value: entry } })
+  expect(input.value).toBe(display)
+  expect(onTimeChange).toHaveBeenLastCalledWith(expected)
+})
+
+it('bounds native input and resets a pending keyboard entry', () => {
+  const onTimeChange = vi.fn()
+  const { container } = render(<TimePicker value={0} min={1} max={10} onTimeChange={onTimeChange} />)
+  const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
+  fireEvent.keyDown(input, { key: '4' })
+  fireEvent.change(input, { target: { value: '55' } })
+  expect(input.value).toBe('10')
+  expect(onTimeChange).toHaveBeenLastCalledWith(10)
+  fireEvent.keyDown(input, { key: '3' })
+  expect(input.value).toBe('03')
+  fireEvent.change(input, { target: { value: '' } })
+  expect(input.value).toBe('01')
+  expect(onTimeChange).toHaveBeenLastCalledWith(1)
+})
+
+it('ignores invalid native input and permits clipboard shortcuts', () => {
+  const onTimeChange = vi.fn()
+  const { container } = render(<TimePicker value={5} onTimeChange={onTimeChange} />)
+  const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
+  for (const value of ['abc', '-1', '1.5']) fireEvent.change(input, { target: { value } })
+  expect(input.value).toBe('05')
+  expect(onTimeChange).not.toHaveBeenCalled()
+  expect(fireEvent.keyDown(input, { key: 'v', metaKey: true })).toBe(true)
+  expect(fireEvent.keyDown(input, { key: 'v', ctrlKey: true })).toBe(true)
+})
