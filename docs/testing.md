@@ -65,3 +65,10 @@ verifies that editing it produces a valid, clamped submission.
 saves a limited preset, clears the limit, saves a separate unlimited preset,
 reopens it after reload, and starts it without an overall-limit prompt. It also
 checks that the original limited preset remains unchanged.
+
+
+`e2e/optional-limits.spec.ts` also saves and reloads cleared Stopwatch and Work/Rest
+limits, confirms the original limited presets remain unchanged, and verifies
+that the displayed Countdown minimum (1 second) and Stopwatch maximum (24 hours)
+match the persisted values. Work/Rest validation accepts an absent work limit
+in both fixed-rest and ratio modes, while still rejecting an explicit zero.

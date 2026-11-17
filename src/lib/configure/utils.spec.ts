@@ -402,3 +402,23 @@ describe('utils', () => {
     })
   })
 })
+
+describe('optional Work/Rest work limits', () => {
+  for (const mode of [
+    { restMode: 'fixed', fixedRestDuration: 5 },
+    { restMode: 'ratio', ratio: 1 },
+  ]) {
+    it(`accepts an absent limit in ${mode.restMode} mode but rejects zero`, () => {
+      const config = {
+        id: 'unlimited',
+        name: 'Unlimited',
+        type: TimerType.WORKREST,
+        maxRounds: 2,
+        ...mode,
+      } as WorkRestConfig
+      expect(validateTimerConfig(config)).toEqual([])
+      expect(validateTimerConfig({ ...config, maxWorkTime: undefined })).toEqual([])
+      expect(validateTimerConfig({ ...config, maxWorkTime: 0 })).not.toEqual([])
+    })
+  }
+})

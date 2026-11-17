@@ -75,7 +75,8 @@ const workRestBaseSchema = baseTimerConfigSchema.extend({
   maxWorkTime: z
     .number()
     .int('Maximum work time must be an integer')
-    .min(1, 'Maximum work time must be greater than 0'),
+    .min(1, 'Maximum work time must be greater than 0')
+    .optional(),
   maxRounds: z
     .number()
     .int('Maximum rounds must be an integer')
