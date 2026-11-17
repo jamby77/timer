@@ -11,7 +11,6 @@ import {
   TimerPickerTime,
 } from '@/lib/timer'
 import { cn } from '@/lib/utils'
-import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 import { Input } from '@/components/ui/input'
 
@@ -35,6 +34,7 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
       setTime,
       onChange,
       onKeyDown,
+      onBlur,
       picker,
       onLeftFocus,
       onRightFocus,
@@ -42,30 +42,24 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
     },
     ref
   ) => {
-    const [flag, setFlag] = useState<boolean>(false)
-    const isTouchDevice = useTouchDevice()
+    const [pendingEntry, setPendingEntry] = useState<{
+      digit: string
+      time: TimerPickerTime
+    } | null>(null)
 
-    /**
-     * allow the user to enter the second digit within 2 seconds
-     * otherwise start again with entering first digit
-     */
     useEffect(() => {
-      if (flag) {
+      if (pendingEntry) {
         const timer = setTimeout(() => {
-          setFlag(false)
+          setPendingEntry(null)
         }, 2000)
 
         return () => clearTimeout(timer)
       }
-    }, [flag])
+    }, [pendingEntry])
 
     const calculatedValue = useMemo(() => {
       return getTimeByType(time, picker)
     }, [time, picker])
-
-    const calculateNewValue = (key: string) => {
-      return !flag ? '0' + key : calculatedValue.slice(1, 2) + key
-    }
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Tab') return
@@ -75,15 +69,15 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
       if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
         const step = e.key === 'ArrowUp' ? 1 : -1
         const newValue = getValidArrowTime(calculatedValue, step, picker)
-        if (flag) setFlag(false)
+        setPendingEntry(null)
         const newTime = setTimeByType(time, newValue, picker)
         setTime(newTime)
       }
       if (e.key >= '0' && e.key <= '9') {
-        const newValue = calculateNewValue(e.key)
-        if (flag) onRightFocus?.()
-        setFlag((prev) => !prev)
-        const newTime = setTimeByType(time, newValue, picker)
+        const newValue = pendingEntry ? pendingEntry.digit + e.key : '0' + e.key
+        const newTime = setTimeByType(pendingEntry?.time ?? time, newValue, picker)
+        if (pendingEntry) onRightFocus?.()
+        setPendingEntry(pendingEntry ? null : { digit: e.key, time: { ...time } })
         setTime(newTime)
       }
     }
@@ -107,6 +101,10 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
         onKeyDown={(e) => {
           onKeyDown?.(e)
           handleKeyDown(e)
+        }}
+        onBlur={(event) => {
+          setPendingEntry(null)
+          onBlur?.(event)
         }}
         {...props}
       />
