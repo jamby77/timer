@@ -1,14 +1,26 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Clock, FileText, Layers, MoveLeft, Play, Save } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
 
-import type { ComplexConfig, PredefinedStyle } from '@/types/configure'
+import type { ComplexConfig } from '@/types/configure'
 
-import { isCountdownConfig, isIntervalConfig, isStopwatchConfig } from '@/types/configure'
+import {
+  isComplexConfig,
+  isCountdownConfig,
+  isIntervalConfig,
+  isStopwatchConfig,
+} from '@/types/configure'
+import { saveTimerPreset } from '@/lib/configure/save-preset'
 import { storage } from '@/lib/configure/storage'
-import { formatDuration, generateComplexTimerName, processTimerConfig } from '@/lib/configure/utils'
+import {
+  formatDuration,
+  generateComplexTimerName,
+  processTimerConfig,
+  validateTimerConfig,
+} from '@/lib/configure/utils'
 import { TimerType } from '@/lib/enums'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +55,14 @@ const calculateDuration = (config: Partial<ComplexConfig>) => {
 }
 
 export default function ConfigureComplexTimerPage() {
+  return (
+    <Suspense fallback={null}>
+      <ConfigureComplexTimer />
+    </Suspense>
+  )
+}
+
+function ConfigureComplexTimer() {
   const router = useRouter()
   const [config, setConfig] = useState<Partial<ComplexConfig>>({
     type: TimerType.COMPLEX,
@@ -51,6 +71,18 @@ export default function ConfigureComplexTimerPage() {
     autoAdvance: true,
   })
   const [errors, setErrors] = useState<string[]>([])
+  const presetId = useSearchParams().get('preset')
+
+  useEffect(() => {
+    if (!presetId) return
+    const preset = storage.getPreset(presetId)
+    if (!preset || !isComplexConfig(preset.config) || validateTimerConfig(preset.config).length) {
+      setErrors(['Preset not found or invalid.'])
+      return
+    }
+    setConfig(preset.config)
+    setErrors([])
+  }, [presetId])
 
   const updateConfig = (updates: Partial<ComplexConfig>) => {
     const newConfig = { ...config, ...updates }
@@ -93,20 +125,12 @@ export default function ConfigureComplexTimerPage() {
 
     if (!fullConfig) return
 
-    // Create a PredefinedStyle from the complex timer config
-    const preset: PredefinedStyle<ComplexConfig> = {
-      id: `preset-${Date.now()}`,
-      name: fullConfig.name || 'Custom Complex Timer',
-      description: `Complex timer with ${fullConfig.phases.length} phases`,
-      isBuiltIn: false,
-      config: fullConfig,
-    }
-
     try {
-      // Store the preset using the storage method
-      storage.storePreset(preset)
+      saveTimerPreset(fullConfig)
+      setErrors([])
+      toast.success('Preset saved.')
     } catch {
-      setErrors(['Failed to save preset. Please try again.'])
+      toast.error('Failed to save preset. Please try again.')
     }
   }
 

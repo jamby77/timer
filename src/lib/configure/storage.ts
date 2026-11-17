@@ -28,6 +28,24 @@ const storedPresetSchema = z.looseObject({
   lastUsed: z.union([z.string(), z.number()]).optional(),
 })
 
+function restoreConfigDates(config: AnyTimerConfig): AnyTimerConfig {
+  const restored = {
+    ...config,
+    createdAt: config.createdAt ? new Date(config.createdAt) : undefined,
+    lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
+  }
+  if (restored.type === 'COMPLEX' && Array.isArray(restored.phases)) {
+    return {
+      ...restored,
+      phases: restored.phases.map((phase) => ({
+        ...phase,
+        config: restoreConfigDates(phase.config) as typeof phase.config,
+      })),
+    }
+  }
+  return restored
+}
+
 class LocalTimerStorage implements StorageManager {
   private readonly RECENT_TIMERS_KEY = 'recent_timers'
   private readonly TIMER_PREFIX = 'timer_'
@@ -193,11 +211,7 @@ class LocalTimerStorage implements StorageManager {
                 id: presetId,
                 config: {
                   ...rest,
-                  config: {
-                    ...config,
-                    createdAt: config.createdAt ? new Date(config.createdAt) : undefined,
-                    lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
-                  },
+                  config: restoreConfigDates(config as AnyTimerConfig),
                 } as PredefinedStyle<T>,
               })
             }
@@ -230,11 +244,7 @@ class LocalTimerStorage implements StorageManager {
       const { config, ...rest } = parsed.data
       return {
         ...rest,
-        config: {
-          ...config,
-          createdAt: config.createdAt ? new Date(config.createdAt) : undefined,
-          lastUsed: config.lastUsed ? new Date(config.lastUsed) : undefined,
-        },
+        config: restoreConfigDates(config as AnyTimerConfig),
       } as PredefinedStyle<T>
     } catch (error) {
       console.error('Failed to load preset:', error)

@@ -82,9 +82,10 @@ export const WorkRestFields = ({
           <NativeSelect
             id="maxRounds"
             name="maxRounds"
+            value={maxRounds || ''}
             onChange={(e) => onChange({ maxRounds: parseInt(e.target.value) || 0 })}
           >
-            <NativeSelectOption value={maxRounds || ''}>Select rounds</NativeSelectOption>
+            <NativeSelectOption value="">Select rounds</NativeSelectOption>
             {[...Array(100)].map((_, i) => (
               <NativeSelectOption key={i + 1} value={i + 1}>
                 {i + 1}

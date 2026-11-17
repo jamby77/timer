@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 import { AnyTimerConfig, PredefinedStyle, RecentTimer, TimerType } from '@/types/configure'
 import { PREDEFINED_STYLES } from '@/lib/configure/presets'
+import { saveTimerPreset } from '@/lib/configure/save-preset'
 import { storage } from '@/lib/configure/storage'
+import { validateTimerConfig } from '@/lib/configure/utils'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { PredefinedStyles } from '@/components/configure/PredefinedStyles'
@@ -20,11 +23,18 @@ export default function ConfigurePage() {
   const [selectedPredefined, setSelectedPredefined] =
     useState<PredefinedStyle<AnyTimerConfig> | null>(null)
   const router = useRouter()
+  const [customPresets, setCustomPresets] = useState<PredefinedStyle<AnyTimerConfig>[]>([])
 
   useEffect(() => {
     // Load recent timers on mount
     const timers = storage.getRecentTimers()
     setRecentTimers(timers)
+    setCustomPresets(
+      storage
+        .getAllPresets()
+        .map(({ config }) => config)
+        .filter((preset) => validateTimerConfig(preset.config).length === 0)
+    )
   }, [])
 
   const handleStartTimer = (config: AnyTimerConfig, isPredefined: boolean = false) => {
@@ -57,6 +67,29 @@ export default function ConfigurePage() {
     router.push(`/?id=${finalConfig.id}`)
   }
 
+  const handleSavePreset = (config: AnyTimerConfig) => {
+    try {
+      saveTimerPreset(config)
+      setCustomPresets(
+        storage
+          .getAllPresets()
+          .map(({ config }) => config)
+          .filter((preset) => validateTimerConfig(preset.config).length === 0)
+      )
+      toast.success('Preset saved.')
+    } catch {
+      toast.error('Failed to save preset. Please try again.')
+    }
+  }
+
+  const handleSelectPreset = (preset: PredefinedStyle<AnyTimerConfig>) => {
+    if (preset.config.type === TimerType.COMPLEX) {
+      router.push(`/configure/complex?preset=${encodeURIComponent(preset.id)}`)
+      return
+    }
+    setSelectedPredefined(preset)
+  }
+
   const handleRemoveTimer = (timerId: string) => {
     storage.removeTimer(timerId)
     setRecentTimers(storage.getRecentTimers())
@@ -81,9 +114,7 @@ export default function ConfigurePage() {
         initialConfig={selectedPredefined?.config}
         isPredefined={!!selectedPredefined}
         onStartTimer={(config) => handleStartTimer(config, !!selectedPredefined)}
-        onSaveAsPredefined={(_config) => {
-          // TODO: Implement save as predefined functionality
-        }}
+        onSaveAsPredefined={handleSavePreset}
         onCancel={() => {
           setSelectedTimer(null)
           setSelectedPredefined(null)
@@ -127,8 +158,8 @@ export default function ConfigurePage() {
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-8">
               <PredefinedStyles
-                styles={PREDEFINED_STYLES}
-                onSelectStyle={setSelectedPredefined}
+                styles={[...PREDEFINED_STYLES, ...customPresets]}
+                onSelectStyle={handleSelectPreset}
                 onStartTimer={(config) => handleStartTimer(config, true)}
               />
             </div>
