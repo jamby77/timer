@@ -33,6 +33,7 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
       time = createDefaultTime(),
       setTime,
       onChange,
+      onInput,
       onKeyDown,
       onBlur,
       picker,
@@ -96,12 +97,13 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
           className
         )}
         value={value || calculatedValue}
-        onChange={(e) => {
+        onChange={onChange}
+        onInput={(e) => {
           setPendingEntry(null)
-          if (/^\d*$/.test(e.target.value)) {
-            setTime(setTimeByType(time, e.target.value || '0', picker))
+          if (/^\d*$/.test(e.currentTarget.value)) {
+            setTime(setTimeByType(time, e.currentTarget.value || '0', picker))
           }
-          onChange?.(e)
+          onInput?.(e)
         }}
         type={type}
         inputMode="decimal"

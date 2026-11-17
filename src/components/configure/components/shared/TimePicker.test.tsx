@@ -165,7 +165,7 @@ it.each([
   const onTimeChange = vi.fn()
   const { container } = render(<TimePicker value={0} onTimeChange={onTimeChange} />)
   const input = container.querySelector<HTMLInputElement>(`input[name=${picker}]`)!
-  fireEvent.change(input, { target: { value: entry } })
+  fireEvent.input(input, { target: { value: entry } })
   expect(input.value).toBe(display)
   expect(onTimeChange).toHaveBeenLastCalledWith(expected)
 })
@@ -175,12 +175,12 @@ it('bounds native input and resets a pending keyboard entry', () => {
   const { container } = render(<TimePicker value={0} min={1} max={10} onTimeChange={onTimeChange} />)
   const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
   fireEvent.keyDown(input, { key: '4' })
-  fireEvent.change(input, { target: { value: '55' } })
+  fireEvent.input(input, { target: { value: '55' } })
   expect(input.value).toBe('10')
   expect(onTimeChange).toHaveBeenLastCalledWith(10)
   fireEvent.keyDown(input, { key: '3' })
   expect(input.value).toBe('03')
-  fireEvent.change(input, { target: { value: '' } })
+  fireEvent.input(input, { target: { value: '' } })
   expect(input.value).toBe('01')
   expect(onTimeChange).toHaveBeenLastCalledWith(1)
 })
@@ -189,9 +189,18 @@ it('ignores invalid native input and permits clipboard shortcuts', () => {
   const onTimeChange = vi.fn()
   const { container } = render(<TimePicker value={5} onTimeChange={onTimeChange} />)
   const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
-  for (const value of ['abc', '-1', '1.5']) fireEvent.change(input, { target: { value } })
+  for (const value of ['abc', '-1', '1.5']) fireEvent.input(input, { target: { value } })
   expect(input.value).toBe('05')
   expect(onTimeChange).not.toHaveBeenCalled()
   expect(fireEvent.keyDown(input, { key: 'v', metaKey: true })).toBe(true)
   expect(fireEvent.keyDown(input, { key: 'v', ctrlKey: true })).toBe(true)
+})
+
+it('validates native input even when the displayed text does not change', () => {
+  const onTimeChange = vi.fn()
+  const { container } = render(<TimePicker value={0} min={1} onTimeChange={onTimeChange} />)
+  const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
+  fireEvent.input(input, { target: { value: '00' }, inputType: 'insertFromPaste' })
+  expect(input.value).toBe('01')
+  expect(onTimeChange).toHaveBeenLastCalledWith(1)
 })
