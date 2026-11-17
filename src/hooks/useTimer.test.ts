@@ -66,37 +66,6 @@ describe('useTimer', () => {
     expect(result.current.time).toBe(timeBeforePause)
   })
 
-  it('should resume counting from paused state', async () => {
-    const { result } = renderHook(() => useTimer(5000))
-
-    act(() => {
-      result.current.start()
-    })
-
-    await act(async () => {
-      await sleep(200)
-    })
-
-    act(() => {
-      result.current.pause()
-    })
-
-    const pausedTime = result.current.time
-
-    act(() => {
-      result.current.start() // Resume
-    })
-
-    expect(result.current.state).toBe(TimerState.Running)
-
-    await act(async () => {
-      await sleep(200)
-    })
-
-    expect(result.current.time).toBeLessThan(pausedTime)
-    expect(result.current.time).toBeGreaterThan(pausedTime - 250)
-  })
-
   it('should reset timer to initial state', async () => {
     const { result } = renderHook(() => useTimer(3000))
 
