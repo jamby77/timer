@@ -57,7 +57,9 @@ The expanded storage flow is now implemented. Device-level installation verifica
 - [x] Verify an expired dismissal permits the prompt on a subsequent mount (component test).
 - [x] Verify standalone mode and successful browser installation hide the prompt.
       Standalone detection and installation events are simulated, not actual device installs.
-- [ ] Verify the iOS instructions and browser installation flow on supported devices.
+- [x] Verify iOS instructions, dismissal, and standalone persistence with simulated browser signals.
+- [x] Verify accepted and dismissed browser installation choices through the Install button.
+- [ ] Verify actual installation on supported iOS devices and desktop browsers.
 
 Implementation reference: `src/components/InstallPrompt.tsx`.
 
@@ -100,3 +102,17 @@ manual skipping, first-phase restart, Stop while paused or pre-starting, and fin
 All 54 checks pass against the production app. No runtime code change was needed.
 
 Run `pnpm exec playwright test e2e/navigation-lifecycle.spec.ts e2e/complex-stop.spec.ts e2e/complex-auto-start.spec.ts`.
+
+## Installation UI flow verification (2026-11-17)
+
+Five production Chromium tests cover the Install button with accepted and dismissed browser
+choices, installation-event persistence after reload, iOS instruction text and icons, temporary
+and permanent dismissal of those instructions, and standalone detection followed by a browser
+visit. Accepting the browser dialog alone does not record installation; the appinstalled event does.
+
+The five new cases and four existing cross-tab preference tests pass. The tests simulate
+beforeinstallprompt, appinstalled, an iPhone user agent, and navigator.standalone. They do not
+operate native installation dialogs or prove installation on a physical iPhone or iPad.
+No production code changes were needed. Real-device verification remains outstanding.
+
+Run `pnpm exec playwright test --config playwright.pwa.config.ts`.
