@@ -72,3 +72,19 @@ limits, confirms the original limited presets remain unchanged, and verifies
 that the displayed Countdown minimum (1 second) and Stopwatch maximum (24 hours)
 match the persisted values. Work/Rest validation accepts an absent work limit
 in both fixed-rest and ratio modes, while still rejecting an explicit zero.
+
+
+## Leading-zero time entry
+
+`TimePicker.test.tsx` covers typing `05` into seconds, minutes, and hours when a
+required duration clamps the initial `0` to one second. The second digit uses
+the original entry rather than the clamped display, preserving the intended
+time and the other fields. Maximum bounds still apply to the completed entry.
+Timeout, blur, and arrow-key checks verify that subsequent input starts fresh.
+
+`e2e/time-picker-entry.spec.ts` verifies saved and reopened Countdown values of
+5 seconds, 5 minutes, and 5 hours, and a fixed Work/Rest rest duration of 5 seconds.
+Four component regressions failed before the fix. Afterward, all 268 tests passed;
+lint, TypeScript, the production build, and React Doctor (100/100) also passed.
+Production browser verification passed all 18 checks, including the new digit-entry
+cases and existing preset and optional-limit persistence flows.

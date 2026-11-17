@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
 import type { ComplexConfig } from '@/types/configure'
@@ -102,4 +102,54 @@ it('clears the optional Work/Rest work time limit', () => {
   const { container } = render(<WorkRestFields config={{ maxWorkTime: 1 }} onChange={onChange} />)
   fireEvent.keyDown(container.querySelector('input[name=seconds]')!, { key: 'ArrowDown' })
   expect(onChange).toHaveBeenLastCalledWith({ maxWorkTime: undefined })
+})
+
+it.each([
+  { picker: 'seconds', expected: 5 },
+  { picker: 'minutes', expected: 300 },
+  { picker: 'hours', expected: 18000 },
+])(
+  'keeps leading-zero $picker input intact when the first digit is clamped',
+  ({ picker, expected }) => {
+    const onTimeChange = vi.fn()
+    const { container } = render(<TimePicker value={0} min={1} onTimeChange={onTimeChange} />)
+    const input = container.querySelector<HTMLInputElement>(`input[name=${picker}]`)!
+    fireEvent.keyDown(input, { key: '0' })
+    fireEvent.keyDown(input, { key: '5' })
+    expect(input.value).toBe('05')
+    expect(onTimeChange).toHaveBeenLastCalledWith(expected)
+  }
+)
+
+it('still bounds the completed entry and allows the next two-digit entry', () => {
+  const onTimeChange = vi.fn()
+  const { container } = render(
+    <TimePicker value={0} min={1} max={10} onTimeChange={onTimeChange} />
+  )
+  const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
+  for (const key of ['9', '9']) fireEvent.keyDown(input, { key })
+  expect(input.value).toBe('10')
+  expect(onTimeChange).toHaveBeenLastCalledWith(10)
+  for (const key of ['0', '5']) fireEvent.keyDown(input, { key })
+  expect(input.value).toBe('05')
+  expect(onTimeChange).toHaveBeenLastCalledWith(5)
+})
+
+it.each(['timeout', 'blur', 'arrow'])('starts a fresh numeric entry after %s', (boundary) => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  try {
+    const onTimeChange = vi.fn()
+    const { container } = render(<TimePicker value={0} min={1} onTimeChange={onTimeChange} />)
+    const input = container.querySelector<HTMLInputElement>('input[name=seconds]')!
+    fireEvent.keyDown(input, { key: '4' })
+    if (boundary === 'timeout') act(() => vi.advanceTimersByTime(2001))
+    if (boundary === 'blur') fireEvent.blur(input)
+    if (boundary === 'arrow') fireEvent.keyDown(input, { key: 'ArrowUp' })
+    fireEvent.keyDown(input, { key: '3' })
+    expect(input.value).toBe('03')
+    expect(onTimeChange).toHaveBeenLastCalledWith(3)
+  } finally {
+    cleanup()
+    vi.useRealTimers()
+  }
 })
