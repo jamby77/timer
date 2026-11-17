@@ -32,3 +32,21 @@ The phase story covers adding, editing, saving, reopening, cancelling, and press
 
 The run still emits non-failing Node deprecation, Storybook annotation-provisioning, and PostCSS
 warnings. App-level Playwright E2E tests remain separate and were not rerun for this change.
+
+
+## Deterministic timer timing checks
+
+`src/hooks/timer-timing.test.ts` covers the previously flaky Countdown resume and
+Work/Rest rest-progress cases with a controlled monotonic clock and animation
+frames. It exercises the real timer classes and hooks; only the scheduling
+boundary is replaced for this test file.
+
+Countdown runs for 200 ms, pauses for 10 seconds, resumes for 200 ms, and then
+completes after the remaining 4600 ms. Assertions check exact remaining and active
+elapsed time, and a single completion callback. Work/Rest runs for 500 ms and
+checks rest progress at 0%, 40%, and 80%, then the completed round.
+
+Cleanup unmounts hooks before restoring the real clock and checks for pending
+frames and timeouts. The tests no longer depend on a 200 ms real sleep finishing
+within 250 ms, or rest progress staying below an arbitrary 20% threshold while
+the browser is busy. Other browser tests retain real scheduling coverage.

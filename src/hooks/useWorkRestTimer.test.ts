@@ -368,43 +368,6 @@ describe('useWorkRestTimer', () => {
     expect(result.current[0].maxRounds).toBe(1000) // Should be capped at MAX_ROUNDS
   })
 
-  it('should calculate progress correctly for rest phase', async () => {
-    const { result } = renderHook(() => useWorkRestTimer())
-
-    act(() => {
-      result.current[1].startWork()
-    })
-
-    await act(async () => {
-      await sleep(500)
-    })
-
-    act(() => {
-      result.current[1].stopWork()
-    })
-
-    // Wait for REST_DELAY_MS (100ms) + small buffer for rest phase to start
-    await act(async () => {
-      await sleep(150)
-    })
-
-    expect(result.current[0].phase).toBe(TimerPhase.Rest)
-
-    // Progress should be 0% at start of rest (just started)
-    const initialProgress = result.current[1].getProgress()
-    expect(initialProgress).toBeLessThan(20) // Should be close to 0, allowing some time to pass
-
-    // Let rest run for a bit
-    await act(async () => {
-      await sleep(200)
-    })
-
-    // Progress should be less than 100%
-    const laterProgress = result.current[1].getProgress()
-    expect(laterProgress).toBeLessThan(100)
-    expect(laterProgress).toBeGreaterThan(0)
-  })
-
   it('should return 0 progress for work phase', async () => {
     const { result } = renderHook(() => useWorkRestTimer())
 
