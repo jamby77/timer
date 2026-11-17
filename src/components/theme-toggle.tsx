@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 import { Theme, THEME_LABELS } from '@/lib/enums'
+import { useHydrated } from '@/hooks/useHydrated'
 
 import { Button } from '@/components/ui/button'
 
@@ -12,11 +12,7 @@ const themes = [Theme.LIGHT, Theme.DARK, Theme.SYSTEM]
 
 export const ThemeToggle = () => {
   const { setTheme, theme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useHydrated()
 
   const rotateTheme = () => {
     const currentIndex = themes.indexOf(theme as Theme)

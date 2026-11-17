@@ -165,7 +165,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
         {phases.length === 0 && (
           <div className="bg-muted rounded-md p-4 text-center">
             <p className="text-muted-foreground text-sm">
-              No phases added yet. Click "Add Phase" to create your first phase.
+              No phases added yet. Click &quot;Add Phase&quot; to create your first phase.
             </p>
           </div>
         )}

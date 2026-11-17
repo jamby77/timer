@@ -26,6 +26,10 @@ interface ComplexTimerProps {
 }
 
 export function ComplexTimer({ config }: ComplexTimerProps) {
+  return <ComplexTimerSession key={config.id} config={config} />
+}
+
+function ComplexTimerSession({ config }: ComplexTimerProps) {
   const { setTimerActive } = useTimerContext()
   const phases = useMemo(() => {
     return [...(config.phases ?? [])].sort((a, b) => a.order - b.order)
@@ -48,13 +52,6 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
   useEffect(() => {
     setTimerActive(isComplexRunning)
   }, [isComplexRunning, setTimerActive])
-
-  useEffect(() => {
-    setAutoStartPhase(false)
-    setPhaseIndex(0)
-    setIsStopped(false)
-    lastAutoAdvancedPhaseIdRef.current = null
-  }, [config.id])
 
   const goToPhase = useCallback(
     (index: number) => {

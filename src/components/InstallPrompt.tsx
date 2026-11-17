@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Share, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { ClientOnly } from '@/components/ClientOnly'
 
 type BeforeInstallPromptOutcome = 'accepted' | 'dismissed'
 
@@ -18,24 +19,46 @@ const PERMANENT_DISMISSAL_STORAGE_KEY = 'pwa-install-permanently-dismissed'
 const INSTALL_COMPLETED_STORAGE_KEY = 'pwa-install-completed'
 const DISMISSAL_DURATION_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 
-export const InstallPrompt = () => {
-  const [isIOS, setIsIOS] = useState(false)
-  const [isStandalone, setIsStandalone] = useState(false)
+const readPreferences = () => {
+  try {
+    const storedCount = Number(localStorage.getItem(DISMISSAL_COUNT_STORAGE_KEY))
+    const dismissCount = Number.isSafeInteger(storedCount) && storedCount > 0 ? storedCount : 0
+    const dismissedTime = Number.parseInt(localStorage.getItem(DISMISSAL_STORAGE_KEY) ?? '', 10)
+    const isVisible =
+      localStorage.getItem(INSTALL_COMPLETED_STORAGE_KEY) !== 'true' &&
+      localStorage.getItem(PERMANENT_DISMISSAL_STORAGE_KEY) !== 'true' &&
+      (Number.isNaN(dismissedTime) || Date.now() - dismissedTime >= DISMISSAL_DURATION_MS)
+    return { dismissCount, isVisible }
+  } catch (error) {
+    console.error('Failed to load install prompt preferences:', error)
+    return { dismissCount: 0, isVisible: true }
+  }
+}
+
+const standaloneMode = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  (window.navigator as unknown as Record<string, unknown>).standalone === true
+
+export const InstallPrompt = () => (
+  <ClientOnly>
+    <InstallPromptContent />
+  </ClientOnly>
+)
+
+const InstallPromptContent = () => {
+  const [isIOS] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      !(window as unknown as Record<string, unknown>).MSStream
+  )
+  const [isStandalone, setIsStandalone] = useState(standaloneMode)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
-  const [dismissCount, setDismissCount] = useState(0)
+  const [preferences] = useState(readPreferences)
+  const [isVisible, setIsVisible] = useState(preferences.isVisible)
+  const [dismissCount, setDismissCount] = useState(preferences.dismissCount)
 
   useEffect(() => {
-    setIsIOS(
-      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-        !(window as unknown as Record<string, unknown>).MSStream
-    )
-
-    const isStandaloneMode =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as Record<string, unknown>).standalone === true
-    setIsStandalone(isStandaloneMode)
-
     const recordInstallation = () => {
       setIsVisible(false)
       setDeferredPrompt(null)
@@ -46,41 +69,10 @@ export const InstallPrompt = () => {
       }
     }
 
-    // Check if prompt was dismissed within the last 30 days
-    const checkDismissalStatus = () => {
-      const storedCount = Number(localStorage.getItem(DISMISSAL_COUNT_STORAGE_KEY))
-      setDismissCount(Number.isSafeInteger(storedCount) && storedCount > 0 ? storedCount : 0)
-      if (
-        localStorage.getItem(INSTALL_COMPLETED_STORAGE_KEY) === 'true' ||
-        localStorage.getItem(PERMANENT_DISMISSAL_STORAGE_KEY) === 'true'
-      ) {
-        setIsVisible(false)
-        return
-      }
-      const dismissedTimestamp = localStorage.getItem(DISMISSAL_STORAGE_KEY)
-      if (dismissedTimestamp) {
-        const dismissedTime = parseInt(dismissedTimestamp, 10)
-        if (Number.isNaN(dismissedTime)) {
-          localStorage.removeItem(DISMISSAL_STORAGE_KEY)
-          setIsVisible(true)
-          return
-        }
-        const now = Date.now()
-        if (now - dismissedTime < DISMISSAL_DURATION_MS) {
-          setIsVisible(false)
-          return
-        }
-      }
-      setIsVisible(true)
-    }
-
     const refreshPreferences = () => {
-      try {
-        checkDismissalStatus()
-      } catch (error) {
-        console.error('Failed to load install prompt preferences:', error)
-        setIsVisible(true)
-      }
+      const next = readPreferences()
+      setDismissCount(next.dismissCount)
+      setIsVisible(next.isVisible)
     }
 
     const storageHandler = (event: StorageEvent) => {
@@ -98,9 +90,13 @@ export const InstallPrompt = () => {
       }
     }
 
-    refreshPreferences()
-
-    if (isStandaloneMode) recordInstallation()
+    if (standaloneMode()) {
+      try {
+        localStorage.setItem(INSTALL_COMPLETED_STORAGE_KEY, 'true')
+      } catch (error) {
+        console.error('Failed to save installation status:', error)
+      }
+    }
 
     const beforeInstallPromptHandler = (e: Event) => {
       e.preventDefault()
@@ -187,7 +183,7 @@ export const InstallPrompt = () => {
           <p className="text-muted-foreground text-xs">
             To install this app on your iOS device, tap the share button
             <Share className="inline-block size-6 px-1" role="img" aria-label="share icon" />
-            and then "Add to Home Screen"
+            and then &quot;Add to Home Screen&quot;
             <Plus className="inline-block size-6 px-1" role="img" aria-label="plus icon" />.
           </p>
         )}

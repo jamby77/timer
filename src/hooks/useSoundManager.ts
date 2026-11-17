@@ -1,21 +1,18 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { SoundConfig } from '@/types/configure'
 
 import { SoundManager } from '@/lib/sound/SoundManager'
 
 export const useSoundManager = (config?: SoundConfig) => {
-  const manager = useRef<SoundManager | null>(null)
+  const [manager] = useState(() => new SoundManager(config))
 
-  if (manager.current === null) {
-    manager.current = new SoundManager(config)
-  }
   useEffect(() => {
-    manager.current?.setConfig(config)
+    manager.setConfig(config)
     return () => {
-      manager.current?.reset()
+      manager.reset()
     }
-  }, [config])
+  }, [config, manager])
 
-  return manager.current
+  return manager
 }
