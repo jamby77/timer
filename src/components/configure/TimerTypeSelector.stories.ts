@@ -43,7 +43,7 @@ export const Default = meta.story({
     expect(canvasElement.textContent).toContain('Count-up timer with optional limit')
     expect(canvasElement.textContent).toContain('Work/rest cycles')
     expect(canvasElement.textContent).toContain('Ratio-based timer')
-    expect(canvasElement.textContent).toContain('Multi-sequence timer combining different types')
+    expect(canvasElement.textContent).toContain('Complex timer with multiple phases')
   },
 })
 

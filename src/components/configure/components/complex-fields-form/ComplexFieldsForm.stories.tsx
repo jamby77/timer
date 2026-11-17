@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import preview from '#.storybook/preview'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 
 import type { ComplexConfig } from '@/types/configure'
 
@@ -69,10 +69,35 @@ export const AddAndEditPhase = meta.story({
       const nameInput = portal.getByLabelText(/phase name/i) as HTMLInputElement
       await userEvent.clear(nameInput)
       await userEvent.type(nameInput, 'Warm Up')
+      expect(nameInput).toHaveValue('Warm Up')
+      await userEvent.type(nameInput, '{enter}')
+      expect(portal.getByRole('heading', { name: /edit phase/i })).toBeInTheDocument()
 
       await userEvent.click(portal.getByRole('button', { name: /^save$/i }))
 
       expect(await canvas.findByText('Warm Up')).toBeInTheDocument()
+    })
+
+    await step('edit phase type and duration, then reopen saved values', async () => {
+      await userEvent.click(canvas.getByLabelText(/edit phase/i))
+      await userEvent.click(portal.getByRole('combobox', { name: 'Phase type' }))
+      await userEvent.click(portal.getByRole('option', { name: 'Interval' }))
+      await waitFor(() => expect(document.body).not.toHaveStyle({ pointerEvents: 'none' }))
+      expect(portal.getByText('Number of Intervals')).toBeInTheDocument()
+      const rounds = portal.getByLabelText('Number of Intervals')
+      await userEvent.clear(rounds)
+      await userEvent.type(rounds, '6')
+      expect(rounds).toHaveValue(6)
+      await userEvent.click(portal.getByRole('button', { name: /^save$/i }))
+      await userEvent.click(canvas.getByLabelText(/edit phase/i))
+      expect(await portal.findByLabelText('Number of Intervals')).toHaveValue(6)
+      await userEvent.clear(portal.getByLabelText(/phase name/i))
+      await userEvent.type(portal.getByLabelText(/phase name/i), 'Discard this edit')
+      await userEvent.click(portal.getByRole('button', { name: /cancel/i }))
+      expect(canvas.queryByText('Discard this edit')).not.toBeInTheDocument()
+      await userEvent.click(canvas.getByLabelText(/edit phase/i))
+      expect(portal.getByLabelText(/phase name/i)).not.toHaveValue('Discard this edit')
+      await userEvent.click(portal.getByRole('button', { name: /cancel/i }))
     })
 
     await step('open add phase dialog (>0 phases)', async () => {

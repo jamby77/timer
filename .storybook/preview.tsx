@@ -4,6 +4,8 @@ import { default as addonThemes, withThemeByClassName } from '@storybook/addon-t
 import { definePreview, ReactRenderer } from '@storybook/nextjs-vite'
 import { themes } from 'storybook/theming'
 
+import { TimerProvider } from '../src/contexts/TimerContext'
+
 import '../src/app/globals.css'
 
 export default definePreview({
@@ -22,7 +24,9 @@ export default definePreview({
     (Story) => {
       return (
         <main className="bg-background text-foreground rounded-lg p-2 md:p-4 lg:p-10">
-          <Story />
+          <TimerProvider>
+            <Story />
+          </TimerProvider>
         </main>
       )
     },
