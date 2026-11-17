@@ -62,7 +62,11 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
     }, [time, picker])
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Tab') return
+      if (e.defaultPrevented) return
+      if (e.metaKey || e.ctrlKey || e.altKey || ['Tab', 'Backspace', 'Delete'].includes(e.key)) {
+        setPendingEntry(null)
+        return
+      }
       e.preventDefault()
       if (e.key === 'ArrowRight') onRightFocus?.()
       if (e.key === 'ArrowLeft') onLeftFocus?.()
@@ -93,7 +97,10 @@ const TimePickerInput = forwardRef<HTMLInputElement, TimePickerInputProps>(
         )}
         value={value || calculatedValue}
         onChange={(e) => {
-          e.preventDefault()
+          setPendingEntry(null)
+          if (/^\d*$/.test(e.target.value)) {
+            setTime(setTimeByType(time, e.target.value || '0', picker))
+          }
           onChange?.(e)
         }}
         type={type}
