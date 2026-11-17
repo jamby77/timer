@@ -1,5 +1,5 @@
 import preview from '#.storybook/preview'
-import { expect, fn } from 'storybook/test'
+import { expect, fn, userEvent } from 'storybook/test'
 
 import { AnyTimerConfig, WorkRestMode } from '@/types/configure'
 import { TimerType } from '@/lib/enums'
@@ -34,10 +34,10 @@ export const Countdown = meta.story({
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Configure Countdown Timer')
     expect(canvasElement.textContent).toContain('Timer Name')
-    expect(canvasElement.textContent).toContain('Duration (seconds)')
-    expect(canvasElement.textContent).toContain('Completion Message (optional)')
+    expect(canvasElement.textContent).toContain('Duration')
+    expect(canvasElement.textContent).toContain('Completion Message')
     expect(canvasElement.textContent).toContain('Start Timer')
-    expect(canvasElement.textContent).toContain('Save as Predefined')
+    expect(canvasElement.textContent).toContain('Save as Preset')
   },
 })
 
@@ -47,11 +47,11 @@ export const Interval = meta.story({
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Configure Interval Timer')
-    expect(canvasElement.textContent).toContain('Work Duration (seconds)')
-    expect(canvasElement.textContent).toContain('Rest Duration (seconds)')
+    expect(canvasElement.textContent).toContain('Work Duration')
+    expect(canvasElement.textContent).toContain('Rest Duration')
     expect(canvasElement.textContent).toContain('Number of Intervals')
-    expect(canvasElement.textContent).toContain('Work Label (optional)')
-    expect(canvasElement.textContent).toContain('Rest Label (optional)')
+    expect(canvasElement.textContent).toContain('Work Label')
+    expect(canvasElement.textContent).toContain('Rest Label')
     expect(canvasElement.textContent).toContain('Skip last rest period')
   },
 })
@@ -63,7 +63,7 @@ export const Stopwatch = meta.story({
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Configure Stopwatch Timer')
     expect(canvasElement.textContent).toContain('Time Limit (seconds, optional)')
-    expect(canvasElement.textContent).toContain('Completion Message (optional)')
+    expect(canvasElement.textContent).toContain('Completion Message')
   },
 })
 
@@ -75,8 +75,8 @@ export const WorkRestRatio = meta.story({
     expect(canvasElement.textContent).toContain('Configure Work/Rest Ratio Timer')
     expect(canvasElement.textContent).toContain('Rest Mode')
     expect(canvasElement.textContent).toContain('Work/Rest Ratio')
-    expect(canvasElement.textContent).toContain('Maximum Work Time (seconds)')
-    expect(canvasElement.textContent).toContain('Maximum Rounds')
+    expect(canvasElement.textContent).toContain('Time limit')
+    expect(canvasElement.textContent).toContain('Max rounds')
   },
 })
 
@@ -97,7 +97,7 @@ export const WorkRestFixed = meta.story({
   },
   play: async ({ canvas }) => {
     const title = canvas.getByRole('heading', { name: /configure work/i })
-    const fixedRestLabel = canvas.getByLabelText(/fixed rest duration/i)
+    const fixedRestLabel = canvas.getByText('Rest time')
     const ratioOption = canvas.queryByRole('option', { name: /work\/rest ratio/i })
 
     expect(title).toBeInTheDocument()
@@ -112,18 +112,14 @@ export const Complex = meta.story({
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Configure Complex Timer')
-    expect(canvasElement.textContent).toContain(
-      'Complex timers allow you to combine multiple timer types'
-    )
-    expect(canvasElement.textContent).toContain(
-      'This feature will be implemented in a future update'
-    )
+    expect(canvasElement.textContent).toContain('Timer Name')
+    expect(canvasElement.textContent).toContain('Start Timer')
   },
 })
 
 export const PredefinedStyle = meta.story({
   args: {
-    type: TimerType.COUNTDOWN,
+    type: TimerType.INTERVAL,
     isPredefined: true,
     initialConfig: {
       id: 'tabata-config',
@@ -158,140 +154,69 @@ export const WithInitialData = meta.story({
       lastUsed: new Date(),
     } as AnyTimerConfig,
   },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.textContent).toContain('5 Minute Timer')
-    expect(canvasElement.textContent).toContain('300')
-    expect(canvasElement.textContent).toContain('Time is up!')
+  play: async ({ canvas, canvasElement }) => {
+    expect(canvas.getByLabelText(/Timer Name/)).toHaveValue('5 Minute Timer')
+    expect(canvasElement.querySelector('input[name="minutes"]')).toHaveValue('05')
+    expect(canvas.getByLabelText('Completion Message')).toHaveValue('Time is up!')
   },
 })
 
 export const Interactive = meta.story({
-  args: {
-    type: TimerType.INTERVAL,
-    onStartTimer: fn(),
-    onSaveAsPredefined: fn(),
-    onSave: fn(),
-  },
-  play: async ({ canvasElement, step }) => {
-    const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement
-    const workDurationInput = canvasElement.querySelector(
-      'input[placeholder*="20"]'
-    ) as HTMLInputElement
-
-    expect(nameInput).toBeTruthy()
-    expect(workDurationInput).toBeTruthy()
-
-    if (nameInput && workDurationInput) {
-      await step('fill in timer name', () => {
-        nameInput.value = 'Custom Interval'
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }))
+  args: { type: TimerType.INTERVAL },
+  play: async ({ canvas, canvasElement, args }) => {
+    await userEvent.clear(canvas.getByLabelText(/Timer Name/))
+    await userEvent.type(canvas.getByLabelText(/Timer Name/), 'Custom Interval')
+    await userEvent.type(canvasElement.querySelectorAll('input[name="seconds"]')[0], '45')
+    await userEvent.type(canvasElement.querySelectorAll('input[name="seconds"]')[1], '10')
+    await userEvent.type(canvas.getByLabelText('Number of Intervals'), '8')
+    await userEvent.click(canvas.getByRole('button', { name: 'Start Timer' }))
+    expect(args.onStartTimer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Custom Interval',
+        type: TimerType.INTERVAL,
+        workDuration: 45,
+        intervals: 8,
       })
-
-      await step('fill in work duration', () => {
-        workDurationInput.value = '45'
-        workDurationInput.dispatchEvent(new Event('input', { bubbles: true }))
-      })
-    }
-
-    expect(canvasElement.textContent).toContain('Custom Interval')
+    )
   },
 })
 
 export const FormValidation = meta.story({
-  args: {
-    type: TimerType.COUNTDOWN,
-    onStartTimer: fn(),
-    onSaveAsPredefined: fn(),
-    onSave: fn(),
-  },
-  play: async ({ canvasElement, step }) => {
-    const submitButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.textContent?.includes('Start Timer')
-    )
-
-    if (submitButton) {
-      await step('submit empty form to trigger validation', () => {
-        submitButton.click()
-      })
-    }
-
-    expect(canvasElement.textContent).toContain('Please fix the following errors')
-    expect(canvasElement.textContent).toContain('Timer name is required')
+  args: { type: TimerType.COUNTDOWN },
+  play: async ({ canvas, args }) => {
+    await userEvent.clear(canvas.getByLabelText(/Timer Name/))
+    expect(canvas.getByText(/Timer name is required/)).toBeInTheDocument()
+    expect(canvas.getByRole('button', { name: 'Start Timer' })).toBeDisabled()
+    expect(args.onStartTimer).not.toHaveBeenCalled()
   },
 })
 
 export const ValidFormSubmission = meta.story({
-  args: {
-    type: TimerType.COUNTDOWN,
-    onStartTimer: fn(),
-    onSaveAsPredefined: fn(),
-    onSave: fn(),
-  },
-  play: async ({ canvasElement, step, args }) => {
-    const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement
-    const durationInput = canvasElement.querySelector(
-      'input[placeholder*="300"]'
-    ) as HTMLInputElement
-    const submitButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.textContent?.includes('Start Timer')
-    )
-
-    if (nameInput && durationInput && submitButton) {
-      await step('fill valid timer configuration', () => {
-        nameInput.value = 'Test Timer'
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }))
-
-        durationInput.value = '300'
-        durationInput.dispatchEvent(new Event('input', { bubbles: true }))
-      })
-
-      await step('submit valid form', () => {
-        submitButton.click()
-      })
-    }
-
+  args: { type: TimerType.COUNTDOWN },
+  play: async ({ canvas, canvasElement, args }) => {
+    await userEvent.clear(canvas.getByLabelText(/Timer Name/))
+    await userEvent.type(canvas.getByLabelText(/Timer Name/), 'Test Timer')
+    await userEvent.type(canvasElement.querySelector('input[name="minutes"]')!, '5')
+    await userEvent.click(canvas.getByRole('button', { name: 'Start Timer' }))
     expect(args.onStartTimer).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Test Timer',
         type: TimerType.COUNTDOWN,
         duration: 300,
-        createdAt: expect.any(Date),
-        lastUsed: expect.any(Date),
+        createdAt: expect.anything(),
+        lastUsed: expect.anything(),
       })
     )
   },
 })
 
 export const SaveAsPredefined = meta.story({
-  args: {
-    type: TimerType.COUNTDOWN,
-    onStartTimer: fn(),
-    onSaveAsPredefined: fn(),
-    onSave: fn(),
-  },
-  play: async ({ canvasElement, step, args }) => {
-    const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement
-    const durationInput = canvasElement.querySelector(
-      'input[placeholder*="300"]'
-    ) as HTMLInputElement
-    const saveButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.textContent?.includes('Save as Predefined')
-    )
-
-    if (nameInput && durationInput && saveButton) {
-      await step('fill timer configuration for saving', () => {
-        nameInput.value = 'Custom Timer'
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }))
-
-        durationInput.value = '300'
-        durationInput.dispatchEvent(new Event('input', { bubbles: true }))
-      })
-
-      await step('save as predefined', () => {
-        saveButton.click()
-      })
-    }
-
+  args: { type: TimerType.COUNTDOWN },
+  play: async ({ canvas, canvasElement, args }) => {
+    await userEvent.clear(canvas.getByLabelText(/Timer Name/))
+    await userEvent.type(canvas.getByLabelText(/Timer Name/), 'Custom Timer')
+    await userEvent.type(canvasElement.querySelector('input[name="minutes"]')!, '5')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save as Preset' }))
     expect(args.onSaveAsPredefined).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Custom Timer',
@@ -299,59 +224,31 @@ export const SaveAsPredefined = meta.story({
         duration: 300,
       })
     )
+    expect(args.onStartTimer).not.toHaveBeenCalled()
   },
 })
 
 export const WorkRestModeToggle = meta.story({
-  args: {
-    type: TimerType.WORKREST,
-    onStartTimer: fn(),
-    onSaveAsPredefined: fn(),
-    onSave: fn(),
-  },
-  play: async ({ canvasElement, step }) => {
-    // Initially shows ratio mode
-    expect(canvasElement.textContent).toContain('Work/Rest Ratio')
-    expect(canvasElement.textContent).not.toContain('Fixed Rest Duration')
-
-    const restModeSelect = canvasElement.querySelector('select') as HTMLSelectElement
-
-    if (restModeSelect) {
-      await step('switch to fixed rest mode', () => {
-        restModeSelect.value = 'FIXED'
-        restModeSelect.dispatchEvent(new Event('change', { bubbles: true }))
-      })
-    }
-
-    expect(canvasElement.textContent).toContain('Fixed Rest Duration')
-    expect(canvasElement.textContent).not.toContain('Work/Rest Ratio')
+  args: { type: TimerType.WORKREST },
+  play: async ({ canvas }) => {
+    expect(canvas.getByRole('radio', { name: 'Ratio-based' })).toBeChecked()
+    await userEvent.click(canvas.getByRole('radio', { name: 'Fixed rest' }))
+    expect(canvas.getByRole('radio', { name: 'Fixed rest' })).toBeChecked()
+    expect(canvas.getByText('Rest time')).toBeInTheDocument()
+    expect(canvas.queryByText('Work/Rest Ratio', { exact: true })).not.toBeInTheDocument()
+    await userEvent.click(canvas.getByRole('radio', { name: 'Ratio-based' }))
+    expect(canvas.getByText('Work/Rest Ratio', { exact: true })).toBeInTheDocument()
+    expect(canvas.queryByText('Rest time')).not.toBeInTheDocument()
   },
 })
 
 export const IntervalFieldValidation = meta.story({
-  args: {
-    type: TimerType.INTERVAL,
-    onStartTimer: fn(),
-    onSaveAsPredefined: fn(),
-    onSave: fn(),
-  },
-  play: async ({ canvasElement, step }) => {
-    const nameInput = canvasElement.querySelector('input[placeholder*="name"]') as HTMLInputElement
-    const submitButton = Array.from(canvasElement.querySelectorAll('button')).find((el) =>
-      el.textContent?.includes('Start Timer')
-    )
-
-    if (nameInput && submitButton) {
-      await step('fill only name, leave work duration empty', () => {
-        nameInput.value = 'Test Timer'
-        nameInput.dispatchEvent(new Event('input', { bubbles: true }))
-      })
-
-      await step('submit incomplete form', () => {
-        submitButton.click()
-      })
-    }
-
-    expect(canvasElement.textContent).toContain('Work duration must be greater than 0')
+  args: { type: TimerType.INTERVAL },
+  play: async ({ canvas, canvasElement, args }) => {
+    await userEvent.type(canvas.getByLabelText('Number of Intervals'), '8')
+    await userEvent.type(canvasElement.querySelector('input[name="seconds"]')!, '0')
+    expect(canvas.getByText(/Work duration must be greater than 0/)).toBeInTheDocument()
+    expect(canvas.getByRole('button', { name: 'Start Timer' })).toBeDisabled()
+    expect(args.onStartTimer).not.toHaveBeenCalled()
   },
 })

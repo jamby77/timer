@@ -88,7 +88,7 @@ export const ComplexPhaseAdd = ({
         </h2>
       </div>
 
-      <form className="flex flex-col gap-2 md:gap-4">
+      <form onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-2 md:gap-4">
         <ComplexBody
           type={draftType}
           config={draftConfig}
@@ -98,16 +98,22 @@ export const ComplexPhaseAdd = ({
           onConfigChange={handleConfigChange}
         />
         <div className="flex flex-col gap-2 md:flex-row md:justify-end">
-          {phasesCount === 0 && <Button onClick={handleAddAtStart}>Add</Button>}
+          {phasesCount === 0 && (
+            <Button type="button" onClick={handleAddAtStart}>
+              Add
+            </Button>
+          )}
           {phasesCount > 0 && (
             <>
-              <Button onClick={handleAddAtEnd}>Add at the end</Button>
-              <Button variant="outline" onClick={handleAddAtStart}>
+              <Button type="button" onClick={handleAddAtEnd}>
+                Add at the end
+              </Button>
+              <Button type="button" variant="outline" onClick={handleAddAtStart}>
                 Add at the start
               </Button>
             </>
           )}
-          <Button variant="destructive" onClick={onCancel}>
+          <Button type="button" variant="destructive" onClick={onCancel}>
             Cancel
           </Button>
         </div>

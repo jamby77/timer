@@ -20,12 +20,12 @@ type ComplexPhaseEditProps = {
 }
 
 export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) => {
-  const [phaseId, setPhaseId] = useState<string>('')
-  const [draftType, setDraftType] = useState<TimerType>(TimerType.COUNTDOWN)
-  const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(() =>
-    createDefaultPhaseConfig(phaseId, TimerType.COUNTDOWN)
+  const [phaseId, setPhaseId] = useState<string>(phase.id)
+  const [draftType, setDraftType] = useState<TimerType>(phase.type)
+  const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(
+    () => phase.config as PhaseTimerConfig
   )
-  const [draftName, setDraftName] = useState<string>(() => generateTimerName(draftConfig))
+  const [draftName, setDraftName] = useState<string>(phase.name)
 
   const { id, type, config, name } = phase
   useEffect(() => {
@@ -78,21 +78,21 @@ export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditPr
           {title}
         </h2>
       </div>
-      <form className="flex flex-col gap-2">
+      <form onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-2">
         <ComplexBody
-          type={type}
-          config={config}
-          name={name}
+          type={draftType}
+          config={draftConfig}
+          name={draftName}
           onNameChange={setDraftName}
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
         />
         <div className="flex gap-2">
-          <Button onClick={handleSave} className="grow">
+          <Button type="button" onClick={handleSave} className="grow">
             <Save />
             Save
           </Button>
-          <Button variant="secondary" onClick={onCancel} className="grow">
+          <Button type="button" variant="secondary" onClick={onCancel} className="grow">
             <CircleX /> Cancel
           </Button>
         </div>

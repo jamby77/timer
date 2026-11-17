@@ -124,7 +124,7 @@ export const ManyLaps = meta.story({
   args: {
     laps: Array.from({ length: 10 }, (_, i) => ({
       id: String(i + 1),
-      lapTime: 60000 + Math.random() * 20000,
+      lapTime: 60000 + i * 1500,
       timestamp: now - (10 - i) * 1000,
     })),
   },
@@ -155,7 +155,7 @@ export const ManyLapsExpanded = meta.story({
     return <LapHistory {...args} laps={laps} lastLap={laps[laps.length - 1]} bestLap={bestLap} />
   },
   play: async ({ canvas }) => {
-    expect(canvas.queryByText('Last lap')).toBeInTheDocument()
-    expect(canvas.queryByText('Best lap')).toBeInTheDocument()
+    expect(canvas.queryByText('Last lap:')).toBeInTheDocument()
+    expect(canvas.queryByText('Best lap:')).toBeInTheDocument()
   },
 })

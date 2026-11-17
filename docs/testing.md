@@ -20,16 +20,15 @@ Storybook stories remain in the Storybook project.
 
 - Node: 5 files, 66 tests passed.
 - Chromium browser project: 8 files, 125 tests passed.
-- Full `pnpm test:run`: not passing. Reported 16 failed story tests, 183 passed tests, and one
-  unhandled browser-connection error; the run did not finish all 240 discovered tests.
+- Storybook: 13 files, 51 tests passed.
+- Full `pnpm test:run`: 26 files, 242 tests passed, with no unhandled errors.
+- `pnpm exec tsc --noEmit`: passed.
 
-The failing story cases were:
+The Storybook failures are resolved without removing or skipping stories. Timer stories now
+receive the application timer context. Form interactions use the current labels and keyboard
+controls, and lap-history fixtures are deterministic. Complex phase editing no longer submits
+and navigates away; edits use draft values and retain the saved timer type when reopened.
+The phase story covers adding, editing, saving, reopening, cancelling, and pressing Enter.
 
-- `TimerTypeSelector`: Default.
-- `LapHistory`: Many Laps Expanded.
-- `TimerConfigForm`: Countdown, Interval, Stopwatch, Work Rest Ratio, Work Rest Fixed, Complex,
-  Predefined Style, With Initial Data, Interactive, Form Validation, Valid Form Submission,
-  Save As Predefined, Work Rest Mode Toggle, and Interval Field Validation.
-
-The connection closed while running `ComplexFieldsForm.stories.tsx`. These results are retained
-as follow-up work; the story tests have not been removed, skipped, or marked as passing.
+The run still emits non-failing Node deprecation, Storybook annotation-provisioning, and PostCSS
+warnings. App-level Playwright E2E tests remain separate and were not rerun for this change.
