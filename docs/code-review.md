@@ -217,7 +217,7 @@ These appear unused in the main app. Verify if they are dead code and remove if 
 | `storage` utilities | ✅ Good coverage | — |
 | `TimerManager` class | ❌ No tests | Add unit tests for sequence orchestration, step changes, repeats |
 | `Stopwatch` class | ❌ No tests | Add unit tests for elapsed time, time limits, auto-stop |
-| `SoundManager` / `SoundEngine` | Partial coverage (2026-11-17) | SoundManager has 9 tests; SoundEngine has 3 fallback tests plus browser checks |
+| `SoundManager` / `SoundEngine` | Partial coverage (2026-11-17) | SoundManager has 9 tests; SoundEngine has fallback and browser audio-signal coverage |
 | `useIntervalTimer` hook | ❌ No tests | Add hook-level tests |
 | Display components | ❌ No render tests | Add component tests via Storybook or React Testing Library |
 | `useTimer` tests missing Provider | ⚠️ Fragile | Wrap test renders with `TimerProvider` |
@@ -289,3 +289,15 @@ before initialization. Five browser regressions cover completion for all four ti
 constructor failure and recovery on a later Start. Normal Work/Rest audio generation is checked
 by the two existing oscillator-based browser regressions. These are simulated failures; physical
 audio devices and mobile autoplay policies remain outside the automated coverage.
+
+## Browser audio output coverage (2026-11-17)
+
+Three headed Chromium checks measure actual Web Audio samples after the master gain. A four-second
+Countdown produces nonzero output for start, the final countdown beep, and completion, with silence
+between cues. Volume zero keeps the generated output silent. Disabling sound creates no audio
+context and produces no output. The analyser observes the existing graph while preserving the
+normal destination connection; oscillator and gain implementations are not mocked.
+
+Run `pnpm exec playwright test e2e/audio-output.spec.ts --headed --workers 1`.
+This verifies browser-generated audio samples, not physical speakers, hearing quality, or
+mobile autoplay restrictions. No production code changes were needed.
