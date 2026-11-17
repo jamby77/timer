@@ -217,7 +217,7 @@ These appear unused in the main app. Verify if they are dead code and remove if 
 | `storage` utilities | ✅ Good coverage | — |
 | `TimerManager` class | ❌ No tests | Add unit tests for sequence orchestration, step changes, repeats |
 | `Stopwatch` class | ❌ No tests | Add unit tests for elapsed time, time limits, auto-stop |
-| `SoundManager` / `SoundEngine` | Partial coverage (2026-11-17) | SoundManager cue scheduling has 9 tests; Web Audio output remains untested |
+| `SoundManager` / `SoundEngine` | Partial coverage (2026-11-17) | SoundManager has 9 tests; SoundEngine has 3 fallback tests plus browser checks |
 | `useIntervalTimer` hook | ❌ No tests | Add hook-level tests |
 | Display components | ❌ No render tests | Add component tests via Storybook or React Testing Library |
 | `useTimer` tests missing Provider | ⚠️ Fragile | Wrap test renders with `TimerProvider` |
@@ -276,3 +276,16 @@ A unit regression covers silent intermediate completion, a next-round start in t
 and exactly one final completion cue. Two Playwright regressions exercise standalone and complex
 Work/Rest timers with real Web Audio oscillators, checking two short start horns and one final
 completion horn. Audio calls are observed and forwarded, not replaced with silent mocks.
+
+## Audio initialization fallback (2026-11-17)
+
+AudioContext construction happened outside init's error handler. With sound enabled, a
+constructor failure rejected the Start handler and left all four timer types idle. Move context
+creation inside the error handler and make playback use only an already initialized context.
+Timers now continue silently when context creation fails; a later Start can retry initialization.
+
+Three SoundEngine unit tests cover unavailable Web Audio, failed context creation, and playback
+before initialization. Five browser regressions cover completion for all four timer types despite
+constructor failure and recovery on a later Start. Normal Work/Rest audio generation is checked
+by the two existing oscillator-based browser regressions. These are simulated failures; physical
+audio devices and mobile autoplay policies remain outside the automated coverage.

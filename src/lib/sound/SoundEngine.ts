@@ -61,9 +61,8 @@ export class SoundEngine {
       return false
     }
 
-    const { ctx, masterGain } = this.ensureContext()
-
     try {
+      const { ctx, masterGain } = this.ensureContext()
       if (ctx.state === AudioContextState.Suspended) {
         await ctx.resume()
       }
@@ -104,8 +103,8 @@ export class SoundEngine {
       return
     }
 
-    const { ctx, masterGain } = this.ensureContext()
-    if (ctx.state !== AudioContextState.Running) {
+    const { ctx, masterGain } = this
+    if (!ctx || !masterGain || ctx.state !== AudioContextState.Running) {
       return
     }
 
@@ -135,8 +134,8 @@ export class SoundEngine {
       return
     }
 
-    const { ctx, masterGain } = this.ensureContext()
-    if (ctx.state !== AudioContextState.Running) {
+    const { ctx, masterGain } = this
+    if (!ctx || !masterGain || ctx.state !== AudioContextState.Running) {
       return
     }
 
