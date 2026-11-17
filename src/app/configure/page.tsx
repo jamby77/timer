@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -11,6 +11,7 @@ import { storage } from '@/lib/configure/storage'
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
+import { ClientOnly } from '@/components/ClientOnly'
 import { PredefinedStyles } from '@/components/configure/PredefinedStyles'
 import { RecentTimers } from '@/components/configure/RecentTimers'
 import { TimerConfig } from '@/components/configure/TimerConfig'
@@ -18,24 +19,25 @@ import { TimerTypeSelector } from '@/components/configure/TimerTypeSelector'
 import { PageContainer } from '@/components/PageContainer'
 
 export default function ConfigurePage() {
-  const [recentTimers, setRecentTimers] = useState<RecentTimer[]>([])
+  return (
+    <ClientOnly>
+      <ConfigurePageContent />
+    </ClientOnly>
+  )
+}
+
+function ConfigurePageContent() {
+  const [recentTimers, setRecentTimers] = useState<RecentTimer[]>(() => storage.getRecentTimers())
   const [selectedTimer, setSelectedTimer] = useState<TimerType | null>(null)
   const [selectedPredefined, setSelectedPredefined] =
     useState<PredefinedStyle<AnyTimerConfig> | null>(null)
   const router = useRouter()
-  const [customPresets, setCustomPresets] = useState<PredefinedStyle<AnyTimerConfig>[]>([])
-
-  useEffect(() => {
-    // Load recent timers on mount
-    const timers = storage.getRecentTimers()
-    setRecentTimers(timers)
-    setCustomPresets(
-      storage
-        .getAllPresets()
-        .map(({ config }) => config)
-        .filter((preset) => validateTimerConfig(preset.config).length === 0)
-    )
-  }, [])
+  const [customPresets, setCustomPresets] = useState<PredefinedStyle<AnyTimerConfig>[]>(() =>
+    storage
+      .getAllPresets()
+      .map(({ config }) => config)
+      .filter((preset) => validateTimerConfig(preset.config).length === 0)
+  )
 
   const handleStartTimer = (config: AnyTimerConfig, isPredefined: boolean = false) => {
     let finalConfig: AnyTimerConfig

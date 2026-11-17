@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CircleX, MoveLeft, Save } from 'lucide-react'
 
 import type { ComplexPhase } from '@/types/configure'
@@ -19,21 +19,17 @@ type ComplexPhaseEditProps = {
   onSave: (phaseId: string, draft: PhaseDraft) => void
 }
 
-export const ComplexPhaseEdit = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) => {
-  const [phaseId, setPhaseId] = useState<string>(phase.id)
+export const ComplexPhaseEdit = (props: ComplexPhaseEditProps) => (
+  <ComplexPhaseDraft key={props.phase.id} {...props} />
+)
+
+const ComplexPhaseDraft = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) => {
+  const phaseId = phase.id
   const [draftType, setDraftType] = useState<TimerType>(phase.type)
   const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(
     () => phase.config as PhaseTimerConfig
   )
   const [draftName, setDraftName] = useState<string>(phase.name)
-
-  const { id, type, config, name } = phase
-  useEffect(() => {
-    setPhaseId(id)
-    setDraftType(type)
-    setDraftConfig(config as PhaseTimerConfig)
-    setDraftName(name)
-  }, [id, type, config, name])
 
   const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
     setDraftConfig((prev) => {

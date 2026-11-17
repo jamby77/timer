@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { Clock, FileText, Layers, MoveLeft, Play, Save } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
@@ -35,6 +35,7 @@ import {
   InputGroupText,
 } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
+import { ClientOnly } from '@/components/ClientOnly'
 import { ComplexFieldsForm } from '@/components/configure/components/complex-fields-form/ComplexFieldsForm'
 import { PhaseSummary } from '@/components/configure/components/complex-fields-form/components/PhaseSummary'
 import { FormErrors } from '@/components/configure/components/shared/FormErrors'
@@ -57,32 +58,36 @@ const calculateDuration = (config: Partial<ComplexConfig>) => {
 export default function ConfigureComplexTimerPage() {
   return (
     <Suspense fallback={null}>
-      <ConfigureComplexTimer />
+      <ClientOnly>
+        <ComplexPresetLoader />
+      </ClientOnly>
     </Suspense>
   )
 }
 
-function ConfigureComplexTimer() {
-  const router = useRouter()
-  const [config, setConfig] = useState<Partial<ComplexConfig>>({
-    type: TimerType.COMPLEX,
-    name: 'Complex Timer (0 phases, 0s)',
-    phases: [],
-    autoAdvance: true,
-  })
-  const [errors, setErrors] = useState<string[]>([])
+function ComplexPresetLoader() {
   const presetId = useSearchParams().get('preset')
+  return <ConfigureComplexTimer key={presetId ?? 'new'} presetId={presetId} />
+}
 
-  useEffect(() => {
-    if (!presetId) return
+function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
+  const router = useRouter()
+  const [initial] = useState(() => {
+    const empty: Partial<ComplexConfig> = {
+      type: TimerType.COMPLEX,
+      name: 'Complex Timer (0 phases, 0s)',
+      phases: [],
+      autoAdvance: true,
+    }
+    if (!presetId) return { config: empty, errors: [] as string[] }
     const preset = storage.getPreset(presetId)
     if (!preset || !isComplexConfig(preset.config) || validateTimerConfig(preset.config).length) {
-      setErrors(['Preset not found or invalid.'])
-      return
+      return { config: empty, errors: ['Preset not found or invalid.'] }
     }
-    setConfig(preset.config)
-    setErrors([])
-  }, [presetId])
+    return { config: preset.config, errors: [] as string[] }
+  })
+  const [config, setConfig] = useState<Partial<ComplexConfig>>(initial.config)
+  const [errors, setErrors] = useState<string[]>(initial.errors)
 
   const updateConfig = (updates: Partial<ComplexConfig>) => {
     const newConfig = { ...config, ...updates }

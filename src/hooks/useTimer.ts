@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { TimerOptions } from '@/lib/timer/types'
@@ -58,10 +58,12 @@ export const useTimer = (
   const onStateChangeRef = useRef(onStateChange)
   const onCompleteRef = useRef(onComplete)
   const onStopRef = useRef(onStop)
-  onTickRef.current = onTick
-  onStateChangeRef.current = onStateChange
-  onCompleteRef.current = onComplete
-  onStopRef.current = onStop
+  useLayoutEffect(() => {
+    onTickRef.current = onTick
+    onStateChangeRef.current = onStateChange
+    onCompleteRef.current = onComplete
+    onStopRef.current = onStop
+  }, [onTick, onStateChange, onComplete, onStop])
 
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)

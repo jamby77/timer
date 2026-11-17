@@ -21,6 +21,13 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
   const [state, setState] = useState<TimerState>(TimerState.Idle)
   const [timeLeftMs, setTimeLeftMs] = useState(durationMs)
 
+  const [previousDuration, setPreviousDuration] = useState(durationMs)
+  if (previousDuration !== durationMs) {
+    setPreviousDuration(durationMs)
+    setState(TimerState.Idle)
+    setTimeLeftMs(durationMs)
+  }
+
   const managerRef = useRef<TimerManager | null>(null)
   const onCompleteRef = useRef(onComplete)
 
@@ -29,11 +36,9 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
   }, [onComplete])
 
   useEffect(() => {
+    let disposed = false
     managerRef.current?.reset()
     managerRef.current = null
-
-    setState(TimerState.Idle)
-    setTimeLeftMs(durationMs)
 
     if (durationMs <= 0) {
       return
@@ -49,9 +54,11 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
       ],
       repeat: 1,
       onTick: (time) => {
+        if (disposed) return
         setTimeLeftMs(time)
       },
       onSequenceComplete: () => {
+        if (disposed) return
         managerRef.current?.reset()
         onCompleteRef.current?.()
         setState(TimerState.Idle)
@@ -60,6 +67,7 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
     })
 
     return () => {
+      disposed = true
       managerRef.current?.reset()
       managerRef.current = null
     }

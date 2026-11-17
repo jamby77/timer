@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { AnyTimerConfig, TimerType } from '@/types/configure'
 import { storage } from '@/lib/configure/storage'
 
+import { ClientOnly } from '@/components/ClientOnly'
 import { ComplexTimer } from '@/components/display/ComplexTimer'
 import { Interval } from '@/components/display/Interval'
 import { Stopwatch } from '@/components/display/Stopwatch'
@@ -14,55 +15,32 @@ import { WorkRestTimer } from '@/components/display/WorkRestTimer'
 import { InstallPrompt } from '@/components/InstallPrompt'
 
 export const Body = () => {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [timerConfig, setTimerConfig] = useState<AnyTimerConfig | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const id = useSearchParams().get('id')
+  return (
+    <ClientOnly fallback={<LoadingTimer />}>
+      <TimerSession key={id} id={id} />
+    </ClientOnly>
+  )
+}
 
+const LoadingTimer = () => (
+  <div className="flex min-h-screen flex-col items-center justify-center gap-10 p-4">
+    <div className="text-muted-foreground">Loading timer...</div>
+  </div>
+)
+
+const TimerSession = ({ id }: { id: string | null }) => {
+  const router = useRouter()
+  const [timerConfig] = useState<AnyTimerConfig | null>(() =>
+    id ? storage.getTimerConfig(id) : null
+  )
   const showInstallPrompt = process.env.NODE_ENV === 'production'
 
-  // Wait for component to mount to avoid hydration issues
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    if (!timerConfig) router.replace('/configure')
+  }, [router, timerConfig])
 
-  useEffect(() => {
-    if (!mounted) return
-
-    const id = searchParams.get('id')
-
-    if (!id) {
-      // No ID parameter, redirect to configure
-      router.push('/configure')
-      return
-    }
-
-    // Try to load timer with the given ID
-    const timer = storage.getTimerConfig(id)
-
-    if (!timer) {
-      // Timer not found, redirect to configure
-      router.push('/configure')
-      return
-    }
-
-    // Timer found, set it as the config
-    setTimerConfig(timer)
-    setLoading(false)
-  }, [searchParams, router, mounted])
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-10 p-4">
-        <div className="text-muted-foreground">Loading timer...</div>
-      </div>
-    )
-  }
-
-  if (!timerConfig) {
-    return null // Will redirect
-  }
+  if (!timerConfig) return <LoadingTimer />
 
   // Render the appropriate timer based on type
   const renderTimer = () => {

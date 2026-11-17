@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
 import type { StopwatchOptions as StopwatchOptionsType } from '@/lib/timer/Stopwatch'
@@ -23,10 +23,12 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const onStateChangeRef = useRef(options.onStateChange)
   const onStopRef = useRef(options.onStop)
   const onAutoStopRef = useRef(options.onAutoStop)
-  onTickRef.current = options.onTick
-  onStateChangeRef.current = options.onStateChange
-  onStopRef.current = options.onStop
-  onAutoStopRef.current = options.onAutoStop
+  useLayoutEffect(() => {
+    onTickRef.current = options.onTick
+    onStateChangeRef.current = options.onStateChange
+    onStopRef.current = options.onStop
+    onAutoStopRef.current = options.onAutoStop
+  }, [options.onTick, options.onStateChange, options.onStop, options.onAutoStop])
 
   useEffect(() => {
     setTimerActive(state === TimerState.Running || state === TimerState.Paused)
