@@ -293,13 +293,14 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                       value={config.overallTimeLimit || 0}
                       onTimeChange={(value) =>
                         onChange({
-                          overallTimeLimit: value,
+                          overallTimeLimit: value > 0 ? value : undefined,
                         })
                       }
-                      min={1}
+                      min={0}
                     />
                     Overall Time Limit
                   </FieldLabel>
+                  <FieldDescription>Set 00:00:00 for no overall time limit.</FieldDescription>
                 </Field>
               </FieldGroup>
             </CardContent>

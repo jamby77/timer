@@ -45,7 +45,7 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProp
   const handleTimeChange = (newTime: TimerPickerTime) => {
     const validatedTime = validateTime(newTime)
     setTime(validatedTime)
-    onTimeChange?.(timerPickerTimeToSeconds(newTime))
+    onTimeChange?.(timerPickerTimeToSeconds(validatedTime))
   }
 
   return (

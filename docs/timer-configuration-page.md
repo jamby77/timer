@@ -60,7 +60,7 @@ The configuration page should consist of three main sections:
   - Ability to skip phases during execution
   - Phase-specific completion messages
   - Overall workout progress tracking
-  - **Overall Time Limit**: Optional soft time limit (e.g., 1 hour)
+  - **Overall Time Limit**: Optional soft time limit (e.g., 1 hour). Set 00:00:00 to remove it.
   - **Limit Behavior**: When overall limit is reached, user can choose to:
     - End the complex timer immediately
     - Continue running until all phases complete

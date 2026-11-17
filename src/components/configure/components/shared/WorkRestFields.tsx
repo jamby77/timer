@@ -72,9 +72,9 @@ export const WorkRestFields = ({
           <FieldLabel htmlFor="maxWorkTime">Time limit</FieldLabel>
           <TimePicker
             max={86400}
-            min={1}
+            min={0}
             value={maxWorkTime || 0}
-            onTimeChange={(seconds) => onChange({ maxWorkTime: seconds })}
+            onTimeChange={(seconds) => onChange({ maxWorkTime: seconds > 0 ? seconds : undefined })}
           />
         </Field>
         <Field>
