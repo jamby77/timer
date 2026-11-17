@@ -1,6 +1,6 @@
 # Complex Timer Display and Timer Labels
 
-Status checked against the current code on `main` on 2026-11-16.
+Status checked against the current code on `main` on 2026-11-17.
 Checked items reflect source inspection and the runtime checks described below.
 Remaining unchecked items still need verification.
 
@@ -10,11 +10,11 @@ Remaining unchecked items still need verification.
 - [x] Provide a Next button to skip to the next phase, disabled on the last phase.
 - [x] Provide Previous and Restart controls.
 - [x] Keep phase information and skip controls accessible while the child timer is fullscreen.
-  Render workout and phase information inside the timer card header, with phase controls
-  alongside timer controls at the bottom.
+      Render workout and phase information inside the timer card header, with phase controls
+      alongside timer controls at the bottom.
 - [x] Verify phase names and skipping across all four supported child timer types while running.
-  Chromium checks on 2026-11-16 covered 390px and 1280px widths, Next, last-phase disabling,
-  Previous, and Restart. Wake-lock permission was denied and the existing fallback ran.
+      Chromium checks on 2026-11-16 covered 390px and 1280px widths, Next, last-phase disabling,
+      Previous, and Restart. Wake-lock permission was denied and the existing fallback ran.
 
 ## Timer labels
 
@@ -23,16 +23,17 @@ Remaining unchecked items still need verification.
 - [x] Display the configured Work/Rest timer name alongside the WORK/REST ratio label.
 - [x] Keep the Interval timer name visible alongside its current work/rest label.
 - [x] Verify Interval names and round progress in idle, running, paused, and completed states.
-  Round progress remains visible before starting and after completion. Stop restores the first
-  work duration and round; natural and skipped completion show zero and the final round.
-- [ ] Complete label verification for the other timer types across all four states.
+      Round progress remains visible before starting and after completion. Stop restores the first
+      work duration and round; natural and skipped completion show zero and the final round.
+- [x] Verify Countdown, Stopwatch, and Work/Rest labels in idle, running, paused, and completed states.
+      Cover standalone timers and complex phases at mobile and desktop widths.
 
 ## Related features
 
 - [x] Implement navigation hiding while timers are running or paused.
 - [x] Implement a persistent 30-day PWA install prompt dismissal.
 - [ ] Complete the expanded PWA dismissal flow and runtime verification described in
-  [Navigation Hiding and PWA Install Prompt](navigation-hiding-pwa-install.md).
+      [Navigation Hiding and PWA Install Prompt](navigation-hiding-pwa-install.md).
 
 ## Implementation references
 
@@ -68,3 +69,13 @@ Eight browser regressions cover both timer types, final phases and manual advanc
 with and without pre-start countdowns. Each checks restart, pause/resume, and completion
 again in the same phase. All eight reproduced the stop bug before the fix; 47 related
 Playwright cases and the production build pass after the fix.
+
+## Timer label lifecycle verification (2026-11-17)
+
+Twelve Chromium browser cases cover Countdown, Stopwatch, and Work/Rest in standalone and
+complex timers at 390px and 1280px widths. Configured names remain visible while idle,
+running, paused, and completed. Complex timers retain workout name, phase name, and phase
+position; Stopwatch retains its time cap; Work/Rest retains its ratio and round count,
+including during rest. All twelve cases pass against the production app without runtime changes.
+
+Run `pnpm exec playwright test e2e/timer-label-lifecycle.spec.ts`.
