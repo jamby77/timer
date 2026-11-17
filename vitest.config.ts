@@ -5,6 +5,8 @@ import { defineConfig } from 'vitest/config'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import unitConfig from './vitest.unit.config'
+
 const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 
@@ -13,19 +15,16 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     projects: [
-      // Unit tests project
-      {
-        plugins: [tsconfigPaths()],
-        test: {
-          name: 'unit',
-          environment: 'node',
-        },
-      },
+      unitConfig,
       // React browser tests project (chromium)
       {
         plugins: [tsconfigPaths()],
         test: {
           name: 'react-browser',
+          include: [
+            'src/{hooks,components}/**/*.{test,spec}.{ts,tsx}',
+            'src/lib/timer/**/*.{test,spec}.{ts,tsx}',
+          ],
           browser: {
             enabled: true,
             headless: true,

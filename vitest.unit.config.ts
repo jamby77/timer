@@ -1,10 +1,11 @@
-import tsconfigPaths from "vite-tsconfig-paths";
-import { configDefaults, defineConfig } from "vitest/config";
+import tsconfigPaths from 'vite-tsconfig-paths'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
-    environment: "jsdom",
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    name: 'unit',
+    environment: 'node',
+    include: ['src/lib/{configure,sound}/**/*.{test,spec}.{ts,tsx}'],
   },
-});
+})
