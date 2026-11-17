@@ -63,6 +63,7 @@ export const useIntervalTimer = ({
   onStepChange,
   onSequenceComplete,
   onStop,
+  onStateChange,
 }: IntervalTimerOptions) => {
   const { setTimerActive } = useTimerContext()
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null)
@@ -92,12 +93,19 @@ export const useIntervalTimer = ({
   const onStepChangeRef = useRef(onStepChange)
   const onSequenceCompleteRef = useRef(onSequenceComplete)
   const onStopRef = useRef(onStop)
+  const onStateChangeRef = useRef(onStateChange)
   useLayoutEffect(() => {
     onWorkStepCompleteRef.current = onWorkStepComplete
     onStepChangeRef.current = onStepChange
     onSequenceCompleteRef.current = onSequenceComplete
     onStopRef.current = onStop
-  }, [onWorkStepComplete, onStepChange, onSequenceComplete, onStop])
+    onStateChangeRef.current = onStateChange
+  }, [onWorkStepComplete, onStepChange, onSequenceComplete, onStop, onStateChange])
+
+  const updateTimerState = useCallback((state: TimerState) => {
+    setTimerState(state)
+    onStateChangeRef.current?.(state)
+  }, [])
 
   useEffect(() => {
     setTimerActive(timerState === TimerState.Running || timerState === TimerState.Paused)
@@ -128,7 +136,7 @@ export const useIntervalTimer = ({
       onSequenceComplete: () => {
         if (disposed) return
         // Internal state update
-        setTimerState(TimerState.Completed)
+        updateTimerState(TimerState.Completed)
         setTimeLeft(0)
         setCurrentStep(null)
         setCurrentStepIndex(0)
@@ -147,32 +155,35 @@ export const useIntervalTimer = ({
       manager.reset()
       managerRef.current = null
     }
-  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest])
+  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest, updateTimerState])
 
   const start = useCallback(() => {
     // If we're in the Completed state, reset first to start fresh
     if (timerState === TimerState.Completed) {
       managerRef.current?.reset()
-      setTimerState(TimerState.Idle)
+      updateTimerState(TimerState.Idle)
     }
 
     managerRef.current?.start()
-    setTimerState(TimerState.Running)
-  }, [timerState])
+    updateTimerState(TimerState.Running)
+  }, [timerState, updateTimerState])
 
   const pause = useCallback(() => {
     managerRef.current?.pause()
-    setTimerState(TimerState.Paused)
-  }, [])
+    updateTimerState(TimerState.Paused)
+  }, [updateTimerState])
 
-  const reset = useCallback((notifyStop = true) => {
-    managerRef.current?.reset()
-    setTimerState(TimerState.Idle)
-    setCurrentStep(null)
-    setCurrentStepIndex(0)
-    setTimeLeft(managerRef.current?.getCurrentStep()?.duration ?? 0)
-    if (notifyStop) onStopRef.current?.()
-  }, [])
+  const reset = useCallback(
+    (notifyStop = true) => {
+      managerRef.current?.reset()
+      updateTimerState(TimerState.Idle)
+      setCurrentStep(null)
+      setCurrentStepIndex(0)
+      setTimeLeft(managerRef.current?.getCurrentStep()?.duration ?? 0)
+      if (notifyStop) onStopRef.current?.()
+    },
+    [updateTimerState]
+  )
 
   const skipCurrentStep = useCallback(() => {
     managerRef.current?.skipCurrentStep()

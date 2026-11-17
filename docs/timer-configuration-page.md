@@ -2777,6 +2777,17 @@ export const RecentTimers: React.FC<RecentTimersProps> = ({
 ## Complex Timer Runtime Behavior
 
 ### Overall Time Limit Handling
+
+Implementation update (2026-11-17): the saved limit now runs as a soft limit.
+Active time accumulates across phases and rest periods, excluding pauses,
+pre-start countdowns, and idle gaps. The header displays elapsed / limit time;
+a one-time Continue Workout / End Workout dialog leaves timing uninterrupted.
+Escape acknowledges the limit, End stops the entire workout, and Restart workout
+resets the budget. Natural completion closes the prompt; reload starts fresh.
+The configurable automatic continue/stop modes, warning sounds, and dual progress
+bars in the expanded design below remain deferred. See the approved
+[implementation plan](superpowers/plans/2026-11-17-complex-overall-time-limit.md).
+
 When a complex timer has an overall time limit configured, the runtime behavior follows these rules:
 
 #### 1. Time Tracking

@@ -14,12 +14,15 @@ import type {
 } from '@/types/configure'
 
 import { TimerState, TimerType } from '@/lib/enums'
+import { formatTime } from '@/lib/timer'
+import { useWorkoutClock } from '@/hooks/useWorkoutClock'
 
 import { Button } from '@/components/ui/button'
 import { Interval } from '@/components/display/Interval'
 import { Stopwatch } from '@/components/display/Stopwatch'
 import { Timer } from '@/components/display/Timer'
 import { WorkRestTimer } from '@/components/display/WorkRestTimer'
+import { WorkoutLimitDialog } from './WorkoutLimitDialog'
 
 interface ComplexTimerProps {
   config: ComplexConfig
@@ -35,6 +38,14 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
     return [...(config.phases ?? [])].sort((a, b) => a.order - b.order)
   }, [config.phases])
 
+  const {
+    elapsedMs,
+    promptOpen,
+    setRunning,
+    acknowledge,
+    finish,
+    reset: resetClock,
+  } = useWorkoutClock(config.overallTimeLimit)
   const [phaseIndex, setPhaseIndex] = useState(0)
   const [phaseRun, setPhaseRun] = useState(0)
   const [isStopped, setIsStopped] = useState(false)
@@ -56,35 +67,40 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
   const goToPhase = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(index, phases.length - 1))
+      resetClock()
       setIsComplexRunning(false)
       setAutoStartPhase(false)
       setPhaseIndex(clamped)
       setPhaseRun((run) => run + 1)
       lastAutoAdvancedPhaseIdRef.current = null
     },
-    [phases.length]
+    [phases.length, resetClock]
   )
 
   const goToNextPhase = useCallback(() => {
+    setRunning(false)
     setIsComplexRunning(false)
     setAutoStartPhase(false)
     setPhaseIndex((prev) => Math.min(prev + 1, phases.length - 1))
     lastAutoAdvancedPhaseIdRef.current = null
-  }, [phases.length])
+  }, [phases.length, setRunning])
 
   const goToPrevPhase = useCallback(() => {
+    setRunning(false)
     setIsComplexRunning(false)
     setAutoStartPhase(false)
     setPhaseIndex((prev) => Math.max(prev - 1, 0))
     lastAutoAdvancedPhaseIdRef.current = null
-  }, [])
+  }, [setRunning])
 
   const handlePhaseComplete = useCallback(
     (phaseId: string) => {
+      setRunning(false)
       const autoAdvance = config.autoAdvance ?? true
 
       // Check if this is the last phase FIRST
       if (isLast) {
+        finish()
         setIsComplexRunning(false)
         return // Complex timer finished
       }
@@ -101,33 +117,56 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       goToNextPhase()
       setAutoStartPhase(true)
     },
-    [config.autoAdvance, goToNextPhase, isLast]
+    [config.autoAdvance, goToNextPhase, isLast, setRunning, finish]
   )
 
   const handlePhaseStop = useCallback(() => {
+    finish()
     setAutoStartPhase(false)
     setIsComplexRunning(false)
     setIsStopped(true)
-  }, [])
+  }, [finish])
 
   const handlePhaseStateChange = useCallback(
     (state: TimerState) => {
+      setRunning(state === TimerState.Running)
       setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
       if (state === TimerState.Completed) {
         handlePhaseComplete(currentPhase.id)
       }
     },
-    [handlePhaseComplete, currentPhase.id]
+    [handlePhaseComplete, currentPhase.id, setRunning]
   )
 
-  const handlePhaseStateChangeNoComplete = useCallback((state: TimerState) => {
-    setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
-  }, [])
+  const handlePhaseStateChangeNoComplete = useCallback(
+    (state: TimerState) => {
+      setRunning(state === TimerState.Running)
+      setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
+    },
+    [setRunning]
+  )
 
   const phaseHeader = (
     <div className="grid h-11 w-full grid-cols-3 items-start gap-x-3 pt-3">
-      <div className="truncate text-left text-base leading-5 opacity-75" title={config.name}>
-        {config.name || 'Complex timer'}
+      <div className="min-w-0 text-left">
+        <div className="truncate text-base leading-5 opacity-75" title={config.name}>
+          {config.name || 'Complex timer'}
+        </div>
+        {Boolean(config.overallTimeLimit) && (
+          <div
+            aria-label="Overall workout time"
+            className="truncate text-xs leading-3 tabular-nums"
+            title={
+              elapsedMs >= config.overallTimeLimit! * 1000
+                ? 'Overall time limit reached'
+                : 'Overall workout time'
+            }
+          >
+            {formatTime(elapsedMs).split('.')[0]} /{' '}
+            {formatTime(config.overallTimeLimit! * 1000).split('.')[0]}
+            {elapsedMs >= config.overallTimeLimit! * 1000 && <span> · Limit reached</span>}
+          </div>
+        )}
       </div>
       <div
         className="truncate text-center text-xl leading-5 font-semibold"
@@ -260,5 +299,18 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
     )
   }
 
-  return renderPhaseTimer(currentPhase.config)
+  return (
+    <>
+      {renderPhaseTimer(currentPhase.config)}
+      {Boolean(config.overallTimeLimit) && (
+        <WorkoutLimitDialog
+          open={promptOpen}
+          elapsedMs={elapsedMs}
+          limitSeconds={config.overallTimeLimit!}
+          onContinue={acknowledge}
+          onEnd={handlePhaseStop}
+        />
+      )}
+    </>
+  )
 }
