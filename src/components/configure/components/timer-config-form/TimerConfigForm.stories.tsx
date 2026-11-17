@@ -243,12 +243,27 @@ export const WorkRestModeToggle = meta.story({
 })
 
 export const IntervalFieldValidation = meta.story({
-  args: { type: TimerType.INTERVAL },
+  args: {
+    type: TimerType.INTERVAL,
+    initialConfig: {
+      id: 'invalid-interval',
+      name: 'Interval validation',
+      type: TimerType.INTERVAL,
+      workDuration: 0,
+      restDuration: 0,
+      intervals: 8,
+    },
+  },
   play: async ({ canvas, canvasElement, args }) => {
-    await userEvent.type(canvas.getByLabelText('Number of Intervals'), '8')
-    await userEvent.type(canvasElement.querySelector('input[name="seconds"]')!, '0')
+    await userEvent.click(canvas.getByRole('button', { name: 'Start Timer' }))
     expect(canvas.getByText(/Work duration must be greater than 0/)).toBeInTheDocument()
     expect(canvas.getByRole('button', { name: 'Start Timer' })).toBeDisabled()
     expect(args.onStartTimer).not.toHaveBeenCalled()
+    const seconds = canvasElement.querySelector('input[name="seconds"]')!
+    await userEvent.type(seconds, '0')
+    expect(seconds).toHaveValue('01')
+    expect(canvas.queryByText(/Work duration must be greater than 0/)).not.toBeInTheDocument()
+    await userEvent.click(canvas.getByRole('button', { name: 'Start Timer' }))
+    expect(args.onStartTimer).toHaveBeenCalledWith(expect.objectContaining({ workDuration: 1 }))
   },
 })

@@ -50,3 +50,25 @@ Cleanup unmounts hooks before restoring the real clock and checks for pending
 frames and timeouts. The tests no longer depend on a 200 ms real sleep finishing
 within 250 ms, or rest progress staying below an arbitrary 20% threshold while
 the browser is busy. Other browser tests retain real scheduling coverage.
+
+
+## Optional time limits and picker bounds
+
+`TimePicker.test.tsx` verifies that minimum/maximum bounds apply to both the
+visible value and the value delivered to the form. It also covers clearing
+optional Complex, Stopwatch, and Work/Rest time limits. Zero means an absent
+optional limit; required countdown/work durations still clamp to their minimum.
+The Interval Field Validation story rejects an invalid initial duration and
+verifies that editing it produces a valid, clamped submission.
+
+`e2e/optional-overall-limit.spec.ts` configures a complex workout through the UI,
+saves a limited preset, clears the limit, saves a separate unlimited preset,
+reopens it after reload, and starts it without an overall-limit prompt. It also
+checks that the original limited preset remains unchanged.
+
+
+`e2e/optional-limits.spec.ts` also saves and reloads cleared Stopwatch and Work/Rest
+limits, confirms the original limited presets remain unchanged, and verifies
+that the displayed Countdown minimum (1 second) and Stopwatch maximum (24 hours)
+match the persisted values. Work/Rest validation accepts an absent work limit
+in both fixed-rest and ratio modes, while still rejecting an explicit zero.
