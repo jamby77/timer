@@ -274,12 +274,6 @@ export class SoundManager {
       if (prevPhase === TimerPhase.Rest && phase === TimerPhase.Work) {
         this.onIntervalStart()
       }
-
-      if (prevPhase === TimerPhase.Rest && phase === TimerPhase.Idle) {
-        if (this.previousWorkRestRounds !== null && rounds > this.previousWorkRestRounds) {
-          this.onFinish()
-        }
-      }
     }
 
     if (timerState === TimerState.Running) {

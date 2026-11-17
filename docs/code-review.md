@@ -217,7 +217,7 @@ These appear unused in the main app. Verify if they are dead code and remove if 
 | `storage` utilities | ✅ Good coverage | — |
 | `TimerManager` class | ❌ No tests | Add unit tests for sequence orchestration, step changes, repeats |
 | `Stopwatch` class | ❌ No tests | Add unit tests for elapsed time, time limits, auto-stop |
-| `SoundManager` / `SoundEngine` | ❌ No tests | Add unit tests for state tracking, debouncing, Web Audio API |
+| `SoundManager` / `SoundEngine` | Partial coverage (2026-11-17) | SoundManager cue scheduling has 9 tests; Web Audio output remains untested |
 | `useIntervalTimer` hook | ❌ No tests | Add hook-level tests |
 | Display components | ❌ No render tests | Add component tests via Storybook or React Testing Library |
 | `useTimer` tests missing Provider | ⚠️ Fragile | Wrap test renders with `TimerProvider` |
@@ -252,3 +252,27 @@ These appear unused in the main app. Verify if they are dead code and remove if 
 2. **P1 items next** — these cause subtle issues or developer confusion
 3. **Testing gaps** — prioritize `TimerManager` and `useIntervalTimer` as they have the most complex logic
 4. **P2/P3 cleanup** — tackle as part of normal development cadence
+
+## Sound scheduling coverage follow-up (2026-11-17)
+
+Eight unit tests now exercise the real SoundManager and cue definitions. They cover disabled
+sound, start/finish transitions, pause/resume, countdown thresholds and duplicate suppression,
+competing cues within a wall-clock second, reset, configuration changes, and Interval/WorkRest
+phase transitions. Audio playback methods are replaced at the SoundEngine boundary; the tests
+verify requested cue parameters and timing, not audible output or browser autoplay permissions.
+
+Run `pnpm exec vitest run --project unit src/lib/sound/SoundManager.test.ts`.
+All eight tests pass. No production code changes were needed. SoundEngine/Web Audio testing
+remains a separate task; other findings in this historical review have not been re-audited here.
+
+## Work/Rest sound correction (2026-11-17)
+
+Runtime audio verification found that natural rest completion played a finish horn between
+rounds. That premature cue could also suppress an immediate next-round start in the same
+wall-clock second. Remove the Rest-to-Idle finish call; the Completed-state transition remains
+responsible for the final horn.
+
+A unit regression covers silent intermediate completion, a next-round start in the same second,
+and exactly one final completion cue. Two Playwright regressions exercise standalone and complex
+Work/Rest timers with real Web Audio oscillators, checking two short start horns and one final
+completion horn. Audio calls are observed and forwarded, not replaced with silent mocks.
