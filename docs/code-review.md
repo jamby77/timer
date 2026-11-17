@@ -301,3 +301,14 @@ normal destination connection; oscillator and gain implementations are not mocke
 Run `pnpm exec playwright test e2e/audio-output.spec.ts --headed --workers 1`.
 This verifies browser-generated audio samples, not physical speakers, hearing quality, or
 mobile autoplay restrictions. No production code changes were needed.
+
+## Test project scopes (2026-11-17)
+
+Vitest discovery previously assigned Playwright E2E files and React tests to the Node unit
+project, while the separate unit command used a different environment. Both entry points now
+share the Node configuration for configuration/storage and sound tests. Native-animation-frame
+timer engines, hooks, and components run in Chromium. Add `pnpm test:browser` for that project.
+
+The scoped commands pass 66 Node and 125 browser tests. The full command still reports 16 story
+failures and a browser-connection error; it is not a passing suite. See [Running tests](testing.md)
+for commands, project boundaries, and the exact outstanding story cases.

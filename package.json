@@ -11,6 +11,7 @@
     "build-sb": "storybook build",
     "test": "vitest",
     "test:unit": "vitest --config vitest.unit.config.ts",
+    "test:browser": "vitest --project react-browser",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "e2e": "playwright test",
