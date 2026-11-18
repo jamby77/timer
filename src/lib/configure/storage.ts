@@ -202,19 +202,9 @@ class LocalTimerStorage implements StorageManager {
         const key = localStorage.key(i)
         if (key?.startsWith(this.PRESET_PREFIX)) {
           const presetId = key.replace(this.PRESET_PREFIX, '')
-          const stored = localStorage.getItem(key)
-          if (stored) {
-            const parsed = storedPresetSchema.safeParse(JSON.parse(stored))
-            if (parsed.success) {
-              const { config, ...rest } = parsed.data
-              presets.push({
-                id: presetId,
-                config: {
-                  ...rest,
-                  config: restoreConfigDates(config as AnyTimerConfig),
-                } as PredefinedStyle<T>,
-              })
-            }
+          const config = this.getPreset<T>(presetId)
+          if (config) {
+            presets.push({ id: presetId, config })
           }
         }
       }
