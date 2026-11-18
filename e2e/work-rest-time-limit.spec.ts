@@ -13,9 +13,9 @@ for (const complex of [false, true]) {
             name: 'Limited work',
             maxWorkTime: 1,
             maxRounds: 1,
-            ratio: 2,
+            ratio: restMode === 'ratio' ? 2 : undefined,
             restMode,
-            fixedRestDuration: 3,
+            fixedRestDuration: restMode === 'fixed' ? 3 : undefined,
             countdownBeforeStart: 0,
             sound: { enabled: false, volume: 0 },
           }
@@ -35,7 +35,7 @@ for (const complex of [false, true]) {
                         name: 'After work',
                         type: 'COUNTDOWN',
                         order: 1,
-                        config: { type: 'COUNTDOWN', duration: 60 },
+                        config: { id: 'after', name: 'After work', type: 'COUNTDOWN', duration: 60 },
                       },
                     ],
                   }
@@ -81,7 +81,6 @@ test('pause freezes the work limit and restart begins a fresh timed work period'
         maxRounds: 1,
         restMode: 'fixed',
         fixedRestDuration: 20,
-        ratio: 2,
         countdownBeforeStart: 0,
         sound: { enabled: false, volume: 0 },
       })

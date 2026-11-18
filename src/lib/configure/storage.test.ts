@@ -524,3 +524,27 @@ it('reports failed history removal without deleting the saved timer', () => {
     log.mockRestore()
   }
 })
+
+it('loads legacy zero pre-start countdowns in standalone and nested timers', () => {
+  localStorage.clear()
+  const countdown: AnyTimerConfig = {
+    id: 'legacy', name: 'Legacy timer', type: TimerType.COUNTDOWN,
+    duration: 30, countdownBeforeStart: 0,
+  }
+  const complex: AnyTimerConfig = {
+    id: 'legacy-complex', name: 'Legacy workout', type: TimerType.COMPLEX,
+    phases: [{ id: 'phase', name: 'Work', type: TimerType.COUNTDOWN, order: 0, config: countdown }],
+  }
+  for (const config of [countdown, complex]) {
+    storage.storeTimerConfig(config)
+    storage.addRecentTimer(config)
+    expect(storage.getTimerConfig(config.id)).toEqual(config)
+  }
+  expect(storage.getRecentTimers().map(timer => timer.id)).toEqual(['legacy-complex', 'legacy'])
+})
+
+it('still rejects negative pre-start countdowns', () => {
+  localStorage.clear()
+  storage.storeTimerConfig({ id: 'negative', name: 'Invalid', type: TimerType.COUNTDOWN, duration: 30, countdownBeforeStart: -1 })
+  expect(storage.getTimerConfig('negative')).toBeNull()
+})
