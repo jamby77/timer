@@ -2,6 +2,9 @@ import { defineConfig, devices } from 'playwright/test'
 
 const port = Number(process.env.PLAYWRIGHT_PORT || 3001)
 
+const developmentURL = `http://localhost:${port}`
+const existingServerURL = process.env.PLAYWRIGHT_BASE_URL
+
 export default defineConfig({
   testDir: './e2e',
   testIgnore: '**/*.production.spec.ts',
@@ -11,7 +14,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: `http://127.0.0.1:${port}`,
+    baseURL: existingServerURL || developmentURL,
     trace: 'on-first-retry',
   },
   projects: [
@@ -20,9 +23,9 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
+  webServer: existingServerURL ? undefined : {
     command: `pnpm dev --port ${port}`,
-    url: `http://127.0.0.1:${port}`,
+    url: developmentURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

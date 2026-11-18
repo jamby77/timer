@@ -16,13 +16,22 @@ configuration and sound tests run there; timer-engine tests run with native brow
 frames alongside the hooks and components. Playwright E2E files belong exclusively to Playwright.
 Storybook stories remain in the Storybook project.
 
+## Run app tests against a local production build
+
+Run `pnpm build && pnpm start --port 3025` in one terminal. Once the server is
+ready, run the following command in another terminal:
+
+```sh
+PLAYWRIGHT_BASE_URL=http://localhost:3025 pnpm exec playwright test --workers 4 --retries 0
+```
+
+With `PLAYWRIGHT_BASE_URL` set, the app suite uses the running server. Omit it
+to let Playwright manage the development server.
+
 ## App regression suite verification on 2026-11-18
 
 All 179 app E2E tests across 26 files passed with four parallel workers against
-the production app on `http://localhost:3025`. A temporary configuration extended
-`playwright.config.ts`, set that `baseURL`, and disabled `webServer` to reuse the
-already running production server. The command was
-`pnpm exec playwright test --config playwright.local.config.ts --workers 4 --max-failures 10`.
+the production app on `http://localhost:3025`.
 Lint and TypeScript checks also passed. The separate production-only PWA suite
 and Vitest projects were not rerun for this test-fixture change.
 
