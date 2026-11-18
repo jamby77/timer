@@ -129,6 +129,7 @@ class LocalTimerStorage implements StorageManager {
       localStorage.removeItem(this.TIMER_PREFIX + timerId)
     } catch (error) {
       console.error('Failed to remove timer:', error)
+      throw error
     }
   }
 
