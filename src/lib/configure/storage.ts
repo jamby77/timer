@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 import { AnyTimerConfig, PredefinedStyle, RecentTimer, StorageManager } from '@/types/configure'
 
+import { validateTimerConfig } from './utils'
+
 const storedTimerConfigSchema = z.looseObject({
   id: z.string(),
   name: z.string(),
@@ -16,7 +18,7 @@ const storedRecentTimerSchema = z.object({
   startedAt: z.union([z.string(), z.number()]),
 })
 
-const storedRecentTimersSchema = z.array(storedRecentTimerSchema)
+const storedRecentTimersSchema = z.array(z.unknown())
 
 const storedPresetSchema = z.looseObject({
   id: z.string(),
@@ -67,15 +69,22 @@ class LocalTimerStorage implements StorageManager {
         return []
       }
 
-      return parsed.data.map((timer) => ({
-        ...timer,
-        startedAt: new Date(timer.startedAt),
-        config: {
-          ...timer.config,
-          createdAt: timer.config.createdAt ? new Date(timer.config.createdAt) : undefined,
-          lastUsed: timer.config.lastUsed ? new Date(timer.config.lastUsed) : undefined,
-        },
-      })) as RecentTimer[]
+      return parsed.data.flatMap((entry): RecentTimer[] => {
+        const timer = storedRecentTimerSchema.safeParse(entry)
+        if (!timer.success) return []
+
+        try {
+          const startedAt = new Date(timer.data.startedAt)
+          const config = restoreConfigDates(timer.data.config as AnyTimerConfig)
+          if (Number.isNaN(startedAt.getTime()) || validateTimerConfig(config).length > 0) {
+            return []
+          }
+          return [{ ...timer.data, startedAt, config }]
+        } catch (error) {
+          console.error('Failed to load recent timer:', error)
+          return []
+        }
+      })
     } catch (error) {
       console.error('Failed to load recent timers:', error)
       return []

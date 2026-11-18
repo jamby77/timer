@@ -204,3 +204,37 @@ test('a corrupt preset does not hide valid presets after reload', async ({ page 
   )
   expect(stored).toEqual(saved)
 })
+
+test('malformed recent history does not hide usable timers after reload', async ({ page }) => {
+  await page.goto('/configure')
+  await page.getByRole('heading', { name: 'Countdown', exact: true }).click()
+  await page.getByLabel(/Timer Name/).fill('Recovered recent timer')
+  await page.locator('input[name=seconds]').fill('30')
+  await page.getByRole('button', { name: 'Start Timer', exact: true }).click()
+  await expect(page).toHaveURL(/\/\?id=/)
+  const stored = await page.evaluate(() => {
+    const history = JSON.parse(localStorage.getItem('recent_timers')!)
+    const mixed = JSON.stringify([
+      null,
+      ...history,
+      { id: 'broken', startedAt: new Date().toISOString(), config: { id: 'broken', name: 'Broken recent timer', type: 'COMPLEX' } },
+    ])
+    localStorage.setItem('recent_timers', mixed)
+    return mixed
+  })
+  await page.goto('/configure')
+  await page.reload()
+  const card = page.locator('[data-slot=card]').filter({ has: page.getByRole('heading', { name: 'Recovered recent timer', exact: true }) })
+  await expect(card).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Broken recent timer', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Tabata', exact: true })).toBeVisible()
+  expect(await page.evaluate(() => localStorage.getItem('recent_timers'))).toBe(stored)
+  await card.getByRole('button', { name: 'Start', exact: true }).click()
+  await page.getByRole('button', { name: 'Start timer', exact: true }).click()
+  await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
+  await page.getByRole('button', { name: 'Stop timer', exact: true }).click()
+  await page.goto('/configure')
+  await card.getByRole('button', { name: 'Remove timer', exact: true }).click()
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Recovered recent timer', exact: true })).toHaveCount(0)
+})

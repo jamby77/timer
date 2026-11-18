@@ -419,3 +419,49 @@ describe('preset failure isolation', () => {
     }
   })
 })
+
+describe('recent timer recovery', () => {
+  beforeEach(() => localStorage.clear())
+
+  it.each([
+    null,
+    { id: 'broken' },
+    { id: 'broken', startedAt: 'invalid', config: { id: 'broken', name: 'Broken', type: TimerType.COUNTDOWN, duration: 10 } },
+    { id: 'broken', startedAt: '2026-01-01', config: { id: 'broken', name: 'Broken', type: TimerType.COUNTDOWN } },
+    { id: 'broken', startedAt: '2026-01-01', config: { id: 'broken', name: 'Broken', type: TimerType.COMPLEX, phases: [null] } },
+  ])('keeps valid history around malformed entry %j', (broken) => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const entries = ['first', 'last'].map(id => ({
+        id, startedAt: '2026-01-01',
+        config: { id, name: id, type: TimerType.COUNTDOWN, duration: 30 },
+      }))
+      const stored = JSON.stringify([entries[0], broken, entries[1]])
+      localStorage.setItem('recent_timers', stored)
+      const recovered = storage.getRecentTimers()
+      expect(recovered.map(timer => timer.id)).toEqual(['first', 'last'])
+      expect(recovered[0].startedAt).toEqual(new Date('2026-01-01'))
+      expect(localStorage.getItem('recent_timers')).toBe(stored)
+    } finally {
+      error.mockRestore()
+    }
+  })
+})
+
+it('restores nested dates before validating complex recent timers', () => {
+  localStorage.clear()
+  const date = new Date('2026-01-01')
+  storage.addRecentTimer({
+    id: 'complex', name: 'Complex history', type: TimerType.COMPLEX,
+    createdAt: date,
+    phases: [{
+      id: 'phase', name: 'Work', type: TimerType.COUNTDOWN, order: 0,
+      config: { id: 'phase', name: 'Work', type: TimerType.COUNTDOWN, duration: 30, createdAt: date, lastUsed: date },
+    }],
+  })
+  const [recent] = storage.getRecentTimers()
+  expect(recent.config.type).toBe(TimerType.COMPLEX)
+  if (recent.config.type !== TimerType.COMPLEX) throw new Error('Expected complex timer')
+  expect(recent.config.phases[0].config.createdAt).toEqual(date)
+  expect(recent.config.phases[0].config.lastUsed).toEqual(date)
+})
