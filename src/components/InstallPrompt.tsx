@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Share, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { ClientOnly } from '@/components/ClientOnly'
@@ -130,9 +131,15 @@ const InstallPromptContent = () => {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return
 
-    await deferredPrompt.prompt()
-    await deferredPrompt.userChoice
+    const installPrompt = deferredPrompt
     setDeferredPrompt(null)
+    try {
+      await installPrompt.prompt()
+      await installPrompt.userChoice
+    } catch (error) {
+      console.error('Failed to request installation:', error)
+      toast.error('Installation could not be completed. Please try again when prompted.')
+    }
   }
 
   const handleDismiss = () => {
