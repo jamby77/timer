@@ -16,6 +16,23 @@ configuration and sound tests run there; timer-engine tests run with native brow
 frames alongside the hooks and components. Playwright E2E files belong exclusively to Playwright.
 Storybook stories remain in the Storybook project.
 
+## App regression suite verification on 2026-11-18
+
+All 179 app E2E tests across 26 files passed with four parallel workers against
+the production app on `http://localhost:3025`. A temporary configuration extended
+`playwright.config.ts`, set that `baseURL`, and disabled `webServer` to reuse the
+already running production server. The command was
+`pnpm exec playwright test --config playwright.local.config.ts --workers 4 --max-failures 10`.
+Lint and TypeScript checks also passed. The separate production-only PWA suite
+and Vitest projects were not rerun for this test-fixture change.
+
+The initial run was stopped after four overall-limit failures exposed missing
+phase configuration names (20 passed and four were interrupted). Fixtures for
+overall limits, interval controls, and Work/Rest completion and controls now
+include required nested configuration IDs and names. Work/Rest fixtures supply
+only the fields for their selected fixed-rest or ratio mode. Production
+validation and all existing runtime assertions remain unchanged.
+
 ## Verification on 2026-11-17
 
 - Node: 5 files, 66 tests passed.

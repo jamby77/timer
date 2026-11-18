@@ -32,6 +32,7 @@ async function openWorkout(
         type,
         config: {
           id: 'first',
+          name: 'First timer',
           type,
           duration,
           timeLimit: duration,
