@@ -97,8 +97,12 @@ function ConfigurePageContent() {
   }
 
   const handleRemoveTimer = (timerId: string) => {
-    storage.removeTimer(timerId)
-    setRecentTimers(storage.getRecentTimers())
+    try {
+      storage.removeTimer(timerId)
+      setRecentTimers(storage.getRecentTimers())
+    } catch {
+      toast.error('Failed to remove timer. Please try again.')
+    }
   }
 
   const handleToggleSelectedTimer = (timer: TimerType) => {

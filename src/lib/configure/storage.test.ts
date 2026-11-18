@@ -502,3 +502,25 @@ describe('stored timer validation', () => {
     expect(storage.getTimerConfig('complex')).toEqual(config)
   })
 })
+
+it('reports failed history removal without deleting the saved timer', () => {
+  localStorage.clear()
+  const config: AnyTimerConfig = { id: 'kept', name: 'Kept timer', type: TimerType.COUNTDOWN, duration: 30 }
+  storage.storeTimerConfig(config)
+  storage.addRecentTimer(config)
+  const history = localStorage.getItem('recent_timers')
+  const error = new Error('Storage unavailable')
+  const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+  const write = vi.spyOn(localStorage, 'setItem').mockImplementationOnce(() => { throw error })
+  try {
+    expect(() => storage.removeTimer('kept')).toThrow(error)
+    expect(localStorage.getItem('recent_timers')).toBe(history)
+    expect(storage.getTimerConfig('kept')).toEqual(config)
+    storage.removeTimer('kept')
+    expect(storage.getRecentTimers()).toEqual([])
+    expect(storage.getTimerConfig('kept')).toBeNull()
+  } finally {
+    write.mockRestore()
+    log.mockRestore()
+  }
+})

@@ -64,3 +64,18 @@ Validation: 325 Vitest tests, 23 production Playwright checks, lint, TypeScript,
 and production build passed. The new hash tests initially reproduced 21 failures.
 The first browser run had an assertion assuming disabled sound was explicitly
 stored; using the form's actual absent-means-disabled representation passed.
+
+## Recent timer removal failures (2026-11-18)
+
+- [x] Propagate removal errors from storage to the configuration screen.
+- [x] Show an error toast when removal fails and keep the card available for retry.
+- [x] Verify a failed history write leaves both history and the saved configuration
+      unchanged, including after reload.
+- [x] Verify retry removes the history entry and saved configuration, and removal
+      persists across reload.
+
+Validation: the new unit and browser regressions first failed without propagated
+errors or user feedback. All 326 Vitest tests, 12 preset/history/removal Playwright
+checks, lint, TypeScript, and production build pass. React Doctor reports 100/100.
+The browser check injects a one-time history-write failure; localStorage writes
+across multiple keys are not an atomic transaction.
