@@ -45,3 +45,22 @@ Validation: the three new browser regressions first failed without error feedbac
 all 24 preset/history/direct-link/start-failure checks now pass against production.
 All 294 Vitest tests, lint, TypeScript, and production build pass. React Doctor
 reports 100/100. Storage failures are injected at the browser Storage API boundary.
+
+## Configuration identity (2026-11-18)
+
+- [x] Include pre-start countdown, completion message, and sound settings in IDs
+      for every timer type, including nested complex phases.
+- [x] Normalize sound property order and retain ID/timestamp independence.
+- [x] Match the Complex runtime default for omitted autoAdvance (`true`).
+- [x] Verify same-name Countdown configurations with different pre-start or sound
+      settings keep separate saved records and history entries, reload, and start.
+
+Existing stored records and direct-link IDs are not migrated or deleted. Newly
+configured timers use the corrected hash; equivalent older configurations may
+therefore gain a new history entry when configured again. Previously overwritten
+configurations cannot be recovered by this change.
+
+Validation: 325 Vitest tests, 23 production Playwright checks, lint, TypeScript,
+and production build passed. The new hash tests initially reproduced 21 failures.
+The first browser run had an assertion assuming disabled sound was explicitly
+stored; using the form's actual absent-means-disabled representation passed.
