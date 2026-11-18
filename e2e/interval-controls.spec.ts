@@ -23,6 +23,7 @@ for (const viewport of [
             type,
             config: {
               id: String(order),
+              name: type === 'INTERVAL' ? 'Tabata' : 'Countdown',
               type,
               duration: 60,
               workDuration: 30,

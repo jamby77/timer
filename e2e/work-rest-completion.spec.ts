@@ -16,7 +16,6 @@ for (const mode of ['standalone', 'complex', 'final', 'manual']) {
             restMode: 'fixed',
             fixedRestDuration: skip ? 20 : 1,
             maxWorkTime: 60,
-            ratio: 2,
             countdownBeforeStart: 0,
             sound: { enabled: false, volume: 0 },
           }
@@ -36,7 +35,7 @@ for (const mode of ['standalone', 'complex', 'final', 'manual']) {
                         name: 'After work',
                         type: 'COUNTDOWN',
                         order: 1,
-                        config: { type: 'COUNTDOWN', duration: 60 },
+                        config: { id: 'after', name: 'After work', type: 'COUNTDOWN', duration: 60 },
                       },
                     ].slice(0, mode === 'final' ? 1 : 2),
                   }

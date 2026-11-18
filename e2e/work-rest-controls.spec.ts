@@ -20,10 +20,12 @@ for (const restMode of ['ratio', 'fixed']) {
                 order: 0,
                 type: 'WORKREST',
                 config: {
+                  id: 'work',
+                  name: 'Work/rest',
                   type: 'WORKREST',
-                  ratio: 2,
+                  ratio: restMode === 'ratio' ? 2 : undefined,
                   restMode,
-                  fixedRestDuration: 20,
+                  fixedRestDuration: restMode === 'fixed' ? 20 : undefined,
                   maxRounds: 5,
                   maxWorkTime: 60,
                   countdownBeforeStart: 0,
@@ -35,7 +37,7 @@ for (const restMode of ['ratio', 'fixed']) {
                 name: 'After work',
                 order: 1,
                 type: 'COUNTDOWN',
-                config: { type: 'COUNTDOWN', duration: 60 },
+                config: { id: 'after', name: 'After work', type: 'COUNTDOWN', duration: 60 },
               },
             ],
           })
