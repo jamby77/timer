@@ -32,20 +32,34 @@ export class TimerConfigHash {
       name: config.name.trim().toLowerCase(),
     }
 
+    if (config.countdownBeforeStart) {
+      normalized.countdownBeforeStart = config.countdownBeforeStart
+    }
+    if (config.completionMessage) {
+      normalized.completionMessage = config.completionMessage.trim()
+    }
+    if (config.sound) {
+      normalized.sound = {
+        enabled: config.sound.enabled,
+        volume: config.sound.volume,
+        countdownBeeps: config.sound.countdownBeeps,
+        startBeep: config.sound.startBeep,
+        finishBeep: config.sound.finishBeep,
+        intervalStartBeep: config.sound.intervalStartBeep,
+        intervalEndBeep: config.sound.intervalEndBeep,
+        tick: config.sound.tick,
+        tickEverySeconds: config.sound.tickEverySeconds,
+      }
+    }
+
     switch (config.type) {
       case 'COUNTDOWN':
         normalized.duration = config.duration
-        if (config.completionMessage) {
-          normalized.completionMessage = config.completionMessage.trim()
-        }
         break
 
       case 'STOPWATCH':
         if (config.timeLimit) {
           normalized.timeLimit = config.timeLimit
-        }
-        if (config.completionMessage) {
-          normalized.completionMessage = config.completionMessage.trim()
         }
         break
 
@@ -60,9 +74,6 @@ export class TimerConfigHash {
         if (config.restLabel) {
           normalized.restLabel = config.restLabel.trim()
         }
-        if (config.countdownBeforeStart) {
-          normalized.countdownBeforeStart = config.countdownBeforeStart
-        }
         break
 
       case 'WORKREST':
@@ -72,9 +83,6 @@ export class TimerConfigHash {
         normalized.restMode = config.restMode
         if (config.restMode === WorkRestMode.FIXED && config.fixedRestDuration) {
           normalized.fixedRestDuration = config.fixedRestDuration
-        }
-        if (config.countdownBeforeStart) {
-          normalized.countdownBeforeStart = config.countdownBeforeStart
         }
         break
 
@@ -88,7 +96,7 @@ export class TimerConfigHash {
         if (config.overallTimeLimit) {
           normalized.overallTimeLimit = config.overallTimeLimit
         }
-        normalized.autoAdvance = config.autoAdvance || false
+        normalized.autoAdvance = config.autoAdvance ?? true
         break
     }
 
