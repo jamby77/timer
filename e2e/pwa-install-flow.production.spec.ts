@@ -113,3 +113,37 @@ test.describe('iOS instruction flow with simulated browser signals', () => {
     await expect(browserTab.getByRole('heading', { name: 'Install App', exact: true })).toBeHidden()
   })
 })
+
+for (const failure of ['prompt', 'choice'] as const) {
+  test(`${failure} rejection shows an error and permits a fresh installation offer`, async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', error => errors.push(error.message))
+    await openApp(page)
+    await page.evaluate((failure) => {
+      let rejectChoice: (reason: Error) => void
+      const userChoice = new Promise((_, reject) => { rejectChoice = reject })
+      const event = new Event('beforeinstallprompt', { cancelable: true })
+      Object.assign(event, {
+        prompt: async () => {
+          if (failure === 'prompt') throw new Error('Installation unavailable')
+          rejectChoice(new Error('Installation choice unavailable'))
+        },
+        userChoice,
+      })
+      window.dispatchEvent(event)
+    }, failure)
+    await page.getByRole('button', { name: 'Install', exact: true }).click()
+    await expect(page.getByText('Installation could not be completed. Please try again when prompted.', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Install', exact: true })).toBeHidden()
+    expect(errors).toEqual([])
+    expect(await page.evaluate(() => localStorage.getItem('pwa-install-completed'))).toBeNull()
+    expect(await page.evaluate(() => localStorage.getItem('pwa-install-dismissed'))).toBeNull()
+    await offerInstallation(page, 'accepted')
+    await page.getByRole('button', { name: 'Install', exact: true }).click()
+    await page.evaluate(() => window.dispatchEvent(new Event('appinstalled')))
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Start timer', exact: true })).toBeVisible()
+    expect(await page.evaluate(() => localStorage.getItem('pwa-install-completed'))).toBe('true')
+    expect(errors).toEqual([])
+  })
+}

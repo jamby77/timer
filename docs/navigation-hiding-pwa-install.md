@@ -116,3 +116,18 @@ operate native installation dialogs or prove installation on a physical iPhone o
 No production code changes were needed. Real-device verification remains outstanding.
 
 Run `pnpm exec playwright test --config playwright.pwa.config.ts`.
+
+## Installation failure recovery (2026-11-18)
+
+- [x] Consume the deferred browser prompt when Install is clicked so the same
+      one-shot event is not offered again while its request is pending.
+- [x] Catch rejected prompt and choice promises, report the error, and show feedback.
+- [x] Preserve installation and dismissal preferences after failures.
+- [x] Accept a fresh browser installation offer and persist a later appinstalled event.
+
+The two new production browser regressions first failed without error feedback.
+All 11 PWA checks pass, including failure recovery, simulated iOS behavior, and
+cross-tab preferences. All 294 Vitest tests, lint, TypeScript, and production build
+pass. React Doctor reports no issues and an empty diagnostics file, but gives
+67/100; that inconsistent score is not treated as a clean score. Browser install
+signals and failures are simulated; native device installation remains unverified.
