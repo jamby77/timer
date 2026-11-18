@@ -60,3 +60,16 @@ production checks used localhost:3008. Temporary configuration and browser artif
 moved out of the repository.
 
 Implementation branch: codex/save-timer-presets.
+
+## Corrupt preset isolation follow-up (2026-11-18)
+
+- [x] Reproduce malformed JSON and nested phase data hiding all custom presets.
+- [x] Load each preset through the existing guarded single-preset reader, preserving
+      valid entries and leaving stored data untouched.
+- [x] Verify valid presets before and after a corrupt entry still load with restored dates.
+- [x] Verify a saved Countdown remains visible, reopens with its duration, and starts
+      after reload with a corrupt preset present; built-in presets remain available.
+
+Validation: 280 Vitest tests, all 10 preset Playwright checks against the production app,
+lint, TypeScript, and production build passed. The new unit regressions first reproduced
+both failure cases. Invalid-schema entries were already skipped and remain covered.

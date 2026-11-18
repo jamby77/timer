@@ -382,3 +382,40 @@ describe('Storage Utilities', () => {
     })
   })
 })
+
+describe('preset failure isolation', () => {
+  beforeEach(() => localStorage.clear())
+
+  it.each([
+    ['invalid JSON', '{broken'],
+    ['invalid schema', JSON.stringify({ name: 'Broken' })],
+    ['invalid nested config', JSON.stringify({
+      id: 'broken', name: 'Broken', description: '', isBuiltIn: false,
+      config: { id: 'broken', name: 'Broken', type: TimerType.COMPLEX, phases: [null] },
+    })],
+  ])('keeps valid presets around %s without deleting stored data', (_, broken) => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      for (const id of ['first', 'broken', 'last']) {
+        if (id === 'broken') {
+          localStorage.setItem('preset_broken', broken)
+        } else {
+          storage.storePreset({
+            id, name: id, description: '', isBuiltIn: false,
+            config: {
+              id, name: id, type: TimerType.COUNTDOWN, duration: 30,
+              createdAt: new Date('2026-01-01'),
+            },
+          })
+        }
+      }
+      const presets = storage.getAllPresets()
+      expect(presets.map(preset => preset.id)).toEqual(['first', 'last'])
+      expect(presets[0].config.config.createdAt).toEqual(new Date('2026-01-01'))
+      expect(localStorage.getItem('preset_broken')).toBe(broken)
+      expect(localStorage.length).toBe(3)
+    } finally {
+      error.mockRestore()
+    }
+  })
+})
