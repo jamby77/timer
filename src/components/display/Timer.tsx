@@ -146,7 +146,6 @@ export const Timer = ({
   const elapsed = durationMs - time
   const progress = durationMs > 0 ? (elapsed / durationMs) * 100 : 0
   const isPaused = state === TimerState.Paused
-  const showProgress = !isPreStarting && (isRunning || isPaused)
 
   const isAutoStarting = useAutoStart(autoStart, handleStart)
 
@@ -165,7 +164,7 @@ export const Timer = ({
           progress={progress}
           isRunning={isRunning}
           isRest={isPaused}
-          isVisible={showProgress}
+          isVisible={!isPreStarting}
           minTime={minTime}
           maxTime={maxTime}
         />
