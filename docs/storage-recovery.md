@@ -79,3 +79,13 @@ errors or user feedback. All 326 Vitest tests, 12 preset/history/removal Playwri
 checks, lint, TypeScript, and production build pass. React Doctor reports 100/100.
 The browser check injects a one-time history-write failure; localStorage writes
 across multiple keys are not an atomic transaction.
+
+## Legacy disabled pre-start countdown (2026-11-18)
+
+Runtime regression checks exposed saved timers with `countdownBeforeStart: 0`
+being rejected by the newer configuration loader. Zero already means disabled
+in the runtime, so validation now accepts nonnegative integer countdowns.
+The editor continues to save an omitted value when the countdown is disabled.
+Unit regressions cover standalone and nested complex configurations, recent
+history, and continued rejection of negative values. Existing browser fixtures
+with zero remain unchanged and exercise the compatibility path.

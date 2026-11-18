@@ -22,7 +22,7 @@ const baseTimerConfigSchema = z.object({
   name: z.string('Please provide timer name').min(1, 'Timer name is required'),
   type: z.enum(TimerType),
   createdAt: z.date().optional(),
-  countdownBeforeStart: z.number().int('Countdown must be an integer').min(1).optional(),
+  countdownBeforeStart: z.number().int('Countdown must be an integer').min(0).optional(),
   lastUsed: z.date().optional(),
 })
 

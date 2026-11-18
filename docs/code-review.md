@@ -113,6 +113,14 @@ Enums defined in `@/lib/enums` are re-exported from multiple modules, leading to
 
 ### 10. `Stopwatch.stop()` silently ignores near-limit calls
 
+**Resolved 2026-11-18:** Remove the 100 ms exclusion. A running Stopwatch now
+stops immediately, cancels its next frame, and invokes its callback once. Calls
+after stopping or natural completion remain no-ops. Deterministic tests cover
+900/950/999 ms of a one-second limit, a 50 ms limit, and exact-limit completion.
+The old test asserting ignored Stop calls was replaced by these regressions.
+
+The original finding follows:
+
 **File:** `src/lib/timer/Stopwatch.ts:94`
 
 The magic `- 100` threshold silently prevents stopping near the time limit. This is surprising behavior with no documentation.
@@ -312,3 +320,20 @@ timer engines, hooks, and components run in Chromium. Add `pnpm test:browser` fo
 The scoped commands pass 66 Node and 125 browser tests. The full command still reports 16 story
 failures and a browser-connection error; it is not a passing suite. See [Running tests](testing.md)
 for commands, project boundaries, and the exact outstanding story cases.
+
+## Stopwatch stop boundary verification (2026-11-18)
+
+Remove the 100 ms stop exclusion with five deterministic browser-engine tests.
+Four initially failed; all pass after the fix. Stop cancels pending frames and
+reports elapsed time once, while Stop after natural completion remains a no-op.
+
+The broader browser run uncovered rejection of legacy zero pre-start countdowns
+by saved-config validation. Accept zero as the runtime's disabled value while
+still rejecting negatives, with standalone/nested storage regressions. Correct
+Work/Rest fixtures that supplied mutually exclusive rest settings and incomplete
+phase identifiers; keep those validation rules intact.
+
+Final validation: 332 Vitest tests, 27 production Playwright checks for completed
+phase restart, Work/Rest restart/limits, and direct links, plus lint, TypeScript,
+and production build passed. Initial browser runs failed or were stopped while
+investigating the compatibility regression and invalid fixtures.

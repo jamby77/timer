@@ -184,25 +184,6 @@ describe('Stopwatch', () => {
     sw.destroy()
   })
 
-  it('should ignore stop near time limit (100ms threshold)', async () => {
-    const onStop = vi.fn()
-    const sw = new Stopwatch({
-      timeLimitMs: 250,
-      onStop,
-    })
-
-    sw.start()
-    // Wait until we're within 100ms of the limit
-    await sleep(200)
-    sw.stop()
-
-    // stop() should be ignored because we're within the threshold
-    // (the Timer's onComplete will handle the callback instead)
-    expect(onStop).not.toHaveBeenCalled()
-
-    sw.destroy()
-  })
-
   // --- Callbacks ---
 
   it('should call onTick with elapsed time', async () => {
