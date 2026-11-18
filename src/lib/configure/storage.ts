@@ -158,11 +158,8 @@ class LocalTimerStorage implements StorageManager {
         return null
       }
 
-      return {
-        ...parsed.data,
-        createdAt: parsed.data.createdAt ? new Date(parsed.data.createdAt) : undefined,
-        lastUsed: parsed.data.lastUsed ? new Date(parsed.data.lastUsed) : undefined,
-      } as AnyTimerConfig
+      const config = restoreConfigDates(parsed.data as AnyTimerConfig)
+      return validateTimerConfig(config).length === 0 ? config : null
     } catch (error) {
       console.error('Failed to load timer config:', error)
       return null

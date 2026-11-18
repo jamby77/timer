@@ -465,3 +465,40 @@ it('restores nested dates before validating complex recent timers', () => {
   expect(recent.config.phases[0].config.createdAt).toEqual(date)
   expect(recent.config.phases[0].config.lastUsed).toEqual(date)
 })
+
+describe('stored timer validation', () => {
+  beforeEach(() => localStorage.clear())
+
+  it.each([
+    { id: 'bad', name: 'Bad', type: 'UNKNOWN' },
+    { id: 'bad', name: 'Bad', type: TimerType.COUNTDOWN },
+    { id: 'bad', name: 'Bad', type: TimerType.COUNTDOWN, duration: -1 },
+    { id: 'bad', name: 'Bad', type: TimerType.INTERVAL, workDuration: 20 },
+    { id: 'bad', name: 'Bad', type: TimerType.COMPLEX },
+    { id: 'bad', name: 'Bad', type: TimerType.COMPLEX, phases: [null] },
+    { id: 'bad', name: 'Bad', type: TimerType.STOPWATCH, createdAt: 'invalid' },
+  ])('rejects invalid saved configuration %j without changing storage', (config) => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const stored = JSON.stringify(config)
+      localStorage.setItem('timer_bad', stored)
+      expect(storage.getTimerConfig('bad')).toBeNull()
+      expect(localStorage.getItem('timer_bad')).toBe(stored)
+    } finally {
+      error.mockRestore()
+    }
+  })
+
+  it('restores nested dates in a valid saved complex timer', () => {
+    const date = new Date('2026-01-01')
+    const config: AnyTimerConfig = {
+      id: 'complex', name: 'Workout', type: TimerType.COMPLEX,
+      phases: [{
+        id: 'phase', name: 'Work', type: TimerType.COUNTDOWN, order: 0,
+        config: { id: 'phase', name: 'Work', type: TimerType.COUNTDOWN, duration: 30, createdAt: date },
+      }],
+    }
+    storage.storeTimerConfig(config)
+    expect(storage.getTimerConfig('complex')).toEqual(config)
+  })
+})
