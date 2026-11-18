@@ -113,8 +113,12 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
 
     setErrors([])
 
-    // Store timer configuration and add to recent timers
-    storage.storeTimerConfig(fullConfig)
+    try {
+      storage.storeTimerConfig(fullConfig)
+    } catch {
+      toast.error('Failed to start timer. Please try again.')
+      return
+    }
     storage.addRecentTimer(fullConfig)
 
     // Navigate to the timer page
