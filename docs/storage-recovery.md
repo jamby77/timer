@@ -31,3 +31,17 @@ Validation: 294 Vitest tests, 21 Playwright preset/history/direct-link checks, l
 TypeScript, and production build passed. Eight new unit regressions first failed.
 The initial browser run had two incomplete configuration fixtures; after supplying
 required Interval and Work/Rest fields, all 21 checks passed.
+
+## Starting after a storage failure (2026-11-18)
+
+- [x] Catch failed timer-configuration writes in both configuration routes.
+- [x] Show an error toast, retain the current draft, and avoid navigation/history
+      updates when the write fails.
+- [x] Allow retrying Start after storage becomes writable again.
+- [x] Verify Countdown, Complex, and built-in preset paths with a simulated
+      one-time quota error, including retained settings and successful retry.
+
+Validation: the three new browser regressions first failed without error feedback;
+all 24 preset/history/direct-link/start-failure checks now pass against production.
+All 294 Vitest tests, lint, TypeScript, and production build pass. React Doctor
+reports 100/100. Storage failures are injected at the browser Storage API boundary.

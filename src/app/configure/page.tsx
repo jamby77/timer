@@ -60,8 +60,12 @@ function ConfigurePageContent() {
       }
     }
 
-    // Store timer configuration and add to recent timers
-    storage.storeTimerConfig(finalConfig)
+    try {
+      storage.storeTimerConfig(finalConfig)
+    } catch {
+      toast.error('Failed to start timer. Please try again.')
+      return
+    }
     storage.addRecentTimer(finalConfig)
     setRecentTimers(storage.getRecentTimers())
 
