@@ -268,21 +268,20 @@ export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
   return { config: fullConfig, errors: validationErrors }
 }
 
-// Helper function to generate complex timer names
+export const estimateComplexDuration = (config: Partial<ComplexConfig>): number =>
+  (config.phases ?? []).reduce((total, { config: phase }) => {
+    if (isCountdownConfig(phase)) return total + phase.duration
+    if (isIntervalConfig(phase)) {
+      const rests = phase.skipLastRest === false ? phase.intervals : phase.intervals - 1
+      return total + phase.workDuration * phase.intervals + phase.restDuration * rests
+    }
+    if (isStopwatchConfig(phase)) return total + (phase.timeLimit || 0)
+    return total
+  }, 0)
+
 export const generateComplexTimerName = (config: Partial<ComplexConfig>): string => {
   const phaseCount = config.phases?.length || 0
-  const totalDuration =
-    config.phases?.reduce((total, phase) => {
-      const c = phase.config
-      if (isCountdownConfig(c)) return total + c.duration
-      if (isIntervalConfig(c)) {
-        return total + (c.workDuration + c.restDuration) * c.intervals - c.restDuration
-      }
-      if (isStopwatchConfig(c)) return total + (c.timeLimit || 0)
-      return total
-    }, 0) || 0
-
-  return `Complex Timer (${phaseCount} phases, ${formatDuration(totalDuration)})`
+  return `Complex Timer (${phaseCount} phases, ${formatDuration(estimateComplexDuration(config))})`
 }
 
 // Helper function to generate timer names for individual timer types

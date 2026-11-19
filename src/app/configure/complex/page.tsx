@@ -7,15 +7,11 @@ import { toast } from 'sonner'
 
 import type { ComplexConfig } from '@/types/configure'
 
-import {
-  isComplexConfig,
-  isCountdownConfig,
-  isIntervalConfig,
-  isStopwatchConfig,
-} from '@/types/configure'
+import { isComplexConfig } from '@/types/configure'
 import { saveTimerPreset } from '@/lib/configure/save-preset'
 import { storage } from '@/lib/configure/storage'
 import {
+  estimateComplexDuration,
   formatDuration,
   generateComplexTimerName,
   processTimerConfig,
@@ -41,20 +37,6 @@ import { ComplexFieldsForm } from '@/components/configure/components/complex-fie
 import { PhaseSummary } from '@/components/configure/components/complex-fields-form/components/PhaseSummary'
 import { FormErrors } from '@/components/configure/components/shared/FormErrors'
 import { PageContainer } from '@/components/PageContainer'
-
-const calculateDuration = (config: Partial<ComplexConfig>) => {
-  if (!config.phases || config.phases.length === 0) return 0
-
-  return config.phases.reduce((total, phase) => {
-    const c = phase.config
-    if (isCountdownConfig(c)) return total + c.duration
-    if (isIntervalConfig(c)) {
-      return total + (c.workDuration + c.restDuration) * c.intervals - c.restDuration
-    }
-    if (isStopwatchConfig(c)) return total + (c.timeLimit || 0)
-    return total
-  }, 0)
-}
 
 export default function ConfigureComplexTimerPage() {
   return (
@@ -145,7 +127,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
   }
 
   const totalDuration = useMemo(() => {
-    return calculateDuration(config)
+    return estimateComplexDuration(config)
   }, [config])
 
   const hasErrors = !!errors.length
@@ -229,7 +211,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
                 </InputGroup>
               </Field>
               <Field>
-                <Label>Estimated Duration</Label>
+                <Label htmlFor="estimated-duration">Estimated Duration</Label>
                 <InputGroup>
                   <InputGroupAddon>
                     <InputGroupText>
@@ -237,6 +219,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
                     </InputGroupText>
                   </InputGroupAddon>
                   <InputGroupInput
+                    id="estimated-duration"
                     value={formatDuration(totalDuration)}
                     readOnly
                     className="bg-muted"

@@ -114,7 +114,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
         <Checkbox
           id="skipLastRest"
           name="skipLastRest"
-          checked={config.skipLastRest || false}
+          checked={config.skipLastRest ?? true}
           onCheckedChange={(state) => onChange({ skipLastRest: state === true })}
         />
         Skip last rest period
