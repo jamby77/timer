@@ -73,20 +73,18 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
           />
         </Field>
       </div>
-      <FieldGroup>
-        <Field orientation="horizontal">
-          <Checkbox
-            id="skipLastRest"
-            name="skipLastRest"
-            checked={config.skipLastRest || false}
-            onCheckedChange={(state) => {
-              // Treat indeterminate as false
-              onChange({ skipLastRest: state === true })
-            }}
-          />
-          <FieldLabel htmlFor="skipLastRest">Skip last rest period</FieldLabel>
-        </Field>
-      </FieldGroup>
+      <FieldLabel
+        htmlFor="skipLastRest"
+        className="min-h-11 w-full cursor-pointer items-center gap-3 rounded-md border px-3"
+      >
+        <Checkbox
+          id="skipLastRest"
+          name="skipLastRest"
+          checked={config.skipLastRest || false}
+          onCheckedChange={(state) => onChange({ skipLastRest: state === true })}
+        />
+        Skip last rest period
+      </FieldLabel>
     </FieldGroup>
   )
 }
