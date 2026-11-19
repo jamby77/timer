@@ -166,6 +166,18 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
         {/* Form Errors */}
         <FormErrors errors={errors} />
 
+        <Field>
+          <Label htmlFor="timer-name">Timer Name*</Label>
+          <Input
+            id="timer-name"
+            className="max-sm:min-h-11"
+            value={config.name || ''}
+            onChange={(e) => updateConfig({ name: e.target.value })}
+            placeholder="Enter timer name"
+            required
+          />
+        </Field>
+
         {/* Phase Configuration */}
         <Card className={cn({ 'border-destructive': hasErrors })}>
           <CardHeader>
@@ -190,28 +202,6 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
             </CardContent>
           </Card>
         )}
-
-        {/* Timer Name */}
-        <Card className={cn({ 'border-destructive': hasErrors })}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Layers size={20} />
-              Timer Name
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Field>
-              <Label htmlFor="timer-name">Timer Name*</Label>
-              <Input
-                id="timer-name"
-                value={config.name || ''}
-                onChange={(e) => updateConfig({ name: e.target.value })}
-                placeholder="Enter timer name"
-                required
-              />
-            </Field>
-          </CardContent>
-        </Card>
 
         {/* Actions */}
         <Card className={cn({ 'border-destructive': hasErrors })}>

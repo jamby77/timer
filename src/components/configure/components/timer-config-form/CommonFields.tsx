@@ -69,6 +69,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
         <FieldLabel htmlFor="timerName">Timer Name*</FieldLabel>
         <Input
           id="timerName"
+          className="max-sm:min-h-11"
           name="timerName"
           type="text"
           value={config.name || ''}
