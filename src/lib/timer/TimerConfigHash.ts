@@ -67,7 +67,7 @@ export class TimerConfigHash {
         normalized.workDuration = config.workDuration
         normalized.restDuration = config.restDuration
         normalized.intervals = config.intervals
-        normalized.skipLastRest = config.skipLastRest || false
+        normalized.skipLastRest = config.skipLastRest ?? true
         if (config.workLabel) {
           normalized.workLabel = config.workLabel.trim()
         }

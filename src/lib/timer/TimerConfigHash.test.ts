@@ -52,3 +52,10 @@ it('includes nested phase settings and uses the runtime auto-advance default', (
     ...config, phases: config.phases.map(phase => ({ ...phase, config: { ...phase.config, countdownBeforeStart: 3 } })),
   })).toBe(false)
 })
+
+it('uses the runtime final-rest default for interval identity', () => {
+  const config = configs[2]
+  if (config.type !== TimerType.INTERVAL) throw new Error('Expected interval timer')
+  expect(TimerConfigHash.configsEqual(config, { ...config, skipLastRest: true })).toBe(true)
+  expect(TimerConfigHash.configsEqual(config, { ...config, skipLastRest: false })).toBe(false)
+})
