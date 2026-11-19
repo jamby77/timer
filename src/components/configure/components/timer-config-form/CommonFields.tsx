@@ -11,15 +11,9 @@ import type {
 import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
 
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
+import { SoundField } from '@/components/configure/components/shared/SoundField'
 import {
   CountdownFields,
   CountdownSelector,
@@ -99,28 +93,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
           </div>
         </Field>
 
-        <Field orientation="horizontal">
-          <Switch
-            id="sound-enabled"
-            checked={config.sound?.enabled ?? false}
-            onCheckedChange={(checked) =>
-              onChange({
-                sound: {
-                  ...(config.sound ?? {
-                    enabled: false,
-                    volume: 0.7,
-                  }),
-                  enabled: Boolean(checked),
-                  volume: config.sound?.volume ?? 0.7,
-                },
-              })
-            }
-          />
-          <FieldContent>
-            <FieldLabel htmlFor="sound-enabled">Sounds</FieldLabel>
-            <FieldDescription>Enable audio cues for countdown and transitions</FieldDescription>
-          </FieldContent>
-        </Field>
+        <SoundField sound={config.sound} onChange={(sound) => onChange({ sound })} />
 
         {/* Completion Message */}
         <Field>
