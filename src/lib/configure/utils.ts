@@ -170,7 +170,7 @@ export const getConfigSummary = (config: AnyTimerConfig): string => {
 }
 
 // Format duration in seconds to human-readable format
-export const formatDuration = (seconds: number): string => {
+export const formatDuration = (seconds: number, { exact = false } = {}): string => {
   if (seconds < 60) {
     return `${seconds}s`
   }
@@ -185,7 +185,8 @@ export const formatDuration = (seconds: number): string => {
   const hours = Math.floor(minutes / 60)
   const remainingMinutes = minutes % 60
 
-  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+  const hoursAndMinutes = remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+  return exact && remainingSeconds > 0 ? `${hoursAndMinutes} ${remainingSeconds}s` : hoursAndMinutes
 }
 
 // Format relative time

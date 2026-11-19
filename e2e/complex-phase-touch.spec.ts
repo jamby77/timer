@@ -227,3 +227,26 @@ test('Work/Rest summary shows the chosen rest and optional work limit on a narro
   await expect(summary).not.toContainText('Rest 2× work time')
   expect(await summary.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
 })
+
+test('Stopwatch summary shows the exact limit and updates when cleared on a narrow phone', async ({ page }) => {
+  await page.goto('/configure/complex')
+  const button = (name: string) => page.getByRole('button', { name, exact: true })
+  await button('Add Phase').tap()
+  await page.getByLabel('Phase type').tap()
+  await page.getByRole('option', { name: 'Stopwatch', exact: true }).tap()
+  for (const [field, value] of [['Hours', '01'], ['Minutes', '02'], ['Seconds', '05']]) {
+    await page.getByLabel(field, { exact: true }).pressSequentially(value)
+  }
+  await button('Add').tap()
+  const summary = page.locator('[data-slot=card]').filter({
+    has: page.getByText('Phase Summary', { exact: true }),
+  })
+  await expect(summary.getByText('1h 2m 5s time limit', { exact: true })).toBeVisible()
+  await button('Edit phase').tap()
+  for (const field of ['Hours', 'Minutes', 'Seconds']) {
+    await page.getByLabel(field, { exact: true }).pressSequentially('00')
+  }
+  await button('Save').tap()
+  await expect(summary.getByText('No time limit', { exact: true })).toBeVisible()
+  await expect(summary).not.toContainText('1h 2m 5s')
+})
