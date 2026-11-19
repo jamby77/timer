@@ -30,32 +30,31 @@ const ComplexPhaseDraft = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) =
   const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(
     () => phase.config as PhaseTimerConfig
   )
-  const [draftName, setDraftName] = useState<string>(phase.name)
+  const [customName, setCustomName] = useState<string | undefined>(() =>
+    phase.name && phase.name !== generateTimerName(phase.config) ? phase.name : undefined
+  )
+  const draftName = customName ?? generateTimerName(draftConfig)
 
   const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
-    setDraftConfig((prev) => {
-      const next = { ...prev, ...updates } as PhaseTimerConfig
-      setDraftName(generateTimerName(next))
-      return next
-    })
+    setDraftConfig((prev) => ({ ...prev, ...updates }) as PhaseTimerConfig)
   }
+
   const handleTypeChange = (type: TimerType) => {
     const nextConfig = createDefaultPhaseConfig(phaseId, type)
 
     setDraftType(type)
     setDraftConfig(nextConfig)
-    setDraftName(generateTimerName(nextConfig))
   }
 
   const handleSave = () => {
     const savedConfig: PhaseTimerConfig = {
       ...draftConfig,
-      name: draftName,
+      name: draftName || generateTimerName(draftConfig),
     } as PhaseTimerConfig
     savedConfig.id = TimerConfigHash.generateTimerId(savedConfig)
     const draft: PhaseDraft = {
       id: phaseId,
-      name: draftName,
+      name: savedConfig.name,
       type: draftType,
       config: savedConfig,
     }
@@ -78,7 +77,7 @@ const ComplexPhaseDraft = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) =
           type={draftType}
           config={draftConfig}
           name={draftName}
-          onNameChange={setDraftName}
+          onNameChange={setCustomName}
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
         />
