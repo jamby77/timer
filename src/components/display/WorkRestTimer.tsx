@@ -195,7 +195,7 @@ export function WorkRestTimer({
     return Math.round(state.currentTime / denom)
   })()
 
-  const isVisible = isRestPhase && !fullscreen && !isPreStarting
+  const isVisible = isRestPhase && !isPreStarting
 
   const isAutoStarting = useAutoStart(autoStart, handleStart)
 
