@@ -59,6 +59,7 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProp
       <div className="p-0">
         <TimePickerInput
           picker="hours"
+          aria-label="Hours"
           time={time}
           setTime={handleTimeChange}
           ref={hourRef}
@@ -70,6 +71,7 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProp
       <div className="p-0">
         <TimePickerInput
           picker="minutes"
+          aria-label="Minutes"
           time={time}
           setTime={handleTimeChange}
           ref={minuteRef}
@@ -82,6 +84,7 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProp
       <div className="p-0">
         <TimePickerInput
           picker="seconds"
+          aria-label="Seconds"
           time={time}
           setTime={handleTimeChange}
           ref={secondRef}
