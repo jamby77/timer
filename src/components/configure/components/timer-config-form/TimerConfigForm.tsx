@@ -5,7 +5,7 @@ import { CircleX, MoveLeft, PlayIcon, Save } from 'lucide-react'
 
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 
-import { TimerType } from '@/types/configure'
+import { TimerType, WorkRestMode } from '@/types/configure'
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
@@ -42,6 +42,7 @@ export const TimerConfigForm = ({
       ({
         type,
         name: getName(type),
+        ...(type === TimerType.WORKREST && { restMode: WorkRestMode.RATIO, ratio: 1 }),
       } as AnyTimerConfig)
   )
 

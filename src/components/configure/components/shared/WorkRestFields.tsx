@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 
 import type { WorkRestConfig } from '@/types/configure'
 
@@ -17,10 +17,22 @@ interface WorkRestFieldsProps {
 }
 
 export const WorkRestFields = ({
-  config: { fixedRestDuration, maxRounds, maxWorkTime, ratio, restMode },
+  config: { fixedRestDuration, maxRounds, maxWorkTime, ratio = 1, restMode = WorkRestMode.RATIO },
   onChange,
 }: WorkRestFieldsProps) => {
   const modeId = useId()
+  const previousRatio = useRef(ratio)
+  const previousFixedDuration = useRef(fixedRestDuration)
+
+  const changeMode = (mode: string) => {
+    if (mode === WorkRestMode.FIXED) {
+      previousRatio.current = ratio
+      onChange({ restMode: WorkRestMode.FIXED, ratio: undefined, fixedRestDuration: previousFixedDuration.current })
+    } else {
+      previousFixedDuration.current = fixedRestDuration
+      onChange({ restMode: WorkRestMode.RATIO, ratio: previousRatio.current, fixedRestDuration: undefined })
+    }
+  }
 
   return (
     <FieldGroup className="px-1">
@@ -31,8 +43,8 @@ export const WorkRestFields = ({
         <RadioGroup
           aria-labelledby={modeId}
           className="max-sm:grid-cols-2 max-sm:gap-2"
-          value={restMode || WorkRestMode.RATIO}
-          onValueChange={(value) => onChange({ restMode: value as WorkRestMode })}
+          value={restMode}
+          onValueChange={changeMode}
         >
           {([WorkRestMode.RATIO, WorkRestMode.FIXED] as const).map((mode) => (
             <Label
@@ -58,10 +70,10 @@ export const WorkRestFields = ({
               min={0.1}
               max={10}
               step={0.1}
-              defaultValue={[ratio || 0]}
+              value={[ratio]}
               onValueChange={(value) => onChange({ ratio: value[0] })}
             />
-            <span className="text-lg font-bold">{ratio || 0.0}</span>
+            <span className="text-lg font-bold">{ratio}</span>
           </div>
         </Field>
       )}
