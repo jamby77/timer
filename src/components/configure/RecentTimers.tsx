@@ -43,18 +43,22 @@ export const RecentTimers = ({ timers, onStartTimer, onRemoveTimer }: RecentTime
   return (
     <div className="flex w-full items-center justify-center">
       <Carousel
-        className="relative w-full max-w-60 sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
+        className="relative min-w-0 w-full sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
         opts={{ align: 'start' }}
       >
         <CarouselContent>
           {displayTimers.map((timer) => (
-            <CarouselItem key={timer.id} className="min-w-52 basis-62.5 md:basis-1/3 lg:basis-1/5">
+            <CarouselItem key={timer.id} className="basis-full sm:min-w-52 sm:basis-62.5 md:basis-1/3 lg:basis-1/5">
               <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        {displayTimers.length > 1 && (
+          <div className="mt-2 flex justify-center gap-3 sm:contents">
+            <CarouselPrevious className="max-sm:static max-sm:size-11 max-sm:translate-y-0" />
+            <CarouselNext className="max-sm:static max-sm:size-11 max-sm:translate-y-0" />
+          </div>
+        )}
       </Carousel>
     </div>
   )
@@ -88,7 +92,7 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
             aria-labelledby={`remove-timer-${timer.id}`}
             size="icon"
             onClick={handleRemove}
-            className="rounded-full"
+            className="rounded-full max-sm:size-11"
             variant="destructive"
           >
             <X size={4} />
@@ -109,7 +113,7 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
           {formatRelativeTime(timer.startedAt)}
         </span>
         <CardAction>
-          <Button size="sm" onClick={handleStart}>
+          <Button size="sm" className="max-sm:min-h-11" onClick={handleStart}>
             <PlayIcon size={4} className="fill-tm-play stroke-card" />
             Start
           </Button>
