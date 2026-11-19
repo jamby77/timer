@@ -188,11 +188,18 @@ test('interval estimate follows the final rest setting in a complex workout', as
   await page.getByRole('button', { name: 'Add', exact: true }).tap()
   const estimate = page.getByLabel('Estimated Duration', { exact: true })
   const name = page.getByLabel('Timer Name*', { exact: true })
+  const summary = page.locator('[data-slot=card]').filter({
+    has: page.getByText('Phase Summary', { exact: true }),
+  })
+  await expect(summary).toContainText('3 rounds · Final rest included')
+  await expect(summary).toContainText('30s work / 10s rest')
   await expect(estimate).toHaveValue('2m')
   await expect(name).toHaveValue(/, 2m\)$/)
   await page.getByRole('button', { name: 'Edit phase' }).tap()
   await skip.tap()
   await page.getByRole('button', { name: 'Save', exact: true }).tap()
+  await expect(summary).toContainText('3 rounds · Final rest skipped')
+  expect(await summary.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
   await expect(estimate).toHaveValue('1m 50s')
   await expect(name).toHaveValue(/, 1m 50s\)$/)
 })
