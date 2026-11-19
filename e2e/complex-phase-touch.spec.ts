@@ -174,7 +174,14 @@ test('phase summary keeps long unbroken names and duration details inside the ph
   const titleBounds = (await title.boundingBox())!
   expect(titleBounds.x + titleBounds.width).toBeLessThanOrEqual(Math.min(320, bounds.x + bounds.width))
   expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
-  await expect(summary.getByText('Countdown - 60s', { exact: true })).toBeVisible()
+  await expect(summary.getByText('Countdown · 1m', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Edit phase' }).tap()
+  for (const [field, value] of [['Hours', '01'], ['Minutes', '02'], ['Seconds', '05']]) {
+    await page.getByLabel(field, { exact: true }).pressSequentially(value)
+  }
+  await page.getByRole('button', { name: 'Save', exact: true }).tap()
+  await expect(summary.getByText('Countdown · 1h 2m 5s', { exact: true })).toBeVisible()
+  expect(await summary.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
 })
 
 test('interval estimate follows the final rest setting in a complex workout', async ({ page }) => {
