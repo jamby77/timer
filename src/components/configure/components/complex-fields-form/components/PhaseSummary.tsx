@@ -35,10 +35,13 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
                 {isWorkRestConfig(c) ? 'Work/Rest' : TIMER_TYPE_LABELS[phase.type]}
                 {isCountdownConfig(c) && <span> - {c.duration}s</span>}
                 {isIntervalConfig(c) && (
-                  <span>
-                    {' '}
-                    - {c.workDuration}s work / {c.restDuration}s rest × {c.intervals}
-                  </span>
+                  <>
+                    <div>
+                      {c.intervals} {c.intervals === 1 ? 'round' : 'rounds'} ·{' '}
+                      {c.skipLastRest === false ? 'Final rest included' : 'Final rest skipped'}
+                    </div>
+                    <div>{c.workDuration}s work / {c.restDuration}s rest</div>
+                  </>
                 )}
                 {isStopwatchConfig(c) && c.timeLimit && <span> - {c.timeLimit}s limit</span>}
                 {isWorkRestConfig(c) && (
