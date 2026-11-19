@@ -22,14 +22,15 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
         const Icon = TIMER_TYPE_ICONS[phase.type]
         const c = phase.config
         return (
-          <div key={phase.id} className="flex items-center gap-3 rounded-lg border p-3">
-            <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full">
+          <div key={phase.id} className="flex items-center gap-3 rounded-lg border p-3 max-sm:items-start">
+            <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-full">
               <span className="text-sm font-medium">{index + 1}</span>
             </div>
-            <Icon className="text-muted-foreground h-4 w-4" />
-            <div className="flex-1">
-              <div className="font-medium">{phase.name}</div>
+            <Icon className="text-muted-foreground size-4 shrink-0 max-sm:hidden" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <div className="wrap-anywhere font-medium">{phase.name}</div>
               <div className="text-muted-foreground text-sm">
+                <Icon className="mr-1 inline-block size-4 align-text-bottom sm:hidden" aria-hidden="true" />
                 {TIMER_TYPE_LABELS[phase.type]}
                 {isCountdownConfig(c) && <span> - {c.duration}s</span>}
                 {isIntervalConfig(c) && (

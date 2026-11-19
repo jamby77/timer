@@ -158,3 +158,21 @@ test('long phase names remain readable beside their touch controls', async ({ pa
   await edit.tap()
   await expect(page.getByLabel('Phase name')).toHaveValue(name)
 })
+
+test('phase summary keeps long unbroken names and duration details inside the phone screen', async ({ page }) => {
+  await page.goto('/configure/complex')
+  await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+  const name = 'SingleLegRomanianDeadliftWithContralateralReach'
+  await page.getByLabel('Phase name').fill(name)
+  await page.getByRole('button', { name: 'Add', exact: true }).tap()
+  const summary = page.locator('[data-slot=card]').filter({
+    has: page.getByText('Phase Summary', { exact: true }),
+  })
+  const title = summary.getByText(name, { exact: true })
+  await title.scrollIntoViewIfNeeded()
+  const bounds = (await summary.boundingBox())!
+  const titleBounds = (await title.boundingBox())!
+  expect(titleBounds.x + titleBounds.width).toBeLessThanOrEqual(Math.min(320, bounds.x + bounds.width))
+  expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+  await expect(summary.getByText('Countdown - 60s', { exact: true })).toBeVisible()
+})
