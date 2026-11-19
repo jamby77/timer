@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import cx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
+import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 
 interface LapHistoryProps {
   laps: LapEntry[]
@@ -18,58 +18,22 @@ interface LapHistoryProps {
   onClearHistory?: () => void
 }
 
-const ExpandButton = ({
-  label,
-  opened = false,
-  onClick,
-}: {
-  label?: string
-  opened?: boolean
-  onClick?: () => void
-}) => {
-  return (
-    <Button
-      size="sm"
-      className="text-card-foreground mx-2 bg-transparent p-0 px-1 shadow-none transition-colors hover:bg-transparent"
-      aria-label={label}
-      onClick={onClick}
-    >
-      <ChevronDown
-        className={cn('size-4 transition-transform duration-300 ease-in-out', {
-          'rotate-270': opened,
-        })}
-      />
-    </Button>
-  )
-}
-
 const CollapsedHeader = ({
+  id,
   lastLapTime,
   bestLapTime,
 }: {
+  id: string
   lastLapTime: string
   bestLapTime: string
 }) => (
-  <Item className="w-full" size="sm">
+  <span id={id} className="flex flex-wrap items-center gap-2.5">
     <span className="text-accent-foreground font-medium">Last lap</span>
     <span className="text-card-foreground font-mono">{lastLapTime}</span>
     <span>/</span>
     <span className="text-accent-foreground font-medium">Best lap</span>
     <span className="text-card-foreground font-mono">{bestLapTime}</span>
-  </Item>
-)
-
-const ExpandedHeader = ({ onClearHistory }: { onClearHistory?: () => void }) => (
-  <Item className="w-full pr-0" size="sm">
-    <ItemContent>
-      <ItemTitle className="text-foreground text-lg font-semibold">Lap History</ItemTitle>
-    </ItemContent>
-    <ItemActions>
-      <Button variant="destructive" className="uppercase" size="sm" onClick={onClearHistory}>
-        Clear
-      </Button>
-    </ItemActions>
-  </Item>
+  </span>
 )
 
 export function LapHistory({
@@ -79,9 +43,8 @@ export function LapHistory({
   onClearHistory,
   initialExpanded = false,
 }: LapHistoryProps) {
+  const summaryId = useId()
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
-
-  // const toggleExpand = () => setIsExpanded(!isExpanded);
 
   const handleClearHistory = () => {
     onClearHistory?.()
@@ -101,22 +64,31 @@ export function LapHistory({
     >
       {/*// Compact view - show only last lap*/}
       <div
-        className={cn('flex items-center justify-between gap-1 rounded-md text-sm', {
+        className={cn('flex items-center justify-between gap-2 rounded-md text-sm', {
           'bg-background/50': !isExpanded,
         })}
       >
-        <CollapsibleTrigger role="button" className="w-full cursor-pointer">
-          {!isExpanded && (
+        <CollapsibleTrigger
+          aria-describedby={isExpanded ? undefined : summaryId}
+          aria-label={isExpanded ? 'Collapse lap history' : 'Expand lap history'}
+          className="flex min-h-11 flex-1 cursor-pointer items-center justify-between gap-2 px-4 py-3 text-left"
+        >
+          {isExpanded ? (
+            <span className="text-lg font-semibold">Lap History</span>
+          ) : (
             <CollapsedHeader
+              id={summaryId}
               lastLapTime={formatTime(lastLap?.lapTime || 0)}
               bestLapTime={formatTime(bestLap?.lapTime || 0)}
             />
           )}
-          {isExpanded && <ExpandedHeader onClearHistory={handleClearHistory} />}
+          <ChevronDown aria-hidden="true" className={cn('size-4 shrink-0', isExpanded && 'rotate-180')} />
         </CollapsibleTrigger>
-        <CollapsibleTrigger asChild>
-          <ExpandButton label="Expand lap history" opened={isExpanded} />
-        </CollapsibleTrigger>
+        {isExpanded && onClearHistory && (
+          <Button variant="destructive" className="mr-2 min-h-11 min-w-11 uppercase" size="sm" onClick={handleClearHistory}>
+            Clear
+          </Button>
+        )}
       </div>
       <CollapsibleContent
         asChild
