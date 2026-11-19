@@ -23,6 +23,8 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
+  FieldLegend,
+  FieldSet,
 } from '@/components/ui/field'
 import { SwitchField } from '@/components/configure/components/shared/SwitchField'
 import { SoundField } from '@/components/configure/components/shared/SoundField'
@@ -261,21 +263,17 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
 
                 <SoundField sound={config.sound} onChange={(sound) => onChange({ sound })} />
 
-                <Field>
-                  <FieldLabel>
-                    <TimePicker
-                      value={config.overallTimeLimit || 0}
-                      onTimeChange={(value) =>
-                        onChange({
-                          overallTimeLimit: value > 0 ? value : undefined,
-                        })
-                      }
-                      min={0}
-                    />
-                    Overall Time Limit
-                  </FieldLabel>
+                <FieldSet className="min-w-0 gap-2">
+                  <FieldLegend variant="label" className="mb-2">Overall Time Limit</FieldLegend>
+                  <TimePicker
+                    value={config.overallTimeLimit || 0}
+                    onTimeChange={(value) =>
+                      onChange({ overallTimeLimit: value > 0 ? value : undefined })
+                    }
+                    min={0}
+                  />
                   <FieldDescription>Set 00:00:00 for no overall time limit.</FieldDescription>
-                </Field>
+                </FieldSet>
               </FieldGroup>
             </CardContent>
           </Card>

@@ -59,3 +59,26 @@ test('auto-advance toggles from its description, row edge, and keyboard', async 
   await expect(toggle).not.toBeChecked()
   await expect(sounds).not.toBeChecked()
 })
+
+test('overall time limit fits all three touch targets below its title', async ({ page }) => {
+  await page.goto('/configure/complex')
+  await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+  await page.getByLabel('Phase name').fill('Warmup')
+  await page.getByRole('button', { name: 'Add', exact: true }).tap()
+
+  const limit = page.getByRole('group', { name: 'Overall Time Limit', exact: true })
+  await limit.scrollIntoViewIfNeeded()
+  const title = (await limit.locator('legend').boundingBox())!
+  for (const [unit, value] of [['Hours', '01'], ['Minutes', '02'], ['Seconds', '03']]) {
+    const input = limit.getByLabel(unit, { exact: true })
+    const box = (await input.boundingBox())!
+    expect(box.y).toBeGreaterThanOrEqual(title.y + title.height)
+    expect(box.width).toBeGreaterThanOrEqual(44)
+    expect(box.height).toBeGreaterThanOrEqual(44)
+    expect(box.x + box.width).toBeLessThanOrEqual(320)
+    await page.touchscreen.tap(box.x + box.width - 2, box.y + box.height / 2)
+    await expect(input).toBeFocused()
+    await input.pressSequentially(value)
+    await expect(input).toHaveValue(value)
+  }
+})
