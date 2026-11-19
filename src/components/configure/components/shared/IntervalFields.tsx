@@ -15,7 +15,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
   const restPlaceholder = 'Rest'
   return (
     <FieldGroup>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="workDuration">Work Duration</FieldLabel>
           <TimePicker
