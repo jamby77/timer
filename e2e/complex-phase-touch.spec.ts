@@ -111,3 +111,28 @@ test('phase names stay editable by touch and survive settings changes', async ({
   await expect(name).toHaveValue('Hill climb')
   await expect(type).toHaveText('Stopwatch')
 })
+
+test('phase type menu supports edge taps and keyboard selection on a narrow phone', async ({ page }) => {
+  await page.goto('/configure/complex')
+  await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+  const type = page.getByRole('combobox', { name: 'Phase type' })
+  const trigger = (await type.boundingBox())!
+  expect(trigger.height).toBeGreaterThanOrEqual(44)
+  await type.tap({ position: { x: trigger.width - 4, y: 4 } })
+  const options = page.getByRole('option')
+  await expect(options).toHaveCount(4)
+  for (const option of await options.all()) {
+    await expect(option).toBeInViewport({ ratio: 1 })
+    expect(await option.evaluate((el) => el.clientHeight)).toBeGreaterThanOrEqual(44)
+  }
+  const interval = page.getByRole('option', { name: 'Interval', exact: true })
+  await interval.tap({ position: { x: 4, y: 4 } })
+  await expect(type).toHaveText('Interval')
+  await expect(page.getByLabel('Number of Intervals')).toBeVisible()
+  await type.press('Enter')
+  await expect(interval).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('option', { name: 'Countdown', exact: true })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(type).toHaveText('Countdown')
+})

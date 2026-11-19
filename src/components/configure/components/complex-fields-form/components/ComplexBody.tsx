@@ -48,14 +48,14 @@ export const ComplexBody = ({
       <Field>
         <FieldLabel htmlFor="phase-type">Phase type</FieldLabel>
         <Select value={type} onValueChange={(value) => onTypeChange(value as TimerType)}>
-          <SelectTrigger id="phase-type">
+          <SelectTrigger id="phase-type" className="max-sm:min-h-11 max-sm:text-base">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(TIMER_TYPE_LABELS)
               .filter(([type]) => type !== 'COMPLEX')
               .map(([type, label]) => (
-                <SelectItem key={type} value={type}>
+                <SelectItem key={type} value={type} className="max-sm:min-h-11 max-sm:text-base">
                   {label}
                 </SelectItem>
               ))}
