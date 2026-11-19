@@ -136,3 +136,25 @@ test('phase type menu supports edge taps and keyboard selection on a narrow phon
   await page.keyboard.press('Enter')
   await expect(type).toHaveText('Countdown')
 })
+
+test('long phase names remain readable beside their touch controls', async ({ page }) => {
+  await page.goto('/configure/complex')
+  await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+  const name = 'Run uphill at a steady pace then recover on the way down'
+  await page.getByLabel('Phase name').fill(name)
+  await page.getByRole('button', { name: 'Add', exact: true }).tap()
+  const card = page.locator('[data-slot=card]').filter({
+    has: page.getByRole('button', { name: 'Edit phase' }),
+  }).last()
+  const title = card.locator('[data-slot=card-title]')
+  await expect(title).toContainText(name)
+  expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+  const edit = card.getByRole('button', { name: 'Edit phase' })
+  const down = card.getByRole('button', { name: 'Move phase down' })
+  const editBox = (await edit.boundingBox())!
+  const downBox = (await down.boundingBox())!
+  expect(downBox.y).toBe(editBox.y)
+  expect(downBox.x + downBox.width).toBeLessThanOrEqual(320)
+  await edit.tap()
+  await expect(page.getByLabel('Phase name')).toHaveValue(name)
+})

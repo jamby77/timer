@@ -174,18 +174,18 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
         )}
 
         {phases.map((phase, index) => (
-          <Card key={phase.id} className="relative">
-            <CardHeader>
-              <div className="flex items-center gap-2 overflow-hidden">
-                <GripVertical className="text-muted-foreground size-5" />
-                <CardTitle className="truncate text-sm">
+          <Card key={phase.id} className="relative max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-between">
+            <CardHeader className="max-sm:contents">
+              <div className="flex items-center gap-2 overflow-hidden max-sm:w-full max-sm:p-2">
+                <GripVertical className="text-muted-foreground size-5 max-sm:hidden" />
+                <CardTitle className="text-sm max-sm:wrap-anywhere max-sm:leading-snug sm:truncate">
                   {phase.name}{' '}
                   <span className="text-muted-foreground hidden text-xs sm:inline">
                     ({TIMER_TYPE_LABELS[phase.type]})
                   </span>
                 </CardTitle>
               </div>
-              <CardAction className="max-sm:flex max-sm:gap-2 max-sm:[&>button]:size-11">
+              <CardAction className="max-sm:flex max-sm:gap-1 max-sm:[&>button]:size-11">
                 <Button
                   onClick={() => movePhase(phase.id, 'up')}
                   size="sm"
@@ -207,7 +207,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                 </Button>
               </CardAction>
             </CardHeader>
-            <CardFooter className="flex items-center justify-start gap-1 max-sm:gap-2 max-sm:[&>button]:size-11">
+            <CardFooter className="flex items-center justify-start gap-1 max-sm:px-0 max-sm:[&>button]:size-11">
               <Button
                 onClick={() => setEditPhaseId(phase.id)}
                 variant="ghost"
