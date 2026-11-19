@@ -82,7 +82,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
       <FieldGroup>
         <Field orientation="vertical">
           <FieldLabel htmlFor="countdownBeforeStart">Countdown</FieldLabel>
-          <div className="max-w-48">
+          <div className="sm:max-w-48">
             <CountdownSelector
               countdown={config.countdownBeforeStart}
               onChange={(e) => {
