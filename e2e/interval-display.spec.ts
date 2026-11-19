@@ -24,6 +24,8 @@ for (const skipLastRest of [false, true]) {
         { skipLastRest, skip }
       )
       await page.goto('/?id=display')
+      const progress = page.getByRole('progressbar', { name: 'Timer progress', exact: true })
+      await expect(progress).toHaveAttribute('aria-valuenow', '0')
       const header = page.locator('[data-slot="card-header"]')
       await expect(header.getByText('1 of 2 rounds', { exact: true })).toBeVisible()
       await expect(header).toContainText('Display verification')
@@ -49,6 +51,9 @@ for (const skipLastRest of [false, true]) {
       await expect(header.getByText('2 of 2 rounds', { exact: true })).toBeVisible()
       await expect(header).toContainText('Display verification')
       await expect(page.locator('[data-slot="card-content"]')).toHaveText('00:00.00')
+      await expect(progress).toHaveAttribute('aria-valuenow', '100')
+      const finalDuration = skip ? (skipLastRest ? '00:30.00' : '00:20.00') : '00:01.00'
+      await expect(page.locator('[data-slot="card-footer"]').getByText(finalDuration, { exact: true })).toBeVisible()
       await page.getByRole('button', { name: 'Start intervals', exact: true }).click()
       await expect(header.getByText('1 of 2 rounds', { exact: true })).toBeVisible()
     })
@@ -80,4 +85,5 @@ test('stopping intervals restores the configured first duration and round', asyn
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
   await expect(page.getByText('1 of 3 rounds', { exact: true })).toBeVisible()
   await expect(page.locator('[data-slot="card-content"]')).toHaveText('00:30.00')
+  await expect(page.getByRole('progressbar', { name: 'Timer progress' })).toHaveAttribute('aria-valuenow', '0')
 })
