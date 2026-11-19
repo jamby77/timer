@@ -20,12 +20,11 @@ import {
 } from '@/components/ui/card'
 import {
   Field,
-  FieldContent,
   FieldDescription,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-import { Switch } from '@/components/ui/switch'
+import { SwitchField } from '@/components/configure/components/shared/SwitchField'
 import { SoundField } from '@/components/configure/components/shared/SoundField'
 import { ComplexPhaseAdd } from '@/components/configure/components/complex-fields-form/components/ComplexPhaseAdd'
 import { CountdownSelector } from '@/components/configure/components/shared/CountdownSelector'
@@ -240,19 +239,12 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
             </CardHeader>
             <CardContent>
               <FieldGroup>
-                <Field orientation="horizontal">
-                  <Switch
-                    id="auto-advance"
-                    checked={config.autoAdvance ?? true}
-                    onCheckedChange={(checked) => onChange({ autoAdvance: Boolean(checked) })}
-                  />
-                  <FieldContent>
-                    <FieldLabel htmlFor="auto-advance">Auto-advance phases</FieldLabel>
-                    <FieldDescription>
-                      Automatically move to next phase when current completes
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
+                <SwitchField
+                  title="Auto-advance phases"
+                  description="Automatically move to next phase when current completes"
+                  checked={config.autoAdvance ?? true}
+                  onCheckedChange={(autoAdvance) => onChange({ autoAdvance })}
+                />
 
                 <Field orientation="vertical">
                   <FieldLabel htmlFor="countdownBeforeStart">Countdown</FieldLabel>
