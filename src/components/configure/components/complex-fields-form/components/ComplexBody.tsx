@@ -35,6 +35,17 @@ export const ComplexBody = ({
   return (
     <FieldGroup>
       <Field>
+        <FieldLabel htmlFor="phase-name">Phase name</FieldLabel>
+        <Input
+          id="phase-name"
+          className="max-sm:min-h-11"
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+          placeholder={generatedName}
+        />
+      </Field>
+
+      <Field>
         <FieldLabel htmlFor="phase-type">Phase type</FieldLabel>
         <Select value={type} onValueChange={(value) => onTypeChange(value as TimerType)}>
           <SelectTrigger id="phase-type">
@@ -57,16 +68,6 @@ export const ComplexBody = ({
         config={config}
         onChange={(updates) => onConfigChange(updates as Partial<PhaseTimerConfig>)}
       />
-
-      <Field>
-        <FieldLabel htmlFor="phase-name">Phase name</FieldLabel>
-        <Input
-          id="phase-name"
-          value={name}
-          onChange={(e) => onNameChange(e.target.value)}
-          placeholder={generatedName}
-        />
-      </Field>
     </FieldGroup>
   )
 }

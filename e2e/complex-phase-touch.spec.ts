@@ -82,3 +82,32 @@ test('overall time limit fits all three touch targets below its title', async ({
     await expect(input).toHaveValue(value)
   }
 })
+
+test('phase names stay editable by touch and survive settings changes', async ({ page }) => {
+  await page.goto('/configure/complex')
+  await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+  const name = page.getByLabel('Phase name')
+  const type = page.getByLabel('Phase type')
+  const minutes = page.getByLabel('Minutes', { exact: true })
+  await minutes.press('ArrowUp')
+  await expect(name).toHaveValue('Countdown (2m)')
+  await name.fill('Hill climb')
+  await minutes.press('ArrowUp')
+  await expect(name).toHaveValue('Hill climb')
+  const box = (await name.boundingBox())!
+  expect(box.height).toBeGreaterThanOrEqual(44)
+  expect(box.y + box.height).toBeLessThanOrEqual((await type.boundingBox())!.y)
+  await name.tap({ position: { x: box.width - 4, y: 4 } })
+  await expect(name).toBeFocused()
+  await page.getByRole('button', { name: 'Add', exact: true }).tap()
+
+  const edit = page.getByRole('button', { name: 'Edit phase' })
+  await edit.tap()
+  await type.tap()
+  await page.getByRole('option', { name: 'Stopwatch', exact: true }).tap()
+  await expect(name).toHaveValue('Hill climb')
+  await page.getByRole('button', { name: 'Save', exact: true }).tap()
+  await edit.tap()
+  await expect(name).toHaveValue('Hill climb')
+  await expect(type).toHaveText('Stopwatch')
+})

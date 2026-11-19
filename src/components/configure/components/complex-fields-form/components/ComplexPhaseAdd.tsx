@@ -33,34 +33,30 @@ export const ComplexPhaseAdd = ({
   const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(() =>
     createDefaultPhaseConfig('', TimerType.COUNTDOWN)
   )
-  const [draftName, setDraftName] = useState<string>(() => generateTimerName(draftConfig))
+  const [customName, setCustomName] = useState<string>()
+  const draftName = customName ?? generateTimerName(draftConfig)
 
   const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
-    setDraftConfig((prev) => {
-      const next = { ...prev, ...updates } as PhaseTimerConfig
-      setDraftName(generateTimerName(next))
-      return next
-    })
+    setDraftConfig((prev) => ({ ...prev, ...updates }) as PhaseTimerConfig)
   }
 
   const handleTypeChange = (type: TimerType) => {
     const nextConfig = createDefaultPhaseConfig('', type)
     setDraftConfig(nextConfig)
     setDraftType(type)
-    setDraftName(generateTimerName(nextConfig))
   }
 
   const draft: PhaseDraft = useMemo(() => {
     const phaseConfig: PhaseTimerConfig = {
       ...draftConfig,
-      name: draftName,
+      name: draftName || generateTimerName(draftConfig),
     } as PhaseTimerConfig
     const id = createPhaseId(phaseConfig)
     phaseConfig.id = TimerConfigHash.generateTimerId(phaseConfig)
 
     return {
       id,
-      name: draftName,
+      name: phaseConfig.name,
       type: draftType,
       config: phaseConfig,
     }
@@ -92,7 +88,7 @@ export const ComplexPhaseAdd = ({
           type={draftType}
           config={draftConfig}
           name={draftName}
-          onNameChange={setDraftName}
+          onNameChange={setCustomName}
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
         />
