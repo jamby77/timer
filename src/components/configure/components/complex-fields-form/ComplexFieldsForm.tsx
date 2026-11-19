@@ -156,6 +156,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
               setIsAddingPhase(true)
             }}
             variant="outline"
+            className="max-sm:min-h-11"
           >
             <Plus size={16} className="mr-2" />
             Add Phase
@@ -182,7 +183,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                   </span>
                 </CardTitle>
               </div>
-              <CardAction>
+              <CardAction className="max-sm:flex max-sm:gap-2 max-sm:[&>button]:size-11">
                 <Button
                   onClick={() => movePhase(phase.id, 'up')}
                   size="sm"
@@ -204,7 +205,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                 </Button>
               </CardAction>
             </CardHeader>
-            <CardFooter className="flex items-center justify-start gap-1">
+            <CardFooter className="flex items-center justify-start gap-1 max-sm:gap-2 max-sm:[&>button]:size-11">
               <Button
                 onClick={() => setEditPhaseId(phase.id)}
                 variant="ghost"

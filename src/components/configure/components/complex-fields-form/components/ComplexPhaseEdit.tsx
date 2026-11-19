@@ -83,7 +83,7 @@ const ComplexPhaseDraft = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) =
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
         />
-        <div className="flex gap-2">
+        <div className="flex gap-2 max-sm:[&>button]:min-h-11">
           <Button type="button" onClick={handleSave} className="grow">
             <Save />
             Save
