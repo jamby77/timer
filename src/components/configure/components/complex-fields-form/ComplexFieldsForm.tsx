@@ -26,6 +26,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
+import { SoundField } from '@/components/configure/components/shared/SoundField'
 import { ComplexPhaseAdd } from '@/components/configure/components/complex-fields-form/components/ComplexPhaseAdd'
 import { CountdownSelector } from '@/components/configure/components/shared/CountdownSelector'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
@@ -266,27 +267,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                   </div>
                 </Field>
 
-                <Field orientation="horizontal">
-                  <Switch
-                    id="sound-enabled"
-                    checked={config.sound?.enabled ?? false}
-                    onCheckedChange={(checked) =>
-                      onChange({
-                        sound: {
-                          ...(config.sound ?? { enabled: false, volume: 0.7 }),
-                          enabled: Boolean(checked),
-                          volume: config.sound?.volume ?? 0.7,
-                        },
-                      })
-                    }
-                  />
-                  <FieldContent>
-                    <FieldLabel htmlFor="sound-enabled">Sounds</FieldLabel>
-                    <FieldDescription>
-                      Enable audio cues for countdown and transitions
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
+                <SoundField sound={config.sound} onChange={(sound) => onChange({ sound })} />
 
                 <Field>
                   <FieldLabel>
