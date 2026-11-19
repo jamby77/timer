@@ -36,7 +36,7 @@ test('restores and saves the selected ratio after editing fixed rest', async ({ 
   await page.locator('input[name=seconds]').first().fill('15')
   await page.getByText('Ratio-based', { exact: true }).tap()
   await expect(slider).toHaveAttribute('aria-valuenow', selected!)
-  await expect(page.getByText(selected!, { exact: true })).toBeVisible()
+  await expect(page.getByText(selected!, { exact: true }).filter({ visible: true })).toBeVisible()
   await page.getByLabel('Max rounds').selectOption('4')
   await page.getByRole('button', { name: 'Save as Preset' }).tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
@@ -45,4 +45,22 @@ test('restores and saves the selected ratio after editing fixed rest', async ({ 
   )!).config)
   expect(config.ratio).toBe(Number(selected))
   expect(config.fixedRestDuration).toBeUndefined()
+})
+
+test('ratio slider accepts touch above and below the track on a narrow phone', async ({ page }) => {
+  await page.goto('/configure')
+  await page.getByRole('heading', { name: 'Work/Rest Ratio', exact: true }).tap()
+  const control = page.locator('[data-slot=slider]')
+  const box = (await control.boundingBox())!
+  expect(box.height).toBeGreaterThanOrEqual(44)
+  expect(box.x).toBeGreaterThanOrEqual(0)
+  expect(box.x + box.width).toBeLessThanOrEqual(320)
+
+  const thumb = page.getByRole('slider')
+  await control.tap({ position: { x: box.width / 4, y: 2 } })
+  await expect(thumb).toHaveAttribute('aria-valuenow', '2.6')
+  await control.tap({ position: { x: 3 * box.width / 4, y: box.height - 2 } })
+  await expect(thumb).toHaveAttribute('aria-valuenow', '7.5')
+  await thumb.press('ArrowLeft')
+  await expect(thumb).toHaveAttribute('aria-valuenow', '7.4')
 })
