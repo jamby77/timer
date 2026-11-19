@@ -64,7 +64,7 @@ export const WorkRestFields = ({
           <FieldLabel htmlFor="ratio">Work/Rest Ratio</FieldLabel>
           <div className="flex items-center justify-between gap-2">
             <Slider
-              className="max-w-[90%]"
+              className="max-w-[90%] max-sm:min-h-11 max-sm:[&_[data-slot=slider-thumb]]:size-6"
               id="ratio"
               name="ratio"
               min={0.1}
@@ -73,7 +73,7 @@ export const WorkRestFields = ({
               value={[ratio]}
               onValueChange={(value) => onChange({ ratio: value[0] })}
             />
-            <span className="text-lg font-bold">{ratio}</span>
+            <span className="text-lg font-bold tabular-nums max-sm:min-w-[3ch] max-sm:text-right">{ratio}</span>
           </div>
         </Field>
       )}
