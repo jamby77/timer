@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 import type { WorkRestConfig } from '@/types/configure'
 
 import { WorkRestMode } from '@/types/configure'
@@ -18,22 +20,30 @@ export const WorkRestFields = ({
   config: { fixedRestDuration, maxRounds, maxWorkTime, ratio, restMode },
   onChange,
 }: WorkRestFieldsProps) => {
+  const modeId = useId()
+
   return (
     <FieldGroup className="px-1">
       <Field>
-        <FieldLabel htmlFor="restMode">Rest Mode</FieldLabel>
+        <FieldLabel asChild>
+          <span id={modeId}>Rest Mode</span>
+        </FieldLabel>
         <RadioGroup
-          defaultValue={restMode || WorkRestMode.RATIO}
+          aria-labelledby={modeId}
+          className="max-sm:grid-cols-2 max-sm:gap-2"
+          value={restMode || WorkRestMode.RATIO}
           onValueChange={(value) => onChange({ restMode: value as WorkRestMode })}
         >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value={WorkRestMode.RATIO} id={WorkRestMode.RATIO} />
-            <Label htmlFor={WorkRestMode.RATIO}>Ratio-based</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value={WorkRestMode.FIXED} id={WorkRestMode.FIXED} />
-            <Label htmlFor={WorkRestMode.FIXED}>Fixed rest</Label>
-          </div>
+          {([WorkRestMode.RATIO, WorkRestMode.FIXED] as const).map((mode) => (
+            <Label
+              key={mode}
+              htmlFor={`${modeId}-${mode}`}
+              className="cursor-pointer max-sm:min-h-11 max-sm:rounded-md max-sm:border max-sm:px-3 max-sm:has-[[aria-checked=true]]:border-primary max-sm:has-[[aria-checked=true]]:bg-accent"
+            >
+              <RadioGroupItem id={`${modeId}-${mode}`} value={mode} />
+              {mode === WorkRestMode.RATIO ? 'Ratio-based' : 'Fixed rest'}
+            </Label>
+          ))}
         </RadioGroup>
       </Field>
 
