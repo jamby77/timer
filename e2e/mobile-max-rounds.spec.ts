@@ -1,0 +1,31 @@
+import { expect, test } from 'playwright/test'
+
+test.use({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true })
+
+test('Max rounds is easy to tap and retains the selection across rest modes', async ({ page }) => {
+  await page.goto('/configure')
+  await page.getByRole('heading', { name: 'Work/Rest Ratio', exact: true }).tap()
+  const rounds = page.getByRole('combobox', { name: 'Max rounds', exact: true })
+  const box = (await rounds.boundingBox())!
+  expect(box.height).toBeGreaterThanOrEqual(44)
+  expect(box.x).toBeGreaterThanOrEqual(0)
+  expect(box.x + box.width).toBeLessThanOrEqual(320)
+  await rounds.tap({ position: { x: box.width - 4, y: 4 } })
+  await expect(rounds).toBeFocused()
+  await rounds.press('Escape')
+  await rounds.press('Home')
+  await rounds.press('ArrowDown')
+  await expect(rounds).toHaveValue('1')
+  await rounds.press('End')
+  await expect(rounds).toHaveValue('100')
+  await page.getByRole('radio', { name: 'Fixed rest' }).tap()
+  await expect(rounds).toHaveValue('100')
+  await page.locator('input[name=seconds]').first().pressSequentially('15')
+  await rounds.selectOption('8')
+  await page.getByLabel(/Timer Name/).fill('Eight rounds')
+  await page.getByRole('button', { name: 'Save as Preset' }).tap()
+  await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
+  await page.reload()
+  await page.getByRole('heading', { name: 'Eight rounds', exact: true }).tap()
+  await expect(rounds).toHaveValue('8')
+})
