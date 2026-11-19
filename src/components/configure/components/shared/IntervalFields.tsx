@@ -49,10 +49,11 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="workLabel">Work Label</FieldLabel>
           <Input
+            className="max-sm:min-h-11"
             id="workLabel"
             name="workLabel"
             type="text"
@@ -64,6 +65,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
         <Field>
           <FieldLabel htmlFor="restLabel">Rest Label</FieldLabel>
           <Input
+            className="max-sm:min-h-11"
             id="restLabel"
             name="restLabel"
             type="text"
