@@ -19,6 +19,7 @@ const secondsOptions = Array.from({ length: 60 }, (_, i) => i + 1).map((i) => (
 export const CountdownSelector = ({ countdown, onChange }: CountdownSelectorProps) => {
   return (
     <NativeSelect
+      className="max-sm:min-h-11 max-sm:text-base"
       id="countdownBeforeStart"
       name="countdownBeforeStart"
       value={countdown ?? 0}
