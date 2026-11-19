@@ -97,7 +97,7 @@ export const ComplexPhaseAdd = ({
           onTypeChange={handleTypeChange}
           onConfigChange={handleConfigChange}
         />
-        <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+        <div className="flex flex-col gap-2 md:flex-row md:justify-end max-sm:[&>button]:min-h-11">
           {phasesCount === 0 && (
             <Button type="button" onClick={handleAddAtStart}>
               Add
