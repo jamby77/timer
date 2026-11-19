@@ -196,3 +196,27 @@ test('interval estimate follows the final rest setting in a complex workout', as
   await expect(estimate).toHaveValue('1m 50s')
   await expect(name).toHaveValue(/, 1m 50s\)$/)
 })
+
+test('Work/Rest summary shows the chosen rest and optional work limit on a narrow phone', async ({ page }) => {
+  await page.goto('/configure/complex')
+  const button = (name: string) => page.getByRole('button', { name, exact: true })
+  await button('Add Phase').tap()
+  await page.getByLabel('Phase type').tap()
+  await page.getByRole('option', { name: 'Work/Rest Ratio', exact: true }).tap()
+  await button('Add').tap()
+  const summary = page.locator('[data-slot=card]').filter({
+    has: page.getByText('Phase Summary', { exact: true }),
+  })
+  await expect(summary).toContainText('5 rounds · 5m work limit')
+  await expect(summary).toContainText('Rest 2× work time')
+  await button('Edit phase').tap()
+  await page.getByLabel('Minutes', { exact: true }).pressSequentially('00')
+  await page.getByRole('radio', { name: 'Fixed rest' }).tap()
+  await page.getByLabel('Seconds', { exact: true }).first().pressSequentially('15')
+  await page.getByLabel('Max rounds').selectOption('1')
+  await button('Save').tap()
+  await expect(summary).toContainText('1 round · No work time limit')
+  await expect(summary).toContainText('15s fixed rest')
+  await expect(summary).not.toContainText('Rest 2× work time')
+  expect(await summary.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+})
