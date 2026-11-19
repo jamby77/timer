@@ -262,7 +262,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
               </Field>
             </FieldGroup>
 
-            <div className="flex flex-col justify-end gap-3 border-t pt-4 sm:flex-row">
+            <div className="flex flex-col justify-end gap-3 border-t pt-4 sm:flex-row max-sm:*:min-h-11">
               <Button
                 variant="outline"
                 onClick={handleSaveAsPreset}

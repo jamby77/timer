@@ -120,7 +120,7 @@ export const TimerConfigForm = ({
 
         <CommonFields config={config} onChange={updateConfig} type={type} />
 
-        <div className="flex flex-col justify-between gap-4 pt-4 md:flex-row">
+        <div className="flex flex-col justify-between gap-4 pt-4 md:flex-row max-sm:*:min-h-11">
           <Button disabled={errors.length > 0} variant="default" type="submit" size="lg">
             <PlayIcon />
             Start Timer
