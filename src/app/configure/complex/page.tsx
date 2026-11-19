@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useMemo, useState } from 'react'
-import { Clock, FileText, Layers, MoveLeft, Play, Save } from 'lucide-react'
+import { Clock, FileText, Layers, Play, Save } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -25,6 +25,7 @@ import { TimerType } from '@/lib/enums'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
+import { SetupBackButton } from '@/components/configure/components/shared/SetupBackButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -153,15 +154,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
       <div className="mx-auto max-w-4xl space-y-6 px-2 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.back()}
-            className="flex items-center gap-2"
-            aria-label="Go back"
-          >
-            <MoveLeft />
-          </Button>
+          <SetupBackButton onClick={() => router.back()} />
           <div className="flex-1">
             <h1 className="text-foreground text-xl font-bold">Complex Timer Configuration</h1>
             <p className="text-muted-foreground mt-2">

@@ -8,6 +8,7 @@ import { generateTimerName } from '@/lib/configure/utils'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { Button } from '@/components/ui/button'
+import { SetupBackButton } from '@/components/configure/components/shared/SetupBackButton'
 import ComplexBody from '@/components/configure/components/complex-fields-form/components/ComplexBody'
 import { createDefaultPhaseConfig, PhaseTimerConfig } from './complex-phase-utils'
 
@@ -80,12 +81,10 @@ export const ComplexPhaseAdd = ({
   return (
     <div className="h-full w-full overflow-hidden overflow-y-auto">
       <div className="mb-6">
-        <h2 className="text-foreground mb-2 text-xl font-semibold">
-          <Button variant="ghost" size="sm" type="button" onClick={onCancel}>
-            <MoveLeft size={4} />
-          </Button>{' '}
-          {title}
-        </h2>
+        <div className="flex items-center gap-2">
+          <SetupBackButton onClick={onCancel} label="Back to phases" />
+          <h2 className="text-foreground text-xl font-semibold">{title}</h2>
+        </div>
       </div>
 
       <form onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-2 md:gap-4">

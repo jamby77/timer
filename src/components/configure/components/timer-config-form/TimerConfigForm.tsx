@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CircleX, MoveLeft, PlayIcon, Save } from 'lucide-react'
+import { CircleX, PlayIcon, Save } from 'lucide-react'
 
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 
@@ -11,6 +11,7 @@ import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { Button } from '@/components/ui/button'
+import { SetupBackButton } from '@/components/configure/components/shared/SetupBackButton'
 import { FormErrors } from '@/components/configure/components'
 import { CommonFields } from './CommonFields'
 
@@ -96,12 +97,10 @@ export const TimerConfigForm = ({
   return (
     <div className="mx-auto h-full max-w-2xl overflow-hidden overflow-y-auto p-4">
       <div className="mb-6">
-        <h2 className="text-foreground mb-2 text-xl font-semibold">
-          <Button variant="ghost" size="sm" type="button" onClick={onCancel}>
-            <MoveLeft size={4} />
-          </Button>{' '}
-          Configure {TIMER_TYPE_LABELS[type]} Timer
-        </h2>
+        <div className="flex items-center gap-2">
+          <SetupBackButton onClick={onCancel} />
+          <h2 className="text-foreground text-xl font-semibold">Configure {TIMER_TYPE_LABELS[type]} Timer</h2>
+        </div>
         {isPredefined && (
           <p className="text-accent-foreground text-sm">
             Customizing a predefined style. Changes will not affect the original.
