@@ -140,7 +140,6 @@ export function Stopwatch({
   const maxTime = timeLimit ? timeLimit * 1000 : 0
   const progress = timeLimit ? (time / (timeLimit * 1000)) * 100 : 0
   const isRest = state === TimerState.Paused
-  const isVisible = isRunning || isRest
 
   const isAutoStarting = useAutoStart(autoStart, handleStart)
 
@@ -161,7 +160,7 @@ export function Stopwatch({
             progress={progress}
             isRunning={isRunning}
             isRest={isRest}
-            isVisible={isVisible}
+            isVisible={!isPreStarting}
             minTime={minTime}
             maxTime={maxTime}
           />
