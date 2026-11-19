@@ -102,6 +102,7 @@ export const WorkRestFields = ({
         <Field>
           <FieldLabel htmlFor="maxRounds">Max rounds</FieldLabel>
           <NativeSelect
+            className="max-sm:min-h-11 max-sm:text-base"
             id="maxRounds"
             name="maxRounds"
             value={maxRounds || ''}
