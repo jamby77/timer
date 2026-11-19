@@ -161,15 +161,10 @@ export function Interval({
     pause()
   }, [isPreStarting, pause, preStart])
 
-  const minTime = 0
-  const maxTime = currentStep?.duration ?? 0
-  const elapsed = currentStep ? currentStep.duration - timeLeft : 0
-  const progress = maxTime > 0 ? (elapsed / maxTime) * 100 : 0
-  const isVisible =
-    !!currentStep &&
-    !isPreStarting &&
-    (timerState === TimerState.Running || timerState === TimerState.Paused)
-  const isWorkStep = currentStep?.isWork ?? true
+  const endsWithRest = timerState === TimerState.Completed && intervalConfig.skipLastRest === false
+  const isWorkStep = currentStep?.isWork ?? !endsWithRest
+  const maxTime = (isWorkStep ? intervalConfig.workDuration : intervalConfig.restDuration) * 1000
+  const progress = maxTime > 0 ? ((maxTime - timeLeft) / maxTime) * 100 : 0
 
   const getCurrentIntervalInfo = () => {
     const workSteps =
@@ -221,8 +216,8 @@ export function Interval({
           progress={progress}
           isRunning={isWorkStep}
           isRest={!isWorkStep}
-          isVisible={isVisible}
-          minTime={minTime}
+          isVisible={!isPreStarting}
+          minTime={0}
           maxTime={maxTime}
         />
         <TimerControls secondary={phaseControls}>
