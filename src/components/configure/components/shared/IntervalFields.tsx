@@ -1,5 +1,8 @@
+import { Minus, Plus } from 'lucide-react'
+
 import type { IntervalConfig } from '@/types/configure'
 
+import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -11,6 +14,9 @@ interface IntervalFieldsProps {
 }
 
 export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
+  const intervals = config.intervals ?? 0
+  const minIntervals = 1
+  const maxIntervals = 1000
   const workPlaceholder = 'Work'
   const restPlaceholder = 'Rest'
   return (
@@ -36,17 +42,43 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
 
       <Field>
         <FieldLabel htmlFor="intervals">Number of Intervals</FieldLabel>
-        <Input
-          id="intervals"
-          name="intervals"
-          type="number"
-          min="1"
-          max="1000"
-          value={config.intervals || ''}
-          onChange={(e) => onChange({ intervals: parseInt(e.target.value) || 0 })}
-          placeholder="8"
-          required
-        />
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-11 shrink-0 sm:hidden"
+            aria-label="Decrease interval count"
+            disabled={intervals <= minIntervals}
+            onClick={() => onChange({ intervals: Math.min(maxIntervals, intervals - 1) })}
+          >
+            <Minus />
+          </Button>
+          <Input
+            id="intervals"
+            name="intervals"
+            type="number"
+            inputMode="numeric"
+            min={minIntervals}
+            max={maxIntervals}
+            className="min-w-0 max-sm:min-h-11 max-sm:text-center"
+            value={intervals || ''}
+            onChange={(e) => onChange({ intervals: parseInt(e.target.value) || 0 })}
+            placeholder="8"
+            required
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-11 shrink-0 sm:hidden"
+            aria-label="Increase interval count"
+            disabled={intervals >= maxIntervals}
+            onClick={() => onChange({ intervals: Math.max(minIntervals, intervals + 1) })}
+          >
+            <Plus />
+          </Button>
+        </div>
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
