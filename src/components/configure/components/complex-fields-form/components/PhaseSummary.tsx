@@ -8,7 +8,8 @@ import {
   isStopwatchConfig,
   isWorkRestConfig,
 } from '@/types/configure'
-import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { formatDuration } from '@/lib/configure/utils'
+import { TIMER_TYPE_LABELS, WorkRestMode } from '@/lib/enums'
 import { TIMER_TYPE_ICONS } from '@/lib/timer-type-icons'
 
 interface PhaseSummaryProps {
@@ -31,7 +32,7 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
               <div className="wrap-anywhere font-medium">{phase.name}</div>
               <div className="text-muted-foreground text-sm">
                 <Icon className="mr-1 inline-block size-4 align-text-bottom sm:hidden" aria-hidden="true" />
-                {TIMER_TYPE_LABELS[phase.type]}
+                {isWorkRestConfig(c) ? 'Work/Rest' : TIMER_TYPE_LABELS[phase.type]}
                 {isCountdownConfig(c) && <span> - {c.duration}s</span>}
                 {isIntervalConfig(c) && (
                   <span>
@@ -41,10 +42,17 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
                 )}
                 {isStopwatchConfig(c) && c.timeLimit && <span> - {c.timeLimit}s limit</span>}
                 {isWorkRestConfig(c) && (
-                  <span>
-                    {' '}
-                    - {c.maxWorkTime}s max work / {c.maxRounds} rounds
-                  </span>
+                  <>
+                    <div>
+                      {c.maxRounds} {c.maxRounds === 1 ? 'round' : 'rounds'} ·{' '}
+                      {c.maxWorkTime ? `${formatDuration(c.maxWorkTime)} work limit` : 'No work time limit'}
+                    </div>
+                    <div>
+                      {c.restMode === WorkRestMode.FIXED
+                        ? c.fixedRestDuration ? `${formatDuration(c.fixedRestDuration)} fixed rest` : 'Set rest duration'
+                        : `Rest ${c.ratio ?? 1}× work time`}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
