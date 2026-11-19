@@ -43,7 +43,9 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
                     <div>{c.workDuration}s work / {c.restDuration}s rest</div>
                   </>
                 )}
-                {isStopwatchConfig(c) && c.timeLimit && <span> - {c.timeLimit}s limit</span>}
+                {isStopwatchConfig(c) && (
+                  <div>{c.timeLimit ? `${formatDuration(c.timeLimit, { exact: true })} time limit` : 'No time limit'}</div>
+                )}
                 {isWorkRestConfig(c) && (
                   <>
                     <div>
