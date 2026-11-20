@@ -151,6 +151,38 @@ for (const failure of ['prompt', 'choice'] as const) {
 test.describe('mobile install banner', () => {
   test.use({ viewport: { width: 320, height: 640 }, hasTouch: true, isMobile: true })
 
+  test('the install offer leaves the timer title and Start visible', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('pwa-install-dismiss-count', '3'))
+    await openApp(page)
+    await offerInstallation(page, 'dismissed')
+    const banner = page.locator('[data-install-banner]')
+    const bounds = (await banner.boundingBox())!
+    const title = await page.getByText('Install verification', { exact: true }).boundingBox()
+    expect(title!.y).toBeGreaterThanOrEqual(bounds.y + bounds.height)
+    const start = page.getByRole('button', { name: 'Start timer', exact: true })
+    const button = (await start.boundingBox())!
+    expect(button.y + button.height).toBeLessThanOrEqual(640)
+    await start.tap()
+    await expect(banner).toBeHidden()
+    await page.getByRole('button', { name: 'Pause timer', exact: true }).tap()
+    await expect(banner).toBeHidden()
+    await page.getByRole('button', { name: 'Stop timer', exact: true }).tap()
+    await expect(banner.getByRole('button', { name: 'Install', exact: true })).toBeVisible()
+  })
+
+  test('an install offer arriving during a workout stays hidden until Stop', async ({ page }) => {
+    await openApp(page)
+    await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
+    await page.evaluate(() => window.dispatchEvent(new Event('beforeinstallprompt')))
+    const banner = page.locator('[data-install-banner]')
+    await expect(banner).toBeAttached()
+    await expect(banner).toBeHidden()
+    await page.getByRole('button', { name: 'Pause timer', exact: true }).tap()
+    await expect(banner).toBeHidden()
+    await page.getByRole('button', { name: 'Stop timer', exact: true }).tap()
+    await expect(banner).toBeVisible()
+  })
+
   for (const action of ['Install', 'Dismiss install prompt', 'Never show again']) {
     test(`${action} responds to an edge tap`, async ({ page }) => {
       await page.addInitScript(() => localStorage.setItem('pwa-install-dismiss-count', '3'))

@@ -75,9 +75,9 @@ const TimerSession = ({ id }: { id: string | null }) => {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-10 p-4">
-      {renderTimer()}
+    <div className="flex h-full flex-col items-center justify-center gap-10 p-4 max-sm:has-[[data-install-banner]]:h-[calc(100dvh-4rem)] max-sm:has-[[data-install-banner]]:justify-start max-sm:gap-3">
       {showInstallPrompt && <InstallPrompt />}
+      {renderTimer()}
     </div>
   )
 }
