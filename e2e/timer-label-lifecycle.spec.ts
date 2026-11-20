@@ -72,7 +72,7 @@ for (const viewport of [
         await assertLabels()
         await page
           .getByRole('button', {
-            name: type === 'WORKREST' ? 'Resume work' : 'Start timer',
+            name: type === 'WORKREST' ? 'Resume work' : 'Resume timer',
             exact: true,
           })
           .click()

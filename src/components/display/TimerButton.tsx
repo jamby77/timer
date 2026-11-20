@@ -31,7 +31,8 @@ function TimerButton({
   } else if (isRunning) {
     playButton = <PauseButton onClick={onPause} title="Pause" label="Pause timer" />
   } else {
-    playButton = <StartButton onClick={onStart} title="Start" label="Start timer" />
+    const action = state === TimerState.Paused ? 'Resume' : 'Start'
+    playButton = <StartButton onClick={onStart} title={action} label={`${action} timer`} />
   }
 
   return (

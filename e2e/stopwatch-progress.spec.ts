@@ -18,7 +18,7 @@ test('capped Stopwatch exposes progress from zero through pause and completion',
   expect(Number(paused)).toBeLessThan(100)
   await page.clock.fastForward(5000)
   await expect(bar).toHaveAttribute('aria-valuenow', paused!)
-  await start.click()
+  await page.getByRole('button', { name: 'Resume timer', exact: true }).click()
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'completed')
   await expect(bar).toHaveAttribute('aria-valuenow', '100')
 })

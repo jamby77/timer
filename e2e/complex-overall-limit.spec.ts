@@ -91,8 +91,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
     await page.waitForTimeout(1200)
     await expect(overall(page)).toHaveText(time!)
     await expect(prompt(page)).toBeHidden()
-    const resume = ['INTERVAL', 'WORKREST'].includes(type) ? 'Resume' : 'Start'
-    await page.getByRole('button', { name: `${resume} ${suffix}`, exact: true }).click()
+    await page.getByRole('button', { name: `Resume ${suffix}`, exact: true }).click()
     await expect(prompt(page)).toBeVisible()
     await page.getByRole('button', { name: 'End Timer', exact: true }).click()
     await expect(page.getByRole('status')).toHaveText('Timer stopped')

@@ -45,7 +45,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH']) {
         await expect(card).toHaveAttribute('data-timer-state', 'running')
         await page.getByRole('button', { name: 'Pause timer', exact: true }).click()
         await expect(card).toHaveAttribute('data-timer-state', 'paused')
-        await page.getByRole('button', { name: 'Start timer', exact: true }).click()
+        await page.getByRole('button', { name: 'Resume timer', exact: true }).click()
         await expect(card).toHaveAttribute('data-timer-state', 'completed', { timeout: 4000 })
         await expect(page.getByText('Restartable phase', { exact: true })).toBeVisible()
       })
