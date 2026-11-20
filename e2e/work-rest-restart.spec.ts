@@ -44,7 +44,7 @@ for (const complex of [false, true]) {
       await page.getByRole('button', { name: 'Restart', exact: true }).click()
       await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
       await expect(page.locator('[data-slot="card-title"]')).toContainText('WORK/REST (20s fixed rest)')
-      await expect(page.getByText('Round: 1', { exact: true })).toBeVisible()
+      await expect(page.getByText('Round 1 of 3', { exact: true })).toBeVisible()
       await expect(page.getByText('Timer stopped', { exact: true })).toBeHidden()
       await expect(page.locator('[data-slot="card-content"]')).not.toHaveText('00:00.00')
       if (!complex) {
@@ -53,8 +53,24 @@ for (const complex of [false, true]) {
         await expect(page.locator('[data-slot="card-content"]')).toContainText('00:19')
         await page.getByRole('button', { name: 'Restart', exact: true }).click()
         await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
-        await expect(page.getByText('Round: 1', { exact: true })).toBeVisible()
+        await expect(page.getByText('Round 1 of 3', { exact: true })).toBeVisible()
       }
     })
   }
 }
+
+test('Restart returns to round one after a rest expires between rounds', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('timer_round-check', JSON.stringify({
+    id: 'round-check', name: 'Mobility', type: 'WORKREST', maxRounds: 3,
+    maxWorkTime: 60, restMode: 'fixed', fixedRestDuration: 1,
+  })))
+  await page.goto('/?id=round-check')
+  const restart = page.getByRole('button', { name: 'Restart', exact: true })
+  await expect(restart).toBeDisabled()
+  await page.getByRole('button', { name: 'Start work', exact: true }).click()
+  await page.getByRole('button', { name: 'Finish work / Start rest', exact: true }).click()
+  await expect(page.getByText('Round 2 of 3', { exact: true })).toBeVisible()
+  await restart.click()
+  await expect(page.getByText('Round 1 of 3', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
+})

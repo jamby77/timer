@@ -62,7 +62,7 @@ for (const complex of [false, true]) {
       )
     await page.getByRole('button', { name: 'Start work', exact: true }).click()
     await expect.poll(async () => (await horns()).length).toBe(1)
-    await expect(page.getByText('Round: 2', { exact: true })).toBeVisible({ timeout: 8000 })
+    await expect(page.getByText('Round 2 of 2', { exact: true })).toBeVisible({ timeout: 8000 })
     await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
     await page.waitForTimeout(100)
     expect(await horns()).toHaveLength(1)
