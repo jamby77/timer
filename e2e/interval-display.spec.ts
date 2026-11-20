@@ -87,3 +87,39 @@ test('stopping intervals restores the configured first duration and round', asyn
   await expect(page.locator('[data-slot="card-content"]')).toHaveText('00:30.00')
   await expect(page.getByRole('progressbar', { name: 'Timer progress' })).toHaveAttribute('aria-valuenow', '0')
 })
+test.describe('mobile interval transitions', () => {
+  test.use({ viewport: { width: 320, height: 640 }, hasTouch: true, isMobile: true })
+
+  test('tapping Skip resets the digits and progress together on the first rest frame', async ({ page }) => {
+    await page.addInitScript(() =>
+      localStorage.setItem('timer_skip', JSON.stringify({
+        id: 'skip', name: 'Mobile intervals', type: 'INTERVAL',
+        workDuration: 10, restDuration: 10, intervals: 2,
+      }))
+    )
+    await page.goto('/?id=skip')
+    await page.getByRole('button', { name: 'Start intervals', exact: true }).tap()
+    const progress = page.getByRole('progressbar', { name: 'Timer progress' })
+    await expect.poll(async () => Number(await progress.getAttribute('aria-valuenow'))).toBeGreaterThan(10)
+    const firstRestFrame = page.evaluate(() => new Promise(resolve => {
+      const header = document.querySelector('[data-slot="card-header"]')!
+      const observer = new MutationObserver(() => {
+        if (!header.textContent?.includes('Rest')) return
+        observer.disconnect()
+        const bar = document.querySelector('[role="progressbar"]')!
+        const fill = bar.querySelector('[data-slot="progress-indicator"]')!
+        resolve({
+          time: document.querySelector('[data-slot="card-content"]')?.textContent,
+          progress: bar.getAttribute('aria-valuenow'),
+          fillMatchesBorder: getComputedStyle(fill).backgroundColor === getComputedStyle(bar).borderTopColor,
+          visibleWidth: Math.round(fill.getBoundingClientRect().right - bar.getBoundingClientRect().left - bar.clientLeft),
+        })
+      })
+      observer.observe(header, { subtree: true, characterData: true, childList: true })
+    }))
+    await page.getByRole('button', { name: 'Skip current interval' }).tap()
+    expect(await firstRestFrame).toEqual({
+      time: '00:10.00', progress: '0', fillMatchesBorder: true, visibleWidth: 0,
+    })
+  })
+})

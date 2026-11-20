@@ -213,6 +213,7 @@ export function Interval({
         fullscreen={isActive || isAutoStarting}
       >
         <TimerProgressIndicator
+          key={currentStepIndex}
           progress={progress}
           isRunning={isWorkStep}
           isRest={!isWorkStep}
