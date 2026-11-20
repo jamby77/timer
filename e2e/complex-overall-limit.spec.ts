@@ -223,3 +223,26 @@ test('opening a different workout starts with a fresh budget', async ({ page }) 
   await expect(prompt(page)).toBeHidden()
   await expect(timer(page)).toHaveAttribute('data-timer-state', 'idle')
 })
+
+test.describe('mobile time-limit dialog', () => {
+  test.use({ viewport: { width: 320, height: 640 }, hasTouch: true, isMobile: true })
+
+  for (const action of ['Continue Workout', 'End Workout', 'Close']) {
+    test(`${action} responds to an edge tap`, async ({ page }) => {
+      await openWorkout(page)
+      await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
+      const button = prompt(page).getByRole('button', { name: action, exact: true })
+      await expect(button).toBeVisible()
+      const bounds = (await button.boundingBox())!
+      expect(bounds.height).toBeGreaterThanOrEqual(44)
+      expect(bounds.width).toBeGreaterThanOrEqual(44)
+      await button.tap({ position: { x: bounds.width - 4, y: bounds.height / 2 } })
+      await expect(prompt(page)).toBeHidden()
+      if (action === 'End Workout') {
+        await expect(page.getByRole('status')).toHaveText('Workout stopped')
+      } else {
+        await expect(timer(page)).toHaveAttribute('data-timer-state', 'running')
+      }
+    })
+  }
+})
