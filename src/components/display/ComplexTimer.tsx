@@ -54,11 +54,17 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
   const lastAutoAdvancedPhaseIdRef = useRef<string | null>(null)
 
   const currentPhase = phases[phaseIndex]
-  const phaseConfig = useMemo(
-    () => (config.sound ? { ...currentPhase.config, sound: config.sound } : currentPhase.config),
-    [config.sound, currentPhase.config]
-  )
   const isFirst = phaseIndex === 0
+  const phaseConfig = useMemo(
+    () => ({
+      ...currentPhase.config,
+      sound: config.sound ?? currentPhase.config.sound,
+      countdownBeforeStart: isFirst
+        ? (config.countdownBeforeStart ?? currentPhase.config.countdownBeforeStart)
+        : currentPhase.config.countdownBeforeStart,
+    }),
+    [currentPhase.config, config.sound, config.countdownBeforeStart, isFirst]
+  )
   const isLast = phaseIndex === phases.length - 1
 
   // Register timer state changes with context

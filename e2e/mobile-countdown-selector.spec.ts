@@ -28,3 +28,25 @@ for (const type of ['Countdown', 'Complex']) {
     await expect(select).toHaveValue('0')
   })
 }
+
+test('Complex uses the workout countdown before the first phase only', async ({ page }) => {
+  await page.goto('/configure')
+  await page.getByRole('heading', { name: 'Complex', exact: true }).tap()
+  for (const name of ['Warmup', 'Recovery']) {
+    await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+    await page.getByLabel('Phase name').fill(name)
+    if (name === 'Warmup') {
+      await page.getByLabel('Seconds', { exact: true }).pressSequentially('01')
+      await page.getByLabel('Minutes', { exact: true }).pressSequentially('00')
+    }
+    await page.getByRole('button', { name: name === 'Warmup' ? 'Add' : 'Add at the end', exact: true }).tap()
+  }
+  await page.getByRole('combobox', { name: 'Countdown', exact: true }).selectOption('3')
+  await page.getByRole('button', { name: 'Start Timer', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
+  const timer = page.locator('[data-timer-state]')
+  await expect(timer.getByText('3', { exact: true })).toBeVisible({ timeout: 900 })
+  await expect(timer.getByText('Recovery', { exact: true })).toBeVisible({ timeout: 6000 })
+  await expect(timer).toHaveAttribute('data-timer-state', 'running')
+  await expect(timer.getByRole('progressbar')).toBeVisible({ timeout: 900 })
+})
