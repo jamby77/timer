@@ -10,7 +10,7 @@ test('create 3s countdown and verify idle → running → completed', async ({ p
 
   // Set duration to 00:00:03
   // Note: TimePickerInput is keyboard-driven (onKeyDown), so we use key presses instead of fill().
-  await page.locator('#seconds').click()
+  await page.getByLabel('Seconds', { exact: true }).click()
   await page.keyboard.press('3')
 
   // Create timer and navigate to run page
