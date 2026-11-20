@@ -238,3 +238,26 @@ test('malformed recent history does not hide usable timers after reload', async 
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Recovered recent timer', exact: true })).toHaveCount(0)
 })
+
+test.describe('mobile preset cards', () => {
+  test.use({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true })
+
+  test('a saved preset with a long unbroken name fits and reopens by touch', async ({ page }) => {
+    const name = 'Strength · SingleLegRomanianDeadliftWithContralateralReach'
+    await page.goto('/configure')
+    await page.getByRole('heading', { name: 'Countdown', exact: true }).tap()
+    await page.getByLabel(/Timer Name/).fill(name)
+    await page.getByLabel('Seconds', { exact: true }).pressSequentially('45')
+    await page.getByRole('button', { name: 'Save as Preset' }).tap()
+    await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
+    await page.reload()
+
+    const title = page.getByRole('heading', { name, exact: true })
+    await title.scrollIntoViewIfNeeded()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
+    expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+    await title.tap()
+    await expect(page.getByLabel(/Timer Name/)).toHaveValue(name)
+    await expect(page.getByLabel('Seconds', { exact: true })).toHaveValue('45')
+  })
+})

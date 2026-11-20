@@ -74,7 +74,7 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
     >
       <CardHeader>
         <CardTitle>
-          <h3 className="text-card-foreground font-semibold">{style.name}</h3>
+          <h3 className="text-card-foreground wrap-anywhere font-semibold">{style.name}</h3>
           {style.isBuiltIn && (
             <span className="text-card-foreground rounded py-1 text-xs font-thin">(Built-in)</span>
           )}
