@@ -59,6 +59,9 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
                         ? c.fixedRestDuration ? `${formatPhaseDuration(c.fixedRestDuration)} fixed rest` : 'Set rest duration'
                         : `Rest ${c.ratio ?? 1}× work time`}
                     </div>
+                    {c.maxRounds > 1 && (
+                      <div>{c.autoContinue ? 'Next round starts automatically' : 'Tap Start after rest'}</div>
+                    )}
                   </>
                 )}
               </div>
