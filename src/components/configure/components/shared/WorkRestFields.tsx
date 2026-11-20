@@ -121,12 +121,14 @@ export const WorkRestFields = ({
           </NativeSelect>
         </Field>
       </div>
-      <SwitchField
-        title="Auto-continue rounds"
-        description="Start the next work round automatically when rest ends."
-        checked={autoContinue}
-        onCheckedChange={(autoContinue) => onChange({ autoContinue })}
-      />
+      {(maxRounds ?? 0) > 1 && (
+        <SwitchField
+          title="Auto-continue rounds"
+          description="Start the next work round automatically when rest ends."
+          checked={autoContinue}
+          onCheckedChange={(autoContinue) => onChange({ autoContinue })}
+        />
+      )}
     </FieldGroup>
   )
 }
