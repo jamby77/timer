@@ -154,10 +154,10 @@
   --foreground: oklch(0.129 0.042 264.695);
 
   /* Timer colors - Light theme */
-  --tm-work-fg: oklch(0.945 0.015 142.3);
+  --tm-work-fg: var(--foreground);
   --tm-work-bg: oklch(0.714 0.188 143.292);
   --tm-rest-bg: oklch(0.769 0.148 77.315);
-  --tm-rest-fg: oklch(0.973 0.001 106.424);
+  --tm-rest-fg: var(--foreground);
   /* Timer button colors - Light theme */
   --tm-play: oklch(0.532 0.151 143.091);
   --tm-pause: oklch(0.713 0.139 104.204);
@@ -212,8 +212,8 @@
   /* Timer colors - Dark theme */
   --tm-work-bg: oklch(0.714 0.188 143.292 / 0.3);
   --tm-work-fg: oklch(0.845 0.03 142.3);
-  --tm-rest-bg: oklch(0.665 0.104 92.847);
-  --tm-rest-fg: oklch(0.845 0.03 254.3);
+  --tm-rest-bg: oklch(0.35 0.063 77.315);
+  --tm-rest-fg: var(--foreground);
 
   /* Timer button colors - Light theme */
   --tm-play: oklch(0.845 0.03 142.3);
