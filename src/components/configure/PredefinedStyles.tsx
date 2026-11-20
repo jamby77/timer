@@ -48,6 +48,9 @@ interface StyleCardProps {
 }
 
 const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
+  const summary = getConfigSummary(style.config)
+  const description = style.description?.trim()
+
   return (
     <Card role="group" aria-label={style.name} className="relative transition-colors hover:opacity-80">
       <CardHeader>
@@ -69,8 +72,8 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
       </CardHeader>
       <CardContent>
         <CardDescription>
-          <p className="mb-2 text-sm">{style.description}</p>
-          <p className="text-sm">{getConfigSummary(style.config)}</p>
+          {description && description !== summary && <p className="mb-2 text-sm">{description}</p>}
+          <p className="text-sm">{summary}</p>
         </CardDescription>
 
         <CardAction className="flex items-center justify-between max-sm:mt-2 max-sm:w-full">
