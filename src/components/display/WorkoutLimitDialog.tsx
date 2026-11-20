@@ -32,7 +32,7 @@ export function WorkoutLimitDialog({
         if (!nextOpen) onContinue()
       }}
     >
-      <DialogContent className="z-10001" overlayClassName="z-10000">
+      <DialogContent className="z-10001 max-sm:[&>[data-slot=dialog-close]]:top-1 max-sm:[&>[data-slot=dialog-close]]:right-1 max-sm:[&>[data-slot=dialog-close]]:grid max-sm:[&>[data-slot=dialog-close]]:size-11 max-sm:[&>[data-slot=dialog-close]]:place-items-center" overlayClassName="z-10000">
         <DialogHeader>
           <DialogTitle>Time Limit Reached</DialogTitle>
           <DialogDescription>
@@ -44,9 +44,9 @@ export function WorkoutLimitDialog({
           Elapsed {formatTime(elapsedMs).split('.')[0]} / Limit{' '}
           {formatTime(limitSeconds * 1000).split('.')[0]}
         </p>
-        <DialogFooter>
-          <Button onClick={onContinue}>Continue Workout</Button>
-          <Button variant="destructive" onClick={onEnd}>
+        <DialogFooter className="max-sm:flex-col">
+          <Button className="max-sm:min-h-11" onClick={onContinue}>Continue Workout</Button>
+          <Button className="max-sm:min-h-11" variant="destructive" onClick={onEnd}>
             End Workout
           </Button>
         </DialogFooter>
