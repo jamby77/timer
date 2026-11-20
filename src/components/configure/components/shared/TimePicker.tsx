@@ -1,5 +1,6 @@
 'use client'
 
+import { X } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
 import type { TimerPickerTime } from '@/lib/timer'
@@ -7,17 +8,18 @@ import type { TimerPickerTime } from '@/lib/timer'
 import { secondsToTimerPickerTime, timerPickerTimeToSeconds } from '@/lib/timer'
 import { cn } from '@/lib/utils'
 
+import { Button } from '@/components/ui/button'
 import { TimePickerInput } from '@/components/ui/time-picker-input'
 
 interface TimePickerProps {
-  children?: React.ReactNode
+  clearLabel?: string
   max?: number
   min?: number
   value?: number
   onTimeChange?: (seconds: number) => void
 }
 
-export const TimePicker = ({ value = 0, min, max, onTimeChange, children }: TimePickerProps) => {
+export const TimePicker = ({ value = 0, min, max, onTimeChange, clearLabel }: TimePickerProps) => {
   const minuteRef = useRef<HTMLInputElement>(null)
   const hourRef = useRef<HTMLInputElement>(null)
   const secondRef = useRef<HTMLInputElement>(null)
@@ -93,7 +95,19 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange, children }: Time
           className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"
         />
       </div>
-      {children}
+      {clearLabel && (
+        <Button
+          type="button"
+          variant="ghost"
+          aria-label={clearLabel}
+          title={clearLabel}
+          className="border-input bg-destructive/20 text-destructive hover:bg-destructive/30 hover:text-destructive h-auto w-11 shrink-0 self-stretch ml-1 rounded-md border p-0 focus-visible:ring-inset max-sm:min-h-11"
+          disabled={!value}
+          onClick={() => handleTimeChange(secondsToTimerPickerTime(0))}
+        >
+          <X aria-hidden="true" />
+        </Button>
+      )}
     </div>
   )
 }

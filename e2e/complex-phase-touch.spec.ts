@@ -68,6 +68,8 @@ test('overall time limit fits all three touch targets below its title', async ({
 
   const limit = page.getByRole('group', { name: 'Overall Time Limit', exact: true })
   await limit.scrollIntoViewIfNeeded()
+  const clear = limit.getByRole('button', { name: 'Clear overall time limit' })
+  await expect(clear).toBeDisabled()
   const title = (await limit.locator('legend').boundingBox())!
   for (const [unit, value] of [['Hours', '01'], ['Minutes', '02'], ['Seconds', '03']]) {
     const input = limit.getByLabel(unit, { exact: true })
@@ -80,6 +82,15 @@ test('overall time limit fits all three touch targets below its title', async ({
     await expect(input).toBeFocused()
     await input.pressSequentially(value)
     await expect(input).toHaveValue(value)
+  }
+  const bounds = (await clear.boundingBox())!
+  expect(bounds.width).toBeGreaterThanOrEqual(44)
+  expect(bounds.height).toBeGreaterThanOrEqual(44)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(320)
+  await clear.tap({ position: { x: bounds.width - 2, y: bounds.height / 2 } })
+  await expect(clear).toBeDisabled()
+  for (const unit of ['Hours', 'Minutes', 'Seconds']) {
+    await expect(limit.getByLabel(unit, { exact: true })).toHaveValue('00')
   }
 })
 
