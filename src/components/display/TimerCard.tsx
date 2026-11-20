@@ -28,6 +28,7 @@ interface TimerCardProps {
   time: string
   children: ReactNode
   subtitle?: ReactNode
+  idleStatus?: string
   isPreStarting?: boolean
   isWork?: boolean
   fullscreen?: boolean
@@ -42,11 +43,14 @@ export const TimerCard = ({
   time,
   children,
   subtitle,
+  idleStatus,
   isPreStarting = false,
   isWork,
   fullscreen = false,
 }: TimerCardProps) => {
-  const status = isPreStarting && state === TimerState.Running ? 'Get ready' : timerStatusLabels[state]
+  let status = timerStatusLabels[state]
+  if (state === TimerState.Idle && idleStatus) status = idleStatus
+  if (state === TimerState.Running && isPreStarting) status = 'Get ready'
   const lastDotIndex = time.lastIndexOf('.')
   const mainTime = lastDotIndex > -1 ? time.slice(0, lastDotIndex) : time
   const fractionalTime = lastDotIndex > -1 ? time.slice(lastDotIndex) : ''

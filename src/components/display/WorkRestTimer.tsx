@@ -203,6 +203,7 @@ export function WorkRestTimer({
   return (
     <TimerContainer fullscreen={fullscreen || isAutoStarting}>
       <TimerCard
+        idleStatus={isIdlePhase && state.rounds > 0 ? 'Ready for next round' : undefined}
         isPreStarting={isPreStarting}
         header={header}
         headerControls={
