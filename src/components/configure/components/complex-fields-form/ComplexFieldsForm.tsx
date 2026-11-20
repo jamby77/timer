@@ -249,7 +249,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                 />
 
                 <Field orientation="vertical">
-                  <FieldLabel htmlFor="countdownBeforeStart">Countdown</FieldLabel>
+                  <FieldLabel htmlFor="countdownBeforeStart">Pre-start countdown</FieldLabel>
                   <div className="sm:max-w-48">
                     <CountdownSelector
                       countdown={config.countdownBeforeStart}

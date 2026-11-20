@@ -10,11 +10,16 @@ type CountdownSelectorProps = {
   countdown: number | undefined
   onChange: (e: ChangeEvent<HTMLSelectElement>) => void
 }
-const secondsOptions = Array.from({ length: 60 }, (_, i) => i + 1).map((i) => (
-  <NativeSelectOption key={i} value={String(i)}>
-    {i}s
+const quickSeconds = [3, 5, 10]
+const otherSeconds = Array.from({ length: 60 }, (_, i) => i + 1).filter(
+  seconds => !quickSeconds.includes(seconds)
+)
+
+const secondsOption = (seconds: number) => (
+  <NativeSelectOption key={seconds} value={String(seconds)}>
+    {seconds}s
   </NativeSelectOption>
-))
+)
 
 export const CountdownSelector = ({ countdown, onChange }: CountdownSelectorProps) => {
   return (
@@ -27,11 +32,9 @@ export const CountdownSelector = ({ countdown, onChange }: CountdownSelectorProp
     >
       <NativeSelectOption value="0">None</NativeSelectOption>
       <NativeSelectOptGroup label="Quick options">
-        <NativeSelectOption value="3">3s</NativeSelectOption>
-        <NativeSelectOption value="5">5s</NativeSelectOption>
-        <NativeSelectOption value="10">10s</NativeSelectOption>
+        {quickSeconds.map(secondsOption)}
       </NativeSelectOptGroup>
-      <NativeSelectOptGroup label="1 - 60 sec">{secondsOptions}</NativeSelectOptGroup>
+      <NativeSelectOptGroup label="Other durations">{otherSeconds.map(secondsOption)}</NativeSelectOptGroup>
     </NativeSelect>
   )
 }

@@ -12,7 +12,12 @@ for (const type of ['Countdown', 'Complex']) {
       await page.getByRole('button', { name: 'Add', exact: true }).tap()
     }
 
-    const select = page.getByRole('combobox', { name: 'Countdown', exact: true })
+    const select = page.getByRole('combobox', { name: 'Pre-start countdown', exact: true })
+    const durations = await select.locator('option').evaluateAll(options =>
+      options.map(option => Number((option as HTMLOptionElement).value))
+    )
+    expect(durations.slice(0, 4)).toEqual([0, 3, 5, 10])
+    expect(durations.sort((a, b) => a - b)).toEqual(Array.from({ length: 61 }, (_, i) => i))
     await select.scrollIntoViewIfNeeded()
     const box = (await select.boundingBox())!
     const field = (await select.locator('xpath=ancestor::*[@data-slot="field"][1]').boundingBox())!
@@ -41,7 +46,7 @@ test('Complex uses the workout countdown before the first phase only', async ({ 
     }
     await page.getByRole('button', { name: name === 'Warmup' ? 'Add' : 'Add at the end', exact: true }).tap()
   }
-  await page.getByRole('combobox', { name: 'Countdown', exact: true }).selectOption('3')
+  await page.getByRole('combobox', { name: 'Pre-start countdown', exact: true }).selectOption('3')
   await page.getByRole('button', { name: 'Start Timer', exact: true }).tap()
   await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
   const timer = page.locator('[data-timer-state]')

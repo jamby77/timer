@@ -10,7 +10,7 @@ for (const setting of ['pre-start countdown', 'sound']) {
       await page.locator('input[name=seconds]').fill('30')
       await page.getByRole('switch', { name: 'Sounds' }).setChecked(setting === 'sound' && variant === 1)
       if (setting === 'pre-start countdown') {
-        await page.getByLabel('Countdown', { exact: true }).selectOption(variant === 0 ? '1' : '3')
+        await page.getByLabel('Pre-start countdown', { exact: true }).selectOption(variant === 0 ? '1' : '3')
       }
       await page.getByRole('button', { name: 'Start Timer', exact: true }).click()
       await expect(page).toHaveURL(/\/\?id=/)
