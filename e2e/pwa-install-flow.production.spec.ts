@@ -147,3 +147,25 @@ for (const failure of ['prompt', 'choice'] as const) {
     expect(errors).toEqual([])
   })
 }
+
+test.describe('mobile install banner', () => {
+  test.use({ viewport: { width: 320, height: 640 }, hasTouch: true, isMobile: true })
+
+  for (const action of ['Install', 'Dismiss install prompt', 'Never show again']) {
+    test(`${action} responds to an edge tap`, async ({ page }) => {
+      await page.addInitScript(() => localStorage.setItem('pwa-install-dismiss-count', '3'))
+      await openApp(page)
+      await offerInstallation(page, 'dismissed')
+      const button = page.getByRole('button', { name: action, exact: true })
+      const box = (await button.boundingBox())!
+      expect(box.width).toBeGreaterThanOrEqual(44)
+      expect(box.height).toBeGreaterThanOrEqual(44)
+      expect(box.x + box.width).toBeLessThanOrEqual(320)
+      await button.tap({ position: { x: box.width - 3, y: box.height / 2 } })
+      await expect(page.getByRole('heading', { name: 'Install App' })).toBeHidden()
+      if (action === 'Never show again') {
+        expect(await page.evaluate(() => localStorage.getItem('pwa-install-permanently-dismissed'))).toBe('true')
+      }
+    })
+  }
+})
