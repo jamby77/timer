@@ -130,6 +130,7 @@ export const useIntervalTimer = ({
         if (disposed) return
         // Internal state updates
         setCurrentStep(step)
+        setTimeLeft(step.duration)
         setCurrentStepIndex(stepIndex)
         onStepChangeRef.current?.(step, stepIndex)
       },
