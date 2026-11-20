@@ -28,12 +28,23 @@ for (const complex of [false, true]) {
     }, complex)
     await page.goto('/?id=' + (complex ? 'session' : 'work'))
     const stop = page.getByRole('button', { name: 'Stop work', exact: true })
+    const ready = page
+      .locator('[data-slot="card-header"]')
+      .getByText('Ready for next round', { exact: true })
+    await expect(ready).toBeHidden()
     await expect(stop).toBeDisabled()
     await page.getByRole('button', { name: 'Start work', exact: true }).tap()
     await page.getByRole('button', { name: 'Finish work / Start rest', exact: true }).tap()
     await expect(page.getByText('Round 2 of 3', { exact: true })).toBeVisible()
+    await expect(ready).toBeInViewport({ ratio: 1 })
+    await page.getByRole('button', { name: 'Start work', exact: true }).tap()
+    await expect(ready).toBeHidden()
+    await page.getByRole('button', { name: 'Finish work / Start rest', exact: true }).tap()
+    await expect(page.getByText('Round 3 of 3', { exact: true })).toBeVisible()
+    await expect(ready).toBeVisible()
     await expect(stop).toBeEnabled()
     await stop.tap()
+    await expect(ready).toBeHidden()
     if (complex) {
       await expect(page.getByRole('status')).toHaveText('Timer stopped')
     } else {
