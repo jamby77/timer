@@ -95,8 +95,7 @@ test('save a built-in copy without modifying Tabata', async ({ page }) => {
   await expect(page.getByLabel('Number of Intervals')).toHaveValue('8')
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
   await page
-    .getByRole('button')
-    .filter({ has: page.getByRole('heading', { name: 'My Tabata', exact: true }) })
+    .getByRole('group', { name: 'My Tabata', exact: true })
     .getByRole('button', { name: 'Start', exact: true })
     .click()
   await expect(page).toHaveURL(/\/\?id=/)
@@ -241,6 +240,25 @@ test('malformed recent history does not hide usable timers after reload', async 
 
 test.describe('mobile preset cards', () => {
   test.use({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true })
+
+  test('preset Start opens the timer by edge tap and keyboard', async ({ page }) => {
+    for (const action of ['tap', 'Enter', 'Space']) {
+      await page.goto('/configure')
+      const card = page.getByRole('group', { name: 'Tabata', exact: true })
+      const start = card.getByRole('button', { name: 'Start', exact: true })
+      const bounds = (await start.boundingBox())!
+      const description = (await card.locator('[data-slot=card-description]').boundingBox())!
+      expect(bounds.width).toBeCloseTo(description.width)
+      expect(bounds.height).toBeGreaterThanOrEqual(44)
+      if (action === 'tap') {
+        await start.tap({ position: { x: bounds.width - 2, y: bounds.height / 2 } })
+      } else {
+        await start.press(action)
+      }
+      await expect(page).toHaveURL(/\/\?id=/)
+      await expect(page.locator('[data-slot=card-header]')).toContainText('Tabata')
+    }
+  })
 
   test('a saved preset with a long unbroken name fits and reopens by touch', async ({ page }) => {
     const name = 'Strength · SingleLegRomanianDeadliftWithContralateralReach'
