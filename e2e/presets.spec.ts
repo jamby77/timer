@@ -270,7 +270,12 @@ test.describe('mobile preset cards', () => {
     await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
     await page.reload()
 
-    const title = page.getByRole('heading', { name, exact: true })
+    const savedCard = page.getByRole('group', { name, exact: true })
+    await expect(savedCard.getByText('45s countdown', { exact: true })).toHaveCount(1)
+    const tabata = page.getByRole('group', { name: 'Tabata', exact: true })
+    await expect(tabata.getByText('20 seconds on, 10 seconds off', { exact: true })).toBeVisible()
+    await expect(tabata.getByText('8 rounds: 20s work / 10s rest', { exact: true })).toBeVisible()
+    const title = savedCard.getByRole('heading', { name, exact: true })
     await title.scrollIntoViewIfNeeded()
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
     expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
