@@ -33,7 +33,7 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
               <div className="text-muted-foreground text-sm">
                 <Icon className="mr-1 inline-block size-4 align-text-bottom sm:hidden" aria-hidden="true" />
                 {isWorkRestConfig(c) ? 'Work/Rest' : TIMER_TYPE_LABELS[phase.type]}
-                {isCountdownConfig(c) && <span> - {c.duration}s</span>}
+                {isCountdownConfig(c) && <span> · {formatDuration(c.duration, { exact: true })}</span>}
                 {isIntervalConfig(c) && (
                   <>
                     <div>
