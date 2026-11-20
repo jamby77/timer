@@ -172,7 +172,7 @@ const InstallPromptContent = () => {
   }
 
   return (
-    <div className="bg-background/80 max-sm:bg-background fixed top-16 right-0 z-50 w-screen space-y-2 px-4 py-2 max-sm:border-b">
+    <div data-install-banner="" className="bg-background/80 max-sm:bg-background fixed top-16 right-0 z-50 w-screen space-y-2 px-4 py-2 max-sm:static max-sm:-mt-4 max-sm:shrink-0 max-sm:border-b [[data-fullscreen=true]_&]:hidden">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Install App</h3>
         <Button
