@@ -48,6 +48,7 @@ for (const skipLastRest of [false, true]) {
         'data-timer-state',
         'completed'
       )
+      await expect(header.getByRole('status')).toHaveText('Complete')
       await expect(header.getByText('2 of 2 rounds', { exact: true })).toBeVisible()
       await expect(header).toContainText('Display verification')
       await expect(page.locator('[data-slot="card-content"]')).toHaveText('00:00.00')
@@ -55,6 +56,7 @@ for (const skipLastRest of [false, true]) {
       const finalDuration = skip ? (skipLastRest ? '00:30.00' : '00:20.00') : '00:01.00'
       await expect(page.locator('[data-slot="card-footer"]').getByText(finalDuration, { exact: true })).toBeVisible()
       await page.getByRole('button', { name: 'Start intervals', exact: true }).click()
+      await expect(header.getByRole('status')).toBeHidden()
       await expect(header.getByText('1 of 2 rounds', { exact: true })).toBeVisible()
     })
   }

@@ -81,6 +81,7 @@ for (const viewport of [
           await assertLabels()
         }
         await expect(card).toHaveAttribute('data-timer-state', 'completed', { timeout: 8000 })
+        await expect(header.getByRole('status')).toHaveText('Complete')
         await assertLabels()
       })
     }

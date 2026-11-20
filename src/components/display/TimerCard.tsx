@@ -12,6 +12,13 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+const timerStatusLabels = {
+  [TimerState.Idle]: '',
+  [TimerState.Running]: '',
+  [TimerState.Paused]: 'Paused',
+  [TimerState.Completed]: 'Complete',
+}
+
 interface TimerCardProps {
   header?: ReactNode
   headerControls?: ReactNode
@@ -37,6 +44,7 @@ export const TimerCard = ({
   isWork,
   fullscreen = false,
 }: TimerCardProps) => {
+  const status = timerStatusLabels[state]
   const lastDotIndex = time.lastIndexOf('.')
   const mainTime = lastDotIndex > -1 ? time.slice(0, lastDotIndex) : time
   const fractionalTime = lastDotIndex > -1 ? time.slice(lastDotIndex) : ''
@@ -51,7 +59,7 @@ export const TimerCard = ({
           'bg-tm-rest-bg text-tm-rest-fg': isWork === false,
         })}
       >
-        {(header || !hideLabel || subtitle || state === TimerState.Paused) && (
+        {(header || !hideLabel || subtitle || status) && (
           <CardHeader
             className={cn('shrink-0 gap-1 px-4 text-center md:px-6', header ? 'py-1' : 'py-2')}
           >
@@ -74,9 +82,9 @@ export const TimerCard = ({
                 {subtitle}
               </CardDescription>
             )}
-            {state === TimerState.Paused && (
+            {status && (
               <div role="status" className="text-sm leading-5 font-semibold">
-                Paused
+                {status}
               </div>
             )}
             {headerControls}
