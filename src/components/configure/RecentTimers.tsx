@@ -81,11 +81,11 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
 
   return (
     <Card className="cursor-grab py-4 active:cursor-grabbing">
-      <div className="flex items-center justify-between gap-2 px-1 md:px-4">
-        <CardTitle className="max-w-32 text-left">
-          <h3 className="truncate">{timer.config.name}</h3>
+      <div className="flex items-center justify-between gap-2 px-1 max-sm:items-start md:px-4">
+        <CardTitle className="min-w-0 text-left max-sm:flex-1 max-sm:leading-snug sm:max-w-32">
+          <h3 className="wrap-anywhere sm:truncate">{timer.config.name}</h3>
         </CardTitle>
-        <div className="inline-flex items-center">
+        <div className="inline-flex shrink-0 items-center">
           {/* Remove button */}
           <Button
             aria-label="Remove timer"
