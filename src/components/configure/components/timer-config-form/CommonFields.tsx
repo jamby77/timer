@@ -100,12 +100,13 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
         <Field>
           <FieldLabel htmlFor="completionMessage">Completion Message</FieldLabel>
           <Input
+            className="max-sm:min-h-11"
             id="completionMessage"
             name="completionMessage"
             type="text"
-            value={config.completionMessage || 'Time is up!'}
+            value={config.completionMessage ?? 'Time is up!'}
             onChange={(e) => onChange({ completionMessage: e.target.value })}
-            placeholder="Time is up!"
+            placeholder="Enter a completion message"
           />
         </Field>
       </FieldGroup>
