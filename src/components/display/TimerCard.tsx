@@ -51,7 +51,7 @@ export const TimerCard = ({
           'bg-tm-rest-bg text-tm-rest-fg': isWork === false,
         })}
       >
-        {(header || !hideLabel || subtitle) && (
+        {(header || !hideLabel || subtitle || state === TimerState.Paused) && (
           <CardHeader
             className={cn('shrink-0 gap-1 px-4 text-center md:px-6', header ? 'py-1' : 'py-2')}
           >
@@ -73,6 +73,11 @@ export const TimerCard = ({
               <CardDescription className="text-base leading-none font-semibold text-inherit sm:text-lg">
                 {subtitle}
               </CardDescription>
+            )}
+            {state === TimerState.Paused && (
+              <div role="status" className="text-sm leading-5 font-semibold">
+                Paused
+              </div>
             )}
             {headerControls}
           </CardHeader>
