@@ -11,8 +11,11 @@ interface StopwatchFieldsProps {
 export const StopwatchFields = ({ config, onChange }: StopwatchFieldsProps) => {
   return (
     <FieldSet className="min-w-0 gap-2">
-      <FieldLegend variant="label">Time Limit (optional)</FieldLegend>
+      <FieldLegend variant="label">
+        <label htmlFor="stopwatchLimitSeconds">Time Limit (optional)</label>
+      </FieldLegend>
       <TimePicker
+        secondsInputId="stopwatchLimitSeconds"
         clearLabel="Clear limit"
         max={86400}
         min={0}

@@ -70,6 +70,8 @@ test('overall time limit fits all three touch targets below its title', async ({
   await limit.scrollIntoViewIfNeeded()
   const clear = limit.getByRole('button', { name: 'Clear overall time limit' })
   await expect(clear).toBeDisabled()
+  await limit.getByText('Overall Time Limit', { exact: true }).tap()
+  await expect(limit.getByLabel('Seconds', { exact: true })).toBeFocused()
   const title = (await limit.locator('legend').boundingBox())!
   for (const [unit, value] of [['Hours', '01'], ['Minutes', '02'], ['Seconds', '03']]) {
     const input = limit.getByLabel(unit, { exact: true })
@@ -258,6 +260,8 @@ test('Stopwatch summary shows the exact limit and updates when cleared on a narr
   await button('Add Phase').tap()
   await page.getByLabel('Phase type').tap()
   await page.getByRole('option', { name: 'Stopwatch', exact: true }).tap()
+  await page.getByText('Time Limit (optional)', { exact: true }).tap()
+  await expect(page.getByLabel('Seconds', { exact: true })).toBeFocused()
   for (const [field, value] of [['Hours', '01'], ['Minutes', '02'], ['Seconds', '05']]) {
     await page.getByLabel(field, { exact: true }).pressSequentially(value)
   }
