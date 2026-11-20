@@ -42,7 +42,10 @@ test('recent timers can be browsed, removed and started by touch on a narrow pho
   await next.tap()
   await card('Evening').getByRole('button', { name: 'Remove timer' }).tap()
   await expect(card('Evening')).toHaveCount(0)
-  await start.tap()
+  const bounds = (await start.boundingBox())!
+  const details = (await card(morning).locator('[data-slot=card-description]').boundingBox())!
+  expect(bounds.width).toBeCloseTo(details.width)
+  await start.tap({ position: { x: bounds.width - 2, y: bounds.height / 2 } })
   await expect(page).toHaveURL(/\/\?id=/)
   await expect(page.locator('[data-slot="card-header"]')).toContainText(morning)
   await page.getByRole('button', { name: 'Start timer', exact: true }).tap()

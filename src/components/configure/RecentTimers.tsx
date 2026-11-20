@@ -108,12 +108,12 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
           <p className="truncate">{getConfigSummary(timer.config)}</p>
         </CardDescription>
       </CardContent>
-      <CardFooter className="justify-between gap-2 px-1 md:px-4">
+      <CardFooter className="justify-between gap-2 px-1 max-sm:flex-col max-sm:items-stretch md:px-4">
         <span className="text-muted-foreground truncate text-xs">
           {formatRelativeTime(timer.startedAt)}
         </span>
-        <CardAction>
-          <Button size="sm" className="max-sm:min-h-11" onClick={handleStart}>
+        <CardAction className="max-sm:self-stretch">
+          <Button size="sm" className="max-sm:min-h-11 max-sm:w-full" onClick={handleStart}>
             <PlayIcon size={4} className="fill-tm-play stroke-card" />
             Start
           </Button>
