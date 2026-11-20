@@ -27,3 +27,28 @@ for (const type of ['Countdown', 'Complex']) {
     await expect(toggle).toBeChecked()
   })
 }
+
+test('enabling Sounds in Complex setup plays the phase start cue', async ({ page }) => {
+  await page.addInitScript(() => {
+    const start = OscillatorNode.prototype.start
+    const audio = { cueStarts: 0 }
+    Object.assign(window, { audio })
+    OscillatorNode.prototype.start = function (when) {
+      audio.cueStarts++
+      start.call(this, when)
+    }
+  })
+  await page.goto('/configure')
+  await page.getByRole('heading', { name: 'Complex', exact: true }).tap()
+  await page.getByRole('button', { name: 'Add Phase', exact: true }).tap()
+  await page.getByRole('button', { name: 'Add', exact: true }).tap()
+  await page.getByRole('switch', { name: 'Sounds', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start Timer', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
+  await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
+  await expect
+    .poll(() =>
+      page.evaluate(() => (window as unknown as { audio: { cueStarts: number } }).audio.cueStarts)
+    )
+    .toBeGreaterThan(0)
+})
