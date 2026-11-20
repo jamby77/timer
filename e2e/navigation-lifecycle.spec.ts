@@ -121,3 +121,31 @@ for (const type of types) {
     await expect(other.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
   })
 }
+
+test.describe('phone navigation', () => {
+  test.use({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true })
+
+  test('header controls support edge taps and identify the active section', async ({ page }) => {
+    await openTimer(page, 'COUNTDOWN')
+    const nav = page.getByRole('navigation')
+    const run = nav.getByRole('link', { name: 'Run' })
+    const create = nav.getByRole('link', { name: 'New' })
+    const theme = nav.getByRole('button', { name: /toggle theme/i })
+    for (const control of [run, create, theme]) {
+      const box = (await control.boundingBox())!
+      expect(box.width).toBeGreaterThanOrEqual(44)
+      expect(box.height).toBeGreaterThanOrEqual(44)
+    }
+    await expect(run).toHaveAttribute('aria-current', 'page')
+    const themeName = await theme.innerText()
+    await theme.tap({ position: { x: 3, y: 3 } })
+    await expect(theme).not.toHaveText(themeName)
+    await create.tap({ position: { x: 3, y: 3 } })
+    await expect(create).toHaveAttribute('aria-current', 'page')
+    await page.getByRole('heading', { name: 'Complex', exact: true }).tap()
+    await expect(page).toHaveURL(/\/configure\/complex/)
+    await expect(create).toHaveAttribute('aria-current', 'location')
+    await run.tap({ position: { x: 3, y: 3 } })
+    await expect(page).not.toHaveURL(/\/configure\/complex/)
+  })
+})
