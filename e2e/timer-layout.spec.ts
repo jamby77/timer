@@ -75,9 +75,14 @@ for (const viewport of [
       await expect(
         page.locator('[data-slot="card-header"]').getByText('Current phase', { exact: true })
       ).toBeVisible()
+      const pausedLabel = page.getByText('Paused', { exact: true })
+      await expect(pausedLabel).toBeHidden()
       await page.getByRole('button', { name: /^Pause/ }).click()
+      await expect(pausedLabel).toBeInViewport({ ratio: 1 })
       await expect(page.getByRole('button', { name: /^Pause/ })).toBeHidden()
       await expectViewportFilled(page)
+      await page.getByRole('button', { name: /^Resume/ }).click()
+      await expect(pausedLabel).toBeHidden()
     })
   }
 }
