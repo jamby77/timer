@@ -224,7 +224,7 @@ export function WorkRestTimer({
               onClick={handleRestart}
               title="Restart"
               label="Restart"
-              disabled={isIdlePhase}
+              disabled={isIdlePhase && state.rounds === 0}
             />
           </div>
         }
@@ -233,7 +233,7 @@ export function WorkRestTimer({
           .join(' · ')}
         state={displayState}
         time={displayTime}
-        subtitle={`Round: ${Math.min(state.rounds + 1, state.maxRounds)}`}
+        subtitle={`Round ${Math.min(state.rounds + 1, state.maxRounds)} of ${state.maxRounds}`}
         isWork={displayIsWork}
         fullscreen={fullscreen || isAutoStarting}
       >

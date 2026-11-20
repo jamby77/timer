@@ -98,5 +98,5 @@ test('pause freezes the work limit and restart begins a fresh timed work period'
   await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
   await expect(page.locator('[data-slot="card-content"]')).toContainText('00:00')
   await expect(page.getByRole('button', { name: 'Skip rest', exact: true })).toBeVisible()
-  await expect(page.getByText('Round: 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('Round 1 of 1', { exact: true })).toBeVisible()
 })

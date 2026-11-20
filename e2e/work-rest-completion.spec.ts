@@ -48,13 +48,14 @@ for (const mode of ['standalone', 'complex', 'final', 'manual']) {
       await page.goto('/?id=rounds')
       await page.getByRole('button', { name: 'Start work', exact: true }).click()
       for (let round = 1; round <= 2; round++) {
-        await expect(page.getByText(`Round: ${round}`, { exact: true })).toBeVisible()
+        await expect(page.getByText(`Round ${round} of 2`, { exact: true })).toBeVisible()
         await expect(page.locator('[data-slot="card-content"]')).toContainText('00:01')
         await page.getByRole('button', { name: 'Finish work / Start rest', exact: true }).click()
         await expect(page.getByRole('button', { name: 'Skip rest', exact: true })).toBeVisible()
+        await expect(page.getByText(`Round ${round} of 2`, { exact: true })).toBeVisible()
         if (skip) await page.getByRole('button', { name: 'Skip rest', exact: true }).click()
         if (round === 1) {
-          await expect(page.getByText('Round: 2', { exact: true })).toBeVisible()
+          await expect(page.getByText('Round 2 of 2', { exact: true })).toBeVisible()
           if (complex)
             await expect(
               page.getByText(mode === 'final' ? 'Phase 1/1' : 'Phase 1/2', { exact: true })
@@ -71,9 +72,9 @@ for (const mode of ['standalone', 'complex', 'final', 'manual']) {
           'completed'
         )
         await expect(page.getByRole('navigation')).toBeVisible()
-        await expect(page.getByText('Round: 2', { exact: true })).toBeVisible()
+        await expect(page.getByText('Round 2 of 2', { exact: true })).toBeVisible()
         await page.getByRole('button', { name: 'Start work', exact: true }).click()
-        await expect(page.getByText('Round: 1', { exact: true })).toBeVisible()
+        await expect(page.getByText('Round 1 of 2', { exact: true })).toBeVisible()
         await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
       }
     })

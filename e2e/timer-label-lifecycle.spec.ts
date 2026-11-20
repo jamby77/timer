@@ -57,7 +57,7 @@ for (const viewport of [
           }
           if (type === 'WORKREST') {
             await expect(header).toContainText('WORK/REST (r 2.00x)')
-            await expect(header.getByText('Round: 1', { exact: true })).toBeVisible()
+            await expect(header.getByText('Round 1 of 1', { exact: true })).toBeVisible()
           }
           if (type === 'STOPWATCH') await expect(header).toContainText('(Cap: 00:02.00)')
         }
