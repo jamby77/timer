@@ -35,7 +35,7 @@ for (const type of ['Countdown', 'Stopwatch', 'Interval', 'Work/Rest Ratio']) {
     }
     await page.getByLabel(/Timer Name/).fill(name)
     await page.getByLabel('Completion Message').fill('Finished!')
-    await page.getByLabel('Countdown', { exact: true }).selectOption('3')
+    await page.getByLabel('Pre-start countdown', { exact: true }).selectOption('3')
     await page.getByRole('switch', { name: 'Sounds' }).check()
     await page.getByRole('button', { name: 'Save as Preset' }).click()
     await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
@@ -57,7 +57,7 @@ for (const type of ['Countdown', 'Stopwatch', 'Interval', 'Work/Rest Ratio']) {
     await page.getByRole('heading', { name, exact: true }).click()
     await expect(page.getByLabel(/Timer Name/)).toHaveValue(name)
     await expect(page.getByLabel('Completion Message')).toHaveValue('Finished!')
-    await expect(page.getByLabel('Countdown', { exact: true })).toHaveValue('3')
+    await expect(page.getByLabel('Pre-start countdown', { exact: true })).toHaveValue('3')
     await expect(page.getByRole('switch', { name: 'Sounds' })).toBeChecked()
     if (type === 'Work/Rest Ratio') {
       await expect(page.getByLabel('Max rounds')).toHaveValue('4')
