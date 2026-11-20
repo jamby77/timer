@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
 import type {
@@ -37,6 +37,7 @@ export const useWorkRestTimer = ({
     currentTime: 0,
   })
 
+  const onRestCompleteRef = useRef<() => void>(() => {})
   const timerRef = useRef<Timer | null>(null)
   const stopwatchRef = useRef<Stopwatch | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -83,19 +84,7 @@ export const useWorkRestTimer = ({
           // Update currentTime to trigger re-renders (show remaining time)
           setState((prev) => ({ ...prev, currentTime: timeLeft }))
         },
-        onComplete: () => {
-          setState((prev) => {
-            const rounds = prev.rounds + 1
-            const completed = rounds >= prev.maxRounds
-            return {
-              ...prev,
-              phase: completed ? TimerPhase.Completed : TimerPhase.Idle,
-              rounds,
-              state: completed ? TimerState.Completed : TimerState.Idle,
-              currentTime: 0,
-            }
-          })
-        },
+        onComplete: () => onRestCompleteRef.current(),
         onStateChange: (newState) => {
           if (newState === TimerState.Completed) return
           setState((prev) => ({ ...prev, state: newState }))
@@ -221,36 +210,29 @@ export const useWorkRestTimer = ({
     onStopRef.current?.()
   }, [state.phase, finishWork])
 
-  // Skip rest - automatically start the next work phase
-  const skipRest = useCallback(() => {
-    if (state.phase !== TimerPhase.Rest) return
-
-    // Check if max rounds reached
-    if (state.rounds + 1 >= state.maxRounds) {
-      cleanupTimer()
-      setState((prev) => ({
-        ...prev,
-        phase: TimerPhase.Completed,
-        state: TimerState.Completed,
-        currentTime: 0,
-        rounds: prev.rounds + 1,
-      }))
-      return
-    }
-
+  const finishRest = useCallback((continueWork: boolean) => {
     cleanupTimer()
+    const rounds = state.rounds + 1
+    const completed = rounds >= state.maxRounds
+    const startNext = !completed && continueWork
+    const phase = completed ? TimerPhase.Completed : startNext ? TimerPhase.Work : TimerPhase.Idle
     setState((prev) => ({
       ...prev,
-      phase: TimerPhase.Work,
-      rounds: prev.rounds + 1,
-      state: TimerState.Idle,
+      rounds,
+      phase,
+      state: completed ? TimerState.Completed : TimerState.Idle,
       currentTime: 0,
     }))
+    if (startNext) createWorkStopwatch().start()
+  }, [state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch])
 
-    // Automatically start the next work phase
-    const stopwatch = createWorkStopwatch()
-    stopwatch.start()
-  }, [state.phase, state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch])
+  useLayoutEffect(() => {
+    onRestCompleteRef.current = () => finishRest(config.autoContinue === true)
+  }, [config.autoContinue, finishRest])
+
+  const skipRest = useCallback(() => {
+    if (state.phase === TimerPhase.Rest) finishRest(true)
+  }, [state.phase, finishRest])
 
   // Stop rest (reset completely)
   const stopRest = useCallback(() => {

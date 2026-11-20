@@ -71,6 +71,7 @@ const intervalConfigSchema = baseTimerConfigSchema.extend({
 })
 
 const workRestBaseSchema = baseTimerConfigSchema.extend({
+  autoContinue: z.boolean().optional(),
   type: z.literal(TimerType.WORKREST),
   maxWorkTime: z
     .number()
