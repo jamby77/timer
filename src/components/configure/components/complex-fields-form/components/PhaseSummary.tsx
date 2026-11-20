@@ -16,6 +16,8 @@ interface PhaseSummaryProps {
   phases: ComplexPhase[]
 }
 
+const formatPhaseDuration = (seconds: number) => formatDuration(seconds, { exact: true })
+
 export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
   return (
     <div className="space-y-2">
@@ -33,28 +35,28 @@ export const PhaseSummary = ({ phases }: PhaseSummaryProps) => {
               <div className="text-muted-foreground text-sm">
                 <Icon className="mr-1 inline-block size-4 align-text-bottom sm:hidden" aria-hidden="true" />
                 {isWorkRestConfig(c) ? 'Work/Rest' : TIMER_TYPE_LABELS[phase.type]}
-                {isCountdownConfig(c) && <span> · {formatDuration(c.duration, { exact: true })}</span>}
+                {isCountdownConfig(c) && <span> · {formatPhaseDuration(c.duration)}</span>}
                 {isIntervalConfig(c) && (
                   <>
                     <div>
                       {c.intervals} {c.intervals === 1 ? 'round' : 'rounds'} ·{' '}
                       {c.skipLastRest === false ? 'Final rest included' : 'Final rest skipped'}
                     </div>
-                    <div>{c.workDuration}s work / {c.restDuration}s rest</div>
+                    <div>{formatPhaseDuration(c.workDuration)} work / {formatPhaseDuration(c.restDuration)} rest</div>
                   </>
                 )}
                 {isStopwatchConfig(c) && (
-                  <div>{c.timeLimit ? `${formatDuration(c.timeLimit, { exact: true })} time limit` : 'No time limit'}</div>
+                  <div>{c.timeLimit ? `${formatPhaseDuration(c.timeLimit)} time limit` : 'No time limit'}</div>
                 )}
                 {isWorkRestConfig(c) && (
                   <>
                     <div>
                       {c.maxRounds} {c.maxRounds === 1 ? 'round' : 'rounds'} ·{' '}
-                      {c.maxWorkTime ? `${formatDuration(c.maxWorkTime)} work limit` : 'No work time limit'}
+                      {c.maxWorkTime ? `${formatPhaseDuration(c.maxWorkTime)} work limit` : 'No work time limit'}
                     </div>
                     <div>
                       {c.restMode === WorkRestMode.FIXED
-                        ? c.fixedRestDuration ? `${formatDuration(c.fixedRestDuration)} fixed rest` : 'Set rest duration'
+                        ? c.fixedRestDuration ? `${formatPhaseDuration(c.fixedRestDuration)} fixed rest` : 'Set rest duration'
                         : `Rest ${c.ratio ?? 1}× work time`}
                     </div>
                   </>

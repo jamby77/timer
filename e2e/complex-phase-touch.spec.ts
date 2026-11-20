@@ -257,3 +257,35 @@ test('Stopwatch summary shows the exact limit and updates when cleared on a narr
   await expect(summary.getByText('No time limit', { exact: true })).toBeVisible()
   await expect(summary).not.toContainText('1h 2m 5s')
 })
+
+test('long Interval and Work/Rest durations stay exact in the mobile phase summary', async ({ page }) => {
+  await page.goto('/configure/complex')
+  const button = (name: string) => page.getByRole('button', { name, exact: true })
+  const addPhase = async (type: string, name: string) => {
+    await button('Add Phase').tap()
+    await page.getByLabel('Phase type').tap()
+    await page.getByRole('option', { name: type, exact: true }).tap()
+    await page.getByLabel('Phase name').fill(name)
+  }
+  const setTime = async (label: string, hours: string, minutes: string, seconds: string) => {
+    const field = page.locator('[data-slot=field]').filter({ has: page.getByText(label, { exact: true }) })
+    for (const [unit, value] of [['Hours', hours], ['Minutes', minutes], ['Seconds', seconds]]) {
+      await field.getByLabel(unit, { exact: true }).pressSequentially(value)
+    }
+  }
+  await addPhase('Interval', 'Hill repeats')
+  await setTime('Work Duration', '00', '02', '30')
+  await setTime('Rest Duration', '00', '01', '05')
+  await button('Add').tap()
+  await addPhase('Work/Rest Ratio', 'Endurance block')
+  await page.getByRole('radio', { name: 'Fixed rest' }).tap()
+  await setTime('Time limit', '01', '02', '05')
+  await setTime('Rest time', '01', '00', '10')
+  await button('Add at the end').tap()
+
+  const summary = page.locator('[data-slot=card]').filter({ has: page.getByText('Phase Summary', { exact: true }) })
+  await expect(summary).toContainText('2m 30s work / 1m 5s rest')
+  await expect(summary).toContainText('1h 2m 5s work limit')
+  await expect(summary).toContainText('1h 10s fixed rest')
+  expect(await summary.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+})
