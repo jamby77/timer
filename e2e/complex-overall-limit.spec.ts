@@ -223,3 +223,13 @@ test('opening a different workout starts with a fresh budget', async ({ page }) 
   await expect(prompt(page)).toBeHidden()
   await expect(timer(page)).toHaveAttribute('data-timer-state', 'idle')
 })
+
+test('the elapsed time and limit reached message fit on a 320px phone', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  await openWorkout(page)
+  await page.getByRole('button', { name: 'Start timer', exact: true }).click()
+  await prompt(page).getByRole('button', { name: 'Continue Workout' }).click()
+  const clock = overall(page)
+  await expect(clock).toContainText('Limit reached')
+  expect(await clock.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+})
