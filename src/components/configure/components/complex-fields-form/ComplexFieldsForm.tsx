@@ -264,8 +264,11 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                 <SoundField sound={config.sound} onChange={(sound) => onChange({ sound })} />
 
                 <FieldSet className="min-w-0 gap-2">
-                  <FieldLegend variant="label" className="mb-2">Overall Time Limit</FieldLegend>
+                  <FieldLegend variant="label" className="mb-2">
+                    <label htmlFor="overallLimitSeconds">Overall Time Limit</label>
+                  </FieldLegend>
                   <TimePicker
+                    secondsInputId="overallLimitSeconds"
                     clearLabel="Clear overall time limit"
                     value={config.overallTimeLimit || 0}
                     onTimeChange={(value) =>
