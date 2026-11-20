@@ -59,7 +59,7 @@ export const TimerCard = ({
             {!hideLabel && (
               <CardTitle
                 className={cn(
-                  'truncate',
+                  'truncate max-sm:portrait:line-clamp-2 max-sm:portrait:wrap-anywhere max-sm:portrait:whitespace-normal max-sm:portrait:leading-tight',
                   subtitle
                     ? 'text-xs leading-4 font-normal opacity-80'
                     : 'text-base font-semibold sm:text-lg'
