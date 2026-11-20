@@ -120,7 +120,7 @@ export function WorkRestTimer({
   const isPausedState = state.state === TimerState.Paused
 
   // Keep screen awake while work/rest timer is running
-  useWakeLock(isRunningState)
+  useWakeLock(isRunningState || preStart.state === TimerState.Running)
 
   const isPreStarting = preStart.isActive
   const isPreStartRunning = preStart.state === TimerState.Running
