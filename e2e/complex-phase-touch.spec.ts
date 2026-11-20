@@ -250,8 +250,14 @@ test('Stopwatch summary shows the exact limit and updates when cleared on a narr
   })
   await expect(summary.getByText('1h 2m 5s time limit', { exact: true })).toBeVisible()
   await button('Edit phase').tap()
+  const clear = button('Clear limit')
+  const bounds = (await clear.boundingBox())!
+  expect(bounds.height).toBeGreaterThanOrEqual(44)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(320)
+  await clear.tap({ position: { x: bounds.width - 2, y: bounds.height / 2 } })
+  await expect(clear).toBeDisabled()
   for (const field of ['Hours', 'Minutes', 'Seconds']) {
-    await page.getByLabel(field, { exact: true }).pressSequentially('00')
+    await expect(page.getByLabel(field, { exact: true })).toHaveValue('00')
   }
   await button('Save').tap()
   await expect(summary.getByText('No time limit', { exact: true })).toBeVisible()
