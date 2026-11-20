@@ -44,7 +44,7 @@ export const TimerProgressIndicator = ({
       <Progress
         aria-label="Timer progress"
         value={clampedProgress}
-        className="flex-1"
+        className="flex-1 border border-(--progress-indicator-color) bg-background"
         style={progressStyle}
       />
       <span className="text-foreground text-base tabular-nums">{formatTime(maxTime)}</span>
