@@ -45,7 +45,7 @@ for (const complex of [false, true]) {
       await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
       await expect(page.locator('[data-slot="card-title"]')).toContainText('r 1.00x')
       await expect(page.getByText('Round: 1', { exact: true })).toBeVisible()
-      await expect(page.getByText('Workout stopped', { exact: true })).toBeHidden()
+      await expect(page.getByText('Timer stopped', { exact: true })).toBeHidden()
       await expect(page.locator('[data-slot="card-content"]')).not.toHaveText('00:00.00')
       if (!complex) {
         await page.getByRole('button', { name: 'Finish work / Start rest', exact: true }).click()

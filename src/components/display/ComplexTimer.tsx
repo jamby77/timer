@@ -164,12 +164,12 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
         </div>
         {Boolean(config.overallTimeLimit) && (
           <div
-            aria-label="Overall workout time"
+            aria-label="Overall timer time"
             className="truncate text-xs leading-3 tabular-nums"
             title={
               elapsedMs >= config.overallTimeLimit! * 1000
                 ? 'Overall time limit reached'
-                : 'Overall workout time'
+                : 'Overall timer time'
             }
           >
             {formatTime(elapsedMs).split('.')[0]} /{' '}
@@ -209,7 +209,7 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
         size="icon"
         onClick={() => goToPhase(0)}
         aria-label="Restart from first phase"
-        title="Restart workout"
+        title="Restart timer"
       >
         <RotateCcw />
       </Button>
@@ -294,16 +294,17 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
 
   if (isStopped) {
     return (
-      <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <h2 className="text-2xl font-semibold">{config.name || 'Complex timer'}</h2>
-        <p role="status">Workout stopped</p>
+      <div className="flex w-full max-w-xl flex-col items-center gap-4 py-12 text-center">
+        <h2 className="max-w-full text-2xl font-semibold wrap-anywhere">{config.name || 'Complex timer'}</h2>
+        <p role="status">Timer stopped</p>
         <Button
+          className="max-sm:min-h-11 max-sm:w-full"
           onClick={() => {
             goToPhase(0)
             setIsStopped(false)
           }}
         >
-          Restart workout
+          Restart timer
         </Button>
       </div>
     )

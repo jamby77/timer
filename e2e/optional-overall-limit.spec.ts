@@ -34,7 +34,7 @@ test('clearing an overall limit saves and reopens an unlimited workout', async (
   await page.getByRole('button', { name: 'Start Timer', exact: true }).click()
   await page.getByRole('button', { name: 'Start timer', exact: true }).click()
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
-  await expect(page.getByLabel('Overall workout time')).toHaveCount(0)
+  await expect(page.getByLabel('Overall timer time')).toHaveCount(0)
   await page.waitForTimeout(1300)
   await expect(page.getByRole('dialog', { name: 'Time Limit Reached' })).toBeHidden()
 })

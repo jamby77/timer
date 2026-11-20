@@ -36,7 +36,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH']) {
         await page.getByRole('button', { name: 'Start timer', exact: true }).click()
         await expect(card).toHaveAttribute('data-timer-state', 'completed', { timeout: 6000 })
         await page.getByRole('button', { name: 'Restart timer', exact: true }).click()
-        await expect(page.getByText('Workout stopped', { exact: true })).not.toBeVisible()
+        await expect(page.getByText('Timer stopped', { exact: true })).not.toBeVisible()
         await expect(page.getByText('Restartable phase', { exact: true })).toBeVisible()
         if (countdownBeforeStart) {
           await expect(page.locator('[data-slot="card-content"]')).toHaveText('1')
