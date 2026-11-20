@@ -81,3 +81,49 @@ for (const viewport of [
     })
   }
 }
+
+test('a narrow portrait phone shows a two-line phase title between the timer name and phase count', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timer_mobility',
+      JSON.stringify({
+        id: 'mobility',
+        type: 'COMPLEX',
+        name: 'Mobility',
+        phases: [
+          {
+            id: 'shoulders',
+            name: 'Shoulder mobility',
+            order: 0,
+            type: 'COUNTDOWN',
+            config: { id: 'child', name: 'Shoulders', type: 'COUNTDOWN', duration: 60 },
+          },
+        ],
+      })
+    )
+  })
+  await page.goto('/?id=mobility')
+  await page.getByRole('button', { name: 'Start timer', exact: true }).click()
+  const header = page.locator('[data-slot="card-header"]')
+  const title = header.getByText('Shoulder mobility', { exact: true })
+  for (const action of ['Pause timer', 'Resume timer']) {
+    const lines = await title.evaluate((element) => {
+      const range = document.createRange()
+      range.selectNodeContents(element)
+      return Array.from(range.getClientRects(), (rect) => rect.toJSON())
+    })
+    expect(lines).toHaveLength(2)
+    expect(lines[1].top).toBeGreaterThan(lines[0].top)
+    const left = (await header.getByText('Mobility', { exact: true }).boundingBox())!
+    const right = (await header.getByText('Phase 1/1', { exact: true }).boundingBox())!
+    for (const line of lines) {
+      expect(line.left).toBeGreaterThanOrEqual(left.x + left.width)
+      expect(line.right).toBeLessThanOrEqual(right.x)
+    }
+    await expectViewportFilled(page)
+    await page.getByRole('button', { name: action, exact: true }).click()
+  }
+})
