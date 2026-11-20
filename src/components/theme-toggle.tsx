@@ -36,7 +36,7 @@ export const ThemeToggle = () => {
   const currentTheme = mounted ? (theme as Theme) : Theme.SYSTEM
 
   return (
-    <Button variant="outline" size="icon" onClick={rotateTheme}>
+    <Button variant="outline" size="icon" className="max-sm:size-11" onClick={rotateTheme}>
       {mounted ? getThemeIcon(currentTheme) : null}
       <span className="sr-only">Toggle theme (current: {THEME_LABELS[currentTheme]})</span>
     </Button>
