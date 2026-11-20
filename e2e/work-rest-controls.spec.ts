@@ -61,7 +61,7 @@ for (const restMode of ['ratio', 'fixed']) {
         .poll(async () => Number(await progress.getAttribute('aria-valuenow')))
         .toBeGreaterThan(initialProgress)
       await expect(header.getByText('Phase 1/2', { exact: true })).toBeVisible()
-      await expect(page.getByText('Workout stopped', { exact: true })).toBeHidden()
+      await expect(page.getByText('Timer stopped', { exact: true })).toBeHidden()
       await header.getByRole('button', { name: 'Skip rest', exact: true }).click()
       await expect(progress).toBeHidden()
       await expect(header.getByText('Round: 2', { exact: true })).toBeVisible()
@@ -71,7 +71,7 @@ for (const restMode of ['ratio', 'fixed']) {
       await expect(digits).toContainText('00:01')
       await finish.click()
       await page.getByRole('button', { name: 'Stop rest', exact: true }).click()
-      await expect(page.getByRole('status')).toHaveText('Workout stopped')
+      await expect(page.getByRole('status')).toHaveText('Timer stopped')
       await expect(page.getByRole('navigation')).toBeVisible()
     })
   }

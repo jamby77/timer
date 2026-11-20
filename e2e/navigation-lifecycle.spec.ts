@@ -73,8 +73,8 @@ for (const type of types) {
     await stop.click()
     await expect(page.getByRole('navigation')).toBeVisible()
     if (type === 'COMPLEX') {
-      await expect(page.getByRole('status')).toHaveText('Workout stopped')
-      await page.getByRole('button', { name: 'Restart workout', exact: true }).click()
+      await expect(page.getByRole('status')).toHaveText('Timer stopped')
+      await page.getByRole('button', { name: 'Restart timer', exact: true }).click()
       await expect(page.getByRole('navigation')).toBeVisible()
     }
     await start.click()

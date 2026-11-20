@@ -59,6 +59,6 @@ for (const viewport of [
     await expect(header.getByText('Work', { exact: true })).toBeVisible()
     await expect(header.getByText('Phase 2/3', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Pause intervals', exact: true })).toBeVisible()
-    await expect(page.getByText('Workout stopped', { exact: true })).toBeHidden()
+    await expect(page.getByText('Timer stopped', { exact: true })).toBeHidden()
   })
 }

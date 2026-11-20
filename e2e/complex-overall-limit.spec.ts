@@ -78,7 +78,7 @@ async function openWorkout(
 }
 const timer = (page: Page) => page.locator('[data-timer-state]')
 const prompt = (page: Page) => page.getByRole('dialog', { name: 'Time Limit Reached' })
-const overall = (page: Page) => page.getByLabel('Overall workout time')
+const overall = (page: Page) => page.getByLabel('Overall timer time')
 
 for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
   test(`${type} excludes pauses and End stops the entire workout`, async ({ page }) => {
@@ -94,10 +94,10 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
     const resume = ['INTERVAL', 'WORKREST'].includes(type) ? 'Resume' : 'Start'
     await page.getByRole('button', { name: `${resume} ${suffix}`, exact: true }).click()
     await expect(prompt(page)).toBeVisible()
-    await page.getByRole('button', { name: 'End Workout', exact: true }).click()
-    await expect(page.getByRole('status')).toHaveText('Workout stopped')
+    await page.getByRole('button', { name: 'End Timer', exact: true }).click()
+    await expect(page.getByRole('status')).toHaveText('Timer stopped')
     await expect(page.getByRole('navigation')).toBeVisible()
-    await page.getByRole('button', { name: 'Restart workout', exact: true }).click()
+    await page.getByRole('button', { name: 'Restart timer', exact: true }).click()
     await expect(overall(page)).toContainText('00:00 / 00:01')
     await expect(timer(page)).toHaveAttribute('data-timer-state', 'idle')
   })
@@ -110,7 +110,7 @@ for (const width of [440, 956]) {
     await page.getByRole('button', { name: 'Start timer', exact: true }).click()
     await expect(prompt(page)).toBeVisible()
     await expect(timer(page)).toHaveAttribute('data-timer-state', 'running')
-    await page.getByRole('button', { name: 'Continue Workout', exact: true }).click()
+    await page.getByRole('button', { name: 'Continue Timer', exact: true }).click()
     await page.waitForTimeout(1200)
     await expect(prompt(page)).toBeHidden()
     await expect(overall(page)).toContainText('Limit reached')
@@ -227,7 +227,7 @@ test('opening a different workout starts with a fresh budget', async ({ page }) 
 test.describe('mobile time-limit dialog', () => {
   test.use({ viewport: { width: 320, height: 640 }, hasTouch: true, isMobile: true })
 
-  for (const action of ['Continue Workout', 'End Workout', 'Close']) {
+  for (const action of ['Continue Timer', 'End Timer', 'Close']) {
     test(`${action} responds to an edge tap`, async ({ page }) => {
       await openWorkout(page)
       await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
@@ -238,8 +238,8 @@ test.describe('mobile time-limit dialog', () => {
       expect(bounds.width).toBeGreaterThanOrEqual(44)
       await button.tap({ position: { x: bounds.width - 4, y: bounds.height / 2 } })
       await expect(prompt(page)).toBeHidden()
-      if (action === 'End Workout') {
-        await expect(page.getByRole('status')).toHaveText('Workout stopped')
+      if (action === 'End Timer') {
+        await expect(page.getByRole('status')).toHaveText('Timer stopped')
       } else {
         await expect(timer(page)).toHaveAttribute('data-timer-state', 'running')
       }

@@ -7,7 +7,8 @@ async function openComplex(
   type: string,
   autoAdvance: boolean,
   final = false,
-  preStart = 0
+  preStart = 0,
+  name = 'Stop verification'
 ) {
   const phase = (id: string, phaseType: string) => ({
     id,
@@ -35,7 +36,7 @@ async function openComplex(
     (config) => localStorage.setItem('timer_stop-check', JSON.stringify(config)),
     {
       id: 'stop-check',
-      name: 'Stop verification',
+      name,
       type: 'COMPLEX',
       autoAdvance,
       phases: final
@@ -56,7 +57,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
   test(`${type} Stop ends the entire complex workout`, async ({ page }) => {
     await openComplex(page, type, true)
     await page.getByRole('button', { name: /^Stop/i }).first().click()
-    await expect(page.getByRole('status')).toHaveText('Workout stopped')
+    await expect(page.getByRole('status')).toHaveText('Timer stopped')
     await expect(page.getByRole('navigation')).toBeVisible()
   })
 
@@ -64,7 +65,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
     await openComplex(page, type, false)
     await page.getByRole('button', { name: /^Stop/i }).first().click()
     await expect(page.getByRole('navigation')).toBeVisible()
-    await expect(page.getByRole('status')).toHaveText('Workout stopped')
+    await expect(page.getByRole('status')).toHaveText('Timer stopped')
   })
 
   test(`${type} final Stop restores navigation`, async ({ page }) => {
@@ -79,7 +80,7 @@ test('paused Work/Rest Stop work ends the complex workout', async ({ page }) => 
   await openComplex(page, 'WORKREST', true)
   await page.getByRole('button', { name: 'Pause work', exact: true }).click()
   await page.getByRole('button', { name: 'Stop work', exact: true }).click()
-  await expect(page.getByRole('status')).toHaveText('Workout stopped')
+  await expect(page.getByRole('status')).toHaveText('Timer stopped')
 })
 
 for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
@@ -94,7 +95,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
 test('running Work/Rest Stop work ends the entire workout', async ({ page }) => {
   await openComplex(page, 'WORKREST', true)
   await page.getByRole('button', { name: 'Stop work', exact: true }).click()
-  await expect(page.getByRole('status')).toHaveText('Workout stopped')
+  await expect(page.getByRole('status')).toHaveText('Timer stopped')
   await expect(page.getByRole('navigation')).toBeVisible()
 })
 
@@ -106,8 +107,8 @@ test('Restart after Stop returns to the first phase without starting it', async 
     .first()
     .click()
   await page.getByRole('button', { name: /^Stop/i }).first().click()
-  await expect(page.getByRole('status')).toHaveText('Workout stopped')
-  await page.getByRole('button', { name: 'Restart workout', exact: true }).click()
+  await expect(page.getByRole('status')).toHaveText('Timer stopped')
+  await page.getByRole('button', { name: 'Restart timer', exact: true }).click()
   await expect(page.getByText('Phase 1', { exact: true })).toBeVisible()
   await expect(page.getByRole('navigation')).toBeVisible()
   await expect(page.getByRole('button', { name: /^Start/i }).first()).toBeVisible()
@@ -121,7 +122,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
       .first()
       .click()
     await page.getByRole('button', { name: /^Stop/i }).first().click()
-    await expect(page.getByRole('status')).toHaveText('Workout stopped')
+    await expect(page.getByRole('status')).toHaveText('Timer stopped')
     await expect(page.getByRole('navigation')).toBeVisible()
     await expect(page.locator('html')).not.toHaveAttribute('data-fullscreen', 'true')
   })
@@ -129,7 +130,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
   test(`${type} Stop ends a complex workout during pre-start`, async ({ page }) => {
     await openComplex(page, type, true, false, 10)
     await page.getByRole('button', { name: /^Stop/i }).first().click()
-    await expect(page.getByRole('status')).toHaveText('Workout stopped')
+    await expect(page.getByRole('status')).toHaveText('Timer stopped')
     await expect(page.getByRole('navigation')).toBeVisible()
   })
 }
@@ -160,7 +161,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
       await expect(page.getByText('Phase 1', { exact: true })).toBeVisible()
       await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
       await expect(page.getByRole('navigation')).toBeVisible()
-      await expect(page.getByText('Workout stopped', { exact: true })).toBeHidden()
+      await expect(page.getByText('Timer stopped', { exact: true })).toBeHidden()
       if (type === 'COUNTDOWN') {
         await expect(page.locator('[data-slot="card-content"]')).toHaveText('05:00.00')
       }
@@ -176,3 +177,26 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST']) {
     })
   }
 }
+
+test.describe('stopped workout on a narrow phone', () => {
+  test.use({ viewport: { width: 320, height: 640 }, hasTouch: true, isMobile: true })
+
+  test('long names fit and an edge tap restarts at the first phase', async ({ page }) => {
+    const name = 'StrengthAndConditioningWithExtendedRecovery'
+    await openComplex(page, 'COUNTDOWN', true, false, 0, name)
+    await page.getByRole('button', { name: 'Go to next phase' }).tap()
+    await page.getByRole('button', { name: 'Start timer', exact: true }).tap()
+    await page.getByRole('button', { name: 'Stop timer', exact: true }).tap()
+    const heading = page.getByRole('heading', { name, exact: true })
+    await expect(heading).toBeVisible()
+    expect(await heading.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+    const restart = page.getByRole('button', { name: 'Restart timer', exact: true })
+    const box = (await restart.boundingBox())!
+    expect(box.width).toBe(288)
+    expect(box.height).toBeGreaterThanOrEqual(44)
+    await restart.tap({ position: { x: box.width - 3, y: box.height / 2 } })
+    await expect(page.getByText('Phase 1', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Start timer', exact: true })).toBeEnabled()
+  })
+})

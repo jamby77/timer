@@ -36,8 +36,7 @@ export function WorkoutLimitDialog({
         <DialogHeader>
           <DialogTitle>Time Limit Reached</DialogTitle>
           <DialogDescription>
-            Your workout has reached its overall time limit. This message does not pause your
-            workout. Continue the workout or end it now.
+            Your timer has reached its overall time limit and is still running.
           </DialogDescription>
         </DialogHeader>
         <p className="text-sm tabular-nums">
@@ -45,9 +44,9 @@ export function WorkoutLimitDialog({
           {formatTime(limitSeconds * 1000).split('.')[0]}
         </p>
         <DialogFooter className="max-sm:flex-col">
-          <Button className="max-sm:min-h-11" onClick={onContinue}>Continue Workout</Button>
+          <Button className="max-sm:min-h-11" onClick={onContinue}>Continue Timer</Button>
           <Button className="max-sm:min-h-11" variant="destructive" onClick={onEnd}>
-            End Workout
+            End Timer
           </Button>
         </DialogFooter>
       </DialogContent>
