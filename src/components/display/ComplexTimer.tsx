@@ -157,15 +157,15 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
   )
 
   const phaseHeader = (
-    <div className="grid h-11 w-full grid-cols-3 items-start gap-x-3 pt-3">
-      <div className="min-w-0 text-left">
-        <div className="truncate text-base leading-5 opacity-75" title={config.name}>
+    <div className="grid min-h-11 w-full grid-cols-3 items-start gap-x-3 pt-3 max-sm:gap-y-1">
+      <div className="min-w-0 text-left max-sm:contents">
+        <div className="truncate text-left text-base leading-5 opacity-75" title={config.name}>
           {config.name || 'Complex timer'}
         </div>
         {Boolean(config.overallTimeLimit) && (
           <div
             aria-label="Overall workout time"
-            className="truncate text-xs leading-3 tabular-nums"
+            className="truncate text-xs leading-3 tabular-nums max-sm:col-span-full max-sm:row-start-2 max-sm:text-center max-sm:text-sm/5"
             title={
               elapsedMs >= config.overallTimeLimit! * 1000
                 ? 'Overall time limit reached'
