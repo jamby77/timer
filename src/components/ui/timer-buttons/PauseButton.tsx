@@ -24,7 +24,7 @@ export const PauseButton = ({
       title={title}
       label={label}
       disabled={disabled}
-      className={cn('bg-tm-pause hover:bg-tm-pause/80 focus:ring-tm-pause', className)}
+      className={cn('bg-tm-pause text-slate-950 hover:bg-tm-pause/80 focus:ring-tm-pause', className)}
     >
       <PauseIcon className="h-6 w-6" />
     </BaseButton>
