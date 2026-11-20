@@ -115,6 +115,7 @@ export function WorkRestTimer({
 
   const isRestPhase = state.phase === TimerPhase.Rest
   const isIdlePhase = state.phase === TimerPhase.Idle
+  const isAtStart = isIdlePhase && state.rounds === 0
   const isCompletedPhase = state.phase === TimerPhase.Completed
   const isWorkPhase = state.phase === TimerPhase.Work
   const isRunningState = state.state === TimerState.Running
@@ -136,13 +137,9 @@ export function WorkRestTimer({
   const fullscreen = (!isIdlePhase && !isCompletedPhase) || isPreStarting
 
   const handleStop = useCallback(() => {
-    if (isPreStarting) {
-      preStart.reset()
-      onStop?.()
-      return
-    }
+    if (isPreStarting) preStart.reset()
     actions.stopExecution()
-  }, [isPreStarting, preStart, actions, onStop])
+  }, [isPreStarting, preStart, actions])
 
   const handleSkipRest = useCallback(() => {
     actions.skipRest()
@@ -224,7 +221,7 @@ export function WorkRestTimer({
               onClick={handleRestart}
               title="Restart"
               label="Restart"
-              disabled={isIdlePhase && state.rounds === 0}
+              disabled={isAtStart}
             />
           </div>
         }
@@ -275,7 +272,7 @@ export function WorkRestTimer({
 
           {(showStopButton || showStartButton) && (
             <StopButton
-              disabled={(isIdlePhase || isCompletedPhase) && !isPreStarting}
+              disabled={(isAtStart || isCompletedPhase) && !isPreStarting}
               onClick={handleStop}
               title="Stop work"
               label="Stop work"

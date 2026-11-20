@@ -360,6 +360,7 @@ export const useWorkRestTimer = ({
       phase: TimerPhase.Idle,
       state: TimerState.Idle,
       currentTime: 0,
+      rounds: 0,
     }))
   }, [cleanupTimer])
 
