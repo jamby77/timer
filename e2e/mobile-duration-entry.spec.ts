@@ -18,9 +18,11 @@ test('work and rest durations fit and can be set independently by touch', async 
     await expect(segment).toBeFocused()
   }
   const seconds = page.locator('input[name=seconds]')
-  await seconds.first().tap()
+  await page.getByText('Work Duration', { exact: true }).tap()
+  await expect(seconds.first()).toBeFocused()
   await seconds.first().pressSequentially('45')
-  await seconds.last().tap()
+  await page.getByText('Rest Duration', { exact: true }).tap()
+  await expect(seconds.last()).toBeFocused()
   await seconds.last().pressSequentially('15')
   await expect(seconds.first()).toHaveValue('45')
   await expect(seconds.last()).toHaveValue('15')

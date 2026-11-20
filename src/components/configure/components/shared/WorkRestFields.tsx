@@ -83,6 +83,7 @@ export const WorkRestFields = ({
           <TimePicker
             max={86400}
             min={1}
+            secondsInputId="fixedRestDuration"
             value={fixedRestDuration || 0}
             onTimeChange={(seconds) => onChange({ fixedRestDuration: seconds })}
           />
@@ -96,6 +97,7 @@ export const WorkRestFields = ({
             max={86400}
             min={0}
             clearLabel="Clear work time limit"
+            secondsInputId="maxWorkTime"
             value={maxWorkTime || 0}
             onTimeChange={(seconds) => onChange({ maxWorkTime: seconds > 0 ? seconds : undefined })}
           />

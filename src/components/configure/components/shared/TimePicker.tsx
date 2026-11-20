@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { TimePickerInput } from '@/components/ui/time-picker-input'
 
 interface TimePickerProps {
+  secondsInputId?: string
   clearLabel?: string
   max?: number
   min?: number
@@ -19,7 +20,7 @@ interface TimePickerProps {
   onTimeChange?: (seconds: number) => void
 }
 
-export const TimePicker = ({ value = 0, min, max, onTimeChange, clearLabel }: TimePickerProps) => {
+export const TimePicker = ({ value = 0, min, max, onTimeChange, clearLabel, secondsInputId }: TimePickerProps) => {
   const minuteRef = useRef<HTMLInputElement>(null)
   const hourRef = useRef<HTMLInputElement>(null)
   const secondRef = useRef<HTMLInputElement>(null)
@@ -86,6 +87,7 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange, clearLabel }: Ti
       <div className="h-9 px-1 text-2xl">:</div>
       <div className="p-0">
         <TimePickerInput
+          id={secondsInputId}
           picker="seconds"
           aria-label="Seconds"
           time={time}
