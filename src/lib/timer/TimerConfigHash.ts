@@ -77,6 +77,7 @@ export class TimerConfigHash {
         break
 
       case 'WORKREST':
+        if (config.autoContinue) normalized.autoContinue = true
         normalized.ratio = config.ratio
         normalized.maxWorkTime = config.maxWorkTime
         normalized.maxRounds = config.maxRounds

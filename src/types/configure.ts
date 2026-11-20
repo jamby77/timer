@@ -50,6 +50,7 @@ export interface IntervalConfig extends TimerConfig {
 
 // Base WorkRest configuration without ratio/fixedRestDuration
 interface BaseWorkRestConfig extends TimerConfig {
+  autoContinue?: boolean
   type: TimerType.WORKREST
   maxWorkTime?: number // seconds
   maxRounds: number

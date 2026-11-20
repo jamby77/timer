@@ -59,3 +59,10 @@ it('uses the runtime final-rest default for interval identity', () => {
   expect(TimerConfigHash.configsEqual(config, { ...config, skipLastRest: true })).toBe(true)
   expect(TimerConfigHash.configsEqual(config, { ...config, skipLastRest: false })).toBe(false)
 })
+
+it('preserves manual Work/Rest identity and distinguishes automatic rounds', () => {
+  const config = configs[3]
+  if (config.type !== TimerType.WORKREST) throw new Error('Expected Work/Rest timer')
+  expect(TimerConfigHash.configsEqual(config, { ...config, autoContinue: false })).toBe(true)
+  expect(TimerConfigHash.configsEqual(config, { ...config, autoContinue: true })).toBe(false)
+})

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Slider } from '@/components/ui/slider'
+import { SwitchField } from './SwitchField'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface WorkRestFieldsProps {
@@ -17,7 +18,7 @@ interface WorkRestFieldsProps {
 }
 
 export const WorkRestFields = ({
-  config: { fixedRestDuration, maxRounds, maxWorkTime, ratio = 1, restMode = WorkRestMode.RATIO },
+  config: { autoContinue = false, fixedRestDuration, maxRounds, maxWorkTime, ratio = 1, restMode = WorkRestMode.RATIO },
   onChange,
 }: WorkRestFieldsProps) => {
   const modeId = useId()
@@ -120,6 +121,12 @@ export const WorkRestFields = ({
           </NativeSelect>
         </Field>
       </div>
+      <SwitchField
+        title="Auto-continue rounds"
+        description="Start the next work round automatically when rest ends."
+        checked={autoContinue}
+        onCheckedChange={(autoContinue) => onChange({ autoContinue })}
+      />
     </FieldGroup>
   )
 }

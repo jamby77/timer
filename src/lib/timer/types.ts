@@ -3,6 +3,7 @@ import { type TimerStep } from '@/lib/timer/TimerManager'
 
 // Timer-specific configuration (without metadata)
 export interface WorkRestTimerConfig {
+  autoContinue?: boolean
   ratio?: number // work/rest ratio (e.g., 2.0 for 2:1)
   maxWorkTime?: number // seconds
   maxRounds?: number

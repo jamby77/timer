@@ -1,0 +1,53 @@
+import { expect, test } from 'playwright/test'
+
+test.use({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true })
+
+test('enable auto-continue in Work/Rest setup and finish exactly two rounds after reload', async ({
+  page,
+}) => {
+  await page.goto('/configure')
+  await page.getByRole('heading', { name: 'Work/Rest Ratio' }).tap()
+  const option = page.getByRole('switch', { name: 'Auto-continue rounds' })
+  await expect(option).not.toBeChecked()
+  await option.tap()
+  await page.getByLabel('Max rounds').selectOption('2')
+  await page.locator('#maxWorkTime').fill('01')
+  await page.getByRole('button', { name: 'Start Timer', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start work', exact: true }).waitFor()
+  await page.reload()
+  await page.getByRole('button', { name: 'Start work', exact: true }).tap()
+  await expect(page.getByRole('button', { name: 'Skip rest' })).toBeVisible()
+  await expect(page.getByText('Round 2 of 2', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Pause work' })).toBeVisible()
+  await expect(page.getByText('Complete', { exact: true })).toBeVisible()
+  await expect(page.getByText('Round 2 of 2', { exact: true })).toBeVisible()
+})
+
+test('auto-continue runs fixed-rest rounds inside a saved complex phase', async ({ page }) => {
+  await page.goto('/configure/complex')
+  const button = (name: string) => page.getByRole('button', { name, exact: true })
+  await button('Add Phase').tap()
+  await page.getByLabel('Phase type').tap()
+  await page.getByRole('option', { name: 'Work/Rest Ratio', exact: true }).tap()
+  const option = page.getByRole('switch', { name: 'Auto-continue rounds' })
+  await expect(option).not.toBeChecked()
+  await page
+    .getByText('Start the next work round automatically when rest ends.', { exact: true })
+    .tap()
+  await page.getByRole('radio', { name: 'Fixed rest' }).tap()
+  await page.locator('#fixedRestDuration').fill('01')
+  await button('Clear work time limit').tap()
+  await page.locator('#maxWorkTime').fill('01')
+  await page.getByLabel('Max rounds').selectOption('2')
+  await button('Add').tap()
+  await button('Edit phase').tap()
+  await expect(option).toBeChecked()
+  await button('Save').tap()
+  await button('Start Timer').tap()
+  await button('Start work').waitFor()
+  await page.reload()
+  await button('Start work').tap()
+  await expect(page.getByText('Round 2 of 2', { exact: true })).toBeVisible()
+  await expect(button('Pause work')).toBeVisible()
+  await expect(page.getByText('Complete', { exact: true })).toBeVisible()
+})
