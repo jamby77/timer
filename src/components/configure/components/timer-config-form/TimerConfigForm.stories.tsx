@@ -62,7 +62,7 @@ export const Stopwatch = meta.story({
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.textContent).toContain('Configure Stopwatch Timer')
-    expect(canvasElement.textContent).toContain('Time Limit (seconds, optional)')
+    expect(canvasElement.textContent).toContain('Time Limit (optional)')
     expect(canvasElement.textContent).toContain('Completion Message')
   },
 })

@@ -10,13 +10,14 @@ import { cn } from '@/lib/utils'
 import { TimePickerInput } from '@/components/ui/time-picker-input'
 
 interface TimePickerProps {
+  children?: React.ReactNode
   max?: number
   min?: number
   value?: number
   onTimeChange?: (seconds: number) => void
 }
 
-export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProps) => {
+export const TimePicker = ({ value = 0, min, max, onTimeChange, children }: TimePickerProps) => {
   const minuteRef = useRef<HTMLInputElement>(null)
   const hourRef = useRef<HTMLInputElement>(null)
   const secondRef = useRef<HTMLInputElement>(null)
@@ -92,6 +93,7 @@ export const TimePicker = ({ value = 0, min, max, onTimeChange }: TimePickerProp
           className="border-0 bg-transparent p-0 text-center focus:bg-transparent focus:ring-0 focus:outline-none"
         />
       </div>
+      {children}
     </div>
   )
 }
