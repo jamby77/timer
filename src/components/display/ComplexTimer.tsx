@@ -157,7 +157,7 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
   )
 
   const phaseHeader = (
-    <div className="grid h-11 w-full grid-cols-3 items-start gap-x-3 pt-3">
+    <div className="grid h-11 w-full grid-cols-3 items-start gap-x-3 pt-3 max-sm:portrait:h-auto max-sm:portrait:min-h-11 max-sm:portrait:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] max-sm:portrait:gap-x-1">
       <div className="min-w-0 text-left">
         <div className="truncate text-base leading-5 opacity-75" title={config.name}>
           {config.name || 'Complex timer'}
@@ -179,7 +179,7 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
         )}
       </div>
       <div
-        className="truncate text-center text-xl leading-5 font-semibold"
+        className="truncate text-center text-xl leading-5 font-semibold max-sm:portrait:line-clamp-2 max-sm:portrait:wrap-anywhere max-sm:portrait:whitespace-normal"
         title={currentPhase.name}
       >
         {currentPhase.name}
