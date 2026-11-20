@@ -95,6 +95,7 @@ export const WorkRestFields = ({
           <TimePicker
             max={86400}
             min={0}
+            clearLabel="Clear work time limit"
             value={maxWorkTime || 0}
             onTimeChange={(seconds) => onChange({ maxWorkTime: seconds > 0 ? seconds : undefined })}
           />
