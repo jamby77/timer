@@ -146,6 +146,7 @@ export function Stopwatch({
   return (
     <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
+        isPreStarting={isPreStarting}
         header={header}
         label={name}
         hideLabel={Boolean(header)}

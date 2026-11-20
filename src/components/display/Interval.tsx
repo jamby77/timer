@@ -185,6 +185,7 @@ export function Interval({
   return (
     <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
+        isPreStarting={isPreStarting}
         header={header}
         headerControls={
           <div className="mt-3 flex items-center justify-center gap-3 [&>button]:size-11">
