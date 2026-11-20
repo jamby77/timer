@@ -26,7 +26,7 @@ for (const mode of ['Countdown', 'Complex', 'preset']) {
       }
     })
     const start = mode === 'preset'
-      ? page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'Tabata', exact: true }) }).getByRole('button', { name: 'Start', exact: true })
+      ? page.getByRole('group', { name: 'Tabata', exact: true }).getByRole('button', { name: 'Start', exact: true })
       : page.getByRole('button', { name: 'Start Timer', exact: true })
     await start.click()
     await expect(page.getByText('Failed to start timer. Please try again.', { exact: true })).toBeVisible()

@@ -1,7 +1,5 @@
 'use client'
 
-import { MouseEvent } from 'react'
-
 import { PredefinedStylesProps } from '@/types/configure'
 import { getConfigSummary } from '@/lib/configure/utils'
 
@@ -50,31 +48,20 @@ interface StyleCardProps {
 }
 
 const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
-  const handleCardClick = () => {
-    onSelect()
-  }
-
-  const handleStartClick = (e: MouseEvent) => {
-    e.stopPropagation()
-    onStart()
-  }
-
   return (
-    <Card
-      onClick={handleCardClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleCardClick()
-        }
-      }}
-      className="cursor-pointer transition-colors hover:opacity-80"
-    >
+    <Card role="group" aria-label={style.name} className="relative transition-colors hover:opacity-80">
       <CardHeader>
         <CardTitle>
-          <h3 className="text-card-foreground wrap-anywhere font-semibold">{style.name}</h3>
+          <h3 aria-label={style.name} className="text-card-foreground wrap-anywhere font-semibold">
+            <button
+              type="button"
+              aria-label={`Configure ${style.name}`}
+              className="cursor-pointer text-left after:absolute after:inset-0 after:rounded-md"
+              onClick={onSelect}
+            >
+              {style.name}
+            </button>
+          </h3>
           {style.isBuiltIn && (
             <span className="text-card-foreground rounded py-1 text-xs font-thin">(Built-in)</span>
           )}
@@ -86,8 +73,8 @@ const StyleCard = ({ style, onSelect, onStart }: StyleCardProps) => {
           <p className="text-sm">{getConfigSummary(style.config)}</p>
         </CardDescription>
 
-        <CardAction className="flex items-center justify-between">
-          <Button size="sm" onClick={handleStartClick}>
+        <CardAction className="flex items-center justify-between max-sm:mt-2 max-sm:w-full">
+          <Button type="button" size="sm" className="relative max-sm:min-h-11 max-sm:w-full" onClick={onStart}>
             <PlayIcon className="h-4 w-4" />
             Start
           </Button>
