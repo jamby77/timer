@@ -172,14 +172,14 @@ const InstallPromptContent = () => {
   }
 
   return (
-    <div className="bg-background/80 fixed top-16 right-0 z-50 w-screen space-y-2 px-4 py-2">
+    <div className="bg-background/80 max-sm:bg-background fixed top-16 right-0 z-50 w-screen space-y-2 px-4 py-2 max-sm:border-b">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Install App</h3>
         <Button
           size="sm"
           variant="ghost"
           onClick={handleDismiss}
-          className="h-6 w-6 p-0"
+          className="h-6 w-6 p-0 max-sm:size-11"
           aria-label="Dismiss install prompt"
         >
           <X className="size-4" />
@@ -187,7 +187,7 @@ const InstallPromptContent = () => {
       </div>
       <div className="flex items-start gap-2">
         {isIOS && (
-          <p className="text-muted-foreground text-xs">
+          <p className="text-muted-foreground text-xs max-sm:text-sm">
             To install this app on your iOS device, tap the share button
             <Share className="inline-block size-6 px-1" role="img" aria-label="share icon" />
             and then &quot;Add to Home Screen&quot;
@@ -195,13 +195,23 @@ const InstallPromptContent = () => {
           </p>
         )}
         {!isIOS && (
-          <Button size="sm" variant="outline" onClick={handleInstallClick}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="max-sm:min-h-11 max-sm:w-full"
+            onClick={handleInstallClick}
+          >
             Install
           </Button>
         )}
       </div>
       {dismissCount >= 3 && (
-        <Button size="sm" variant="ghost" onClick={handlePermanentDismiss}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="max-sm:min-h-11 max-sm:w-full"
+          onClick={handlePermanentDismiss}
+        >
           Never show again
         </Button>
       )}
