@@ -92,7 +92,7 @@ export const Timer = ({
   const isActive = isRunning || state === TimerState.Paused || isPreStarting
 
   // Keep screen awake while timer is running
-  useWakeLock(isRunning)
+  useWakeLock(isRunning || preStart.state === TimerState.Running)
   const handleReset = () => {
     if (isPreStarting) {
       preStart.reset()

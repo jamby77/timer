@@ -151,7 +151,7 @@ export function Interval({
   const isActive = isRunning || timerState === TimerState.Paused || isPreStarting
 
   // Keep screen awake while interval timer is running
-  useWakeLock(isRunning)
+  useWakeLock(isRunning || preStart.state === TimerState.Running)
 
   const handlePause = useCallback(() => {
     if (isPreStarting) {

@@ -86,7 +86,7 @@ export function Stopwatch({
   const isActive = isRunning || state === TimerState.Paused || isPreStarting
 
   // Keep the screen awake while stopwatch is running
-  useWakeLock(isRunning)
+  useWakeLock(isRunning || preStart.state === TimerState.Running)
 
   const handleReset = useCallback(() => {
     if (isPreStarting) {

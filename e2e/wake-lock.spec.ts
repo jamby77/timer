@@ -74,3 +74,41 @@ test('a running workout reacquires a released lock when the page becomes visible
     )
   ).toEqual([true, true])
 })
+
+for (const type of ['COUNTDOWN', 'STOPWATCH', 'INTERVAL', 'WORKREST', 'COMPLEX']) {
+  test(`${type} keeps the screen-awake fallback active during pre-start until paused`, async ({
+    page,
+  }) => {
+    await page.addInitScript((type) => {
+      Object.defineProperty(navigator, 'wakeLock', { value: undefined })
+      const phase = {
+        id: 'prep',
+        name: 'Warmup',
+        type: type === 'COMPLEX' ? 'COUNTDOWN' : type,
+        duration: 60,
+        workDuration: 20,
+        restDuration: 10,
+        intervals: 2,
+        restMode: 'fixed',
+        fixedRestDuration: 10,
+        maxRounds: 2,
+      }
+      const config =
+        type === 'COMPLEX' ? { type, phases: [{ ...phase, config: phase, order: 0 }] } : phase
+      localStorage.setItem(
+        'timer_prep',
+        JSON.stringify({
+          ...config,
+          id: 'prep',
+          name: 'Workout',
+          countdownBeforeStart: 60,
+        })
+      )
+    }, type)
+    await page.goto('/?id=prep')
+    await page.getByRole('button', { name: /^Start / }).tap()
+    await expect(page.locator('video')).toHaveCount(1, { timeout: 2000 })
+    await page.getByRole('button', { name: /^Pause / }).tap()
+    await expect(page.locator('video')).toHaveCount(0)
+  })
+}
