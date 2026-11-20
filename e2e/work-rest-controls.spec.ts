@@ -53,6 +53,9 @@ for (const restMode of ['ratio', 'fixed']) {
       await expect(finish).toBeEnabled()
       await finish.click()
       await expect(header.getByRole('button', { name: 'Skip rest', exact: true })).toBeVisible()
+      await expect(header).toContainText(
+        restMode === 'fixed' ? 'WORK/REST (20s fixed rest)' : 'WORK/REST (r 2.00x)'
+      )
       await expect(digits).toContainText(restMode === 'fixed' ? '00:19' : '00:03')
       const progress = page.getByRole('progressbar', { name: 'Timer progress', exact: true })
       await expect(progress).toBeVisible()

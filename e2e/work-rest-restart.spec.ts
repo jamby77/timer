@@ -43,7 +43,7 @@ for (const complex of [false, true]) {
       if (paused) await page.getByRole('button', { name: 'Pause work', exact: true }).click()
       await page.getByRole('button', { name: 'Restart', exact: true }).click()
       await expect(page.getByRole('button', { name: 'Pause work', exact: true })).toBeVisible()
-      await expect(page.locator('[data-slot="card-title"]')).toContainText('r 1.00x')
+      await expect(page.locator('[data-slot="card-title"]')).toContainText('WORK/REST (20s fixed rest)')
       await expect(page.getByText('Round: 1', { exact: true })).toBeVisible()
       await expect(page.getByText('Timer stopped', { exact: true })).toBeHidden()
       await expect(page.locator('[data-slot="card-content"]')).not.toHaveText('00:00.00')

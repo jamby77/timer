@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { WorkRestConfig } from '@/types/configure'
 
-import { TimerPhase, TimerState } from '@/lib/enums'
+import { formatDuration } from '@/lib/configure/utils'
+import { TimerPhase, TimerState, WorkRestMode } from '@/lib/enums'
 import { getDisplayData } from '@/lib/timer/displayUtils'
 import {
   useAutoStart,
@@ -179,7 +180,10 @@ export function WorkRestTimer({
 
   const progress = actions.getProgress()
   const { isWork, time } = getDisplayData(state)
-  const currentRatio = (state.ratio / 100).toFixed(2)
+  const restSetting =
+    state.restMode === WorkRestMode.FIXED && state.fixedRestDuration
+      ? `${formatDuration(state.fixedRestDuration, { exact: true })} fixed rest`
+      : `r ${(state.ratio / 100).toFixed(2)}x`
   const displayTime = isPreStarting ? String(preStart.secondsLeft) : time
   const displayState = isPreStarting ? preStart.state : state.state
   const displayIsWork = isPreStarting ? undefined : isWork
@@ -224,7 +228,7 @@ export function WorkRestTimer({
             />
           </div>
         }
-        label={[header ? undefined : config.name, `WORK/REST (r ${currentRatio}x)`]
+        label={[header ? undefined : config.name, `WORK/REST (${restSetting})`]
           .filter(Boolean)
           .join(' · ')}
         state={displayState}
