@@ -66,7 +66,9 @@ export const useWakeLock = (isActive: boolean) => {
         )
       } catch (error) {
         if (visible()) {
-          console.error('Wake lock failed, using video fallback:', error)
+          if (!(error instanceof DOMException && error.name === 'NotAllowedError')) {
+            console.error('Wake lock failed, using video fallback:', error)
+          }
           playFallback()
         }
       } finally {
