@@ -49,9 +49,12 @@ for (const restMode of ['ratio', 'fixed']) {
       await expect(digits).toContainText('00:02')
       if (paused) await page.getByRole('button', { name: 'Pause work', exact: true }).click()
       const header = page.locator('[data-slot="card-header"]')
+      const round = header.locator('[data-slot="card-description"]')
+      await expect(round).toHaveText('Work · Round 1 of 5')
       const finish = header.getByRole('button', { name: 'Finish work / Start rest', exact: true })
       await expect(finish).toBeEnabled()
       await finish.click()
+      await expect(round).toHaveText('Rest · Round 1 of 5')
       await expect(header.getByRole('button', { name: 'Skip rest', exact: true })).toBeVisible()
       await expect(header).toContainText(
         restMode === 'fixed' ? 'WORK/REST (20s fixed rest)' : 'WORK/REST (r 2.00x)'
