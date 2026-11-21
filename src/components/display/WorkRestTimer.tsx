@@ -181,6 +181,7 @@ export function WorkRestTimer({
     state.restMode === WorkRestMode.FIXED && state.fixedRestDuration
       ? `${formatDuration(state.fixedRestDuration, { exact: true })} fixed rest`
       : `r ${(state.ratio / 100).toFixed(2)}x`
+  const phaseLabel = isWorkPhase ? 'Work' : isRestPhase ? 'Rest' : undefined
   const displayTime = isPreStarting ? String(preStart.secondsLeft) : time
   const displayState = isPreStarting ? preStart.state : state.state
   const displayIsWork = isPreStarting ? undefined : isWork
@@ -231,7 +232,16 @@ export function WorkRestTimer({
           .join(' · ')}
         state={displayState}
         time={displayTime}
-        subtitle={`Round ${Math.min(state.rounds + 1, state.maxRounds)} of ${state.maxRounds}`}
+        subtitle={
+          <>
+            {phaseLabel && (
+              <>
+                <span>{phaseLabel}</span> ·{' '}
+              </>
+            )}
+            <span>{`Round ${Math.min(state.rounds + 1, state.maxRounds)} of ${state.maxRounds}`}</span>
+          </>
+        }
         isWork={displayIsWork}
         fullscreen={fullscreen || isAutoStarting}
       >
