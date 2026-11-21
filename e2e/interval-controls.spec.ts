@@ -1,6 +1,7 @@
 import { expect, test } from 'playwright/test'
 
 for (const viewport of [
+  { width: 320, height: 640 },
   { width: 440, height: 956 },
   { width: 956, height: 440 },
 ]) {
@@ -41,6 +42,7 @@ for (const viewport of [
     await page.getByRole('button', { name: 'Start intervals', exact: true }).click()
     const header = page.locator('[data-slot="card-header"]')
     const skip = header.getByRole('button', { name: 'Skip current interval', exact: true })
+    await expect(skip).toHaveText('Skip current interval')
     const restart = header.getByRole('button', { name: 'Restart intervals', exact: true })
     await expect(header.getByText('1 of 8 rounds', { exact: true })).toBeVisible()
     const rounds = await header.getByText('1 of 8 rounds', { exact: true }).boundingBox()

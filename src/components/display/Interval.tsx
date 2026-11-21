@@ -188,14 +188,16 @@ export function Interval({
         isPreStarting={isPreStarting}
         header={header}
         headerControls={
-          <div className="mt-3 flex items-center justify-center gap-3 [&>button]:size-11">
+          <div className="mt-3 flex items-center justify-center gap-3 [&>button]:h-11">
             <SkipButton
               onClick={skipCurrentStep}
               disabled={timerState !== TimerState.Running}
+              text="Skip current interval"
               title="Skip current interval"
               label="Skip current interval"
             />
             <ResetButton
+              className="w-11"
               onClick={handleRestart}
               title="Restart intervals"
               label="Restart intervals"
