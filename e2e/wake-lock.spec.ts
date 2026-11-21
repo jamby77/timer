@@ -17,6 +17,10 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('a denied wake lock plays the fallback until the timer pauses', async ({ page }) => {
+  const consoleErrors: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text())
+  })
   await page.addInitScript(() =>
     Object.defineProperty(navigator, 'wakeLock', {
       value: {
@@ -32,6 +36,8 @@ test('a denied wake lock plays the fallback until the timer pauses', async ({ pa
   await expect
     .poll(() => video.evaluate((el) => (el as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1)
+  expect(consoleErrors).toEqual([])
+  await expect(page.getByRole('button', { name: 'Open issues overlay' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Pause timer', exact: true }).tap()
   await expect(video).toHaveCount(0)
 })
