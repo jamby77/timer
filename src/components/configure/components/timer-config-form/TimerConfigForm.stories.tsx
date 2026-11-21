@@ -75,7 +75,7 @@ export const WorkRestRatio = meta.story({
     expect(canvasElement.textContent).toContain('Configure Work/Rest Ratio Timer')
     expect(canvasElement.textContent).toContain('Rest Mode')
     expect(canvasElement.textContent).toContain('Work/Rest Ratio')
-    expect(canvasElement.textContent).toContain('Time limit')
+    expect(canvasElement.textContent).toContain('Work time limit per round')
     expect(canvasElement.textContent).toContain('Max rounds')
   },
 })

@@ -4,7 +4,7 @@ import type { WorkRestConfig } from '@/types/configure'
 
 import { WorkRestMode } from '@/types/configure'
 
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -22,6 +22,7 @@ export const WorkRestFields = ({
   onChange,
 }: WorkRestFieldsProps) => {
   const modeId = useId()
+  const workLimitHintId = useId()
   const previousRatio = useRef(ratio)
   const previousFixedDuration = useRef(fixedRestDuration)
 
@@ -92,8 +93,8 @@ export const WorkRestFields = ({
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor="maxWorkTime">Time limit</FieldLabel>
+        <Field aria-describedby={workLimitHintId}>
+          <FieldLabel htmlFor="maxWorkTime">Work time limit per round</FieldLabel>
           <TimePicker
             max={86400}
             min={0}
@@ -102,6 +103,9 @@ export const WorkRestFields = ({
             value={maxWorkTime || 0}
             onTimeChange={(seconds) => onChange({ maxWorkTime: seconds > 0 ? seconds : undefined })}
           />
+          <FieldDescription id={workLimitHintId}>
+            {maxWorkTime ? 'Rest starts automatically at the limit.' : 'Finish work manually to start rest.'}
+          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="maxRounds">Max rounds</FieldLabel>

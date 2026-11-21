@@ -313,7 +313,7 @@ test('long Interval and Work/Rest durations stay exact in the mobile phase summa
   await button('Add').tap()
   await addPhase('Work/Rest Ratio', 'Endurance block')
   await page.getByRole('radio', { name: 'Fixed rest' }).tap()
-  await setTime('Time limit', '01', '02', '05')
+  await setTime('Work time limit per round', '01', '02', '05')
   await setTime('Rest time', '01', '00', '10')
   await button('Add at the end').tap()
 
