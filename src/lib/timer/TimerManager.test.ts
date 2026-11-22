@@ -104,7 +104,7 @@ describe('TimerManager', () => {
   it('should advance to next step after completion', async () => {
     const onStepChange = vi.fn()
     const step1 = createStep({ id: 'step-1', label: 'Step 1', duration: 100 })
-    const step2 = createStep({ id: 'step-2', label: 'Step 2', duration: 100 })
+    const step2 = createStep({ id: 'step-2', label: 'Step 2', duration: 1000 })
 
     const manager = new TimerManager({
       steps: [step1, step2],
@@ -119,6 +119,7 @@ describe('TimerManager', () => {
     expect(onStepChange).toHaveBeenCalledWith(step1, 0)
     expect(onStepChange).toHaveBeenCalledWith(step2, 1)
     expect(manager.getCurrentStepIndex()).toBe(1)
+    manager.reset()
   })
 
   it('should call step onStart callback', () => {
