@@ -199,6 +199,7 @@ export const useWorkRestTimer = ({
 
     stateChangedAt.current = undefined
     stopwatchRef.current?.pause()
+    if (stopwatchRef.current?.getState() === TimerState.Completed) return
     const workDuration = stopwatchRef.current?.getElapsedTime() || 0
     onLapRecordedRef.current?.(workDuration)
 

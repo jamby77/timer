@@ -35,7 +35,7 @@ it.each([900, 950, 999])('stops at %i ms of a one-second limit exactly once', el
   try {
     stopwatch.start()
     advance(0)
-    advance(elapsed)
+    vi.advanceTimersByTime(elapsed)
     stopwatch.stop()
     expect(stopwatch.getState()).toBe(TimerState.Paused)
     expect(stopwatch.getElapsedTime()).toBe(elapsed)
@@ -72,7 +72,7 @@ it('does not repeat natural completion when stop is called at the limit', () => 
   try {
     stopwatch.start()
     advance(0)
-    advance(1000)
+    vi.advanceTimersByTime(1000)
     stopwatch.stop()
     advance(1000)
     expect(stopwatch.getState()).toBe(TimerState.Completed)

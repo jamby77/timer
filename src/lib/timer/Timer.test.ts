@@ -61,7 +61,7 @@ describe('Timer', () => {
     const timeWhilePaused = timer.getTime()
 
     expect(timer.getState()).toBe(TimerState.Paused)
-    expect(timeBeforePause).toBe(timeAfterPause)
+    expect(timeAfterPause).toBeLessThanOrEqual(timeBeforePause)
     expect(timeAfterPause).toBe(timeWhilePaused)
   })
 

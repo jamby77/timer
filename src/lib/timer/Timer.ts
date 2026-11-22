@@ -33,10 +33,7 @@ export class Timer {
     console.log('[Timer] ' + message)
   }
 
-  private updateTime(timestamp: number) {
-    this.log('updateTime() called, current state: ' + this.state)
-    if (this.state !== TimerState.Running) return
-
+  private syncTime() {
     const remaining = Math.max(0, Math.min(this.time, this.endsAt - Date.now()))
     this.totalElapsedTime += this.time - remaining
     this.time = remaining
@@ -50,8 +47,13 @@ export class Timer {
       this.options?.onTick?.(0, this.totalElapsedTime)
       this.options?.onComplete?.(this.totalElapsedTime)
       this.options?.onStateChange?.(this.state, this.totalElapsedTime)
-      return
+      return false
     }
+    return true
+  }
+
+  private updateTime(timestamp: number) {
+    if (this.state !== TimerState.Running || !this.syncTime()) return
 
     // Only call onTick every updateInterval ms to reduce re-renders
     if (timestamp - this.lastUpdateTime >= this.updateInterval) {
@@ -99,11 +101,14 @@ export class Timer {
       return
     }
 
+    if (!this.syncTime()) return
+
     // Start tracking pause time
     this.pauseStartTime = performance.now()
 
     this.cleanup()
     this.state = TimerState.Paused
+    this.options?.onTick?.(this.time, this.totalElapsedTime)
     this.log('State changed to Paused, time: ' + this.time + 'ms')
     this.options?.onStateChange?.(this.state, this.totalElapsedTime)
     this.options?.onPauseCountChange?.(this.getPauseCount(), this.getTotalPausedTime())

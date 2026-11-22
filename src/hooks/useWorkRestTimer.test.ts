@@ -94,7 +94,7 @@ describe('useWorkRestTimer', () => {
     // Let work run for a bit
     await sleepAndWait(200)
 
-    const pausedTime = result.current[0].currentTime
+    const beforePause = result.current[0].currentTime
 
     act(() => {
       result.current[1].pauseWork()
@@ -102,7 +102,8 @@ describe('useWorkRestTimer', () => {
 
     expect(result.current[0].phase).toBe(TimerPhase.Work)
     expect(result.current[0].state).toBe(TimerState.Paused)
-    expect(result.current[0].currentTime).toBe(pausedTime)
+    const pausedTime = result.current[0].currentTime
+    expect(pausedTime).toBeGreaterThanOrEqual(beforePause)
 
     // Ensure time doesn't continue while paused
     await sleepAndWait(200)

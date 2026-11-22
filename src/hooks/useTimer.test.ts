@@ -56,14 +56,15 @@ describe('useTimer', () => {
     })
 
     expect(result.current.state).toBe(TimerState.Paused)
-    expect(result.current.time).toBe(timeBeforePause)
+    const pausedTime = result.current.time
+    expect(pausedTime).toBeLessThanOrEqual(timeBeforePause)
 
     // Wait to ensure it doesn't continue counting
     await act(async () => {
       await sleep(100)
     })
 
-    expect(result.current.time).toBe(timeBeforePause)
+    expect(result.current.time).toBe(pausedTime)
   })
 
   it('should reset timer to initial state', async () => {
