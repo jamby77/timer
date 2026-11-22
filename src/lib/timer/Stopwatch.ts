@@ -95,6 +95,7 @@ export class Stopwatch {
     if (!this.isRunning) return
 
     this.pause()
+    if (this.getState() === TimerState.Completed) return
     this.stopCallback?.(this.getElapsedTime())
   }
 
