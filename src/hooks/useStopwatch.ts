@@ -84,7 +84,10 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
     stopwatchRef.current?.start(startsAt)
   }, [])
 
+  const getElapsedTime = useCallback(() => stopwatchRef.current?.getElapsedTime() ?? 0, [])
+
   return {
+    getElapsedTime,
     time,
     state,
     start,

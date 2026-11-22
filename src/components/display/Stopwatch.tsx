@@ -61,7 +61,7 @@ export function Stopwatch({
     [addLap]
   )
 
-  const { time, state, start, pause, reset, restart } = useStopwatch({
+  const { time, state, start, pause, reset, restart, getElapsedTime } = useStopwatch({
     timeLimitMs: timeLimit * 1000,
     onStateChange: handleStateChange,
     onAutoStop: handleStop,
@@ -98,11 +98,12 @@ export function Stopwatch({
       return
     }
     // Save the current elapsed time as a lap before resetting
-    if (time > 0) {
-      addLap(time)
+    const elapsed = getElapsedTime()
+    if (elapsed > 0) {
+      addLap(elapsed)
     }
     reset()
-  }, [isPreStarting, preStart, time, reset, addLap, onStop])
+  }, [isPreStarting, preStart, getElapsedTime, reset, addLap, onStop])
 
   const handleRestart = useCallback(() => {
     if (preStart.isEnabled) {
