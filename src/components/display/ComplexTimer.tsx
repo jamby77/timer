@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useTimerContext } from '@/contexts/TimerContext'
 import { RotateCcw, SkipBack, SkipForward } from 'lucide-react'
 
@@ -46,7 +47,9 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
     finish,
     reset: resetClock,
   } = useWorkoutClock(config.overallTimeLimit)
-  const [phaseIndex, setPhaseIndex] = useState(0)
+  const savedPhase = useInitialProgress('phaseIndex')
+  const [phaseIndex, setPhaseIndex] = useState(savedPhase ?? 0)
+  useSaveProgress('phaseIndex', phaseIndex)
   const [phaseRun, setPhaseRun] = useState(0)
   const [isStopped, setIsStopped] = useState(false)
   const [autoStartPhase, setAutoStartPhase] = useState(false)

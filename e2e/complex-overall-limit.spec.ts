@@ -146,7 +146,7 @@ test('natural completion closes a pending prompt and wins at the limit', async (
   await expect(page.getByRole('navigation')).toBeVisible()
 })
 
-test('no limit adds no UI and reload resets a limited workout', async ({ page }) => {
+test('no limit adds no UI and discard resets a limited timer', async ({ page }) => {
   await openWorkout(page, { limit: 0 })
   await page.getByRole('button', { name: 'Start timer', exact: true }).click()
   await expect(overall(page)).toHaveCount(0)
@@ -155,6 +155,7 @@ test('no limit adds no UI and reload resets a limited workout', async ({ page })
   await page.getByRole('button', { name: 'Start timer', exact: true }).click()
   await expect(prompt(page)).toBeVisible()
   await page.reload()
+  await page.getByRole('button', { name: 'Discard', exact: true }).click()
   await expect(prompt(page)).toBeHidden()
   await expect(overall(page)).toContainText('00:00 / 00:01')
   await expect(page.getByRole('navigation')).toBeVisible()

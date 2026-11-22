@@ -1,3 +1,4 @@
+import { isRecoverable, useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
@@ -66,10 +67,12 @@ export const useIntervalTimer = ({
   onStateChange,
 }: IntervalTimerOptions) => {
   const { setTimerActive } = useTimerContext()
+  const saved = useInitialProgress('interval')
   const [currentStep, setCurrentStep] = useState<TimerStep | null>(null)
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [timerState, setTimerState] = useState<TimerState>(TimerState.Idle)
-  const [timeLeft, setTimeLeft] = useState(workDuration * 1000)
+  const [currentStepIndex, setCurrentStepIndex] = useState(saved?.index ?? 0)
+  const [timerState, setTimerState] = useState<TimerState>(saved ? TimerState.Running : TimerState.Idle)
+  const [timeLeft, setTimeLeft] = useState(saved?.remaining ?? workDuration * 1000)
+  useSaveProgress('interval', isRecoverable(timerState) ? { index: currentStepIndex, remaining: timeLeft } : undefined)
   const managerRef = useRef<TimerManager | null>(null)
 
   const configurationKey = JSON.stringify([
@@ -150,13 +153,17 @@ export const useIntervalTimer = ({
     })
 
     managerRef.current = manager
+    if (saved && saved.index < steps.length) {
+      manager.resumeFrom(saved.index, saved.remaining)
+      onStateChangeRef.current?.(TimerState.Running)
+    }
 
     return () => {
       disposed = true
       manager.reset()
       managerRef.current = null
     }
-  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest, updateTimerState])
+  }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest, updateTimerState, saved])
 
   const start = useCallback(() => {
     // If we're in the Completed state, reset first to start fresh

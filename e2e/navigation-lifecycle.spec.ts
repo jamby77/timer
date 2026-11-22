@@ -99,7 +99,7 @@ for (const type of types) {
     await expect(page.getByRole('navigation')).toBeVisible()
   })
 
-  test(`${type} reload resets activity and tabs keep independent navigation`, async ({
+  test(`${type} recovery choices and activity stay independent across tabs`, async ({
     page,
     context,
   }) => {
@@ -114,10 +114,12 @@ for (const type of types) {
     await expect(other.getByRole('navigation')).toBeHidden()
     await page.reload()
     await expect(page.getByRole('navigation')).toBeVisible()
-    await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
+    await page.getByRole('button', { name: 'Resume', exact: true }).click()
+    await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
     await expect(other.getByRole('navigation')).toBeHidden()
     await other.reload()
     await expect(other.getByRole('navigation')).toBeVisible()
+    await other.getByRole('button', { name: 'Discard', exact: true }).click()
     await expect(other.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
   })
 }

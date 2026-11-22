@@ -74,6 +74,16 @@ export class TimerManager {
     this.frame = requestAnimationFrame(this.tick)
   }
 
+  public resumeFrom(index: number, remaining: number): void {
+    const step = this.sequence[index]
+    if (!step) return
+    this.currentStepIndex = index
+    this.pausedRemaining = Math.min(remaining, step.duration)
+    this.onStepChange?.(step, index)
+    this.onStepTick?.(this.pausedRemaining, step.duration - this.pausedRemaining, step)
+    this.start()
+  }
+
   public pause(): boolean {
     if (!this.isSequenceRunning) return false
     const now = Date.now()

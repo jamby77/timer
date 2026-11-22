@@ -1,9 +1,12 @@
+import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useMemo, useState } from 'react'
 
 import { LapEntry } from '@/types'
 
 export const useLapHistory = () => {
-  const [laps, setLaps] = useState<LapEntry[]>([])
+  const saved = useInitialProgress('laps')
+  const [laps, setLaps] = useState<LapEntry[]>(saved ?? [])
+  useSaveProgress('laps', laps)
 
   const lastLap = useMemo(() => laps[laps.length - 1], [laps])
   const bestLap = useMemo(() => {

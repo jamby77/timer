@@ -1,3 +1,4 @@
+import { isRecoverable, useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { TimerState } from '@/lib/enums'
@@ -18,8 +19,9 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
   const countdownSeconds = useMemo(() => clampCountdownSeconds(seconds), [seconds])
   const durationMs = countdownSeconds * 1000
 
-  const [state, setState] = useState<TimerState>(TimerState.Idle)
-  const [timeLeftMs, setTimeLeftMs] = useState(durationMs)
+  const saved = useInitialProgress('prestart')
+  const [state, setState] = useState<TimerState>(saved !== undefined ? TimerState.Running : TimerState.Idle)
+  const [timeLeftMs, setTimeLeftMs] = useState(saved ?? durationMs)
 
   const [previousDuration, setPreviousDuration] = useState(durationMs)
   if (previousDuration !== durationMs) {
@@ -28,6 +30,7 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
     setTimeLeftMs(durationMs)
   }
 
+  useSaveProgress('prestart', isRecoverable(state) ? timeLeftMs : undefined)
   const managerRef = useRef<TimerManager | null>(null)
   const onCompleteRef = useRef(onComplete)
 
@@ -66,12 +69,15 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
       },
     })
 
+    if (saved !== undefined) {
+      managerRef.current.resumeFrom(0, saved)
+    }
     return () => {
       disposed = true
       managerRef.current?.reset()
       managerRef.current = null
     }
-  }, [durationMs])
+  }, [durationMs, saved])
 
   const start = useCallback(() => {
     if (durationMs <= 0) {
