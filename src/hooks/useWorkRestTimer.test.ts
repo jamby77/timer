@@ -136,8 +136,10 @@ describe('useWorkRestTimer', () => {
   })
 
   it('should stop work and start rest phase with ratio-based duration', async () => {
+    const onLapRecorded = vi.fn<(time: number) => void>()
     const { result } = renderHook(() =>
       useWorkRestTimer({
+        onLapRecorded,
         config: { ratio: 2.0 }, // 2x rest duration
       })
     )
@@ -147,9 +149,9 @@ describe('useWorkRestTimer', () => {
     // Let work run for 500ms
     await sleepAndWait(500)
 
-    const workDuration = result.current[0].currentTime
-
     await stopWorkAndWaitForRest(result)
+    await sleepAndWait(120)
+    const workDuration = onLapRecorded.mock.calls[0][0]
 
     expect(result.current[0].phase).toBe(TimerPhase.Rest)
     expect(result.current[0].state).toBe(TimerState.Running)

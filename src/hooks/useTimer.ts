@@ -78,9 +78,11 @@ export const useTimer = (
         dispatch({ type: 'TICK', payload: { time: currentTime, elapsed } })
         onTickRef.current?.(currentTime, elapsed)
       },
-      onStateChange: (newState, elapsed) => {
+      onStateChange: (newState, elapsed, at) => {
         dispatch({ type: 'STATE_CHANGE', payload: { state: newState, elapsed } })
-        onStateChangeRef.current?.(newState, elapsed)
+        if (newState === TimerState.Completed) onStateChangeRef.current?.(newState, elapsed, timer.getEndTime())
+        else if (at !== undefined) onStateChangeRef.current?.(newState, elapsed, at)
+        else onStateChangeRef.current?.(newState, elapsed)
       },
       onComplete: (elapsed) => {
         dispatch({ type: 'STATE_CHANGE', payload: { state: TimerState.Completed, elapsed } })
@@ -97,8 +99,8 @@ export const useTimer = (
     }
   }, [initialTime, saved])
 
-  const start = useCallback(() => {
-    timerRef.current?.start()
+  const start = useCallback((startsAt?: number) => {
+    timerRef.current?.start(startsAt)
   }, [])
 
   const pause = useCallback(() => {
@@ -110,9 +112,9 @@ export const useTimer = (
     onStopRef.current?.()
   }, [])
 
-  const restart = useCallback(() => {
+  const restart = useCallback((startsAt?: number) => {
     timerRef.current?.reset()
-    timerRef.current?.start()
+    timerRef.current?.start(startsAt)
   }, [])
 
   const getState = useCallback((): TimerState | undefined => {

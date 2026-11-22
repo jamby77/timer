@@ -5,11 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useWorkoutClock } from './useWorkoutClock'
 
 describe('workout clock', () => {
-  let now = 0
   beforeEach(() => {
-    now = 0
     vi.useFakeTimers()
-    vi.spyOn(performance, 'now').mockImplementation(() => now)
   })
   afterEach(() => {
     vi.restoreAllMocks()
@@ -17,7 +14,6 @@ describe('workout clock', () => {
   })
   const advance = (ms: number) =>
     act(() => {
-      now += ms
       vi.advanceTimersByTime(ms)
     })
 
@@ -43,7 +39,7 @@ describe('workout clock', () => {
     advance(1000)
     act(() => result.current.setRunning(true))
     act(() => {
-      now += 10000
+      vi.setSystemTime(Date.now() + 9900)
       vi.advanceTimersByTime(100)
     })
     expect(result.current.elapsedMs).toBe(11000)

@@ -105,9 +105,10 @@ export const useIntervalTimer = ({
     onStateChangeRef.current = onStateChange
   }, [onWorkStepComplete, onStepChange, onSequenceComplete, onStop, onStateChange])
 
-  const updateTimerState = useCallback((state: TimerState) => {
+  const updateTimerState = useCallback((state: TimerState, at?: number) => {
     setTimerState(state)
-    onStateChangeRef.current?.(state)
+    if (at !== undefined) onStateChangeRef.current?.(state, at)
+    else onStateChangeRef.current?.(state)
   }, [])
 
   useEffect(() => {
@@ -137,14 +138,14 @@ export const useIntervalTimer = ({
         setCurrentStepIndex(stepIndex)
         onStepChangeRef.current?.(step, stepIndex)
       },
-      onSequenceComplete: () => {
+      onSequenceComplete: (endedAt) => {
         if (disposed) return
         // Internal state update
-        updateTimerState(TimerState.Completed)
+        updateTimerState(TimerState.Completed, endedAt)
         setTimeLeft(0)
         setCurrentStep(null)
         setCurrentStepIndex(0)
-        onSequenceCompleteRef.current?.()
+        onSequenceCompleteRef.current?.(endedAt)
       },
       onTick: (time) => {
         if (disposed) return
@@ -165,15 +166,15 @@ export const useIntervalTimer = ({
     }
   }, [workDuration, restDuration, intervals, workLabel, restLabel, skipLastRest, updateTimerState, saved])
 
-  const start = useCallback(() => {
+  const start = useCallback((startsAt?: number) => {
     // If we're in the Completed state, reset first to start fresh
     if (timerState === TimerState.Completed) {
       managerRef.current?.reset()
       updateTimerState(TimerState.Idle)
     }
 
-    managerRef.current?.start()
-    updateTimerState(TimerState.Running)
+    managerRef.current?.start(startsAt)
+    updateTimerState(TimerState.Running, startsAt)
   }, [timerState, updateTimerState])
 
   const pause = useCallback(() => {

@@ -12,7 +12,7 @@ const clampCountdownSeconds = (seconds?: number): number => {
 
 interface UsePreStartCountdownOptions {
   seconds?: number
-  onComplete?: () => void
+  onComplete?: (endedAt: number) => void
 }
 
 export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdownOptions) => {
@@ -60,10 +60,10 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
         if (disposed) return
         setTimeLeftMs(time)
       },
-      onSequenceComplete: () => {
+      onSequenceComplete: (endedAt) => {
         if (disposed) return
         managerRef.current?.reset()
-        onCompleteRef.current?.()
+        onCompleteRef.current?.(endedAt)
         setState(TimerState.Idle)
         setTimeLeftMs(durationMs)
       },
@@ -79,13 +79,13 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
     }
   }, [durationMs, saved])
 
-  const start = useCallback(() => {
+  const start = useCallback((startsAt = Date.now()) => {
     if (durationMs <= 0) {
-      onCompleteRef.current?.()
+      onCompleteRef.current?.(startsAt)
       return
     }
 
-    managerRef.current?.start()
+    managerRef.current?.start(startsAt)
     setState(TimerState.Running)
   }, [durationMs])
 

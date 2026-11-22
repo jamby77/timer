@@ -31,16 +31,17 @@ import { TimerContainer } from './TimerContainer'
 import { TimerControls } from './TimerControls'
 
 interface WorkRestTimerProps {
+  startsAt?: number
   autoStart?: boolean
   header?: ReactNode
   phaseControls?: ReactNode
   config: WorkRestConfig
   /** Optional callback invoked when a full work/rest cycle completes */
-  onPhaseComplete?: () => void
+  onPhaseComplete?: (endedAt: number) => void
   /** Optional callback when the Stop button is clicked */
   onStop?: () => void
   /** Optional callback when timer state changes */
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, at?: number) => void
 }
 
 export function WorkRestTimer({
@@ -49,7 +50,8 @@ export function WorkRestTimer({
   onStop,
   header,
   phaseControls,
-  autoStart = false,
+  startsAt,
+  autoStart = startsAt !== undefined,
   onStateChange,
 }: WorkRestTimerProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
@@ -66,9 +68,9 @@ export function WorkRestTimer({
 
   const preStart = usePreStartCountdown({
     seconds: config.countdownBeforeStart,
-    onComplete: () => {
+    onComplete: (endedAt) => {
       soundManager.reset()
-      actions.startWork()
+      actions.startWork(endedAt)
     },
   })
 
@@ -93,8 +95,8 @@ export function WorkRestTimer({
     if (state.phase !== TimerPhase.Completed) return
     if (state.rounds <= lastCompletedRoundsRef.current) return
     lastCompletedRoundsRef.current = state.rounds
-    onPhaseComplete()
-  }, [onPhaseComplete, state.phase, state.rounds])
+    onPhaseComplete(state.completedAt ?? Date.now())
+  }, [onPhaseComplete, state.phase, state.rounds, state.completedAt])
 
   useEffect(() => {
     if (state.rounds === 0) {
@@ -145,18 +147,18 @@ export function WorkRestTimer({
     actions.skipRest()
   }, [actions])
 
-  const handleStart = useCallback(async () => {
+  const handleStart = useCallback(async (startsAt?: number) => {
     await soundManager.init()
 
     if (isPreStarting) {
-      preStart.start()
+      preStart.start(startsAt)
       return
     }
 
     if (isCompletedPhase) {
       if (preStart.isEnabled) {
         actions.reset()
-        preStart.start()
+        preStart.start(startsAt)
       } else {
         actions.restart()
       }
@@ -165,10 +167,10 @@ export function WorkRestTimer({
 
     if (isIdlePhase) {
       if (preStart.isEnabled) {
-        preStart.start()
+        preStart.start(startsAt)
         return
       }
-      actions.startWork()
+      actions.startWork(startsAt)
       return
     }
 
@@ -199,7 +201,7 @@ export function WorkRestTimer({
 
   const isVisible = isRestPhase && !isPreStarting
 
-  const isAutoStarting = useAutoStart(autoStart, handleStart)
+  const isAutoStarting = useAutoStart(autoStart, handleStart, startsAt)
 
   return (
     <TimerContainer fullscreen={fullscreen || isAutoStarting}>
@@ -257,7 +259,7 @@ export function WorkRestTimer({
           {showStartButton && (
             <>
               <StartButton
-                onClick={handleStart}
+                onClick={() => handleStart()}
                 title={
                   isPreStarting
                     ? 'Resume countdown'
