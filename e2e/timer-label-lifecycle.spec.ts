@@ -59,7 +59,7 @@ for (const viewport of [
             await expect(header).toContainText('WORK/REST (r 2.00x)')
             await expect(header.getByText('Round 1 of 1', { exact: true })).toBeVisible()
           }
-          if (type === 'STOPWATCH') await expect(header).toContainText('(Cap: 00:02.00)')
+          if (type === 'STOPWATCH') await expect(header).toContainText('2s limit')
         }
         const suffix = type === 'WORKREST' ? 'work' : 'timer'
         await expect(card).toHaveAttribute('data-timer-state', 'idle')

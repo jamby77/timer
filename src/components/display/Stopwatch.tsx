@@ -5,6 +5,7 @@ import { useCallback, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { StopwatchConfig } from '@/types/configure'
 
+import { formatDuration } from '@/lib/configure/utils'
 import { TimerState } from '@/lib/enums'
 import { formatTime } from '@/lib/timer'
 import {
@@ -134,7 +135,7 @@ export function Stopwatch({
     }
     pause()
   }, [isPreStarting, pause, preStart])
-  const timeLimitDisplay = timeLimit ? `(Cap: ${formatTime(timeLimit * 1000)})` : undefined
+  const timeLimitDisplay = timeLimit ? `${formatDuration(timeLimit, { exact: true })} limit` : undefined
 
   const minTime = 0
   const maxTime = timeLimit ? timeLimit * 1000 : 0
