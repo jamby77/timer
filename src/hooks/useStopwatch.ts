@@ -19,8 +19,11 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const [time, setTime] = useState(0)
   const [state, setState] = useState<TimerState>(TimerState.Idle)
   const saved = useInitialProgress('stopwatch')
-  useSaveProgress('stopwatch', isRecoverable(state) ? time : undefined)
   const stopwatchRef = useRef<Stopwatch | null>(null)
+  useSaveProgress('stopwatch', () => {
+    const timer = stopwatchRef.current
+    return timer && isRecoverable(timer.getState()) ? timer.getElapsedTime() : undefined
+  })
 
   const onTickRef = useRef(options.onTick)
   const onStateChangeRef = useRef(options.onStateChange)
