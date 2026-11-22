@@ -63,7 +63,7 @@ export const Timer = ({
     })
   }, [completionMessage])
 
-  const { time, state, totalElapsedTime, start, pause, reset, restart } = useTimer(
+  const { time, state, getTime, start, pause, reset, restart } = useTimer(
     duration * 1000,
     {
       onStateChange: handleStateChange,
@@ -102,8 +102,9 @@ export const Timer = ({
       return
     }
     // Save the total elapsed time as a lap before resetting
-    if (totalElapsedTime > 0) {
-      addLap(totalElapsedTime)
+    const elapsed = duration * 1000 - getTime()
+    if (elapsed > 0) {
+      addLap(elapsed)
     }
     reset()
   }

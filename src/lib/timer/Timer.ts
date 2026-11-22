@@ -34,7 +34,7 @@ export class Timer {
   }
 
   private syncTime() {
-    const remaining = Math.max(0, Math.min(this.time, this.endsAt - Date.now()))
+    const remaining = this.getTime()
     this.totalElapsedTime += this.time - remaining
     this.time = remaining
 
@@ -138,6 +138,9 @@ export class Timer {
   }
 
   public getTime(): number {
+    if (this.state === TimerState.Running) {
+      return Math.max(0, Math.min(this.time, this.endsAt - Date.now()))
+    }
     return this.time
   }
 
