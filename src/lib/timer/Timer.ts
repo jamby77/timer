@@ -138,7 +138,7 @@ export class Timer {
   }
 
   public getTime(): number {
-    if (this.state === TimerState.Running) {
+    if (this.state === TimerState.Running && this.animationFrameId !== null) {
       return Math.max(0, Math.min(this.time, this.endsAt - Date.now()))
     }
     return this.time

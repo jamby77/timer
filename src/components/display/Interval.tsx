@@ -119,14 +119,8 @@ export function Interval({
       onStop?.()
       return
     }
-    // Record current lap if timer is running and we're in a work step
-    if (timerState === TimerState.Running && currentStep?.isWork) {
-      const elapsed = currentStep.duration - timeLeft
-      addLap(elapsed)
-    }
-    // Stop and reset the timer
     reset()
-  }, [preStart, timerState, currentStep, timeLeft, reset, addLap, onStop])
+  }, [preStart, reset, onStop])
 
   const handleStart = useCallback((startsAt?: number) => {
     void (async () => {

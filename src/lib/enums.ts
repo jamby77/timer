@@ -22,6 +22,7 @@ export enum TimerPhase {
 }
 
 export enum StepState {
+  Stop = 'stop',
   Start = 'start',
   Pause = 'pause',
   Resume = 'resume',

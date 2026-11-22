@@ -109,6 +109,20 @@ export class TimerManager {
     this.advanceToNextStep(now)
   }
 
+  public stop(): void {
+    const now = Date.now()
+    if (this.isSequenceRunning) this.update(now, false)
+    const step = this.getCurrentStep()
+    if (step && (this.isSequenceRunning || this.pausedRemaining !== null)) {
+      const remaining = this.pausedRemaining ?? (this.stepEndsAt - now)
+      const elapsed = Math.max(0, Math.min(step.duration, step.duration - remaining))
+      if (elapsed > 0) {
+        step.onStepStateChange?.(StepState.Stop, { step, index: this.currentStepIndex, elapsed })
+      }
+    }
+    this.reset()
+  }
+
   public reset(): void {
     this.stopFrames()
     this.pausedRemaining = null
@@ -157,7 +171,7 @@ export class TimerManager {
     if (this.isSequenceRunning) this.frame = requestAnimationFrame(this.tick)
   }
 
-  private update(now: number): void {
+  private update(now: number, notifyCompletion = true): void {
     let step = this.getCurrentStep()
     let advanced = false
     while (this.isSequenceRunning && step && now >= this.stepEndsAt) {
@@ -168,7 +182,7 @@ export class TimerManager {
         elapsed: 0,
       })
       step.onComplete?.()
-      this.advanceToNextStep(this.stepEndsAt)
+      this.advanceToNextStep(this.stepEndsAt, notifyCompletion)
       advanced = true
       step = this.getCurrentStep()
     }
@@ -179,14 +193,14 @@ export class TimerManager {
     }
   }
 
-  private advanceToNextStep(startsAt: number): void {
+  private advanceToNextStep(startsAt: number, notifyCompletion = true): void {
     this.currentStepIndex++
     if (this.currentStepIndex >= this.sequence.length) {
       this.currentStepIndex = 0
       this.currentRepeat++
       if (this.totalRepeats > 0 && this.currentRepeat >= this.totalRepeats) {
         this.stopFrames()
-        this.onSequenceComplete?.(startsAt)
+        if (notifyCompletion) this.onSequenceComplete?.(startsAt)
         return
       }
     }
