@@ -84,8 +84,7 @@ export const usePreStartCountdown = ({ seconds, onComplete }: UsePreStartCountdo
   }, [durationMs])
 
   const pause = useCallback(() => {
-    managerRef.current?.pause()
-    setState(TimerState.Paused)
+    if (managerRef.current?.pause()) setState(TimerState.Paused)
   }, [])
 
   const reset = useCallback(() => {

@@ -170,8 +170,7 @@ export const useIntervalTimer = ({
   }, [timerState, updateTimerState])
 
   const pause = useCallback(() => {
-    managerRef.current?.pause()
-    updateTimerState(TimerState.Paused)
+    if (managerRef.current?.pause()) updateTimerState(TimerState.Paused)
   }, [updateTimerState])
 
   const reset = useCallback(

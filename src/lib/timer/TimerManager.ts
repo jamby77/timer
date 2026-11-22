@@ -1,6 +1,6 @@
-import { StepState, TimerState } from '@/lib/enums'
+import { StepState } from '@/lib/enums'
 
-import { Timer } from './Timer'
+import { cancelAnimationFrame, requestAnimationFrame } from './requestAnimationFramePolyfill'
 
 // Re-export StepState for backward compatibility
 export { StepState }
@@ -36,7 +36,10 @@ export class TimerManager {
   private currentStepIndex: number = 0
   private currentRepeat: number = 0
   private readonly totalRepeats: number = 0
-  private timer?: Timer
+  private frame: number | null = null
+  private stepEndsAt = 0
+  private pausedRemaining: number | null = null
+  private lastTickAt = 0
   private isSequenceRunning: boolean = false
   private readonly onStepChange?: (step: TimerStep, stepIndex: number) => void
   private readonly onSequenceComplete?: () => void
@@ -55,69 +58,53 @@ export class TimerManager {
   }
 
   public start(): void {
-    if (this.isSequenceRunning) return
+    const step = this.getCurrentStep()
+    if (!step || this.isSequenceRunning) return
 
+    const now = Date.now()
     this.isSequenceRunning = true
-    if (!this.timer || this.timer.getState() === TimerState.Idle) {
-      this.startCurrentStep()
+    if (this.pausedRemaining === null) {
+      this.startStep(step, now)
     } else {
-      // Timer was paused, notify about resume
-      const currentStep = this.getCurrentStep()
-      if (currentStep) {
-        currentStep.onStepStateChange?.(StepState.Resume, {
-          step: currentStep,
-          index: this.getCurrentStepIndex(),
-          elapsed: 0,
-        })
-      }
-      this.timer.start()
+      this.stepEndsAt = now + this.pausedRemaining
+      this.pausedRemaining = null
+      step.onStepStateChange?.(StepState.Resume, { step, index: this.currentStepIndex, elapsed: 0 })
     }
+    this.lastTickAt = now
+    this.frame = requestAnimationFrame(this.tick)
   }
 
-  public pause(): void {
-    const currentStep = this.getCurrentStep()
+  public pause(): boolean {
+    if (!this.isSequenceRunning) return false
+    const now = Date.now()
+    this.update(now)
+    const step = this.getCurrentStep()
+    if (!this.isSequenceRunning || !step) return false
 
-    // Notify step about pause with elapsed time
-    if (currentStep && this.isSequenceRunning && this.timer) {
-      const elapsed = currentStep.duration - this.timer.getTime()
-      currentStep.onStepStateChange?.(StepState.Pause, {
-        step: currentStep,
-        index: this.getCurrentStepIndex(),
-        elapsed,
-      })
-    }
-
-    this.timer?.pause()
-    this.isSequenceRunning = false
+    this.pausedRemaining = this.stepEndsAt - now
+    const elapsed = step.duration - this.pausedRemaining
+    this.stopFrames()
+    this.onStepTick?.(this.pausedRemaining, elapsed, step)
+    step.onStepStateChange?.(StepState.Pause, { step, index: this.currentStepIndex, elapsed })
+    return true
   }
 
   public skipCurrentStep(): void {
-    const currentStep = this.getCurrentStep()
-    if (!currentStep || !this.isSequenceRunning || !this.timer) return
-
-    // Get the elapsed time for the current step
-    const elapsed = currentStep.duration - this.timer.getTime()
-
-    // Notify step about skip with elapsed time
-    currentStep.onStepStateChange?.(StepState.Skip, {
-      step: currentStep,
-      index: this.getCurrentStepIndex(),
-      elapsed,
-    })
-
-    // Stop the current timer before moving to next step
-    this.timer?.pause()
-
-    // Advance to the next step
-    this.advanceToNextStep()
+    if (!this.isSequenceRunning) return
+    const now = Date.now()
+    this.update(now)
+    const step = this.getCurrentStep()
+    if (!this.isSequenceRunning || !step) return
+    const elapsed = step.duration - (this.stepEndsAt - now)
+    step.onStepStateChange?.(StepState.Skip, { step, index: this.currentStepIndex, elapsed })
+    this.advanceToNextStep(now)
   }
 
   public reset(): void {
-    this.timer?.reset()
-    this.timer = undefined // Clear timer completely
+    this.stopFrames()
+    this.pausedRemaining = null
     this.currentStepIndex = 0
     this.currentRepeat = 0
-    this.isSequenceRunning = false
   }
 
   public getCurrentStep(): TimerStep | null {
@@ -148,91 +135,60 @@ export class TimerManager {
     return [...this.sequence]
   }
 
-  private startCurrentStep(): void {
-    const currentStep = this.getCurrentStep()
-    if (!currentStep) {
-      this.isSequenceRunning = false
-      return
+  private startStep(step: TimerStep, startsAt: number): void {
+    this.stepEndsAt = startsAt + Math.max(1, step.duration)
+    step.onStart?.()
+    step.onStepStateChange?.(StepState.Start, { step, index: this.currentStepIndex, elapsed: 0 })
+    this.onStepChange?.(step, this.currentStepIndex)
+  }
+
+  private tick = (): void => {
+    this.frame = null
+    this.update(Date.now())
+    if (this.isSequenceRunning) this.frame = requestAnimationFrame(this.tick)
+  }
+
+  private update(now: number): void {
+    let step = this.getCurrentStep()
+    let advanced = false
+    while (this.isSequenceRunning && step && now >= this.stepEndsAt) {
+      this.onStepTick?.(0, step.duration, step)
+      step.onStepStateChange?.(StepState.Complete, {
+        step,
+        index: this.currentStepIndex,
+        elapsed: 0,
+      })
+      step.onComplete?.()
+      this.advanceToNextStep(this.stepEndsAt)
+      advanced = true
+      step = this.getCurrentStep()
     }
-
-    // Call the step's onStart callback if provided
-    currentStep.onStart?.()
-
-    // Notify step about starting
-    const currentStepIndex = this.getCurrentStepIndex()
-    currentStep.onStepStateChange?.(StepState.Start, {
-      step: currentStep,
-      index: currentStepIndex,
-      elapsed: 0,
-    })
-
-    // Notify about the step change
-    this.onStepChange?.(currentStep, currentStepIndex)
-
-    // Set up and start the timer for this step
-    this.timer = new Timer(currentStep.duration, {
-      onComplete: this.handleTimerComplete.bind(this),
-      onStateChange: this.handleTimerStateChange.bind(this),
-      onTick: this.handleTimerTick.bind(this),
-    })
-
-    this.timer.start()
+    if (this.isSequenceRunning && step && (advanced || now - this.lastTickAt >= 100)) {
+      const remaining = this.stepEndsAt - now
+      this.onStepTick?.(remaining, step.duration - remaining, step)
+      this.lastTickAt = now
+    }
   }
 
-  private handleTimerTick(time: number, totalElapsedTime: number): void {
-    this.onStepTick?.(time, totalElapsedTime, this.getCurrentStep())
-  }
-
-  private handleTimerComplete(): void {
-    const currentStep = this.getCurrentStep()
-
-    // Notify step about completion
-    currentStep?.onStepStateChange?.(StepState.Complete, {
-      step: currentStep,
-      index: this.getCurrentStepIndex(),
-      elapsed: 0,
-    })
-
-    currentStep?.onComplete?.()
-
-    // Advance to the next step
-    this.advanceToNextStep()
-  }
-
-  private advanceToNextStep(): void {
-    // Clear the completed timer
-    this.timer = undefined
-
-    // Move to the next step
+  private advanceToNextStep(startsAt: number): void {
     this.currentStepIndex++
-
-    // Check if we've completed all steps
     if (this.currentStepIndex >= this.sequence.length) {
       this.currentStepIndex = 0
       this.currentRepeat++
-
-      // Check if we've completed all repeats
       if (this.totalRepeats > 0 && this.currentRepeat >= this.totalRepeats) {
+        this.stopFrames()
         this.onSequenceComplete?.()
-        this.isSequenceRunning = false
-        this.timer = undefined // Clear timer when sequence completes
         return
       }
     }
-
-    // Start the next step if sequence is still running
-    if (this.isSequenceRunning) {
-      this.startCurrentStep()
-    }
+    this.startStep(this.sequence[this.currentStepIndex], startsAt)
+    this.lastTickAt = startsAt
   }
 
-  private handleTimerStateChange(state: TimerState): void {
-    // Handle any state changes if needed
-    if (state === TimerState.Idle && !this.isSequenceRunning) {
-      // Timer was reset
-      this.currentStepIndex = 0
-      this.currentRepeat = 0
-    }
+  private stopFrames(): void {
+    this.isSequenceRunning = false
+    if (this.frame !== null) cancelAnimationFrame(this.frame)
+    this.frame = null
   }
 }
 
