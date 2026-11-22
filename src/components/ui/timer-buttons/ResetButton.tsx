@@ -5,6 +5,7 @@ import { BaseButton } from './BaseButton'
 
 interface ResetButtonProps {
   onClick: () => void
+  text?: string
   title?: string
   label?: string
   disabled?: boolean
@@ -14,6 +15,7 @@ interface ResetButtonProps {
 export const ResetButton = ({
   onClick,
   title = 'Reset',
+  text,
   label = 'Reset timer',
   disabled = false,
   className = '',
@@ -24,9 +26,14 @@ export const ResetButton = ({
       title={title}
       label={label}
       disabled={disabled}
-      className={cn('bg-tm-reset hover:bg-tm-reset/80 focus:ring-tm-reset', className)}
+      className={cn(
+        'bg-tm-reset hover:bg-tm-reset/80 focus:ring-tm-reset',
+        text && 'w-auto px-4',
+        className
+      )}
     >
       <RepeatIcon className="h-6 w-6" />
+      {text}
     </BaseButton>
   )
 }

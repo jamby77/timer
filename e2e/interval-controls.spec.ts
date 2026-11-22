@@ -44,6 +44,7 @@ for (const viewport of [
     const skip = header.getByRole('button', { name: 'Skip current interval', exact: true })
     await expect(skip).toHaveText('Skip current interval')
     const restart = header.getByRole('button', { name: 'Restart intervals', exact: true })
+    await expect(restart).toHaveText('Restart intervals')
     await expect(header.getByText('1 of 8 rounds', { exact: true })).toBeVisible()
     const rounds = await header.getByText('1 of 8 rounds', { exact: true }).boundingBox()
     const skipBounds = await skip.boundingBox()
