@@ -33,8 +33,7 @@ function generateSteps(
           // Use full duration when completed naturally
           const fullDuration = workDuration * 1000
           onWorkStepCompleteRef.current?.(fullDuration)
-        } else if (state === StepState.Skip) {
-          // Use actual elapsed time when skipped
+        } else if (state === StepState.Skip || state === StepState.Stop) {
           onWorkStepCompleteRef.current?.(elapsedTime)
         }
       },
@@ -183,7 +182,8 @@ export const useIntervalTimer = ({
 
   const reset = useCallback(
     (notifyStop = true) => {
-      managerRef.current?.reset()
+      if (notifyStop) managerRef.current?.stop()
+      else managerRef.current?.reset()
       updateTimerState(TimerState.Idle)
       setCurrentStep(null)
       setCurrentStepIndex(0)
