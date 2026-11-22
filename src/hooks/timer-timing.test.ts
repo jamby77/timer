@@ -34,7 +34,7 @@ describe('timer timing with a controlled clock', () => {
   beforeEach(() => {
     frames.nextId = 0
     frames.callbacks.clear()
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance', 'Date'] })
   })
 
   afterEach(() => {

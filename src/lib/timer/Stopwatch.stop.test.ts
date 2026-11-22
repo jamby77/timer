@@ -22,7 +22,7 @@ function advance(ms: number) {
 
 beforeEach(() => {
   frames.callbacks.clear()
-  vi.useFakeTimers({ toFake: ['performance'] })
+  vi.useFakeTimers({ toFake: ['performance', 'Date'] })
 })
 afterEach(() => {
   frames.callbacks.clear()

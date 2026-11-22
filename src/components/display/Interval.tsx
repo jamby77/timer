@@ -30,17 +30,18 @@ import { TimerCard } from './TimerCard'
 import { TimerControls } from './TimerControls'
 
 interface IntervalProps {
+  startsAt?: number
   autoStart?: boolean
   header?: ReactNode
   phaseControls?: ReactNode
   /** Configuration for the interval timer */
   intervalConfig: IntervalConfig
   /** Optional callback when the full interval sequence completes */
-  onComplete?: () => void
+  onComplete?: (endedAt: number) => void
   /** Optional callback when the Stop button is clicked */
   onStop?: () => void
   /** Optional callback when timer state changes */
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, at?: number) => void
 }
 
 export function Interval({
@@ -49,7 +50,8 @@ export function Interval({
   onStop,
   header,
   phaseControls,
-  autoStart = false,
+  startsAt,
+  autoStart = startsAt !== undefined,
   onStateChange,
 }: IntervalProps) {
   const { laps, lastLap, bestLap, addLap, clearHistory } = useLapHistory()
@@ -80,9 +82,9 @@ export function Interval({
 
   const preStart = usePreStartCountdown({
     seconds: intervalConfig.countdownBeforeStart,
-    onComplete: () => {
+    onComplete: (endedAt) => {
       soundManager.reset()
-      start()
+      start(endedAt)
     },
   })
 
@@ -126,23 +128,23 @@ export function Interval({
     reset()
   }, [preStart, timerState, currentStep, timeLeft, reset, addLap, onStop])
 
-  const handleStart = useCallback(() => {
+  const handleStart = useCallback((startsAt?: number) => {
     void (async () => {
       await soundManager.init()
 
       if (preStart.isActive) {
-        preStart.start()
+        preStart.start(startsAt)
         return
       }
 
       if (timerState === TimerState.Idle || timerState === TimerState.Completed) {
         if (preStart.isEnabled) {
-          preStart.start()
+          preStart.start(startsAt)
           return
         }
       }
 
-      start()
+      start(startsAt)
     })()
   }, [soundManager, start, preStart, timerState])
 
@@ -180,7 +182,7 @@ export function Interval({
       timerState === TimerState.Completed ||
       timerState === TimerState.Paused
 
-  const isAutoStarting = useAutoStart(autoStart, handleStart)
+  const isAutoStarting = useAutoStart(autoStart, handleStart, startsAt)
 
   return (
     <TimerContainer fullscreen={isActive || isAutoStarting}>
@@ -227,7 +229,7 @@ export function Interval({
         <TimerControls secondary={phaseControls}>
           {showPlayButton ? (
             <StartButton
-              onClick={handleStart}
+              onClick={() => handleStart()}
               title={
                 isPreStarting
                   ? 'Resume countdown'

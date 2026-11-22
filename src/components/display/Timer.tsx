@@ -24,12 +24,13 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface TimerProps {
+  startsAt?: number
   autoStart?: boolean
   header?: ReactNode
   phaseControls?: ReactNode
   config: CountdownConfig
   /** Optional callback when timer state changes */
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, endedAt?: number) => void
   /** Optional callback when the Stop button is clicked */
   onStop?: () => void
 }
@@ -39,19 +40,20 @@ export const Timer = ({
   onStateChange,
   header,
   phaseControls,
-  autoStart = false,
+  startsAt,
+  autoStart = startsAt !== undefined,
   onStop,
 }: TimerProps) => {
   const { laps, addLap, clearHistory, lastLap, bestLap } = useLapHistory()
   const soundManager = useSoundManager(sound)
 
   const handleStateChange = useCallback(
-    (newState: TimerState, elapsed: number) => {
+    (newState: TimerState, elapsed: number, endedAt?: number) => {
       // When a timer completes, record the full duration as a lap
       if (newState === TimerState.Completed && elapsed > 0) {
         addLap(duration * 1000)
       }
-      onStateChange?.(newState)
+      onStateChange?.(newState, endedAt)
     },
     [duration, addLap, onStateChange]
   )
@@ -72,9 +74,9 @@ export const Timer = ({
 
   const preStart = usePreStartCountdown({
     seconds: countdownBeforeStart,
-    onComplete: () => {
+    onComplete: (endedAt) => {
       soundManager.reset()
-      restart()
+      restart(endedAt)
     },
   })
 
@@ -114,22 +116,22 @@ export const Timer = ({
     restart()
   }
 
-  const handleStart = useCallback(async () => {
+  const handleStart = useCallback(async (startsAt?: number) => {
     await soundManager.init()
 
     if (isPreStarting) {
-      preStart.start()
+      preStart.start(startsAt)
       return
     }
 
     if (state === TimerState.Idle) {
       if (preStart.isEnabled) {
-        preStart.start()
+        preStart.start(startsAt)
         return
       }
     }
 
-    start()
+    start(startsAt)
   }, [soundManager, start, preStart, isPreStarting, state])
 
   const handlePause = useCallback(() => {
@@ -147,7 +149,7 @@ export const Timer = ({
   const progress = durationMs > 0 ? (elapsed / durationMs) * 100 : 0
   const isPaused = state === TimerState.Paused
 
-  const isAutoStarting = useAutoStart(autoStart, handleStart)
+  const isAutoStarting = useAutoStart(autoStart, handleStart, startsAt)
 
   return (
     <TimerContainer fullscreen={isActive || isAutoStarting}>
@@ -172,7 +174,7 @@ export const Timer = ({
         <TimerButton
           phaseControls={phaseControls}
           state={isPreStarting ? preStart.state : state}
-          onStart={handleStart}
+          onStart={() => handleStart()}
           onPause={handlePause}
           onReset={handleReset}
           onRestart={handleRestart}

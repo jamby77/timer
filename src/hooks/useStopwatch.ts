@@ -9,7 +9,7 @@ import { Stopwatch } from '@/lib/timer/Stopwatch'
 
 type UseStopwatchOptions = Omit<StopwatchOptionsType, 'onTick' | 'onStateChange' | 'onStop'> & {
   onTick?: (elapsedTime: number) => void
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, endedAt?: number) => void
   onStop?: () => void
   onAutoStop?: (elapsedTime: number) => void
 }
@@ -49,9 +49,11 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
         setTime(time)
         onAutoStopRef.current?.(time)
       },
-      onStateChange: (newState) => {
+      onStateChange: (newState, at) => {
         setState(newState)
-        onStateChangeRef.current?.(newState)
+        if (newState === TimerState.Completed) onStateChangeRef.current?.(newState, stopwatch.getEndTime())
+        else if (at !== undefined) onStateChangeRef.current?.(newState, at)
+        else onStateChangeRef.current?.(newState)
       },
     })
 
@@ -64,8 +66,8 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
     }
   }, [options.timeLimitMs, options.autoStart, saved])
 
-  const start = useCallback(() => {
-    stopwatchRef.current?.start()
+  const start = useCallback((startsAt?: number) => {
+    stopwatchRef.current?.start(startsAt)
   }, [])
 
   const pause = useCallback(() => {
@@ -77,9 +79,9 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
     onStopRef.current?.()
   }, [])
 
-  const restart = useCallback(() => {
+  const restart = useCallback((startsAt?: number) => {
     stopwatchRef.current?.reset()
-    stopwatchRef.current?.start()
+    stopwatchRef.current?.start(startsAt)
   }, [])
 
   return {

@@ -27,7 +27,7 @@ export interface TimerSequenceOptions {
   steps: TimerStep[]
   repeat?: number // Number of times to repeat the sequence, 0 for infinite
   onStepChange?: (step: TimerStep, stepIndex: number) => void
-  onSequenceComplete?: () => void
+  onSequenceComplete?: (endedAt: number) => void
   onTick?: (time: number, totalElapsedTime: number, step: TimerStep | null) => void // Add this
 }
 
@@ -42,7 +42,7 @@ export class TimerManager {
   private lastTickAt = 0
   private isSequenceRunning: boolean = false
   private readonly onStepChange?: (step: TimerStep, stepIndex: number) => void
-  private readonly onSequenceComplete?: () => void
+  private readonly onSequenceComplete?: (endedAt: number) => void
   private readonly onStepTick?: (
     time: number,
     totalElapsedTime: number,
@@ -57,11 +57,10 @@ export class TimerManager {
     this.onStepTick = options.onTick
   }
 
-  public start(): void {
+  public start(now = Date.now()): void {
     const step = this.getCurrentStep()
     if (!step || this.isSequenceRunning) return
 
-    const now = Date.now()
     this.isSequenceRunning = true
     if (this.pausedRemaining === null) {
       this.startStep(step, now)
@@ -187,7 +186,7 @@ export class TimerManager {
       this.currentRepeat++
       if (this.totalRepeats > 0 && this.currentRepeat >= this.totalRepeats) {
         this.stopFrames()
-        this.onSequenceComplete?.()
+        this.onSequenceComplete?.(startsAt)
         return
       }
     }

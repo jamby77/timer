@@ -13,6 +13,7 @@ export interface WorkRestTimerConfig {
 }
 
 export interface WorkRestTimerState {
+  completedAt?: number
   phase: TimerPhase
   ratio: number // Work/rest multiplier (stored as integer * 100)
   rounds: number // Count of completed work sessions
@@ -26,7 +27,7 @@ export interface WorkRestTimerState {
 
 export interface WorkRestTimerActions {
   // Work phase controls
-  startWork: () => void
+  startWork: (startsAt?: number) => void
   pauseWork: () => void
   resumeWork: () => void
   stopWork: () => void
@@ -53,13 +54,13 @@ export interface WorkRestTimerOptions {
   config?: WorkRestTimerConfig // Timer-specific configuration only
   onLapRecorded?: (time: number) => void // Callback for lap recording
   onStop?: () => void
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, at?: number) => void
 }
 
 export interface TimerOptions {
   onTick?: (time: number, totalElapsedTime: number) => void
   onComplete?: (totalElapsedTime: number) => void
-  onStateChange?: (state: TimerState, totalElapsedTime: number) => void
+  onStateChange?: (state: TimerState, totalElapsedTime: number, at?: number) => void
   onStop?: () => void
   debug?: boolean
   onPauseCountChange?: (pauseCount: number, totalPausedTime: number) => void
@@ -88,7 +89,7 @@ export interface IntervalTimerOptions {
   skipLastRest?: boolean
   onWorkStepComplete?: (time: number) => void
   onStepChange?: (step: TimerStep | null, stepIndex: number) => void
-  onSequenceComplete?: () => void
+  onSequenceComplete?: (endedAt: number) => void
   onStop?: () => void
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, at?: number) => void
 }

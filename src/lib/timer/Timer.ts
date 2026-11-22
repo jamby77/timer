@@ -7,9 +7,8 @@ import { cancelAnimationFrame, requestAnimationFrame } from './requestAnimationF
 export class Timer {
   private time: number
   private state: TimerState = TimerState.Idle
-  private startTime: number | null = null
   private animationFrameId: number | null = null
-  private lastTickTime: number | null = null
+  private endsAt = 0
   private lastUpdateTime: number = 0
   private totalElapsedTime: number = 0
   private options?: TimerOptions
@@ -36,21 +35,11 @@ export class Timer {
 
   private updateTime(timestamp: number) {
     this.log('updateTime() called, current state: ' + this.state)
-    if (this.startTime === null) return
+    if (this.state !== TimerState.Running) return
 
-    if (this.lastTickTime === null) {
-      this.lastTickTime = timestamp
-      this.lastUpdateTime = timestamp
-      this.log('First tick, lastTickTime set to: ' + timestamp)
-    }
-
-    const delta = timestamp - this.lastTickTime
-    this.lastTickTime = timestamp
-
-    this.log('updateTime - delta: ' + delta + 'ms, time before: ' + this.time)
-
-    this.time = Math.max(0, this.time - delta)
-    this.totalElapsedTime += delta
+    const remaining = Math.max(0, Math.min(this.time, this.endsAt - Date.now()))
+    this.totalElapsedTime += this.time - remaining
+    this.time = remaining
 
     this.log('updateTime - time after: ' + this.time + 'ms (' + Math.round(this.time / 1000) + 's)')
 
@@ -73,7 +62,11 @@ export class Timer {
     this.animationFrameId = requestAnimationFrame((ts) => this.updateTime(ts))
   }
 
-  public start() {
+  public getEndTime() {
+    return this.endsAt
+  }
+
+  public start(startsAt?: number) {
     this.log('start() called, current state: ' + this.state)
     if (this.state === TimerState.Running) {
       this.log('Already running, returning')
@@ -88,11 +81,13 @@ export class Timer {
       this.options?.onPauseCountChange?.(this.getPauseCount(), this.getTotalPausedTime())
     }
 
-    this.startTime = performance.now()
-    this.lastTickTime = null
+    const now = Date.now()
+    this.endsAt = (startsAt ?? now) + this.time
+    this.lastUpdateTime = performance.now() - Math.max(0, now - (startsAt ?? now))
     this.state = TimerState.Running
     this.log('State changed to Running, time: ' + this.time + 'ms')
-    this.options?.onStateChange?.(this.state, this.totalElapsedTime)
+    if (startsAt === undefined) this.options?.onStateChange?.(this.state, this.totalElapsedTime)
+    else this.options?.onStateChange?.(this.state, this.totalElapsedTime, startsAt)
 
     this.animationFrameId = requestAnimationFrame((ts) => this.updateTime(ts))
   }
@@ -117,8 +112,6 @@ export class Timer {
   public reset() {
     this.cleanup()
     this.time = this.initialTime
-    this.startTime = null
-    this.lastTickTime = null
     this.totalElapsedTime = 0
     this.pauseDurations = []
     this.pauseStartTime = null
@@ -152,6 +145,7 @@ export class Timer {
   }
 
   public setTime(newTime: number) {
+    if (this.state === TimerState.Running) this.endsAt = Date.now() + newTime
     this.time = newTime
   }
 
@@ -214,8 +208,6 @@ export class Timer {
     timer.totalElapsedTime = parsed.totalElapsedTime
     timer.pauseDurations = parsed.pauseDurations || []
 
-    // `startTime` / `pauseStartTime` are based on `performance.now()` and are not stable across
-    // sessions. If the persisted state was `running`, we can only safely restore as `paused`.
     if (timer.state === TimerState.Running) {
       timer.state = TimerState.Paused
     }
@@ -234,6 +226,5 @@ export class Timer {
       cancelAnimationFrame(this.animationFrameId)
       this.animationFrameId = null
     }
-    this.lastTickTime = null
   }
 }

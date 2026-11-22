@@ -24,12 +24,13 @@ import TimerButton from './TimerButton'
 import { TimerCard } from './TimerCard'
 
 interface StopwatchProps {
+  startsAt?: number
   autoStart?: boolean
   header?: ReactNode
   phaseControls?: ReactNode
   config: StopwatchConfig
   /** Optional callback when stopwatch state changes */
-  onStateChange?: (state: TimerState) => void
+  onStateChange?: (state: TimerState, endedAt?: number) => void
   /** Optional callback when the Stop button is clicked */
   onStop?: () => void
 }
@@ -39,15 +40,16 @@ export function Stopwatch({
   onStateChange,
   header,
   phaseControls,
-  autoStart = false,
+  startsAt,
+  autoStart = startsAt !== undefined,
   onStop,
 }: StopwatchProps) {
   const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
   const soundManager = useSoundManager(sound)
 
   const handleStateChange = useCallback(
-    (newState: TimerState) => {
-      onStateChange?.(newState)
+    (newState: TimerState, endedAt?: number) => {
+      onStateChange?.(newState, endedAt)
     },
     [onStateChange]
   )
@@ -68,9 +70,9 @@ export function Stopwatch({
 
   const preStart = usePreStartCountdown({
     seconds: countdownBeforeStart,
-    onComplete: () => {
+    onComplete: (endedAt) => {
       soundManager.reset()
-      restart()
+      restart(endedAt)
     },
   })
 
@@ -110,22 +112,22 @@ export function Stopwatch({
     restart()
   }, [preStart, restart])
 
-  const handleStart = useCallback(async () => {
+  const handleStart = useCallback(async (startsAt?: number) => {
     await soundManager.init()
 
     if (isPreStarting) {
-      preStart.start()
+      preStart.start(startsAt)
       return
     }
 
     if (state === TimerState.Idle || state === TimerState.Completed) {
       if (preStart.isEnabled) {
-        preStart.start()
+        preStart.start(startsAt)
         return
       }
     }
 
-    start()
+    start(startsAt)
   }, [soundManager, start, preStart, isPreStarting, state])
 
   const handlePause = useCallback(() => {
@@ -142,7 +144,7 @@ export function Stopwatch({
   const progress = timeLimit ? (time / (timeLimit * 1000)) * 100 : 0
   const isRest = state === TimerState.Paused
 
-  const isAutoStarting = useAutoStart(autoStart, handleStart)
+  const isAutoStarting = useAutoStart(autoStart, handleStart, startsAt)
 
   return (
     <TimerContainer fullscreen={isActive || isAutoStarting}>
@@ -170,7 +172,7 @@ export function Stopwatch({
         <TimerButton
           phaseControls={phaseControls}
           state={isPreStarting ? preStart.state : state}
-          onStart={handleStart}
+          onStart={() => handleStart()}
           onPause={handlePause}
           onReset={handleReset}
           onRestart={handleRestart}

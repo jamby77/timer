@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-export function useAutoStart(enabled: boolean, start: () => void | Promise<void>) {
+export function useAutoStart(enabled: boolean, start: (startsAt?: number) => void | Promise<void>, startsAt?: number) {
   const requested = useRef(false)
   const [started, setStarted] = useState(false)
 
@@ -10,7 +10,7 @@ export function useAutoStart(enabled: boolean, start: () => void | Promise<void>
     const timeout = setTimeout(async () => {
       requested.current = true
       try {
-        await start()
+        await start(startsAt)
       } catch (error) {
         console.error('Failed to start timer automatically:', error)
       } finally {
@@ -19,7 +19,7 @@ export function useAutoStart(enabled: boolean, start: () => void | Promise<void>
     }, 0)
 
     return () => clearTimeout(timeout)
-  }, [enabled, start])
+  }, [enabled, start, startsAt])
 
   return enabled && !started
 }

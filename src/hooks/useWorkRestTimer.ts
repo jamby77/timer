@@ -39,7 +39,8 @@ export const useWorkRestTimer = ({
     currentTime: saved?.time ?? 0,
   })
 
-  const onRestCompleteRef = useRef<() => void>(() => {})
+  const stateChangedAt = useRef<number | undefined>(undefined)
+  const onRestCompleteRef = useRef<(endedAt: number) => void>(() => {})
   const timerRef = useRef<Timer | null>(null)
   const stopwatchRef = useRef<Stopwatch | null>(null)
   const pendingRest = useRef<number | undefined>(undefined)
@@ -68,11 +69,14 @@ export const useWorkRestTimer = ({
   // Update context when work/rest timer state changes
   useEffect(() => {
     setTimerActive(state.state === TimerState.Running || state.state === TimerState.Paused)
-    onStateChangeRef.current?.(state.state)
+    if (stateChangedAt.current !== undefined) onStateChangeRef.current?.(state.state, stateChangedAt.current)
+    else onStateChangeRef.current?.(state.state)
+    stateChangedAt.current = undefined
   }, [state.state, setTimerActive])
 
   // Clean up the current timer and stopwatch
   const cleanupTimer = useCallback(() => {
+    stateChangedAt.current = undefined
     pendingRest.current = undefined
     if (timerRef.current) {
       timerRef.current.destroy()
@@ -98,7 +102,7 @@ export const useWorkRestTimer = ({
           // Update currentTime to trigger re-renders (show remaining time)
           setState((prev) => ({ ...prev, currentTime: timeLeft }))
         },
-        onComplete: () => onRestCompleteRef.current(),
+        onComplete: () => onRestCompleteRef.current(restTimer.getEndTime()),
         onStateChange: (newState) => {
           if (newState === TimerState.Completed) return
           setState((prev) => ({ ...prev, state: newState }))
@@ -111,44 +115,30 @@ export const useWorkRestTimer = ({
     [cleanupTimer]
   )
 
-  // Start the rest phase
+  const workLimit = Math.min((state.maxWorkTime || WORK_TIME_LIMIT_MS / 1000) * 1000, WORK_TIME_LIMIT_MS)
+  const getRestDuration = useCallback((workDuration: number) => {
+    const duration = state.restMode === WorkRestMode.FIXED && state.fixedRestDuration
+      ? state.fixedRestDuration * 1000
+      : Math.round(workDuration * state.ratio / 100)
+    return Math.min(duration, WORK_TIME_LIMIT_MS)
+  }, [state.restMode, state.fixedRestDuration, state.ratio])
+
   const startRestPhase = useCallback(
-    (workDuration: number, ratio: number) => {
-      let restDuration: number
-
-      // Calculate rest duration based on mode
-      if (state.restMode === WorkRestMode.FIXED && state.fixedRestDuration) {
-        restDuration = state.fixedRestDuration * 1000 // Convert seconds to milliseconds
-      } else {
-        // Default: ratio-based calculation
-        restDuration = Math.round(workDuration * (ratio / 100))
-      }
-
-      // Cap rest duration to 99:99 if needed
-      const cappedRestDuration = Math.min(restDuration, WORK_TIME_LIMIT_MS)
-
-      pendingRest.current = cappedRestDuration
+    (workDuration: number, startsAt = Date.now() + REST_DELAY_MS) => {
+      const duration = getRestDuration(workDuration)
+      pendingRest.current = duration
       timeoutRef.current = setTimeout(() => {
-        setState((prev) => ({
-          ...prev,
-          phase: TimerPhase.Rest,
-          state: TimerState.Idle,
-        }))
-
-        const restTimer = createRestTimer(cappedRestDuration)
-        restTimer.start()
-      }, REST_DELAY_MS)
+        setState((prev) => ({ ...prev, phase: TimerPhase.Rest, state: TimerState.Idle }))
+        const restTimer = createRestTimer(duration)
+        stateChangedAt.current = startsAt
+        restTimer.start(startsAt)
+      }, Math.max(0, startsAt - Date.now()))
     },
-    [createRestTimer, state.restMode, state.fixedRestDuration]
+    [createRestTimer, getRestDuration]
   )
 
   const createWorkStopwatch = useCallback(() => {
     cleanupTimer()
-    const workLimit =
-      state.maxWorkTime && state.maxWorkTime > 0
-        ? Math.min(state.maxWorkTime * 1000, WORK_TIME_LIMIT_MS)
-        : WORK_TIME_LIMIT_MS
-
     const stopwatch = new Stopwatch({
       timeLimitMs: workLimit,
       onTick: (elapsedTime) => {
@@ -156,7 +146,7 @@ export const useWorkRestTimer = ({
       },
       onStop: (elapsedTime) => {
         onLapRecordedRef.current?.(elapsedTime)
-        startRestPhase(elapsedTime, state.ratio)
+        startRestPhase(elapsedTime, stopwatch.getEndTime())
       },
       onStateChange: (newState) => {
         if (newState === TimerState.Completed) return
@@ -166,7 +156,7 @@ export const useWorkRestTimer = ({
 
     stopwatchRef.current = stopwatch
     return stopwatch
-  }, [cleanupTimer, startRestPhase, state.maxWorkTime, state.ratio])
+  }, [cleanupTimer, startRestPhase, workLimit])
 
   useEffect(() => {
     if (!saved) return
@@ -175,7 +165,7 @@ export const useWorkRestTimer = ({
   }, [saved, createWorkStopwatch, createRestTimer])
 
   // Start work
-  const startWork = useCallback(() => {
+  const startWork = useCallback((startsAt?: number) => {
     if (state.phase !== TimerPhase.Idle) return
 
     setState((prev) => ({
@@ -185,13 +175,15 @@ export const useWorkRestTimer = ({
     }))
 
     const stopwatch = createWorkStopwatch()
-    stopwatch.start()
+    stateChangedAt.current = startsAt
+    stopwatch.start(startsAt)
   }, [state.phase, createWorkStopwatch])
 
   // Pause work
   const pauseWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work || state.state !== TimerState.Running) return
 
+    stateChangedAt.current = undefined
     stopwatchRef.current?.pause()
   }, [state.phase, state.state])
 
@@ -205,6 +197,7 @@ export const useWorkRestTimer = ({
   const finishWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work || timeoutRef.current) return
 
+    stateChangedAt.current = undefined
     stopwatchRef.current?.pause()
     const workDuration = stopwatchRef.current?.getElapsedTime() || 0
     onLapRecordedRef.current?.(workDuration)
@@ -222,8 +215,8 @@ export const useWorkRestTimer = ({
       return
     }
 
-    startRestPhase(workDuration, state.ratio)
-  }, [state.phase, state.ratio, cleanupTimer, startRestPhase])
+    startRestPhase(workDuration)
+  }, [state.phase, cleanupTimer, startRestPhase])
 
   const stopWork = useCallback(() => {
     if (state.phase !== TimerPhase.Work) return
@@ -231,24 +224,33 @@ export const useWorkRestTimer = ({
     onStopRef.current?.()
   }, [state.phase, finishWork])
 
-  const finishRest = useCallback((continueWork: boolean) => {
+  const finishRest = useCallback((continueWork: boolean, endedAt = Date.now()) => {
     cleanupTimer()
-    const rounds = state.rounds + 1
+    const roundDuration = workLimit + getRestDuration(workLimit)
+    const missedRounds = continueWork ? Math.min(
+      Math.max(0, state.maxRounds - state.rounds - 1),
+      Math.floor(Math.max(0, Date.now() - endedAt) / roundDuration)
+    ) : 0
+    for (let i = 0; i < missedRounds; i++) onLapRecordedRef.current?.(workLimit)
+    const nextStartsAt = endedAt + missedRounds * roundDuration
+    const rounds = state.rounds + 1 + missedRounds
     const completed = rounds >= state.maxRounds
     const startNext = !completed && continueWork
+    if (!startNext) stateChangedAt.current = nextStartsAt
     const phase = completed ? TimerPhase.Completed : startNext ? TimerPhase.Work : TimerPhase.Idle
     setState((prev) => ({
       ...prev,
       rounds,
+      completedAt: completed ? nextStartsAt : undefined,
       phase,
       state: completed ? TimerState.Completed : TimerState.Idle,
       currentTime: 0,
     }))
-    if (startNext) createWorkStopwatch().start()
-  }, [state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch])
+    if (startNext) createWorkStopwatch().start(nextStartsAt)
+  }, [state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch, workLimit, getRestDuration])
 
   useLayoutEffect(() => {
-    onRestCompleteRef.current = () => finishRest(config.autoContinue === true)
+    onRestCompleteRef.current = (endedAt) => finishRest(config.autoContinue === true, endedAt)
   }, [config.autoContinue, finishRest])
 
   const skipRest = useCallback(() => {
