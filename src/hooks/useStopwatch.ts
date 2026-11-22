@@ -1,3 +1,4 @@
+import { isRecoverable, useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
@@ -17,6 +18,8 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
   const { setTimerActive } = useTimerContext()
   const [time, setTime] = useState(0)
   const [state, setState] = useState<TimerState>(TimerState.Idle)
+  const saved = useInitialProgress('stopwatch')
+  useSaveProgress('stopwatch', isRecoverable(state) ? time : undefined)
   const stopwatchRef = useRef<Stopwatch | null>(null)
 
   const onTickRef = useRef(options.onTick)
@@ -53,12 +56,13 @@ export const useStopwatch = (options: UseStopwatchOptions = {}) => {
     })
 
     stopwatchRef.current = stopwatch
+    if (saved !== undefined) stopwatch.resumeFrom(saved)
 
     return () => {
       stopwatch.destroy()
       stopwatchRef.current = null
     }
-  }, [options.timeLimitMs, options.autoStart])
+  }, [options.timeLimitMs, options.autoStart, saved])
 
   const start = useCallback(() => {
     stopwatchRef.current?.start()

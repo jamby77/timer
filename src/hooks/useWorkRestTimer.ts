@@ -1,3 +1,4 @@
+import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
@@ -25,21 +26,33 @@ export const useWorkRestTimer = ({
   onStateChange,
 }: WorkRestTimerOptions = {}): [WorkRestTimerState, WorkRestTimerActions] => {
   const { setTimerActive } = useTimerContext()
+  const saved = useInitialProgress('workrest')
   const [state, setState] = useState<WorkRestTimerState>({
-    phase: TimerPhase.Idle,
+    phase: saved?.phase ?? TimerPhase.Idle,
     ratio: Math.round((config.ratio ?? 1.0) * 100), // Convert to integer * 100
-    rounds: 0,
+    rounds: saved?.rounds ?? 0,
     maxRounds: Math.min(config.maxRounds ?? MAX_ROUNDS, MAX_ROUNDS), // Cap at MAX_ROUNDS
     maxWorkTime: config.maxWorkTime,
     restMode: config.restMode,
     fixedRestDuration: config.fixedRestDuration,
     state: TimerState.Idle,
-    currentTime: 0,
+    currentTime: saved?.time ?? 0,
   })
 
   const onRestCompleteRef = useRef<() => void>(() => {})
   const timerRef = useRef<Timer | null>(null)
   const stopwatchRef = useRef<Stopwatch | null>(null)
+  const pendingRest = useRef<number | undefined>(undefined)
+  useSaveProgress('workrest', () => {
+    if (state.phase === TimerPhase.Completed || (state.phase === TimerPhase.Idle && state.rounds === 0)) return
+    const rest = pendingRest.current
+    return {
+      phase: rest !== undefined ? TimerPhase.Rest : state.phase,
+      rounds: state.rounds,
+      time: rest ?? timerRef.current?.getTime() ?? stopwatchRef.current?.getElapsedTime() ?? state.currentTime,
+      restDuration: rest ?? timerRef.current?.getInitialTime() ?? 0,
+    }
+  })
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const onLapRecordedRef = useRef(onLapRecorded)
   const onStopRef = useRef(onStop)
@@ -60,6 +73,7 @@ export const useWorkRestTimer = ({
 
   // Clean up the current timer and stopwatch
   const cleanupTimer = useCallback(() => {
+    pendingRest.current = undefined
     if (timerRef.current) {
       timerRef.current.destroy()
       timerRef.current = null
@@ -113,6 +127,7 @@ export const useWorkRestTimer = ({
       // Cap rest duration to 99:99 if needed
       const cappedRestDuration = Math.min(restDuration, WORK_TIME_LIMIT_MS)
 
+      pendingRest.current = cappedRestDuration
       timeoutRef.current = setTimeout(() => {
         setState((prev) => ({
           ...prev,
@@ -152,6 +167,12 @@ export const useWorkRestTimer = ({
     stopwatchRef.current = stopwatch
     return stopwatch
   }, [cleanupTimer, startRestPhase, state.maxWorkTime, state.ratio])
+
+  useEffect(() => {
+    if (!saved) return
+    if (saved.phase === TimerPhase.Work) createWorkStopwatch().resumeFrom(saved.time)
+    if (saved.phase === TimerPhase.Rest) createRestTimer(saved.restDuration).resumeFrom(saved.time)
+  }, [saved, createWorkStopwatch, createRestTimer])
 
   // Start work
   const startWork = useCallback(() => {

@@ -128,6 +128,13 @@ export class Timer {
     this.options?.onPauseCountChange?.(this.getPauseCount(), this.getTotalPausedTime())
   }
 
+  public resumeFrom(remaining: number) {
+    this.time = Math.max(0, Math.min(remaining, this.initialTime))
+    this.totalElapsedTime = this.initialTime - this.time
+    this.options?.onTick?.(this.time, this.totalElapsedTime)
+    this.start()
+  }
+
   public getState(): TimerState {
     return this.state
   }

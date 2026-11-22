@@ -1,3 +1,4 @@
+import { isRecoverable, useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
@@ -52,6 +53,8 @@ export const useTimer = (
     state: TimerState.Idle,
     totalElapsedTime: 0,
   })
+  const saved = useInitialProgress('countdown')
+  useSaveProgress('countdown', isRecoverable(state) ? time : undefined)
   const timerRef = useRef<TimerClass | null>(null)
 
   const onTickRef = useRef(onTick)
@@ -86,12 +89,13 @@ export const useTimer = (
     })
 
     timerRef.current = timer
+    if (saved !== undefined) timer.resumeFrom(saved)
 
     return () => {
       timer.destroy()
       timerRef.current = null
     }
-  }, [initialTime])
+  }, [initialTime, saved])
 
   const start = useCallback(() => {
     timerRef.current?.start()

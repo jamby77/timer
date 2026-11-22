@@ -1,10 +1,13 @@
+import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function useWorkoutClock(limitSeconds?: number) {
   const enabled = Boolean(limitSeconds && limitSeconds > 0)
-  const clock = useRef({ elapsed: 0, startedAt: null as number | null })
-  const [elapsedMs, setElapsedMs] = useState(0)
-  const [acknowledged, setAcknowledged] = useState(false)
+  const saved = useInitialProgress('clock')
+  const clock = useRef({ elapsed: saved?.elapsed ?? 0, startedAt: null as number | null })
+  const [elapsedMs, setElapsedMs] = useState(saved?.elapsed ?? 0)
+  const [acknowledged, setAcknowledged] = useState(saved?.acknowledged ?? false)
+  useSaveProgress('clock', enabled ? { elapsed: elapsedMs, acknowledged } : undefined)
 
   const readElapsed = useCallback(() => {
     const { elapsed, startedAt } = clock.current
