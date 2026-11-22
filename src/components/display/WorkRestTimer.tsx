@@ -208,7 +208,7 @@ export function WorkRestTimer({
         isPreStarting={isPreStarting}
         header={header}
         headerControls={
-          <div className="mt-3 flex items-center justify-center gap-3 [&>button]:h-11">
+          <div className="mt-3 flex items-center justify-center gap-3 [&>button]:h-11 max-[400px]:gap-2 max-[400px]:[&>button]:px-3 max-[400px]:[&_svg]:hidden">
             <SkipButton
               onClick={isRestPhase ? handleSkipRest : actions.finishWork}
               disabled={(!isWorkPhase && !isRestPhase) || isPreStarting}
@@ -217,7 +217,7 @@ export function WorkRestTimer({
               text={isRestPhase ? 'Skip rest' : 'Start rest'}
             />
             <ResetButton
-              className="w-11"
+              text="Restart"
               onClick={handleRestart}
               title="Restart"
               label="Restart"

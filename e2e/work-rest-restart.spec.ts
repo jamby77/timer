@@ -66,6 +66,7 @@ test('Restart returns to round one after a rest expires between rounds', async (
   })))
   await page.goto('/?id=round-check')
   const restart = page.getByRole('button', { name: 'Restart', exact: true })
+  await expect(restart).toHaveText('Restart')
   await expect(restart).toBeDisabled()
   await page.getByRole('button', { name: 'Start work', exact: true }).click()
   await page.getByRole('button', { name: 'Finish work / Start rest', exact: true }).click()
