@@ -192,12 +192,12 @@ export function Interval({
             <SkipButton
               onClick={skipCurrentStep}
               disabled={timerState !== TimerState.Running}
-              text="Skip current interval"
+              text="Skip"
               title="Skip current interval"
               label="Skip current interval"
             />
             <ResetButton
-              text="Restart intervals"
+              text="Restart"
               onClick={handleRestart}
               title="Restart intervals"
               label="Restart intervals"
