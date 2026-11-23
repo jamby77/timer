@@ -112,3 +112,30 @@ test('pre-start resumes from the interrupted countdown and completion clears rec
   await page.reload()
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
 })
+
+for (const type of ['COUNTDOWN', 'STOPWATCH', 'COMPLEX']) {
+  test(type + ' recovers time elapsed since the last display update', async ({ page }) => {
+    await page.clock.install({ time: new Date('2026-01-01T12:00:00Z') })
+    await page.clock.pauseAt(new Date('2026-01-01T12:01:00Z'))
+    await page.addInitScript(type => {
+      const phase = { id: 'work', name: 'Work', type: 'COUNTDOWN', duration: 20 }
+      const config = type === 'COMPLEX'
+        ? { type, overallTimeLimit: 60, phases: [{ ...phase, config: phase, order: 0 }] }
+        : { ...phase, type, timeLimit: 20 }
+      localStorage.setItem('timer_live', JSON.stringify({ ...config, id: 'live', name: 'Timing' }))
+    }, type)
+    await page.goto('/?id=live')
+    const button = (name: string) => page.getByRole('button', { name, exact: true })
+    await button('Start timer').tap()
+    await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
+    await page.clock.setSystemTime((await page.evaluate(() => Date.now())) + 7500)
+    await page.reload()
+    const seconds = type === 'STOPWATCH' ? '00:07' : '00:12'
+    await expect(page.getByRole('region', { name: 'Resume timer?' })).toContainText(seconds, { timeout: 1500 })
+    await page.clock.runFor(5000)
+    await button('Resume').tap()
+    await page.clock.runFor(150)
+    await expect(page.locator('[data-slot=card-content]')).toContainText(seconds)
+    if (type === 'COMPLEX') await expect(page.getByLabel('Overall timer time')).toContainText('00:07 /')
+  })
+}

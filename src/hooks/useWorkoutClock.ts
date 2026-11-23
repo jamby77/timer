@@ -7,12 +7,13 @@ export function useWorkoutClock(limitSeconds?: number) {
   const clock = useRef({ elapsed: saved?.elapsed ?? 0, startedAt: null as number | null })
   const [elapsedMs, setElapsedMs] = useState(saved?.elapsed ?? 0)
   const [acknowledged, setAcknowledged] = useState(saved?.acknowledged ?? false)
-  useSaveProgress('clock', enabled ? { elapsed: elapsedMs, acknowledged } : undefined)
 
   const readElapsed = useCallback((at = Date.now()) => {
     const { elapsed, startedAt } = clock.current
     return elapsed + (startedAt === null ? 0 : Math.max(0, at - startedAt))
   }, [])
+
+  useSaveProgress('clock', () => enabled ? { elapsed: readElapsed(), acknowledged } : undefined)
 
   const setRunning = useCallback(
     (running: boolean, at = Date.now()) => {

@@ -54,8 +54,11 @@ export const useTimer = (
     totalElapsedTime: 0,
   })
   const saved = useInitialProgress('countdown')
-  useSaveProgress('countdown', isRecoverable(state) ? time : undefined)
   const timerRef = useRef<TimerClass | null>(null)
+  useSaveProgress('countdown', () => {
+    const timer = timerRef.current
+    return timer && isRecoverable(timer.getState()) ? timer.getTime() : undefined
+  })
 
   const onTickRef = useRef(onTick)
   const onStateChangeRef = useRef(onStateChange)
