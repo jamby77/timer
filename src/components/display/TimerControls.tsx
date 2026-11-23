@@ -7,7 +7,7 @@ interface TimerControlsProps {
 
 export function TimerControls({ children, secondary }: TimerControlsProps) {
   return (
-    <div className="timer-controls">
+    <div className="timer-controls px-3">
       <div className="timer-controls-secondary">{secondary}</div>
       <div className="timer-controls-primary">{children}</div>
     </div>
