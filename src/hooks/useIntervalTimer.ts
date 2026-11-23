@@ -1,4 +1,4 @@
-import { isRecoverable, useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
+import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
 
@@ -71,8 +71,8 @@ export const useIntervalTimer = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(saved?.index ?? 0)
   const [timerState, setTimerState] = useState<TimerState>(saved ? TimerState.Running : TimerState.Idle)
   const [timeLeft, setTimeLeft] = useState(saved?.remaining ?? workDuration * 1000)
-  useSaveProgress('interval', isRecoverable(timerState) ? { index: currentStepIndex, remaining: timeLeft } : undefined)
   const managerRef = useRef<TimerManager | null>(null)
+  useSaveProgress('interval', () => managerRef.current?.getStepProgress())
 
   const configurationKey = JSON.stringify([
     workDuration,
@@ -154,7 +154,7 @@ export const useIntervalTimer = ({
 
     managerRef.current = manager
     if (saved && saved.index < steps.length) {
-      manager.resumeFrom(saved.index, saved.remaining)
+      manager.resumeFrom(saved.index, saved.remaining, saved.overdueMs)
       onStateChangeRef.current?.(TimerState.Running)
     }
 

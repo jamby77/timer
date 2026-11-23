@@ -73,14 +73,14 @@ export class TimerManager {
     this.frame = requestAnimationFrame(this.tick)
   }
 
-  public resumeFrom(index: number, remaining: number): void {
+  public resumeFrom(index: number, remaining: number, overdueMs = 0): void {
     const step = this.sequence[index]
     if (!step) return
     this.currentStepIndex = index
     this.pausedRemaining = Math.min(remaining, step.duration)
     this.onStepChange?.(step, index)
     this.onStepTick?.(this.pausedRemaining, step.duration - this.pausedRemaining, step)
-    this.start()
+    this.start(Date.now() - overdueMs)
   }
 
   public pause(): boolean {
@@ -130,9 +130,18 @@ export class TimerManager {
     this.currentRepeat = 0
   }
 
+  public getStepProgress() {
+    if (!this.isSequenceRunning && this.pausedRemaining === null) return undefined
+    const time = this.pausedRemaining ?? (this.stepEndsAt - Date.now())
+    return {
+      index: this.currentStepIndex,
+      remaining: Math.max(0, time),
+      overdueMs: time < 0 ? -time : undefined,
+    }
+  }
+
   public getRemainingTime(): number | undefined {
-    if (!this.isSequenceRunning) return this.pausedRemaining ?? undefined
-    return Math.max(0, this.stepEndsAt - Date.now())
+    return this.getStepProgress()?.remaining
   }
 
   public getCurrentStep(): TimerStep | null {

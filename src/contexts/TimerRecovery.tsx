@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useState } from 
 import { z } from 'zod'
 
 import type { ReactNode } from 'react'
-import type { AnyTimerConfig } from '@/types/configure'
+import type { AnyTimerConfig, IntervalConfig } from '@/types/configure'
 
 import { TimerPhase, TimerState } from '@/lib/enums'
 import { SoundEngine } from '@/lib/sound/SoundEngine'
@@ -18,7 +18,7 @@ const progress = z.object({
   countdown: ms.optional(),
   stopwatch: ms.optional(),
   prestart: ms.optional(),
-  interval: z.object({ index, remaining: ms }).optional(),
+  interval: z.object({ index, remaining: ms, overdueMs: ms.optional() }).optional(),
   workrest: z
     .object({
       phase: z.enum([TimerPhase.Work, TimerPhase.Rest, TimerPhase.Idle]),
@@ -32,6 +32,20 @@ const progress = z.object({
   laps: z.array(z.object({ id: z.string(), timestamp: ms, lapTime: ms })).optional(),
 })
 type Progress = z.infer<typeof progress>
+function intervalPreview(saved: NonNullable<Progress['interval']>, config: IntervalConfig) {
+  let { index, remaining } = saved
+  let overdue = saved.overdueMs ?? 0
+  const lastIndex = config.intervals * 2 - (config.skipLastRest === false ? 1 : 2)
+  while (remaining === 0 && index < lastIndex) {
+    index++
+    const seconds = index % 2 === 0 ? config.workDuration : config.restDuration
+    const duration = Math.max(1, seconds * 1000)
+    remaining = Math.max(0, duration - overdue)
+    overdue = Math.max(0, overdue - duration)
+  }
+  return { index, remaining }
+}
+
 class Session {
   private readers = new Set<(snapshot: Progress) => void>()
   constructor(public initial: Progress = {}) {}
@@ -154,15 +168,19 @@ export function TimerRecovery({
       config.type === 'COMPLEX'
         ? [...config.phases].sort((a, b) => a.order - b.order)[saved.phaseIndex ?? 0]
         : undefined
+    const activeConfig = phase?.config ?? config
+    const interval = saved.interval && activeConfig.type === 'INTERVAL'
+      ? intervalPreview(saved.interval, activeConfig)
+      : saved.interval
     const time =
       saved.prestart ??
-      saved.interval?.remaining ??
+      interval?.remaining ??
       saved.workrest?.time ??
       saved.countdown ??
       saved.stopwatch ??
       0
-    const round = saved.interval
-      ? Math.floor(saved.interval.index / 2) + 1
+    const round = interval
+      ? Math.floor(interval.index / 2) + 1
       : saved.workrest
         ? saved.workrest.rounds + 1
         : undefined

@@ -171,3 +171,44 @@ for (const scenario of ['running', 'paused', 'expired']) {
     await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
   })
 }
+
+for (const scenario of ['later work', 'later rest', 'paused', 'finished']) {
+  test('Interval reload after delayed frames: ' + scenario, async ({ page }) => {
+    await page.clock.install({ time: new Date('2026-01-01T12:00:00Z') })
+    await page.clock.pauseAt(new Date('2026-01-01T12:01:00Z'))
+    await page.addInitScript(() => localStorage.setItem('timer_gap', JSON.stringify({
+      id: 'gap', type: 'INTERVAL', name: 'Intervals', workDuration: 5, restDuration: 3,
+      intervals: 3, skipLastRest: true,
+    })))
+    await page.goto('/?id=gap')
+    const button = (name: string) => page.getByRole('button', { name, exact: true })
+    await button('Start intervals').tap()
+    await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
+    const start = await page.evaluate(() => Date.now())
+    const gap = scenario === 'finished' ? 22000 : scenario === 'later rest' ? 14000 : 9500
+    await page.clock.setSystemTime(start + gap)
+    if (scenario === 'paused') {
+      await button('Pause intervals').tap()
+      await page.clock.setSystemTime(start + gap + 10000)
+    }
+    await page.reload()
+    const prompt = page.getByRole('region', { name: 'Resume timer?' })
+    const expected = scenario === 'finished' ? 'Round 3 · 00:00' : scenario === 'later rest' ? 'Round 2 · 00:02' : 'Round 2 · 00:03'
+    await expect(prompt).toContainText(expected, { timeout: 1500 })
+    await page.clock.runFor(5000)
+    await button('Resume').tap()
+    await page.clock.runFor(150)
+    const header = page.locator('[data-slot=card-header]')
+    if (scenario === 'finished') {
+      await expect(header).toContainText('Complete')
+    } else {
+      await expect(header).toContainText('2 of 3 rounds')
+      await expect(header).toContainText(scenario === 'later rest' ? 'Rest' : 'Work')
+      await button('Stop intervals').tap()
+    }
+    await button('Expand lap history').tap()
+    const earlierLaps = scenario === 'finished' ? 2 : 1
+    await expect(page.getByText(/^Lap \d+$/)).toHaveCount(earlierLaps)
+    await expect(page.getByText('Lap 1', { exact: true }).locator('..')).toContainText('00:05.00')
+  })
+}
