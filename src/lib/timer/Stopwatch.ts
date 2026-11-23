@@ -83,8 +83,8 @@ export class Stopwatch {
     this.timer.start(startsAt)
   }
 
-  public resumeFrom(elapsed: number) {
-    this.timer.resumeFrom(this.timeLimitMs - elapsed)
+  public resumeFrom(elapsed: number, startsAt?: number) {
+    this.timer.resumeFrom(this.timeLimitMs - elapsed, startsAt)
   }
 
   public pause(): void {
