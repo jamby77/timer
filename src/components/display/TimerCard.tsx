@@ -51,6 +51,7 @@ export const TimerCard = ({
   let status = timerStatusLabels[state]
   if (state === TimerState.Idle && idleStatus) status = idleStatus
   if (state === TimerState.Running && isPreStarting) status = 'Get ready'
+  const showStatusRow = Boolean(status) || state === TimerState.Running
   const lastDotIndex = time.lastIndexOf('.')
   const mainTime = lastDotIndex > -1 ? time.slice(0, lastDotIndex) : time
   const fractionalTime = lastDotIndex > -1 ? time.slice(lastDotIndex) : ''
@@ -65,7 +66,7 @@ export const TimerCard = ({
           'bg-tm-rest-bg text-tm-rest-fg': isWork === false,
         })}
       >
-        {(header || !hideLabel || subtitle || status) && (
+        {(header || !hideLabel || subtitle || showStatusRow) && (
           <CardHeader
             className={cn('shrink-0 gap-1 px-4 text-center md:px-6', header ? 'py-1' : 'py-2')}
           >
@@ -88,8 +89,8 @@ export const TimerCard = ({
                 {subtitle}
               </CardDescription>
             )}
-            {status && (
-              <div role="status" className="text-sm leading-5 font-semibold">
+            {showStatusRow && (
+              <div role={status ? 'status' : undefined} className="min-h-[1lh] text-sm leading-5 font-semibold">
                 {status}
               </div>
             )}
@@ -110,7 +111,7 @@ export const TimerCard = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="shrink-0 justify-center px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6">
+        <CardFooter className="shrink-0 justify-center px-3 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-6">
           <div className="flex w-full flex-col gap-2">{children}</div>
         </CardFooter>
       </Card>

@@ -125,3 +125,35 @@ test.describe('mobile interval transitions', () => {
     })
   })
 })
+
+for (const viewport of [{ width: 320, height: 640 }, { width: 812, height: 375 }]) {
+  test.describe(`pause layout at ${viewport.width}px`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true, colorScheme: 'dark' })
+
+    test('digits and controls stay in place through pause and resume', async ({ page }) => {
+      await page.addInitScript(() => {
+        localStorage.setItem('timer_stable', JSON.stringify({
+          id: 'stable', name: 'Interval (30s work / 15s rest × 13)', type: 'INTERVAL',
+          workDuration: 30, restDuration: 15, intervals: 13,
+        }))
+      })
+      await page.goto('/?id=stable')
+      const button = (name: string) => page.getByRole('button', { name, exact: true })
+      await button('Start intervals').tap()
+      await page.evaluate(() => document.fonts.ready.then(() => true))
+      const status = page.locator('[data-slot=card-header]').getByRole('status')
+      const layout = () => Promise.all([
+        page.locator('[data-slot=card-content] span').first(),
+        button('Skip current interval'), button('Restart intervals'),
+        page.getByRole('progressbar'), button('Stop intervals'),
+      ].map(element => element.boundingBox()))
+      const running = await layout()
+      await button('Pause intervals').tap()
+      await expect(status).toHaveText('Paused')
+      expect(await layout()).toEqual(running)
+      await button('Resume intervals').tap()
+      await expect(status).toBeHidden()
+      expect(await layout()).toEqual(running)
+    })
+  })
+}

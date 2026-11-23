@@ -39,15 +39,15 @@ export const TimerProgressIndicator = ({
   } as CSSProperties
 
   return (
-    <div className={cn('mb-4 flex items-center gap-2', !isVisible && 'invisible', className)}>
+    <div className={cn('mb-3 grid grid-cols-2 items-center gap-y-1', !isVisible && 'invisible', className)}>
       <span className="text-foreground text-base tabular-nums">{formatTime(minTime)}</span>
       <Progress
         aria-label="Timer progress"
         value={clampedProgress}
-        className="flex-1 border border-(--progress-indicator-color) bg-background"
+        className="col-span-2 row-start-2 h-4 w-full border border-(--progress-indicator-color) bg-background"
         style={progressStyle}
       />
-      <span className="text-foreground text-base tabular-nums">{formatTime(maxTime)}</span>
+      <span className="text-foreground col-start-2 row-start-1 text-right text-base tabular-nums">{formatTime(maxTime)}</span>
     </div>
   )
 }
