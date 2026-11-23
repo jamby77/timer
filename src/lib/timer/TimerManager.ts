@@ -130,6 +130,11 @@ export class TimerManager {
     this.currentRepeat = 0
   }
 
+  public getRemainingTime(): number | undefined {
+    if (!this.isSequenceRunning) return this.pausedRemaining ?? undefined
+    return Math.max(0, this.stepEndsAt - Date.now())
+  }
+
   public getCurrentStep(): TimerStep | null {
     return this.sequence[this.currentStepIndex] || null
   }

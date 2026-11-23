@@ -139,3 +139,35 @@ for (const type of ['COUNTDOWN', 'STOPWATCH', 'COMPLEX']) {
     if (type === 'COMPLEX') await expect(page.getByLabel('Overall timer time')).toContainText('00:07 /')
   })
 }
+
+for (const scenario of ['running', 'paused', 'expired']) {
+  test('pre-start countdown recovery between frames: ' + scenario, async ({ page }) => {
+    await page.clock.install({ time: new Date('2026-01-01T12:00:00Z') })
+    await page.clock.pauseAt(new Date('2026-01-01T12:01:00Z'))
+    await page.addInitScript(() => localStorage.setItem('timer_ready', JSON.stringify({
+      id: 'ready', type: 'COUNTDOWN', name: 'Warmup', duration: 20, countdownBeforeStart: 5,
+    })))
+    await page.goto('/?id=ready')
+    const button = (name: string) => page.getByRole('button', { name, exact: true })
+    const ready = page.getByText('Get ready', { exact: true })
+    await button('Start timer').tap()
+    await expect(ready).toBeVisible()
+    const started = await page.evaluate(() => Date.now())
+    await page.clock.setSystemTime(started + (scenario === 'expired' ? 6000 : 3200))
+    if (scenario === 'paused') {
+      await button('Pause timer').tap()
+      await page.clock.setSystemTime(started + 12000)
+    }
+    await page.reload()
+    await page.clock.runFor(5000)
+    await button('Resume').tap()
+    if (scenario !== 'expired') {
+      await expect(page.locator('[data-slot=card-content]')).toHaveText('2', { timeout: 1500 })
+      await page.clock.runFor(1750)
+      await expect(ready).toBeVisible()
+    }
+    await page.clock.runFor(150)
+    await expect(ready).toBeHidden({ timeout: 1500 })
+    await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
+  })
+}
