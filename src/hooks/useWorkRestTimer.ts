@@ -43,17 +43,7 @@ export const useWorkRestTimer = ({
   const onRestCompleteRef = useRef<(endedAt: number) => void>(() => {})
   const timerRef = useRef<Timer | null>(null)
   const stopwatchRef = useRef<Stopwatch | null>(null)
-  const pendingRest = useRef<number | undefined>(undefined)
-  useSaveProgress('workrest', () => {
-    if (state.phase === TimerPhase.Completed || (state.phase === TimerPhase.Idle && state.rounds === 0)) return
-    const rest = pendingRest.current
-    return {
-      phase: rest !== undefined ? TimerPhase.Rest : state.phase,
-      rounds: state.rounds,
-      time: rest ?? timerRef.current?.getTime() ?? stopwatchRef.current?.getElapsedTime() ?? state.currentTime,
-      restDuration: rest ?? timerRef.current?.getInitialTime() ?? 0,
-    }
-  })
+  const pendingRest = useRef<{ duration: number; startsAt: number } | undefined>(undefined)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const onLapRecordedRef = useRef(onLapRecorded)
   const onStopRef = useRef(onStop)
@@ -123,10 +113,46 @@ export const useWorkRestTimer = ({
     return Math.min(duration, WORK_TIME_LIMIT_MS)
   }, [state.restMode, state.fixedRestDuration, state.ratio])
 
+  const roundDuration = workLimit + getRestDuration(workLimit)
+  const roundsAfterRest = useCallback((autoContinue: boolean, elapsed: number) => {
+    const remaining = Math.max(0, state.maxRounds - state.rounds - 1)
+    return autoContinue ? Math.min(remaining, Math.floor(elapsed / roundDuration)) : 0
+  }, [roundDuration, state.maxRounds, state.rounds])
+
+  useSaveProgress('workrest', () => {
+    if (state.phase === TimerPhase.Completed || (state.phase === TimerPhase.Idle && state.rounds === 0)) return
+    const pending = pendingRest.current
+    const engine = timerRef.current ?? stopwatchRef.current
+    const phase = pending ? TimerPhase.Rest : state.phase
+    const restDuration = pending?.duration ?? timerRef.current?.getInitialTime() ?? 0
+    const deadline = pending ? pending.startsAt + pending.duration
+      : engine?.getState() === TimerState.Running ? engine.getEndTime() : undefined
+    const now = Date.now()
+    const time = pending ? Math.min(restDuration, Math.max(0, pending.startsAt + restDuration - now))
+      : timerRef.current?.getTime() ?? stopwatchRef.current?.getElapsedTime() ?? state.currentTime
+    const snapshot = { phase, rounds: state.rounds, time, restDuration }
+    if (deadline === undefined || now < deadline) return snapshot
+
+    const overdueMs = now - deadline
+    const sinceRestEnded = overdueMs - (phase === TimerPhase.Work ? getRestDuration(workLimit) : 0)
+    let round = state.rounds + 1
+    let previewTime = Math.max(0, -sinceRestEnded)
+    if (sinceRestEnded >= 0) {
+      const missed = roundsAfterRest(config.autoContinue === true, sinceRestEnded)
+      const finishedRounds = round + missed
+      round = Math.min(finishedRounds + 1, state.maxRounds)
+      if (config.autoContinue && finishedRounds < state.maxRounds) {
+        const elapsed = sinceRestEnded - missed * roundDuration
+        previewTime = elapsed < workLimit ? elapsed : roundDuration - elapsed
+      }
+    }
+    return { ...snapshot, overdueMs, preview: { round, time: previewTime } }
+  })
+
   const startRestPhase = useCallback(
     (workDuration: number, startsAt = Date.now() + REST_DELAY_MS) => {
       const duration = getRestDuration(workDuration)
-      pendingRest.current = duration
+      pendingRest.current = { duration, startsAt }
       timeoutRef.current = setTimeout(() => {
         setState((prev) => ({ ...prev, phase: TimerPhase.Rest, state: TimerState.Idle }))
         const restTimer = createRestTimer(duration)
@@ -160,8 +186,9 @@ export const useWorkRestTimer = ({
 
   useEffect(() => {
     if (!saved) return
-    if (saved.phase === TimerPhase.Work) createWorkStopwatch().resumeFrom(saved.time)
-    if (saved.phase === TimerPhase.Rest) createRestTimer(saved.restDuration).resumeFrom(saved.time)
+    const startsAt = saved.overdueMs === undefined ? undefined : Date.now() - saved.overdueMs
+    if (saved.phase === TimerPhase.Work) createWorkStopwatch().resumeFrom(saved.time, startsAt)
+    if (saved.phase === TimerPhase.Rest) createRestTimer(saved.restDuration).resumeFrom(saved.time, startsAt)
   }, [saved, createWorkStopwatch, createRestTimer])
 
   // Start work
@@ -227,11 +254,7 @@ export const useWorkRestTimer = ({
 
   const finishRest = useCallback((continueWork: boolean, endedAt = Date.now()) => {
     cleanupTimer()
-    const roundDuration = workLimit + getRestDuration(workLimit)
-    const missedRounds = continueWork ? Math.min(
-      Math.max(0, state.maxRounds - state.rounds - 1),
-      Math.floor(Math.max(0, Date.now() - endedAt) / roundDuration)
-    ) : 0
+    const missedRounds = roundsAfterRest(continueWork, Math.max(0, Date.now() - endedAt))
     for (let i = 0; i < missedRounds; i++) onLapRecordedRef.current?.(workLimit)
     const nextStartsAt = endedAt + missedRounds * roundDuration
     const rounds = state.rounds + 1 + missedRounds
@@ -248,7 +271,7 @@ export const useWorkRestTimer = ({
       currentTime: 0,
     }))
     if (startNext) createWorkStopwatch().start(nextStartsAt)
-  }, [state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch, workLimit, getRestDuration])
+  }, [state.rounds, state.maxRounds, cleanupTimer, createWorkStopwatch, workLimit, roundDuration, roundsAfterRest])
 
   useLayoutEffect(() => {
     onRestCompleteRef.current = (endedAt) => finishRest(config.autoContinue === true, endedAt)

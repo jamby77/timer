@@ -212,3 +212,71 @@ for (const scenario of ['later work', 'later rest', 'paused', 'finished']) {
     await expect(page.getByText('Lap 1', { exact: true }).locator('..')).toContainText('00:05.00')
   })
 }
+
+for (const [scenario, gap, round, time, status] of [
+  ['fixed rest', 8500, 2, '00:01', 'Rest · Round 2 of 3'],
+  ['ratio rest', 10700, 2, '00:01', 'Work · Round 2 of 3'],
+  ['manual rounds', 15000, 2, '00:00', 'Ready for next round'],
+  ['finished', 18000, 3, '00:00', 'Complete'],
+  ['from rest', 8500, 2, '00:01', 'Rest · Round 2 of 3'],
+  ['paused work', 15000, 1, '00:01', 'Work · Round 1 of 3'],
+] as const) {
+  test('Work/Rest reload between frames: ' + scenario, async ({ page }) => {
+    await page.clock.install({ time: new Date('2026-01-01T12:00:00Z') })
+    await page.clock.pauseAt(new Date('2026-01-01T12:01:00Z'))
+    await page.addInitScript(scenario => localStorage.setItem('timer_rounds', JSON.stringify({
+      id: 'rounds', name: 'Rounds', type: 'WORKREST', maxRounds: 3, maxWorkTime: 3,
+      autoContinue: scenario !== 'manual rounds',
+      ...(scenario === 'ratio rest' ? { restMode: 'ratio', ratio: 2 } : { restMode: 'fixed', fixedRestDuration: 2 }),
+    })), scenario)
+    await page.goto('/?id=rounds')
+    const button = (name: string) => page.getByRole('button', { name, exact: true })
+    await button('Start work').tap()
+    const start = await page.evaluate(() => Date.now())
+    if (scenario === 'from rest') await page.clock.runFor(3200)
+    if (scenario === 'paused work') {
+      await page.clock.runFor(1100)
+      await button('Pause work').tap()
+    }
+    await page.clock.setSystemTime(start + gap)
+    await page.reload()
+    await expect(page.getByRole('region', { name: 'Resume timer?' })).toContainText(
+      'Round ' + round + ' · ' + time, { timeout: 1500 }
+    )
+    await page.clock.runFor(5000)
+    await button('Resume').tap()
+    await page.clock.runFor(150)
+    await expect(page.locator('[data-slot=card-header]')).toContainText(status)
+    if (scenario === 'finished') {
+      await button('Expand lap history').tap()
+      await expect(page.getByText(/^Lap \d+$/)).toHaveCount(2)
+    }
+  })
+}
+
+test('reloading after the last Work/Rest round carries excess time into the next phase', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-01T12:00:00Z') })
+  await page.clock.pauseAt(new Date('2026-01-01T12:01:00Z'))
+  await page.addInitScript(() => {
+    const configs = [
+      { type: 'WORKREST', maxRounds: 2, maxWorkTime: 3, autoContinue: true, restMode: 'fixed', fixedRestDuration: 2 },
+      { type: 'COUNTDOWN', duration: 10 },
+    ]
+    localStorage.setItem('timer_nested', JSON.stringify({
+      id: 'nested', name: 'Nested', type: 'COMPLEX', autoAdvance: true,
+      phases: configs.map((config, order) => ({
+        id: String(order), name: config.type, order, type: config.type,
+        config: { ...config, id: String(order), name: config.type },
+      })),
+    }))
+  })
+  await page.goto('/?id=nested')
+  await page.getByRole('button', { name: 'Start work', exact: true }).tap()
+  const start = await page.evaluate(() => Date.now())
+  await page.clock.setSystemTime(start + 12500)
+  await page.reload()
+  await page.getByRole('button', { name: 'Resume', exact: true }).tap()
+  await page.clock.runFor(200)
+  await expect(page.locator('[data-slot=card-header]')).toContainText('Phase 2/2')
+  await expect(page.locator('[data-slot=card-content]')).toContainText('00:07')
+})

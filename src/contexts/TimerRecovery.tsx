@@ -25,6 +25,8 @@ const progress = z.object({
       rounds: index,
       time: ms,
       restDuration: ms,
+      overdueMs: ms.optional(),
+      preview: z.object({ round: index, time: ms }).optional(),
     })
     .optional(),
   phaseIndex: index.optional(),
@@ -175,6 +177,7 @@ export function TimerRecovery({
     const time =
       saved.prestart ??
       interval?.remaining ??
+      saved.workrest?.preview?.time ??
       saved.workrest?.time ??
       saved.countdown ??
       saved.stopwatch ??
@@ -182,7 +185,7 @@ export function TimerRecovery({
     const round = interval
       ? Math.floor(interval.index / 2) + 1
       : saved.workrest
-        ? saved.workrest.rounds + 1
+        ? saved.workrest.preview?.round ?? saved.workrest.rounds + 1
         : undefined
     const detail = [phase?.name, round && `Round ${round}`, formatTime(time).split('.')[0]]
       .filter(Boolean)
