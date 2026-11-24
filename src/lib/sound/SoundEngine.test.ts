@@ -11,7 +11,7 @@ describe('SoundEngine initialization fallback', () => {
     const engine = SoundEngine.getInstance()
     expect(await engine.init()).toBe(false)
     expect(() => engine.playTone({ frequencyHz: 660, durationMs: 100 })).not.toThrow()
-    expect(() => engine.playAirHorn({ durationMs: 500 })).not.toThrow()
+    expect(() => engine.playSampleCue('finish', 1)).not.toThrow()
   })
 
   it('returns false instead of rejecting when audio-context creation fails', async () => {
@@ -26,7 +26,7 @@ describe('SoundEngine initialization fallback', () => {
     const engine = SoundEngine.getInstance()
     await expect(engine.init()).resolves.toBe(false)
     expect(() => engine.playTone({ frequencyHz: 660, durationMs: 100 })).not.toThrow()
-    expect(() => engine.playAirHorn({ durationMs: 500 })).not.toThrow()
+    expect(() => engine.playSampleCue('finish', 1)).not.toThrow()
   })
 
   it('does not create an audio context from a playback request before initialization', async () => {
@@ -40,6 +40,6 @@ describe('SoundEngine initialization fallback', () => {
     const { SoundEngine } = await import('./SoundEngine')
     const engine = SoundEngine.getInstance()
     expect(() => engine.playTone({ frequencyHz: 660, durationMs: 100 })).not.toThrow()
-    expect(() => engine.playAirHorn({ durationMs: 500 })).not.toThrow()
+    expect(() => engine.playSampleCue('finish', 1)).not.toThrow()
   })
 })

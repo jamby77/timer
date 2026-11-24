@@ -1,11 +1,11 @@
 # Timer Sound System (Web)
 
 ## Goals
-Provide configurable, synthesized sound cues for timer execution across:
+Provide configurable sound cues for timer execution across:
 - Mobile browsers: iOS Safari, Android Chrome
 - Desktop browsers: Chrome, Safari, Firefox
 
-Sounds are generated in code (Web Audio API) rather than shipping audio files.
+Web Audio plays bundled recordings for the countdown, start, and finish cues and synthesizes the interval cues.
 
 ## Non-goals
 - Playing native OS “system sounds” (not available to the web sandbox)
@@ -77,15 +77,13 @@ Cues are composable functions that call SoundEngine primitives.
 - Interval end beep
 - Tick sound (metronome)
 
-### Suggested defaults (tunable)
-- Countdown:
-  - 3: ~660Hz, short
-  - 2: ~660Hz, short
-  - 1: ~880Hz, short
-- Start: ~880Hz, medium
-- Finish: two-tone “ta-da” (e.g. 660Hz then 990Hz)
-- Interval start/end: distinct pitch separation
-- Tick: very short click (fast decay)
+### Default sounds
+
+- Countdown uses the short race beep on each countdown tick.
+- Start uses the longer race signal.
+- Finish uses the recorded air horn.
+- Interval start and end use distinct pitches.
+- Tick uses a short click.
 
 ## SoundManager
 

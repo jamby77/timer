@@ -7,22 +7,12 @@ for (const complex of [false, true]) {
     await page.addInitScript((complex) => {
       const horns: { duration: number; state: string }[] = []
       Object.assign(window, { workRestHorns: horns })
-      const createOscillator = AudioContext.prototype.createOscillator
-      AudioContext.prototype.createOscillator = function () {
-        const oscillator = createOscillator.call(this)
-        const start = oscillator.start.bind(oscillator)
-        const stop = oscillator.stop.bind(oscillator)
-        let startedAt = 0
-        oscillator.start = (when = 0) => {
-          startedAt = when
-          start(when)
+      const startSample = AudioBufferSourceNode.prototype.start
+      AudioBufferSourceNode.prototype.start = function (...args) {
+        if (this.buffer && this.buffer.duration > 1) {
+          horns.push({ duration: this.buffer.duration, state: this.context.state })
         }
-        oscillator.stop = (when = 0) => {
-          if (oscillator.type === 'sawtooth')
-            horns.push({ duration: when - startedAt, state: this.state })
-          stop(when)
-        }
-        return oscillator
+        return startSample.apply(this, args)
       }
       const config = {
         id: 'sound-rounds',
@@ -76,9 +66,9 @@ for (const complex of [false, true]) {
     await expect.poll(async () => (await horns()).length).toBe(3)
     const emitted = await horns()
     expect(emitted.every((horn) => horn.state === 'running')).toBe(true)
-    expect(emitted[0].duration).toBeCloseTo(0.463, 2)
-    expect(emitted[1].duration).toBeCloseTo(0.463, 2)
-    expect(emitted[2].duration).toBeCloseTo(1.55, 2)
+    expect(emitted[0].duration).toBeCloseTo(1.027, 2)
+    expect(emitted[1].duration).toBeCloseTo(1.027, 2)
+    expect(emitted[2].duration).toBeCloseTo(1.61, 2)
     await page.waitForTimeout(200)
     expect(await horns()).toHaveLength(3)
   })
