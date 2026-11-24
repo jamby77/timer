@@ -14,6 +14,8 @@ export type PlayAirHornOptions = {
   whenMs?: number
 }
 
+type BrowserAudioSession = { type: string }
+
 type AudioWindow = Window & {
   AudioContext?: typeof AudioContext
   webkitAudioContext?: typeof AudioContext
@@ -39,6 +41,9 @@ export class SoundEngine {
 
   private ctx: AudioContext | null = null
   private masterGain: GainNode | null = null
+
+  private readonly activeCues = new Set<OscillatorNode>()
+  private previousSession: { session: BrowserAudioSession; type: string } | null = null
 
   private enabled = true
   private volume = 0.7
@@ -127,6 +132,7 @@ export class SoundEngine {
 
     osc.start(startTime)
     osc.stop(startTime + durationS + 0.02)
+    this.holdPlaybackUntilEnded(osc, gain)
   }
 
   public playAirHorn({ durationMs, gain = 1, whenMs = 0 }: PlayAirHornOptions): void {
@@ -208,6 +214,7 @@ export class SoundEngine {
     osc1.stop(startTime + stopTotalS)
     osc2.stop(startTime + stopTotalS)
     oscSub.stop(startTime + stopTotalS)
+    this.holdPlaybackUntilEnded(oscSub, gain)
   }
 
   public playClick(
@@ -222,13 +229,52 @@ export class SoundEngine {
     })
   }
 
+  private holdPlaybackUntilEnded(source: OscillatorNode, gain: number): void {
+    if (this.volume === 0 || gain <= 0) return
+
+    if (!this.previousSession) {
+      try {
+        const session = (window.navigator as Navigator & { audioSession?: BrowserAudioSession })
+          .audioSession
+        if (!session || session.type === 'playback') return
+        const type = session.type
+        session.type = 'playback'
+        this.previousSession = { session, type }
+      } catch {
+        return
+      }
+    }
+
+    this.activeCues.add(source)
+    source.onended = () => {
+      this.activeCues.delete(source)
+      if (!this.activeCues.size) this.releasePlayback()
+    }
+  }
+
+  private releasePlayback(): void {
+    const previous = this.previousSession
+    this.previousSession = null
+    this.activeCues.clear()
+    if (!previous) return
+    try {
+      if (previous.session.type === 'playback') previous.session.type = previous.type
+    } catch {
+      return
+    }
+  }
+
   private ensureContext(): { ctx: AudioContext; masterGain: GainNode } {
     if (!this.ctx) {
       const AudioContextCtor = getAudioContextCtor()
       if (!AudioContextCtor) {
         throw new Error('AudioContext unsupported')
       }
-      this.ctx = new AudioContextCtor()
+      const context = new AudioContextCtor()
+      context.onstatechange = () => {
+        if (context.state !== AudioContextState.Running) this.releasePlayback()
+      }
+      this.ctx = context
     }
 
     const ctx = this.ctx
@@ -254,6 +300,7 @@ export class SoundEngine {
     if (!this.masterGain) {
       return
     }
+    if (!this.enabled || this.volume === 0) this.releasePlayback()
     if (this.enabled) {
       this.masterGain.gain.value = this.volume
     } else {

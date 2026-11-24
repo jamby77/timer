@@ -3,7 +3,19 @@ import { expect, test } from 'playwright/test'
 for (const mode of ['audible', 'muted', 'disabled']) {
   test(`Countdown audio output is ${mode}`, async ({ page }) => {
     await page.addInitScript((mode) => {
-      const outputState = { contexts: 0 }
+      const outputState = { contexts: 0, sessionChanges: [] as string[] }
+      let sessionType = 'auto'
+      Object.defineProperty(navigator, 'audioSession', {
+        value: {
+          get type() {
+            return sessionType
+          },
+          set type(value: string) {
+            sessionType = value
+            outputState.sessionChanges.push(value)
+          },
+        },
+      })
       Object.assign(window, { outputState })
       const NativeAudioContext = window.AudioContext
       window.AudioContext = class extends NativeAudioContext {
@@ -62,10 +74,15 @@ for (const mode of ['audible', 'muted', 'disabled']) {
     const samples = await page.evaluate(
       () => (window as unknown as { outputSamples: { time: number; peak: number }[] }).outputSamples
     )
-    const contexts = await page.evaluate(
-      () => (window as unknown as { outputState: { contexts: number } }).outputState.contexts
+    const { contexts, sessionChanges } = await page.evaluate(
+      () =>
+        (window as unknown as { outputState: { contexts: number; sessionChanges: string[] } })
+          .outputState
     )
     expect(contexts).toBe(mode === 'disabled' ? 0 : 1)
+    expect(sessionChanges).toEqual(
+      mode === 'audible' ? ['playback', 'auto', 'playback', 'auto', 'playback', 'auto'] : []
+    )
     if (mode === 'disabled') {
       expect(samples).toEqual([])
       return
