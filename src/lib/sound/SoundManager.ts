@@ -96,7 +96,10 @@ export class SoundManager {
   private tryPlayCue(cue: PlayedCue, play: () => void): boolean {
     const nowSecond = Math.floor(Date.now() / 1000)
 
-    if (this.hasPlayedCueThisSecond(nowSecond)) {
+    const takesPriority =
+      (cue === 'finish' && this.lastPlayedCue !== 'finish') ||
+      (cue === 'start' && this.lastPlayedCue === 'countdownBeep')
+    if (this.hasPlayedCueThisSecond(nowSecond) && !takesPriority) {
       return false
     }
 
@@ -212,7 +215,7 @@ export class SoundManager {
         this.previousIsWork = null
       },
       onFinish: () => {
-        if (prevIsWork === true) {
+        if (prevIsWork === true && !this.config.finishBeep) {
           this.onIntervalEnd()
         }
         this.onFinish()

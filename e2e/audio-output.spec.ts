@@ -103,8 +103,42 @@ for (const mode of ['audible', 'muted', 'disabled']) {
     }
     expect(
       samples
-        .filter((sample) => sample.time > 1 && sample.time < 2.5)
+        .filter((sample) => sample.time > 1.2 && sample.time < 2.5)
         .every((sample) => sample.peak < 0.0001)
     ).toBe(true)
   })
 }
+
+test('three pre-start beeps are followed by the recorded start signal', async ({ page }) => {
+  await page.addInitScript(() => {
+    const samples: number[] = []
+    Object.assign(window, { raceCueDurations: samples })
+    const start = AudioBufferSourceNode.prototype.start
+    AudioBufferSourceNode.prototype.start = function (...args) {
+      if (this.buffer) samples.push(this.buffer.duration)
+      return start.apply(this, args)
+    }
+    localStorage.setItem(
+      'timer_race',
+      JSON.stringify({
+        id: 'race',
+        name: 'Race',
+        type: 'COUNTDOWN',
+        duration: 30,
+        countdownBeforeStart: 3,
+        sound: { enabled: true, volume: 0.5 },
+      })
+    )
+  })
+  await page.goto('/?id=race')
+  await page.getByRole('button', { name: 'Start timer', exact: true }).click()
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (window as unknown as { raceCueDurations: number[] }).raceCueDurations.map((d) =>
+          Math.round(d * 100)
+        )
+      )
+    )
+    .toEqual([52, 52, 52, 103])
+})

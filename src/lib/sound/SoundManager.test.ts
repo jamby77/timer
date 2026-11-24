@@ -10,8 +10,8 @@ const engine = SoundEngine.getInstance()
 beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(0)
+  vi.spyOn(engine, 'playSampleCue').mockImplementation(() => {})
   vi.spyOn(engine, 'playTone').mockImplementation(() => {})
-  vi.spyOn(engine, 'playAirHorn').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -30,8 +30,8 @@ describe('SoundManager cue scheduling', () => {
     vi.setSystemTime(2000)
     manager.onFinish()
     expect(init).not.toHaveBeenCalled()
+    expect(engine.playSampleCue).not.toHaveBeenCalled()
     expect(engine.playTone).not.toHaveBeenCalled()
-    expect(engine.playAirHorn).not.toHaveBeenCalled()
   })
 
   it('plays start once, stays quiet on pause/resume, and plays finish once', () => {
@@ -42,33 +42,28 @@ describe('SoundManager cue scheduling', () => {
     vi.setSystemTime(1000)
     manager.syncStopwatch(TimerState.Paused, 200)
     manager.syncStopwatch(TimerState.Running, 200)
-    expect(engine.playAirHorn).toHaveBeenCalledExactlyOnceWith({ durationMs: 463, gain: 0.7 })
+    expect(engine.playSampleCue).toHaveBeenCalledExactlyOnceWith('start', 0.7)
     vi.setSystemTime(2000)
     manager.syncStopwatch(TimerState.Completed, 1000)
     manager.syncStopwatch(TimerState.Completed, 1000)
-    expect(engine.playAirHorn).toHaveBeenCalledTimes(2)
-    expect(engine.playAirHorn).toHaveBeenLastCalledWith({ durationMs: 1850, gain: 0.95 })
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(2)
+    expect(engine.playSampleCue).toHaveBeenLastCalledWith('finish', 0.95)
   })
 
   it('only counts down within the configured threshold and never repeats a second', () => {
     const manager = new SoundManager({ volume: 0.7, enabled: true, countdownBeeps: 2 })
     manager.syncPreStartCountdown(3000)
-    expect(engine.playTone).not.toHaveBeenCalled()
+    expect(engine.playSampleCue).not.toHaveBeenCalled()
     manager.syncPreStartCountdown(2000)
     manager.syncPreStartCountdown(1900)
     vi.setSystemTime(1000)
     manager.syncPreStartCountdown(1500)
-    expect(engine.playTone).toHaveBeenCalledTimes(1)
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(1)
     manager.syncPreStartCountdown(1000)
     vi.setSystemTime(2000)
     manager.syncPreStartCountdown(0)
-    expect(engine.playTone).toHaveBeenCalledTimes(2)
-    expect(engine.playTone).toHaveBeenLastCalledWith({
-      frequencyHz: 660,
-      durationMs: 160,
-      type: 'square',
-      gain: 1,
-    })
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(2)
+    expect(engine.playSampleCue).toHaveBeenLastCalledWith('countdown', 1)
   })
 
   it('suppresses competing cues within a wall-clock second', () => {
@@ -76,10 +71,28 @@ describe('SoundManager cue scheduling', () => {
     manager.onStart()
     manager.onCountdownTick(1000)
     manager.onIntervalEnd()
+    expect(engine.playSampleCue).toHaveBeenCalledExactlyOnceWith('start', 0.7)
     expect(engine.playTone).not.toHaveBeenCalled()
     vi.setSystemTime(1000)
     manager.onCountdownTick(1000)
-    expect(engine.playTone).toHaveBeenCalledTimes(1)
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(2)
+  })
+
+  it('plays start and finish when the last beep falls in the same clock second', () => {
+    const manager = new SoundManager({ enabled: true, volume: 0.7 })
+    manager.syncPreStartCountdown(100)
+    manager.onStart()
+    manager.onCountdownTick(30000)
+    vi.setSystemTime(1000)
+    manager.onCountdownTick(100)
+    manager.onFinish()
+    manager.onFinish()
+    expect(vi.mocked(engine.playSampleCue).mock.calls.map(([cue]) => cue)).toEqual([
+      'countdown',
+      'start',
+      'countdown',
+      'finish',
+    ])
   })
 
   it('reset permits a fresh countdown and start cue immediately', () => {
@@ -87,10 +100,10 @@ describe('SoundManager cue scheduling', () => {
     manager.syncPreStartCountdown(1000)
     manager.reset()
     manager.syncPreStartCountdown(1000)
-    expect(engine.playTone).toHaveBeenCalledTimes(2)
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(2)
     manager.reset()
     manager.syncCountdown(TimerState.Running, 10000)
-    expect(engine.playAirHorn).toHaveBeenCalledExactlyOnceWith({ durationMs: 463, gain: 0.7 })
+    expect(engine.playSampleCue).toHaveBeenCalledWith('start', 0.7)
   })
 
   it('honors individual cue settings and resets playback when settings change', () => {
@@ -107,13 +120,13 @@ describe('SoundManager cue scheduling', () => {
     manager.onIntervalStart()
     manager.onIntervalEnd()
     expect(engine.playTone).not.toHaveBeenCalled()
-    expect(engine.playAirHorn).not.toHaveBeenCalled()
+    expect(engine.playSampleCue).not.toHaveBeenCalled()
     manager.setConfig({ volume: 0.7, enabled: true })
     manager.onStart()
-    expect(engine.playAirHorn).toHaveBeenCalledTimes(1)
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(1)
     manager.setConfig({ volume: 0.7, enabled: true })
     manager.onStart()
-    expect(engine.playAirHorn).toHaveBeenCalledTimes(2)
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(2)
   })
 
   it('schedules distinct interval cues for work-to-rest and rest-to-work transitions', () => {
@@ -168,16 +181,15 @@ describe('SoundManager cue scheduling', () => {
     manager.syncWorkRest(TimerState.Running, TimerPhase.Rest, 4000, 0)
     vi.setSystemTime(5000)
     manager.syncWorkRest(TimerState.Idle, TimerPhase.Idle, 0, 1)
-    expect(engine.playAirHorn).toHaveBeenCalledTimes(1)
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(1)
     manager.syncWorkRest(TimerState.Running, TimerPhase.Work, 0, 1)
-    expect(engine.playAirHorn).toHaveBeenCalledTimes(2)
-    expect(engine.playAirHorn).toHaveBeenLastCalledWith({ durationMs: 463, gain: 0.7 })
+    expect(engine.playSampleCue).toHaveBeenCalledTimes(2)
+    expect(engine.playSampleCue).toHaveBeenLastCalledWith('start', 0.7)
     vi.setSystemTime(6000)
     manager.syncWorkRest(TimerState.Running, TimerPhase.Rest, 4000, 1)
     vi.setSystemTime(10000)
     manager.syncWorkRest(TimerState.Completed, TimerPhase.Completed, 0, 2)
     manager.syncWorkRest(TimerState.Completed, TimerPhase.Completed, 0, 2)
-    expect(engine.playAirHorn).toHaveBeenCalledTimes(3)
-    expect(engine.playAirHorn).toHaveBeenLastCalledWith({ durationMs: 1850, gain: 0.95 })
+    expect(engine.playSampleCue).toHaveBeenLastCalledWith('finish', 0.95)
   })
 })

@@ -1,15 +1,12 @@
+import cueSamples from './cue-samples.json'
 import { AudioContextState, SoundFrequencyHz, SoundWaveform } from './enums'
+
+type SampleCue = 'countdown' | 'start' | 'finish'
 
 export type PlayToneOptions = {
   frequencyHz: number
   durationMs: number
   type?: OscillatorType | SoundWaveform
-  gain?: number
-  whenMs?: number
-}
-
-export type PlayAirHornOptions = {
-  durationMs: number
   gain?: number
   whenMs?: number
 }
@@ -42,7 +39,8 @@ export class SoundEngine {
   private ctx: AudioContext | null = null
   private masterGain: GainNode | null = null
 
-  private readonly activeCues = new Set<OscillatorNode>()
+  private readonly activeCues = new Set<AudioScheduledSourceNode>()
+  private readonly sampleBuffers = new Map<SampleCue, AudioBuffer>()
   private previousSession: { session: BrowserAudioSession; type: string } | null = null
 
   private enabled = true
@@ -97,6 +95,31 @@ export class SoundEngine {
     this.updateMasterGain()
   }
 
+  public playSampleCue(cue: SampleCue, gain: number): void {
+    const { ctx, masterGain } = this
+    if (!this.enabled || !ctx || !masterGain || ctx.state !== AudioContextState.Running) return
+
+    let buffer = this.sampleBuffers.get(cue)
+    if (!buffer) {
+      const bytes = Uint8Array.from(atob(cueSamples[cue]), (char) => char.charCodeAt(0))
+      const pcm = new DataView(bytes.buffer)
+      buffer = ctx.createBuffer(1, pcm.byteLength / 2, cueSamples.sampleRate)
+      const channel = buffer.getChannelData(0)
+      for (let i = 0; i < channel.length; i++) {
+        channel[i] = pcm.getInt16(i * 2, true) / 32768
+      }
+      this.sampleBuffers.set(cue, buffer)
+    }
+
+    const source = ctx.createBufferSource()
+    source.buffer = buffer
+    const amp = ctx.createGain()
+    amp.gain.value = gain
+    source.connect(amp).connect(masterGain)
+    source.start()
+    this.holdPlaybackUntilEnded(source, gain)
+  }
+
   public playTone({
     frequencyHz,
     durationMs,
@@ -135,88 +158,6 @@ export class SoundEngine {
     this.holdPlaybackUntilEnded(osc, gain)
   }
 
-  public playAirHorn({ durationMs, gain = 1, whenMs = 0 }: PlayAirHornOptions): void {
-    if (!this.isSupported() || !this.enabled) {
-      return
-    }
-
-    const { ctx, masterGain } = this
-    if (!ctx || !masterGain || ctx.state !== AudioContextState.Running) {
-      return
-    }
-
-    const startTime = ctx.currentTime + whenMs / 1000
-    const durationS = Math.max(0.01, durationMs / 1000)
-
-    const envelopeTotalS = Math.min(durationS, 1.5)
-    const stopTotalS = Math.min(durationS, 1.55)
-
-    const osc1 = ctx.createOscillator()
-    osc1.type = SoundWaveform.Sawtooth
-    osc1.frequency.setValueAtTime(510, startTime)
-    osc1.frequency.exponentialRampToValueAtTime(485, startTime + Math.min(0.18, durationS))
-
-    const osc2 = ctx.createOscillator()
-    osc2.type = SoundWaveform.Triangle
-    osc2.frequency.setValueAtTime(1020, startTime)
-    osc2.detune.setValueAtTime(-6, startTime)
-
-    const oscSub = ctx.createOscillator()
-    oscSub.type = SoundWaveform.Sine
-    oscSub.frequency.setValueAtTime(255, startTime)
-
-    const oscGain1 = ctx.createGain()
-    oscGain1.gain.setValueAtTime(0.6, startTime)
-
-    const oscGain2 = ctx.createGain()
-    oscGain2.gain.setValueAtTime(0.22, startTime)
-
-    const oscGainSub = ctx.createGain()
-    oscGainSub.gain.setValueAtTime(0.18, startTime)
-
-    const bandpass = ctx.createBiquadFilter()
-    bandpass.type = 'bandpass'
-    bandpass.frequency.setValueAtTime(650, startTime)
-    bandpass.frequency.linearRampToValueAtTime(730, startTime + Math.min(0.06, durationS))
-    bandpass.Q.setValueAtTime(3, startTime)
-
-    const saturator = ctx.createWaveShaper()
-    saturator.curve = SoundEngine.softSaturationCurve()
-    saturator.oversample = '4x'
-
-    const lowpass = ctx.createBiquadFilter()
-    lowpass.type = 'lowpass'
-    lowpass.frequency.setValueAtTime(4200, startTime)
-    lowpass.frequency.linearRampToValueAtTime(2800, startTime + Math.min(0.35, durationS))
-    lowpass.Q.setValueAtTime(0.7, startTime)
-
-    const amp = ctx.createGain()
-    const peak = Math.max(0.0001, gain)
-    const sustainUntil = startTime + Math.min(1.28, Math.max(0.03, envelopeTotalS - 0.22))
-    amp.gain.setValueAtTime(0.0001, startTime)
-    amp.gain.exponentialRampToValueAtTime(peak, startTime + Math.min(0.03, envelopeTotalS))
-    amp.gain.setValueAtTime(peak, sustainUntil)
-    amp.gain.exponentialRampToValueAtTime(0.0001, startTime + envelopeTotalS)
-
-    osc1.connect(oscGain1).connect(bandpass)
-    osc2.connect(oscGain2).connect(bandpass)
-    oscSub.connect(oscGainSub).connect(bandpass)
-
-    bandpass.connect(saturator)
-    saturator.connect(lowpass)
-    lowpass.connect(amp)
-    amp.connect(masterGain)
-
-    osc1.start(startTime)
-    osc2.start(startTime)
-    oscSub.start(startTime)
-
-    osc1.stop(startTime + stopTotalS)
-    osc2.stop(startTime + stopTotalS)
-    oscSub.stop(startTime + stopTotalS)
-    this.holdPlaybackUntilEnded(oscSub, gain)
-  }
-
   public playClick(
     options: Omit<PlayToneOptions, 'frequencyHz' | 'type'> & { frequencyHz?: number }
   ): void {
@@ -229,7 +170,7 @@ export class SoundEngine {
     })
   }
 
-  private holdPlaybackUntilEnded(source: OscillatorNode, gain: number): void {
+  private holdPlaybackUntilEnded(source: AudioScheduledSourceNode, gain: number): void {
     if (this.volume === 0 || gain <= 0) return
 
     if (!this.previousSession) {
@@ -306,17 +247,5 @@ export class SoundEngine {
     } else {
       this.masterGain.gain.value = 0
     }
-  }
-
-  private static softSaturationCurve(): Float32Array<ArrayBuffer> {
-    const n = 44100
-    const curve = new Float32Array(
-      new ArrayBuffer(n * Float32Array.BYTES_PER_ELEMENT)
-    ) as Float32Array<ArrayBuffer>
-    for (let i = 0; i < n; i += 1) {
-      const x = (i * 2) / n - 1
-      curve[i] = x < 0 ? Math.tanh(x * 1.2) : Math.tanh(x * 0.8)
-    }
-    return curve
   }
 }

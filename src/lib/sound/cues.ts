@@ -6,31 +6,15 @@ export const playCountdownBeep = (secondsLeft: number): void => {
     return
   }
 
-  const engine = SoundEngine.getInstance()
-
-  engine.playTone({
-    frequencyHz: SoundFrequencyHz.CountdownBeep,
-    durationMs: SoundDurationMs.CountdownBeep,
-    type: SoundWaveform.Square,
-    gain: SoundGain.CountdownBeep,
-  })
+  SoundEngine.getInstance().playSampleCue('countdown', SoundGain.CountdownBeep)
 }
 
 export const playStartBeep = (): void => {
-  const engine = SoundEngine.getInstance()
-  engine.playAirHorn({
-    durationMs: Math.round(SoundDurationMs.FinishBeep / 4),
-    gain: SoundGain.StartBeep,
-  })
+  SoundEngine.getInstance().playSampleCue('start', SoundGain.StartBeep)
 }
 
 export const playFinishBeep = (): void => {
-  const engine = SoundEngine.getInstance()
-
-  engine.playAirHorn({
-    durationMs: SoundDurationMs.FinishBeep,
-    gain: SoundGain.FinishBeep,
-  })
+  SoundEngine.getInstance().playSampleCue('finish', SoundGain.FinishBeep)
 }
 
 export const playIntervalStartBeep = (): void => {

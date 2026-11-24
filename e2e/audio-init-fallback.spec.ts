@@ -15,14 +15,14 @@ async function openTimer(page: Page, type: string, recover = false) {
         }
       }
       window.AudioContext = UnavailableAudioContext
-      const horns: number[] = []
-      Object.assign(window, { recoveredHorns: horns })
-      const create = NativeAudioContext.prototype.createOscillator
-      NativeAudioContext.prototype.createOscillator = function () {
+      const samples: number[] = []
+      Object.assign(window, { recoveredSamples: samples })
+      const create = NativeAudioContext.prototype.createBufferSource
+      NativeAudioContext.prototype.createBufferSource = function () {
         const osc = create.call(this)
         const start = osc.start.bind(osc)
         osc.start = (when = 0) => {
-          if (osc.type === 'sawtooth') horns.push(when)
+          samples.push(when)
           start(when)
         }
         return osc
@@ -78,14 +78,16 @@ test('a later Start retries audio initialization and restores sound', async ({ p
   await page.getByRole('button', { name: 'Stop timer', exact: true }).click()
   expect(
     await page.evaluate(
-      () => (window as unknown as { recoveredHorns: number[] }).recoveredHorns.length
+      () => (window as unknown as { recoveredSamples: number[] }).recoveredSamples.length
     )
   ).toBe(0)
   await page.waitForTimeout(1100)
   await page.getByRole('button', { name: 'Start timer', exact: true }).click()
   await expect
     .poll(() =>
-      page.evaluate(() => (window as unknown as { recoveredHorns: number[] }).recoveredHorns.length)
+      page.evaluate(
+        () => (window as unknown as { recoveredSamples: number[] }).recoveredSamples.length
+      )
     )
     .toBe(1)
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
