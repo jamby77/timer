@@ -119,6 +119,9 @@
 }
 
 :root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-padding: var(--safe-area-top) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   --radius: 0.625rem;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
@@ -210,7 +213,7 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 
   /* Timer colors - Dark theme */
-  --tm-work-bg: oklch(0.714 0.188 143.292 / 0.3);
+  --tm-work-bg: color-mix(in srgb, oklch(0.714 0.188 143.292) 30%, var(--background));
   --tm-work-fg: oklch(0.845 0.03 142.3);
   --tm-rest-bg: oklch(0.35 0.063 77.315);
   --tm-rest-fg: var(--foreground);
@@ -231,9 +234,32 @@
   --tm-pr-rest-bg: oklch(0.822 0.062 87.373);
 }
 
+@media (display-mode: standalone) and (orientation: portrait) {
+  :root {
+    --safe-area-top: max(env(safe-area-inset-top, 0px),
+      clamp(0px, calc(100lvh - 100dvh), 5rem));
+  }
+}
+
 @layer base {
   html {
+    --page-surface: var(--background);
     @apply h-full;
+  }
+  html:has([data-timer-surface='work']) {
+    --page-surface: var(--tm-work-bg);
+  }
+  html:has([data-timer-surface='rest']) {
+    --page-surface: var(--tm-rest-bg);
+  }
+  html:has([data-timer-surface='neutral']) {
+    --page-surface: var(--card);
+  }
+  html, body {
+    background-color: var(--page-surface);
+  }
+  html[data-fullscreen='true'] {
+    overflow: hidden;
   }
   html[data-fullscreen='true'] nav {
     display: none;
@@ -242,7 +268,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    padding: var(--safe-area-padding);
   }
 }
 

@@ -2,7 +2,7 @@ import './globals.css'
 
 import { ReactNode } from 'react'
 import { TimerProvider } from '@/contexts/TimerContext'
-import { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -12,6 +12,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { Navigation } from '@/components/Navigation'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export const viewport: Viewport = { viewportFit: 'cover' }
 
 export const metadata: Metadata = {
   title: {
@@ -58,7 +60,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <TimerProvider>
             <Navigation />
 
-            <main className="bg-background inset-0 h-full grow">{children}</main>
+            <main className="bg-(--page-surface) inset-0 h-full grow">{children}</main>
           </TimerProvider>
           <Toaster position="top-center" duration={10000} richColors />
         </ThemeProvider>

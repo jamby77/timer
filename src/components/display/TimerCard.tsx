@@ -58,10 +58,15 @@ export const TimerCard = ({
   const characterWidth = mainTime.length * 0.62 + fractionalTime.length * 0.18
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col" data-timer-state={state}>
+    <div
+      className={cn('flex min-h-0 w-full flex-1 flex-col', !fullscreen && 'landscape:[@media(max-height:32rem)]:min-h-72')}
+      data-timer-state={state}
+    >
       <Card
-        className={cn('flex h-full min-h-0 flex-col gap-0! overflow-hidden border-0 p-0!', {
-          'rounded-none!': fullscreen,
+        data-timer-surface={fullscreen ? (isWork === undefined ? 'neutral' : isWork ? 'work' : 'rest') : undefined}
+        className={cn('flex h-full min-h-0 flex-col gap-0! overflow-hidden border-0', {
+          'rounded-none! p-(--safe-area-padding)!': fullscreen,
+          'p-0!': !fullscreen,
           'bg-tm-work-bg text-tm-work-fg': isWork,
           'bg-tm-rest-bg text-tm-rest-fg': isWork === false,
         })}
@@ -111,7 +116,7 @@ export const TimerCard = ({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="shrink-0 justify-center px-3 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-6">
+        <CardFooter className="shrink-0 justify-center px-3 pt-2 pb-6 md:px-6">
           <div className="flex w-full flex-col gap-2">{children}</div>
         </CardFooter>
       </Card>
