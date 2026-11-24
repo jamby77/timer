@@ -23,7 +23,7 @@ export const TimerContainer = ({
   return (
     <div
       className={cn('mx-auto flex h-[calc(100dvh-6rem)] min-h-64 w-full max-w-5xl flex-col gap-2', {
-        'bg-background fixed inset-0 z-9999 h-dvh min-h-0 max-w-none gap-0 overflow-hidden':
+        'bg-(--page-surface) fixed [@media(display-mode:standalone)]:absolute inset-0 z-9999 h-dvh min-h-0 max-w-none gap-0 overflow-hidden':
           fullscreen,
       })}
     >
