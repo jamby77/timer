@@ -4,11 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TimerState } from '@/lib/enums'
 import { TimerManager } from '@/lib/timer/TimerManager'
 
-const clampCountdownSeconds = (seconds?: number): number => {
-  if (seconds === undefined) return 0
-  if (!Number.isFinite(seconds)) return 0
-  return Math.max(0, Math.min(60, Math.floor(seconds)))
-}
+import { clampCountdownSeconds } from '@/lib/timer/utils'
 
 interface UsePreStartCountdownOptions {
   seconds?: number

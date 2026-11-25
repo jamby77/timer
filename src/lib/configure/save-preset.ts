@@ -7,8 +7,13 @@ export function saveTimerPreset(config: AnyTimerConfig): PredefinedStyle<AnyTime
   const errors = validateTimerConfig(config)
   if (errors.length) throw new Error(errors.join('\n'))
 
+  const id =
+    crypto.randomUUID?.() ??
+    Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+      byte.toString(16).padStart(2, '0')
+    ).join('')
   const preset: PredefinedStyle<AnyTimerConfig> = {
-    id: `custom-${crypto.randomUUID()}`,
+    id: `custom-${id}`,
     name: config.name,
     description: getConfigSummary(config),
     isBuiltIn: false,

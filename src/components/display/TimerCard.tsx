@@ -20,6 +20,7 @@ const timerStatusLabels = {
 }
 
 interface TimerCardProps {
+  statusHint?: ReactNode
   header?: ReactNode
   headerControls?: ReactNode
   hideLabel?: boolean
@@ -36,6 +37,7 @@ interface TimerCardProps {
 
 export const TimerCard = ({
   label,
+  statusHint,
   header,
   headerControls,
   hideLabel = false,
@@ -95,8 +97,9 @@ export const TimerCard = ({
               </CardDescription>
             )}
             {showStatusRow && (
-              <div role={status ? 'status' : undefined} className="min-h-[1lh] text-sm leading-5 font-semibold">
-                {status}
+              <div className={cn('min-h-[1lh] text-sm leading-5 font-semibold', statusHint && 'flex min-w-0 items-center gap-2')}>
+                <span role={status ? 'status' : undefined} className="shrink-0">{status}</span>
+                {statusHint}
               </div>
             )}
             {headerControls}

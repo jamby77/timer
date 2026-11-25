@@ -15,6 +15,8 @@ import type {
 } from '@/types/configure'
 
 import { TimerState, TimerType } from '@/lib/enums'
+import { phaseSequence } from '@/lib/configure/phase-sequence'
+import { exactPhaseDuration, formatDuration } from '@/lib/configure/utils'
 import { formatTime } from '@/lib/timer'
 import { useWorkoutClock } from '@/hooks/useWorkoutClock'
 
@@ -35,9 +37,7 @@ export function ComplexTimer({ config }: ComplexTimerProps) {
 
 function ComplexTimerSession({ config }: ComplexTimerProps) {
   const { setTimerActive } = useTimerContext()
-  const phases = useMemo(() => {
-    return [...(config.phases ?? [])].sort((a, b) => a.order - b.order)
-  }, [config.phases])
+  const phases = useMemo(() => phaseSequence(config), [config])
 
   const {
     elapsedMs,
@@ -54,9 +54,11 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
   const [isStopped, setIsStopped] = useState(false)
   const [phaseStartsAt, setPhaseStartsAt] = useState<number>()
   const [isComplexRunning, setIsComplexRunning] = useState(false)
-  const lastAutoAdvancedPhaseIdRef = useRef<string | null>(null)
+  const lastAutoAdvancedIndex = useRef<number | null>(null)
 
   const currentPhase = phases[phaseIndex]
+  const occurrenceKey = JSON.stringify([currentPhase.id, phaseIndex, phaseRun])
+  const position = `Phase ${phaseIndex + 1}/${phases.length}`
   const isFirst = phaseIndex === 0
   const phaseConfig = useMemo(
     () => ({
@@ -85,7 +87,7 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       setPhaseStartsAt(undefined)
       setPhaseIndex(clamped)
       setPhaseRun((run) => run + 1)
-      lastAutoAdvancedPhaseIdRef.current = null
+      lastAutoAdvancedIndex.current = null
     },
     [phases.length, resetClock]
   )
@@ -95,7 +97,7 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
     setIsComplexRunning(false)
     setPhaseStartsAt(undefined)
     setPhaseIndex((prev) => Math.min(prev + 1, phases.length - 1))
-    lastAutoAdvancedPhaseIdRef.current = null
+    lastAutoAdvancedIndex.current = null
   }, [phases.length, setRunning])
 
   const goToPrevPhase = useCallback(() => {
@@ -103,11 +105,11 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
     setIsComplexRunning(false)
     setPhaseStartsAt(undefined)
     setPhaseIndex((prev) => Math.max(prev - 1, 0))
-    lastAutoAdvancedPhaseIdRef.current = null
+    lastAutoAdvancedIndex.current = null
   }, [setRunning])
 
   const handlePhaseComplete = useCallback(
-    (phaseId: string, endedAt: number) => {
+    (endedAt: number) => {
       setRunning(false, endedAt)
       const autoAdvance = config.autoAdvance ?? true
 
@@ -122,15 +124,16 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
         return
       }
 
-      if (lastAutoAdvancedPhaseIdRef.current === phaseId) {
+      if (lastAutoAdvancedIndex.current === phaseIndex) {
         return
       }
-      lastAutoAdvancedPhaseIdRef.current = phaseId
+      lastAutoAdvancedIndex.current = phaseIndex
 
-      goToNextPhase()
+      setIsComplexRunning(false)
+      setPhaseIndex(phaseIndex + 1)
       setPhaseStartsAt(endedAt)
     },
-    [config.autoAdvance, goToNextPhase, isLast, setRunning, finish]
+    [config.autoAdvance, phaseIndex, isLast, setRunning, finish]
   )
 
   const handlePhaseStop = useCallback(() => {
@@ -145,10 +148,10 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       setRunning(state === TimerState.Running, at)
       setIsComplexRunning(state === TimerState.Running || state === TimerState.Paused)
       if (state === TimerState.Completed) {
-        handlePhaseComplete(currentPhase.id, at ?? Date.now())
+        handlePhaseComplete(at ?? Date.now())
       }
     },
-    [handlePhaseComplete, currentPhase.id, setRunning]
+    [handlePhaseComplete, setRunning]
   )
 
   const handlePhaseStateChangeNoComplete = useCallback(
@@ -159,6 +162,16 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
     [setRunning]
   )
 
+  const nextPhase = phases[phaseIndex + 1]
+  const duration = nextPhase && exactPhaseDuration(nextPhase.config)
+  const statusHint = nextPhase && (
+    <div className="@container min-w-0 flex-1 text-right text-[13px] font-medium opacity-80">
+      <div className="flex h-5 flex-wrap justify-end gap-x-1 overflow-hidden leading-5 @max-[5rem]:sr-only">
+        <span className="max-w-full truncate" title={nextPhase.name}>Next: {nextPhase.name}</span>
+        {duration !== undefined && <span className="whitespace-nowrap">· {formatDuration(duration, { exact: true })}</span>}
+      </div>
+    </div>
+  )
   const phaseHeader = (
     <div className="grid h-11 w-full grid-cols-3 items-start gap-x-3 pt-3 max-sm:portrait:h-auto max-sm:portrait:min-h-11 max-sm:portrait:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] max-sm:portrait:gap-x-1">
       <div className="min-w-0 text-left">
@@ -187,8 +200,13 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       >
         {currentPhase.name}
       </div>
-      <div className="text-right text-lg leading-5 opacity-75">
-        Phase {phaseIndex + 1}/{phases.length}
+      <div className="grid text-right text-lg leading-5 opacity-75">
+        {currentPhase.group ? (
+          <>
+            <span className="col-start-1 row-start-1">Rep {currentPhase.pass}/{currentPhase.group.count}</span>
+            <span className="pointer-events-none col-start-1 row-start-1 opacity-0">{position}</span>
+          </>
+        ) : position}
       </div>
     </div>
   )
@@ -236,7 +254,8 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       case TimerType.COUNTDOWN:
         return (
           <Timer
-            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
+            key={occurrenceKey}
+            statusHint={statusHint}
             header={phaseHeader}
             phaseControls={phaseControls}
             startsAt={phaseStartsAt}
@@ -248,7 +267,8 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       case TimerType.STOPWATCH:
         return (
           <Stopwatch
-            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
+            key={occurrenceKey}
+            statusHint={statusHint}
             header={phaseHeader}
             phaseControls={phaseControls}
             startsAt={phaseStartsAt}
@@ -260,12 +280,13 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       case TimerType.INTERVAL:
         return (
           <Interval
-            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
+            key={occurrenceKey}
+            statusHint={statusHint}
             header={phaseHeader}
             phaseControls={phaseControls}
             startsAt={phaseStartsAt}
             intervalConfig={timerConfig as IntervalConfig}
-            onComplete={(endedAt) => handlePhaseComplete(currentPhase.id, endedAt)}
+            onComplete={handlePhaseComplete}
             onStateChange={handlePhaseStateChangeNoComplete}
             onStop={handlePhaseStop}
           />
@@ -273,12 +294,13 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
       case TimerType.WORKREST:
         return (
           <WorkRestTimer
-            key={`${config.id}-${currentPhase.id}-${phaseRun}`}
+            key={occurrenceKey}
+            statusHint={statusHint}
             header={phaseHeader}
             phaseControls={phaseControls}
             startsAt={phaseStartsAt}
             config={timerConfig as WorkRestConfig}
-            onPhaseComplete={(endedAt) => handlePhaseComplete(currentPhase.id, endedAt)}
+            onPhaseComplete={handlePhaseComplete}
             onStateChange={handlePhaseStateChangeNoComplete}
             onStop={handlePhaseStop}
           />

@@ -32,6 +32,7 @@ import { TimerControls } from './TimerControls'
 interface IntervalProps {
   startsAt?: number
   autoStart?: boolean
+  statusHint?: ReactNode
   header?: ReactNode
   phaseControls?: ReactNode
   /** Configuration for the interval timer */
@@ -48,6 +49,7 @@ export function Interval({
   intervalConfig: { sound, ...intervalConfig },
   onComplete,
   onStop,
+  statusHint,
   header,
   phaseControls,
   startsAt,
@@ -182,6 +184,7 @@ export function Interval({
     <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
         isPreStarting={isPreStarting}
+        statusHint={statusHint}
         header={header}
         headerControls={
           <div className="mt-3 flex items-center justify-center gap-3 [&>button]:min-h-11 [&>button]:h-auto [&>button]:py-1 max-[400px]:gap-2 max-[400px]:[&>button]:px-3 max-[400px]:[&>button]:whitespace-normal max-[400px]:[&_svg]:hidden">

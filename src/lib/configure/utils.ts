@@ -1,6 +1,8 @@
+import { phaseSequence, repeatGroupError } from './phase-sequence'
+import { intervalRestCount } from '@/lib/timer/utils'
 import { z } from 'zod'
 
-import type { AnyTimerConfig, ComplexConfig } from '@/types/configure'
+import type { AnyTimerConfig, ComplexConfig, PhaseConfig } from '@/types/configure'
 
 import {
   isComplexConfig,
@@ -127,9 +129,17 @@ const complexPhaseSchema = z.object({
 // Complex timer schema
 const complexConfigSchema = baseTimerConfigSchema.extend({
   type: z.literal(TimerType.COMPLEX),
+  repeatGroups: z.array(z.object({
+    id: z.string().min(1),
+    phaseIds: z.array(z.string()).min(1).max(1000),
+    count: z.number().int().min(2).max(100),
+  })).max(500).optional(),
   phases: z.array(complexPhaseSchema).min(1, 'Complex timer must have at least one phase'),
   overallTimeLimit: z.number().int().min(1).optional(),
   autoAdvance: z.boolean().optional(),
+}).superRefine((config, ctx) => {
+  const error = repeatGroupError(config.phases, config.repeatGroups ?? [])
+  if (error) ctx.addIssue({ code: 'custom', message: error, path: ['repeatGroups'] })
 })
 
 // Now properly create the final union schema with complex config included
@@ -164,7 +174,7 @@ export const getConfigSummary = (config: AnyTimerConfig): string => {
       }
       return `Work/rest with ${config.ratio}:1 ratio`
     case TimerType.COMPLEX:
-      return `${config.phases.length} phase complex timer`
+      return `${phaseSequence(config).length} phase complex timer`
     default:
       return 'Unknown timer type'
   }
@@ -270,19 +280,24 @@ export const processTimerConfig = (config: Partial<AnyTimerConfig>) => {
   return { config: fullConfig, errors: validationErrors }
 }
 
+export const exactPhaseDuration = (phase: PhaseConfig) => {
+  if (isCountdownConfig(phase)) return phase.duration
+  if (isIntervalConfig(phase)) {
+    const rests = intervalRestCount(phase.intervals, phase.skipLastRest)
+    return phase.workDuration * phase.intervals + phase.restDuration * rests
+  }
+}
+
 export const estimateComplexDuration = (config: Partial<ComplexConfig>): number =>
-  (config.phases ?? []).reduce((total, { config: phase }) => {
-    if (isCountdownConfig(phase)) return total + phase.duration
-    if (isIntervalConfig(phase)) {
-      const rests = phase.skipLastRest === false ? phase.intervals : phase.intervals - 1
-      return total + phase.workDuration * phase.intervals + phase.restDuration * rests
-    }
+  phaseSequence(config).reduce((total, { config: phase }) => {
+    const duration = exactPhaseDuration(phase)
+    if (duration !== undefined) return total + duration
     if (isStopwatchConfig(phase)) return total + (phase.timeLimit || 0)
     return total
   }, 0)
 
 export const generateComplexTimerName = (config: Partial<ComplexConfig>): string => {
-  const phaseCount = config.phases?.length || 0
+  const phaseCount = phaseSequence(config).length
   return `Complex Timer (${phaseCount} phases, ${formatDuration(estimateComplexDuration(config))})`
 }
 
