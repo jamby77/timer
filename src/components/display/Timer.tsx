@@ -26,6 +26,7 @@ import { TimerCard } from './TimerCard'
 interface TimerProps {
   startsAt?: number
   autoStart?: boolean
+  statusHint?: ReactNode
   header?: ReactNode
   phaseControls?: ReactNode
   config: CountdownConfig
@@ -38,6 +39,7 @@ interface TimerProps {
 export const Timer = ({
   config: { duration, completionMessage, name = 'Timer', sound, countdownBeforeStart },
   onStateChange,
+  statusHint,
   header,
   phaseControls,
   startsAt,
@@ -156,6 +158,7 @@ export const Timer = ({
     <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
         isPreStarting={isPreStarting}
+        statusHint={statusHint}
         header={header}
         label={name}
         hideLabel={Boolean(header)}

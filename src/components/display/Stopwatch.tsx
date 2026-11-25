@@ -26,6 +26,7 @@ import { TimerCard } from './TimerCard'
 interface StopwatchProps {
   startsAt?: number
   autoStart?: boolean
+  statusHint?: ReactNode
   header?: ReactNode
   phaseControls?: ReactNode
   config: StopwatchConfig
@@ -38,6 +39,7 @@ interface StopwatchProps {
 export function Stopwatch({
   config: { timeLimit = 0, name = 'Stopwatch', sound, countdownBeforeStart },
   onStateChange,
+  statusHint,
   header,
   phaseControls,
   startsAt,
@@ -151,6 +153,7 @@ export function Stopwatch({
     <TimerContainer fullscreen={isActive || isAutoStarting}>
       <TimerCard
         isPreStarting={isPreStarting}
+        statusHint={statusHint}
         header={header}
         label={name}
         hideLabel={Boolean(header)}

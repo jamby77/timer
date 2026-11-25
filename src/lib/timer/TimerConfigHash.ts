@@ -94,6 +94,13 @@ export class TimerConfigHash {
           order: phase.order,
           config: this.normalizeConfig(phase.config),
         }))
+        if (config.repeatGroups?.length) {
+          const positions = new Map(config.phases.map((phase, i) => [phase.id, i]))
+          normalized.repeatGroups = config.repeatGroups.map(group => ({
+            phases: group.phaseIds.map(id => positions.get(id)),
+            count: group.count,
+          })).sort((a, b) => (a.phases[0] ?? 0) - (b.phases[0] ?? 0))
+        }
         if (config.overallTimeLimit) {
           normalized.overallTimeLimit = config.overallTimeLimit
         }

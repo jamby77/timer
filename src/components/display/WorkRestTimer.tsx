@@ -33,6 +33,7 @@ import { TimerControls } from './TimerControls'
 interface WorkRestTimerProps {
   startsAt?: number
   autoStart?: boolean
+  statusHint?: ReactNode
   header?: ReactNode
   phaseControls?: ReactNode
   config: WorkRestConfig
@@ -48,6 +49,7 @@ export function WorkRestTimer({
   config: { sound, ...config },
   onPhaseComplete,
   onStop,
+  statusHint,
   header,
   phaseControls,
   startsAt,
@@ -208,6 +210,7 @@ export function WorkRestTimer({
       <TimerCard
         idleStatus={isIdlePhase && state.rounds > 0 ? 'Ready for next round' : undefined}
         isPreStarting={isPreStarting}
+        statusHint={statusHint}
         header={header}
         headerControls={
           <div className="mt-3 flex items-center justify-center gap-3 [&>button]:h-11 max-[400px]:gap-2 max-[400px]:[&>button]:px-3 max-[400px]:[&_svg]:hidden">

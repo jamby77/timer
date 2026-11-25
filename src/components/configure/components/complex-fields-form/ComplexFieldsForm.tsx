@@ -1,23 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, CopyPlus, Edit, GripVertical, Plus, Trash2 } from 'lucide-react'
+import { Plus, Repeat2 } from 'lucide-react'
 
-import type { ComplexConfig, ComplexPhase } from '@/types/configure'
+import type { ComplexConfig, ComplexPhase, PhaseRepeatGroup } from '@/types/configure'
 
-import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { repeatGroupError } from '@/lib/configure/phase-sequence'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
-import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Field,
   FieldDescription,
@@ -26,20 +18,49 @@ import {
   FieldLegend,
   FieldSet,
 } from '@/components/ui/field'
-import { SwitchField } from '@/components/configure/components/shared/SwitchField'
-import { SoundField } from '@/components/configure/components/shared/SoundField'
 import { ComplexPhaseAdd } from '@/components/configure/components/complex-fields-form/components/ComplexPhaseAdd'
 import { CountdownSelector } from '@/components/configure/components/shared/CountdownSelector'
+import { SoundField } from '@/components/configure/components/shared/SoundField'
+import { SwitchField } from '@/components/configure/components/shared/SwitchField'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 import { ComplexPhaseEdit } from './components/ComplexPhaseEdit'
+import { EditablePhaseList } from './components/EditablePhaseList'
+import { RepeatGroupEditor } from './components/RepeatGroupEditor'
 
 interface ComplexFieldsProps {
   config: Partial<ComplexConfig>
   onChange: (updates: Partial<ComplexConfig>) => void
 }
 
+function uniqueId(base: string, existing: { id: string }[]) {
+  const used = new Set(existing.map((item) => item.id))
+  let id = base
+  let suffix = 2
+  while (used.has(id)) id = `${base}-${suffix++}`
+  return id
+}
+
 export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
-  const phases = config.phases || []
+  const phases = [...(config.phases ?? [])].sort((a, b) => a.order - b.order)
+  const groups = config.repeatGroups ?? []
+  const groupByPhase = new Map(
+    groups.flatMap((group) => group.phaseIds.map((id) => [id, group] as const))
+  )
+  const ungrouped = phases.find((phase) => !groupByPhase.has(phase.id))
+  const [repeatDraft, setRepeatDraft] = useState<PhaseRepeatGroup | null>(null)
+  const [phaseError, setPhaseError] = useState<string>()
+
+  const updatePhases = (nextPhases: ComplexPhase[], nextGroups = groups) => {
+    const ordered = nextPhases.map((phase, order) => ({ ...phase, order }))
+    const error = repeatGroupError(ordered, nextGroups)
+    setPhaseError(error)
+    if (!error) onChange({ phases: ordered, repeatGroups: nextGroups })
+  }
+
+  const insertPhase = (draft: Omit<ComplexPhase, 'order'>, atStart = false) => {
+    const phase = { ...draft, id: uniqueId(draft.id, phases), order: 0 }
+    updatePhases(atStart ? [phase, ...phases] : [...phases, phase])
+  }
 
   const [isAddingPhase, setIsAddingPhase] = useState(false)
   const [editPhaseId, setEditPhaseId] = useState<string | null>(null)
@@ -47,68 +68,56 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
   const editingPhase = editPhaseId ? phases.find((p) => p.id === editPhaseId) : undefined
 
   const removePhase = (phaseId: string) => {
-    const updatedPhases = phases
-      .filter((phase) => phase.id !== phaseId)
-      .map((phase, index) => ({ ...phase, order: index }))
-    onChange({ phases: updatedPhases })
+    const nextGroups = groups
+      .map((group) => ({
+        ...group,
+        phaseIds: group.phaseIds.filter((id) => id !== phaseId),
+      }))
+      .filter((group) => group.phaseIds.length > 0)
+    updatePhases(
+      phases.filter((phase) => phase.id !== phaseId),
+      nextGroups
+    )
   }
-  const duplicatePhase = (phaseId: string) => {
-    const phaseToDuplicate = phases.find((phase) => phase.id === phaseId)
-    if (!phaseToDuplicate) return
-    const config = { ...phaseToDuplicate.config }
-    config.name = `Copy of ${config.name}`
 
-    let newId = `phase-${TimerConfigHash.generateTimerId(config)}`
-    if (phases.find((p) => p.id === newId)) {
-      newId += Date.now()
+  const duplicatePhase = (phase: ComplexPhase) => {
+    const copiedConfig = { ...phase.config, name: `Copy of ${phase.config.name}` }
+    insertPhase({
+      ...phase,
+      config: copiedConfig,
+      name: `Copy of ${phase.name}`,
+      id: `phase-${TimerConfigHash.generateTimerId(copiedConfig)}`,
+    })
+  }
+
+  const movePhase = (index: number, step: -1 | 1) => {
+    const neighbor = phases[index + step]
+    if (!neighbor) return
+    const current = phases[index]
+    const group = groupByPhase.get(current.id)
+    const neighborGroup = groupByPhase.get(neighbor.id)
+    const next = [...phases]
+    if (group === neighborGroup) {
+      next[index] = neighbor
+      next[index + step] = current
+      const nextGroups = groups.map((existing) =>
+        existing === group
+          ? {
+              ...existing,
+              phaseIds: next
+                .filter((phase) => groupByPhase.get(phase.id) === group)
+                .map((phase) => phase.id),
+            }
+          : existing
+      )
+      updatePhases(next, nextGroups)
+    } else {
+      const size = group?.phaseIds.length ?? 1
+      const start = step === 1 ? index - size + 1 : index
+      const moved = next.splice(start, size)
+      next.splice(start + step * (neighborGroup?.phaseIds.length ?? 1), 0, ...moved)
+      updatePhases(next)
     }
-    const newName = `Copy of ${phaseToDuplicate.name}`
-    const newPhase: ComplexPhase = {
-      ...phaseToDuplicate,
-      config,
-      name: newName,
-      id: newId,
-      order: phases.length,
-    }
-    const updatedPhases = [...phases, newPhase]
-    onChange({ phases: updatedPhases })
-  }
-
-  const movePhase = (phaseId: string, direction: 'up' | 'down') => {
-    const currentIndex = phases.findIndex((phase) => phase.id === phaseId)
-    if (currentIndex === -1) return
-
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    if (newIndex < 0 || newIndex >= phases.length) return
-
-    const updatedPhases = [...phases]
-    const [movedPhase] = updatedPhases.splice(currentIndex, 1)
-    updatedPhases.splice(newIndex, 0, movedPhase)
-
-    const reorderedPhases = updatedPhases.map((phase, index) => ({
-      ...phase,
-      order: index,
-    }))
-
-    onChange({ phases: reorderedPhases })
-  }
-
-  const insertPhaseAtStart = (draft: Omit<ComplexPhase, 'order'>) => {
-    const newPhase: ComplexPhase = { ...draft, order: 0 }
-    const updatedPhases = [newPhase, ...phases].map((phase, index) => ({
-      ...phase,
-      order: index,
-    }))
-    onChange({ phases: updatedPhases })
-  }
-
-  const insertPhaseAtEnd = (draft: Omit<ComplexPhase, 'order'>) => {
-    const newPhase: ComplexPhase = { ...draft, order: phases.length }
-    const updatedPhases = [...phases, newPhase].map((phase, index) => ({
-      ...phase,
-      order: index,
-    }))
-    onChange({ phases: updatedPhases })
   }
 
   const savePhase = (phaseId: string, draft: Omit<ComplexPhase, 'order'>) => {
@@ -130,8 +139,8 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
       <ComplexPhaseAdd
         onCancel={() => setIsAddingPhase(false)}
         phasesCount={phases.length}
-        onAddAtStart={insertPhaseAtStart}
-        onAddAtEnd={insertPhaseAtEnd}
+        onAddAtStart={(draft) => insertPhase(draft, true)}
+        onAddAtEnd={(draft) => insertPhase(draft)}
       />
     )
   }
@@ -148,19 +157,51 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
     )
   }
 
+  if (repeatDraft) {
+    return (
+      <RepeatGroupEditor
+        phases={phases}
+        groups={groups}
+        group={repeatDraft}
+        onCancel={() => setRepeatDraft(null)}
+        onApply={(repeatGroups) => {
+          onChange({ repeatGroups })
+          setPhaseError(undefined)
+          setRepeatDraft(null)
+        }}
+      />
+    )
+  }
+
   return (
     <FieldGroup className="space-y-4">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3>Timer Phases</h3>
+        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+          <h3 className="mr-auto text-sm sm:text-base">Timer Phases</h3>
+          {ungrouped && (
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 max-sm:px-2"
+              onClick={() => {
+                setRepeatDraft({
+                  id: uniqueId(`repeat-${ungrouped.id}`, groups),
+                  phaseIds: [ungrouped.id],
+                  count: 2,
+                })
+              }}
+            >
+              <Repeat2 className="max-sm:hidden" /> Repeat
+            </Button>
+          )}
           <Button
             onClick={() => {
               setIsAddingPhase(true)
             }}
             variant="outline"
-            className="max-sm:min-h-11"
+            className="max-sm:min-h-11 max-sm:px-2"
           >
-            <Plus size={16} className="mr-2" />
+            <Plus size={16} className="max-sm:hidden" />
             Add Phase
           </Button>
         </div>
@@ -173,66 +214,24 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
           </div>
         )}
 
-        {phases.map((phase, index) => (
-          <Card key={phase.id} className="relative max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-between">
-            <CardHeader className="max-sm:contents">
-              <div className="flex items-center gap-2 overflow-hidden max-sm:w-full max-sm:p-2">
-                <GripVertical className="text-muted-foreground size-5 max-sm:hidden" />
-                <CardTitle className="text-sm max-sm:wrap-anywhere max-sm:leading-snug sm:truncate">
-                  {phase.name}{' '}
-                  <span className="text-muted-foreground hidden text-xs sm:inline">
-                    ({TIMER_TYPE_LABELS[phase.type]})
-                  </span>
-                </CardTitle>
-              </div>
-              <CardAction className="max-sm:flex max-sm:gap-1 max-sm:[&>button]:size-11">
-                <Button
-                  onClick={() => movePhase(phase.id, 'up')}
-                  size="sm"
-                  variant="ghost"
-                  disabled={index === 0}
-                  className={cn('disabled:cursor-not-allowed disabled:opacity-50')}
-                  aria-label="Move phase up"
-                >
-                  <ChevronUp />
-                </Button>
-                <Button
-                  onClick={() => movePhase(phase.id, 'down')}
-                  size="sm"
-                  variant="ghost"
-                  disabled={index === phases.length - 1}
-                  aria-label="Move phase down"
-                >
-                  <ChevronDown />
-                </Button>
-              </CardAction>
-            </CardHeader>
-            <CardFooter className="flex items-center justify-start gap-1 max-sm:px-0 max-sm:[&>button]:size-11">
-              <Button
-                onClick={() => setEditPhaseId(phase.id)}
-                variant="ghost"
-                aria-label="Edit phase"
-              >
-                <Edit />
-              </Button>
-              <Button
-                onClick={() => duplicatePhase(phase.id)}
-                variant="ghost"
-                aria-label="Duplicate phase"
-              >
-                <CopyPlus />
-              </Button>
-              <Button
-                onClick={() => removePhase(phase.id)}
-                variant="ghost"
-                className="text-destructive hover:text-destructive"
-                aria-label="Remove phase"
-              >
-                <Trash2 />
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+        {phaseError && (
+          <p role="alert" className="text-destructive text-sm">
+            {phaseError}
+          </p>
+        )}
+        <EditablePhaseList
+          phases={phases}
+          groupByPhase={groupByPhase}
+          onMove={movePhase}
+          onEdit={setEditPhaseId}
+          onDuplicate={duplicatePhase}
+          onRemove={removePhase}
+          onEditGroup={setRepeatDraft}
+          onUngroup={(group) => {
+            setPhaseError(undefined)
+            onChange({ repeatGroups: groups.filter((existing) => existing.id !== group.id) })
+          }}
+        />
 
         {phases.length > 0 && (
           <Card className="border-dashed">

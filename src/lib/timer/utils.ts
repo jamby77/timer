@@ -188,3 +188,12 @@ export function timerPickerTimeToSeconds(time: TimerPickerTime): number {
   return time.hours * 3600 + time.minutes * 60 + time.seconds
 }
 
+
+export const clampCountdownSeconds = (seconds?: number): number => {
+  if (seconds === undefined) return 0
+  if (!Number.isFinite(seconds)) return 0
+  return Math.max(0, Math.min(60, Math.floor(seconds)))
+}
+
+export const intervalRestCount = (rounds: number, skipLastRest = true) =>
+  skipLastRest ? rounds - 1 : rounds

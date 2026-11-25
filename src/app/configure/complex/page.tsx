@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import type { ComplexConfig } from '@/types/configure'
 
 import { isComplexConfig } from '@/types/configure'
+import { phaseSequence } from '@/lib/configure/phase-sequence'
 import { saveTimerPreset } from '@/lib/configure/save-preset'
 import { storage } from '@/lib/configure/storage'
 import {
@@ -34,6 +35,8 @@ import {
 import { Label } from '@/components/ui/label'
 import { ClientOnly } from '@/components/ClientOnly'
 import { ComplexFieldsForm } from '@/components/configure/components/complex-fields-form/ComplexFieldsForm'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { TimelinePreview } from '@/components/configure/components/complex-fields-form/components/TimelinePreview'
 import { PhaseSummary } from '@/components/configure/components/complex-fields-form/components/PhaseSummary'
 import { FormErrors } from '@/components/configure/components/shared/FormErrors'
 import { PageContainer } from '@/components/PageContainer'
@@ -53,6 +56,27 @@ function ComplexPresetLoader() {
   return <ConfigureComplexTimer key={presetId ?? 'new'} presetId={presetId} />
 }
 
+function preparePresetForEditing(config: ComplexConfig): ComplexConfig {
+  if (config.repeatGroups?.length) return config
+  const reserved = new Set(config.phases.map((phase) => phase.id))
+  if (reserved.size === config.phases.length) return config
+  const seen = new Set<string>()
+  let suffix = 1
+  const phases = config.phases.map((phase) => {
+    if (!seen.has(phase.id)) {
+      seen.add(phase.id)
+      return phase
+    }
+    let id: string
+    do {
+      id = `${phase.id}-${suffix++}`
+    } while (reserved.has(id))
+    reserved.add(id)
+    return { ...phase, id }
+  })
+  return { ...config, phases }
+}
+
 function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
   const router = useRouter()
   const [initial] = useState(() => {
@@ -67,7 +91,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
     if (!preset || !isComplexConfig(preset.config) || validateTimerConfig(preset.config).length) {
       return { config: empty, errors: ['Preset not found or invalid.'] }
     }
-    return { config: preset.config, errors: [] as string[] }
+    return { config: preparePresetForEditing(preset.config), errors: [] as string[] }
   })
   const [config, setConfig] = useState<Partial<ComplexConfig>>(initial.config)
   const [errors, setErrors] = useState<string[]>(initial.errors)
@@ -76,7 +100,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
     const newConfig = { ...config, ...updates }
     // Auto-generate a name if it's currently a generated name or empty
     const shouldUpdateName = !config.name || config.name === generateComplexTimerName(config)
-    if (shouldUpdateName && (updates.phases || updates.type)) {
+    if (shouldUpdateName && (updates.phases || updates.type || 'repeatGroups' in updates)) {
       newConfig.name = generateComplexTimerName(newConfig)
     }
     setConfig(newConfig)
@@ -130,6 +154,8 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
     return estimateComplexDuration(config)
   }, [config])
 
+  const sequence = useMemo(() => phaseSequence(config), [config])
+
   const hasErrors = !!errors.length
   return (
     <PageContainer>
@@ -180,7 +206,14 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
               <CardTitle>Phase Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <PhaseSummary phases={config.phases || []} />
+              <Tabs defaultValue="summary">
+                <TabsList aria-label="Phase views" className="h-auto w-full">
+                  <TabsTrigger value="summary" className="min-h-11 flex-1">Summary</TabsTrigger>
+                  <TabsTrigger value="preview" className="min-h-11 flex-1">Preview</TabsTrigger>
+                </TabsList>
+                <TabsContent value="summary"><PhaseSummary phases={sequence} /></TabsContent>
+                <TabsContent value="preview"><TimelinePreview config={config} /></TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         )}
@@ -204,7 +237,7 @@ function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
                     </InputGroupText>
                   </InputGroupAddon>
                   <InputGroupInput
-                    value={`${config.phases?.length || 0} phases`}
+                    value={`${sequence.length} ${sequence.length === 1 ? 'phase' : 'phases'}`}
                     readOnly
                     className="bg-muted"
                   />

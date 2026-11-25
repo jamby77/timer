@@ -6,6 +6,7 @@ import { z } from 'zod'
 import type { ReactNode } from 'react'
 import type { AnyTimerConfig, IntervalConfig } from '@/types/configure'
 
+import { phaseSequence } from '@/lib/configure/phase-sequence'
 import { TimerPhase, TimerState } from '@/lib/enums'
 import { SoundEngine } from '@/lib/sound/SoundEngine'
 import { formatTime } from '@/lib/timer/utils'
@@ -109,7 +110,7 @@ function read(key: string, config: AnyTimerConfig, signature: string) {
     const value = progress.parse(record.progress)
     if (
       hasRun(value) &&
-      (config.type !== 'COMPLEX' || (value.phaseIndex ?? 0) < config.phases.length)
+      (config.type !== 'COMPLEX' || (value.phaseIndex ?? 0) < phaseSequence(config).length)
     )
       return value
   } catch {
@@ -168,7 +169,7 @@ export function TimerRecovery({
   if (!session && saved) {
     const phase =
       config.type === 'COMPLEX'
-        ? [...config.phases].sort((a, b) => a.order - b.order)[saved.phaseIndex ?? 0]
+        ? phaseSequence(config)[saved.phaseIndex ?? 0]
         : undefined
     const activeConfig = phase?.config ?? config
     const interval = saved.interval && activeConfig.type === 'INTERVAL'
@@ -187,7 +188,8 @@ export function TimerRecovery({
       : saved.workrest
         ? saved.workrest.preview?.round ?? saved.workrest.rounds + 1
         : undefined
-    const detail = [phase?.name, round && `Round ${round}`, formatTime(time).split('.')[0]]
+    const rep = phase?.group && `Rep ${phase.pass}/${phase.group.count}`
+    const detail = [phase?.name, rep, round && `Round ${round}`, formatTime(time).split('.')[0]]
       .filter(Boolean)
       .join(' · ')
     const discard = () => {

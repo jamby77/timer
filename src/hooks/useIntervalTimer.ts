@@ -1,3 +1,4 @@
+import { intervalRestCount } from '@/lib/timer/utils'
 import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTimerContext } from '@/contexts/TimerContext'
@@ -18,7 +19,7 @@ function generateSteps(
   onWorkStepCompleteRef: React.RefObject<((elapsedTime: number) => void) | undefined>
 ) {
   const steps: TimerStep[] = []
-  const restIntervals = skipLastRest ? intervals - 1 : intervals
+  const restIntervals = intervalRestCount(intervals, skipLastRest)
 
   for (let i = 0; i < intervals; i++) {
     // Work interval with lap tracking

@@ -84,7 +84,14 @@ export interface ComplexPhase {
   order: number
 }
 
+export interface PhaseRepeatGroup {
+  id: string
+  phaseIds: string[]
+  count: number
+}
+
 export interface ComplexConfig extends TimerConfig {
+  repeatGroups?: PhaseRepeatGroup[]
   type: TimerType.COMPLEX
   phases: ComplexPhase[]
   overallTimeLimit?: number // seconds (optional)
