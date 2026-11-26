@@ -324,3 +324,22 @@
     display: none;
   }
 }
+
+@media (orientation: portrait) and (min-height: 34rem) {
+  .stopwatch-lap {
+    position: absolute;
+    top: calc(100% + 4px);
+    inset-inline: 0;
+    margin-top: 0;
+  }
+}
+
+@media (orientation: landscape) {
+  [data-slot='card-header']:has(.stopwatch-lap) {
+    padding-bottom: 0;
+  }
+
+  [data-slot='card-header']:has(.stopwatch-lap) + [data-slot='card-content'] {
+    --clock-height: 96cqh;
+  }
+}

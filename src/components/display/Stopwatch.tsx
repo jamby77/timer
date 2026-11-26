@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { Flag } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { ReactNode } from 'react'
 import type { StopwatchConfig } from '@/types/configure'
@@ -17,6 +18,8 @@ import {
   useWakeLock,
 } from '@/hooks'
 
+import { useInitialProgress, useSaveProgress } from '@/contexts/TimerRecovery'
+import { BaseButton } from '@/components/ui/timer-buttons/BaseButton'
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
@@ -46,7 +49,10 @@ export function Stopwatch({
   autoStart = startsAt !== undefined,
   onStop,
 }: StopwatchProps) {
-  const { laps, addLap, clearHistory, bestLap, lastLap } = useLapHistory()
+  const { laps, addSplit, clearHistory, bestLap, lastLap } = useLapHistory()
+  const savedStart = useInitialProgress('splitStart')
+  const [runStart, setRunStart] = useState(savedStart ?? laps.length)
+  useSaveProgress('splitStart', runStart)
   const soundManager = useSoundManager(sound)
 
   const handleStateChange = useCallback(
@@ -58,9 +64,9 @@ export function Stopwatch({
 
   const handleStop = useCallback(
     (elapsedTime: number) => {
-      addLap(elapsedTime)
+      addSplit(elapsedTime, runStart)
     },
-    [addLap]
+    [addSplit, runStart]
   )
 
   const { time, state, start, pause, reset, restart, getElapsedTime } = useStopwatch({
@@ -102,18 +108,19 @@ export function Stopwatch({
     // Save the current elapsed time as a lap before resetting
     const elapsed = getElapsedTime()
     if (elapsed > 0) {
-      addLap(elapsed)
+      addSplit(elapsed, runStart)
     }
     reset()
-  }, [isPreStarting, preStart, getElapsedTime, reset, addLap, onStop])
+  }, [isPreStarting, preStart, getElapsedTime, reset, addSplit, runStart, onStop])
 
   const handleRestart = useCallback(() => {
+    setRunStart(laps.length)
     if (preStart.isEnabled) {
       preStart.start()
       return
     }
     restart()
-  }, [preStart, restart])
+  }, [laps.length, preStart, restart])
 
   const handleStart = useCallback(async (startsAt?: number) => {
     await soundManager.init()
@@ -124,6 +131,7 @@ export function Stopwatch({
     }
 
     if (state === TimerState.Idle || state === TimerState.Completed) {
+      setRunStart(laps.length)
       if (preStart.isEnabled) {
         preStart.start(startsAt)
         return
@@ -131,7 +139,7 @@ export function Stopwatch({
     }
 
     start(startsAt)
-  }, [soundManager, start, preStart, isPreStarting, state])
+  }, [soundManager, start, preStart, isPreStarting, state, laps.length])
 
   const handlePause = useCallback(() => {
     if (isPreStarting) {
@@ -154,6 +162,22 @@ export function Stopwatch({
       <TimerCard
         isPreStarting={isPreStarting}
         statusHint={statusHint}
+        runningStatus={laps.length > runStart && lastLap?.split
+          ? `Lap ${lastLap.split.number} · ${formatTime(lastLap.lapTime)}`
+          : undefined}
+        headerControls={!isPreStarting && (isRunning || state === TimerState.Paused) && (
+          <div className="stopwatch-lap mt-3 flex justify-center">
+            <BaseButton
+              label="Lap"
+              disabled={!isRunning}
+              onClick={() => addSplit(getElapsedTime(), runStart)}
+              className="bg-tm-skip hover:bg-tm-skip/80 focus:ring-tm-skip h-11 w-auto min-w-[5.375rem] px-4 max-[400px]:min-w-[3.3125rem] max-[400px]:px-3"
+            >
+              <Flag aria-hidden="true" className="size-5 max-[400px]:hidden" />
+              Lap
+            </BaseButton>
+          </div>
+        )}
         header={header}
         label={name}
         hideLabel={Boolean(header)}
@@ -183,7 +207,7 @@ export function Stopwatch({
         />
       </TimerCard>
       {!isActive && (
-        <LapHistory laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
+        <LapHistory showSplits laps={laps} onClearHistory={clearHistory} bestLap={bestLap} lastLap={lastLap} />
       )}
     </TimerContainer>
   )

@@ -29,6 +29,19 @@ export const useLapHistory = () => {
     ])
   }, [])
 
+  const addSplit = useCallback((total: number, runStart: number) => {
+    const timestamp = Date.now()
+    const id = `lap-${timestamp}-${Math.random()}`
+    setLaps(previous => {
+      const count = Math.max(0, previous.length - runStart)
+      const baseline = count ? previous.at(-1)?.split?.total ?? 0 : 0
+      if (total <= baseline) return previous
+      return [...previous, {
+        id, timestamp, lapTime: total - baseline, split: { number: count + 1, total },
+      }]
+    })
+  }, [])
+
   const clearHistory = useCallback(() => {
     setLaps([])
   }, [])
@@ -36,6 +49,7 @@ export const useLapHistory = () => {
   return {
     laps,
     addLap,
+    addSplit,
     clearHistory,
     lastLap,
     bestLap,
