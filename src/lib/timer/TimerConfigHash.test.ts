@@ -30,7 +30,7 @@ describe.each(configs)('$type identity', config => {
 it.each([
   { enabled: false }, { volume: 0.9 }, { countdownBeeps: 2 }, { startBeep: false },
   { finishBeep: false }, { intervalStartBeep: false }, { intervalEndBeep: false },
-  { tick: true }, { tickEverySeconds: 5 },
+  { tenSecondWarning: true }, { tick: true }, { tickEverySeconds: 5 },
 ])('distinguishes sound options %j', update => {
   const config = { ...configs[0], sound: { enabled: true, volume: 0.5 } }
   expect(TimerConfigHash.configsEqual(config, { ...config, sound: { ...config.sound, ...update } })).toBe(false)

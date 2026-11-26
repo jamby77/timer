@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { WorkRestConfig } from '@/types/configure'
 
+import { workTimeLimitMs } from '@/hooks/useWorkRestTimer'
 import { formatDuration } from '@/lib/configure/utils'
 import { TimerPhase, TimerState, WorkRestMode } from '@/lib/enums'
 import { getDisplayData } from '@/lib/timer/displayUtils'
@@ -81,13 +82,14 @@ export function WorkRestTimer({
       soundManager.syncPreStartCountdown(preStart.timeLeftMs)
       return
     }
-    soundManager.syncWorkRest(state.state, state.phase, state.currentTime, state.rounds)
+    soundManager.syncWorkRest(state.state, state.phase, state.currentTime, state.rounds, config.maxWorkTime ? workTimeLimitMs(config.maxWorkTime) : undefined)
   }, [
     soundManager,
     state.state,
     state.phase,
     state.currentTime,
     state.rounds,
+    config.maxWorkTime,
     preStart.isActive,
     preStart.timeLeftMs,
   ])

@@ -260,7 +260,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                   </div>
                 </Field>
 
-                <SoundField sound={config.sound} onChange={(sound) => onChange({ sound })} />
+                <SoundField config={config} onChange={(sound) => onChange({ sound })} />
 
                 <FieldSet className="min-w-0 gap-2">
                   <FieldLegend variant="label" className="mb-2">

@@ -16,6 +16,7 @@ import { SoundEngine } from './SoundEngine'
 const SoundManagerConfigSchema = z.object({
   enabled: z.boolean().catch(false),
   volume: z.number().min(0).max(1).catch(0.7),
+  tenSecondWarning: z.boolean().catch(false),
   countdownBeeps: z.int().min(1).catch(3),
   startBeep: z.boolean().catch(true),
   finishBeep: z.boolean().catch(true),
@@ -33,6 +34,8 @@ const resolveSoundConfig = (config?: SoundConfig): SoundManagerConfig => {
 
 export class SoundManager {
   private config: SoundManagerConfig
+
+  private previousWarningTime: number | null = null
 
   private lastCountdownSecond: number | null = null
 
@@ -58,6 +61,7 @@ export class SoundManager {
       return
     }
 
+    this.clearWarningObservation()
     this.onCountdownTick(timeLeftMs)
   }
 
@@ -68,6 +72,7 @@ export class SoundManager {
   }
 
   public reset(): void {
+    this.clearWarningObservation()
     this.resetTickState()
     this.resetPlaybackState()
     this.previousTimerState = null
@@ -78,6 +83,24 @@ export class SoundManager {
     this.previousStopwatchElapsedMs = null
     this.previousIntervalStepIndex = null
     this.previousWorkRestRounds = null
+  }
+
+  public clearWarningObservation(): void {
+    this.previousWarningTime = null
+  }
+
+  private syncWarning(state: TimerState, remaining: number | undefined, samePeriod = true): void {
+    const previous = this.previousWarningTime
+    if (!this.config.enabled || !this.config.tenSecondWarning || this.config.volume === 0 ||
+        state !== TimerState.Running || remaining === undefined ||
+        (typeof document !== 'undefined' && document.hidden)) {
+      this.clearWarningObservation()
+      return
+    }
+    this.previousWarningTime = remaining
+    if (samePeriod && previous !== null && previous > 10000 && remaining <= 10000 && remaining > 9000) {
+      SoundEngine.getInstance().playSampleCue('warning', 1)
+    }
   }
 
   private resetTickState(): void {
@@ -172,10 +195,11 @@ export class SoundManager {
     }
 
     this.previousTimerState = timerState
+    this.syncWarning(timerState, timeLeftMs)
     this.previousCountdownTimeLeftMs = timeLeftMs
   }
 
-  public syncStopwatch(timerState: TimerState, elapsedMs: number): void {
+  public syncStopwatch(timerState: TimerState, elapsedMs: number, limitMs?: number): void {
     const prevState = this.previousTimerState
 
     if (
@@ -189,6 +213,7 @@ export class SoundManager {
     this.handleTimerStateTransition(timerState, prevState)
 
     this.previousTimerState = timerState
+    this.syncWarning(timerState, limitMs ? limitMs - elapsedMs : undefined)
     this.previousStopwatchElapsedMs = elapsedMs
   }
 
@@ -244,6 +269,7 @@ export class SoundManager {
 
     this.previousTimerState = timerState
     this.previousIsWork = isWork
+    this.syncWarning(timerState, timeLeftMs, stepIndex === this.previousIntervalStepIndex)
     this.previousIntervalStepIndex = stepIndex
   }
 
@@ -251,7 +277,8 @@ export class SoundManager {
     timerState: TimerState,
     phase: TimerPhase,
     currentTimeMs: number,
-    rounds: number
+    rounds: number,
+    workLimitMs?: number
   ): void {
     const prevState = this.previousTimerState
     const prevPhase = this.previousPhase
@@ -286,6 +313,9 @@ export class SoundManager {
     }
 
     this.previousTimerState = timerState
+    const remaining = phase === TimerPhase.Rest ? currentTimeMs
+      : phase === TimerPhase.Work && workLimitMs ? workLimitMs - currentTimeMs : undefined
+    this.syncWarning(timerState, remaining, phase === prevPhase && rounds === this.previousWorkRestRounds)
     this.previousPhase = phase
     this.previousWorkRestRounds = rounds
   }

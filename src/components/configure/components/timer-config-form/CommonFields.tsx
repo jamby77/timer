@@ -94,7 +94,7 @@ export const CommonFields = ({ config, onChange, type }: CommonFieldsProps) => {
           </div>
         </Field>
 
-        <SoundField sound={config.sound} onChange={(sound) => onChange({ sound })} />
+        <SoundField config={config} onChange={(sound) => onChange({ sound })} />
 
         {/* Completion Message */}
         <Field>

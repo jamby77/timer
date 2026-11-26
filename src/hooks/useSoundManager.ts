@@ -9,7 +9,10 @@ export const useSoundManager = (config?: SoundConfig) => {
 
   useEffect(() => {
     manager.setConfig(config)
+    const clearWarning = () => manager.clearWarningObservation()
+    document.addEventListener('visibilitychange', clearWarning)
     return () => {
+      document.removeEventListener('visibilitychange', clearWarning)
       manager.reset()
     }
   }, [config, manager])
