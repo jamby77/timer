@@ -13,6 +13,10 @@ import { Stopwatch } from '@/lib/timer/Stopwatch'
 import { Timer } from '@/lib/timer/Timer'
 
 const WORK_TIME_LIMIT_MS = (99 * 60 + 99) * 1000 // 99:99 = // 6,039.000
+export function workTimeLimitMs(seconds?: number) {
+  return Math.min(seconds ? seconds * 1000 : WORK_TIME_LIMIT_MS, WORK_TIME_LIMIT_MS)
+}
+
 const DEFAULT_RATIO = 100 // 1.0 stored as integer
 const MIN_RATIO = 1 // 0.01 stored as integer
 const MAX_RATIO = 10000 // 100.0 stored as integer
@@ -105,7 +109,7 @@ export const useWorkRestTimer = ({
     [cleanupTimer]
   )
 
-  const workLimit = Math.min((state.maxWorkTime || WORK_TIME_LIMIT_MS / 1000) * 1000, WORK_TIME_LIMIT_MS)
+  const workLimit = workTimeLimitMs(state.maxWorkTime)
   const getRestDuration = useCallback((workDuration: number) => {
     const duration = state.restMode === WorkRestMode.FIXED && state.fixedRestDuration
       ? state.fixedRestDuration * 1000

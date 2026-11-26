@@ -50,6 +50,9 @@ The following items can ship independently.
 - [x] Approve the stopwatch splits design.
 - [x] Implement stopwatch splits.
 - [x] Verify split timing, history and recovery.
+- [x] Prepare the [10s warning sound and setup preview](../specs/2026-11-26-ten-second-warning.md).
+- [x] Approve the 10s warning setup design.
+- [x] Implement and verify the 10s warning.
 
 | Item | First usable version | Acceptance check |
 |---|---|---|

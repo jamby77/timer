@@ -43,6 +43,7 @@ export class TimerConfigHash {
       normalized.sound = {
         enabled: config.sound.enabled,
         volume: config.sound.volume,
+        tenSecondWarning: config.sound.tenSecondWarning || undefined,
         countdownBeeps: config.sound.countdownBeeps,
         startBeep: config.sound.startBeep,
         finishBeep: config.sound.finishBeep,

@@ -193,3 +193,56 @@ describe('SoundManager cue scheduling', () => {
     expect(engine.playSampleCue).toHaveBeenLastCalledWith('finish', 0.95)
   })
 })
+
+describe('10s warning', () => {
+  const running = TimerState.Running
+  const warnings = () => vi.mocked(engine.playSampleCue).mock.calls.filter(([cue]) => cue === 'warning')
+  const settings = { enabled: true, volume: 0.7, tenSecondWarning: true }
+
+  it('warns on crossing, rearms for restart and keeps the horn at completion', () => {
+    const manager = new SoundManager(settings)
+    manager.syncPreStartCountdown(10000)
+    manager.syncCountdown(running, 12000)
+    manager.syncCountdown(running, 9980)
+    manager.syncCountdown(TimerState.Paused, 9980)
+    manager.syncCountdown(running, 9980)
+    expect(warnings()).toHaveLength(1)
+    manager.syncCountdown(running, 12000)
+    manager.syncCountdown(running, 10000)
+    manager.syncCountdown(TimerState.Completed, 0)
+    expect(warnings()).toHaveLength(2)
+    expect(engine.playSampleCue).toHaveBeenLastCalledWith('finish', 0.95)
+  })
+
+  it('ignores short, skipped and overdue periods and interrupted observations', () => {
+    const manager = new SoundManager(settings)
+    manager.syncInterval(running, 30000, true, 0)
+    manager.syncInterval(running, 10000, false, 1)
+    manager.syncInterval(running, 30000, true, 2)
+    manager.syncInterval(running, 6000, true, 2)
+    manager.syncInterval(running, 15000, false, 3)
+    manager.clearWarningObservation()
+    manager.syncInterval(running, 9900, false, 3)
+    expect(warnings()).toHaveLength(0)
+  })
+
+  it('uses real remaining time for capped work, ratio or fixed rest, and capped Stopwatch', () => {
+    const manager = new SoundManager(settings)
+    manager.syncStopwatch(running, 0)
+    manager.syncStopwatch(running, 10000)
+    manager.syncStopwatch(running, 11000, 25000)
+    manager.syncStopwatch(running, 15000, 25000)
+    manager.syncWorkRest(running, TimerPhase.Work, 0, 0, 20000)
+    manager.syncWorkRest(running, TimerPhase.Work, 10000, 0, 20000)
+    manager.syncWorkRest(running, TimerPhase.Rest, 15000, 0)
+    manager.syncWorkRest(running, TimerPhase.Rest, 10000, 0)
+    expect(warnings()).toHaveLength(3)
+  })
+
+  it.each([{}, { enabled: false }, { volume: 0 }])('respects opt-in and mute', override => {
+    const manager = new SoundManager(Object.keys(override).length ? { ...settings, ...override } : { enabled: true, volume: 1 })
+    manager.syncCountdown(running, 11000)
+    manager.syncCountdown(running, 10000)
+    expect(warnings()).toHaveLength(0)
+  })
+})

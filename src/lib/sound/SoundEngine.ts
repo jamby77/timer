@@ -1,7 +1,7 @@
 import cueSamples from './cue-samples.json'
 import { AudioContextState, SoundFrequencyHz, SoundWaveform } from './enums'
 
-type SampleCue = 'countdown' | 'start' | 'finish'
+type SampleCue = 'countdown' | 'start' | 'finish' | 'warning'
 
 export type PlayToneOptions = {
   frequencyHz: number

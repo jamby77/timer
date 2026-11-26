@@ -89,8 +89,8 @@ export function Stopwatch({
       soundManager.syncPreStartCountdown(preStart.timeLeftMs)
       return
     }
-    soundManager.syncStopwatch(state, time)
-  }, [soundManager, state, time, preStart.isActive, preStart.timeLeftMs])
+    soundManager.syncStopwatch(state, time, timeLimit * 1000)
+  }, [soundManager, state, time, timeLimit, preStart.isActive, preStart.timeLeftMs])
 
   const isRunning = state === TimerState.Running
   const isPreStarting = preStart.isActive

@@ -6,6 +6,7 @@ export { TimerType, WorkRestMode }
 export interface SoundConfig {
   enabled: boolean
   volume: number
+  tenSecondWarning?: boolean
   countdownBeeps?: number
   startBeep?: boolean
   finishBeep?: boolean
