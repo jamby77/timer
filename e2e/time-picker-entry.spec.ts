@@ -19,7 +19,7 @@ for (const [field, duration] of [
       return JSON.parse(localStorage.getItem(key)!).config
     })
     expect(config.duration).toBe(duration)
-    await page.goto('/configure')
+    await page.goto('/configure?tab=presets')
     await page.reload()
     await page.getByRole('heading', { name: `Five ${field}`, exact: true }).click()
     for (const name of ['hours', 'minutes', 'seconds']) {

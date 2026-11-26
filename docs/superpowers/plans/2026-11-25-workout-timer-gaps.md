@@ -70,6 +70,9 @@ The following items can ship independently.
 - [x] Approve the compact recent timer cards.
 - [x] Implement and verify two visible cards in portrait, swipe navigation, Start and Remove.
 
+- [x] Preview the [New and Presets setup tabs](../specs/2026-11-26-setup-tabs.md).
+- [x] Approve and implement the setup tabs. Verify touch swipes and carousel position on both tabs at 320px.
+
 - [ ] **Share and import.** Export a versioned timer definition, including Complex phases, repeat counts and cue settings. The existing local ID alone cannot recreate it on another phone. Validate the payload, bound its size, show a preview, then allow Start or Save. Verify in a fresh browser profile, including malformed input, older versions and importing a timer with an existing name. Offer a file when a definition is too large for a practical link.
 
 ## Later candidates and boundaries

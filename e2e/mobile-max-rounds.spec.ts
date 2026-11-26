@@ -26,6 +26,7 @@ test('Max rounds is easy to tap and retains the selection across rest modes', as
   await page.getByRole('button', { name: 'Save as Preset' }).tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await page.getByRole('heading', { name: 'Eight rounds', exact: true }).tap()
   await expect(rounds).toHaveValue('8')
 })

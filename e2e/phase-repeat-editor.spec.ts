@@ -34,7 +34,7 @@ test('select, edit, save, reopen and ungroup a phase range by touch', async ({ p
   await page.getByLabel('Timer Name*', { exact: true }).fill('Repeated circuit')
   await button('Save as Preset').tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await page.reload()
   await page.getByRole('heading', { name: 'Repeated circuit', exact: true }).tap()
   await expect(page.getByLabel('Estimated Duration')).toHaveValue('9m')

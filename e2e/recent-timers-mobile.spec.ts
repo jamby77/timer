@@ -33,19 +33,37 @@ test('recent timers can be browsed, removed and started by touch on a narrow pho
   expect(second.x).toBeGreaterThan(first.x + first.width)
   expect(second.x + second.width).toBeLessThanOrEqual(320)
   await expect(remove).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-  await expect(next).toBeEnabled()
-  for (const control of [previous, next, start, remove]) {
+  await expect(next).toBeHidden()
+  await expect(previous).toBeHidden()
+  const tabs = page.getByRole('tablist', { name: 'Timer setup' })
+  expect(first.y + first.height).toBeLessThan((await tabs.boundingBox())!.y)
+  for (const control of [start, remove]) {
     const box = (await control.boundingBox())!
     expect(box.width).toBeGreaterThanOrEqual(44)
     expect(box.height).toBeGreaterThanOrEqual(44)
     expect(box.x).toBeGreaterThanOrEqual(0)
     expect(box.x + box.width).toBeLessThanOrEqual(320)
   }
-  await next.tap()
-  await expect(previous).toBeEnabled()
-  await previous.tap()
-  await expect(previous).toBeDisabled()
-  await next.tap()
+  const touch = await page.context().newCDPSession(page)
+  async function swipe(from: number, to: number) {
+    for (let step = 0; step <= 8; step++) {
+      await touch.send('Input.dispatchTouchEvent', {
+        type: step ? 'touchMove' : 'touchStart',
+        touchPoints: [{ x: from + (to - from) * step / 8, y: first.y + 60 }],
+      })
+    }
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
+  await swipe(270, 40)
+  await expect(card('Cooldown')).toBeInViewport({ ratio: 0.99 })
+  await tabs.getByRole('tab', { name: 'Presets' }).tap()
+  await expect(page.getByRole('button', { name: 'Configure Tabata' })).toBeVisible()
+  await expect(card('Cooldown')).toBeInViewport({ ratio: 0.99 })
+  expect((await card('Evening').boundingBox())!.y).toBe(first.y)
+  await swipe(40, 270)
+  await expect(card(morning)).toBeInViewport({ ratio: 0.99 })
+  await tabs.getByRole('tab', { name: 'New' }).tap()
+  await expect(page.getByRole('heading', { name: 'Timer Type' })).toBeVisible()
   await card('Evening').getByRole('button', { name: 'Remove timer' }).tap()
   await expect(card('Evening')).toHaveCount(0)
   await expect(next).toBeHidden()

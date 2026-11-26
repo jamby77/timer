@@ -3,7 +3,6 @@
 import { PredefinedStylesProps } from '@/types/configure'
 import { getConfigSummary } from '@/lib/configure/utils'
 
-import { CardContainer } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -21,23 +20,16 @@ export const PredefinedStyles = ({
   onStartTimer,
 }: PredefinedStylesProps) => {
   return (
-    <CardContainer>
-      <div>
-        <h2 className="mb-2 text-xl font-semibold sm:m-6">Presets</h2>
-
-        {/* Styles list */}
-        <div className="grid grid-cols-1 gap-2 sm:gap-4">
-          {styles.map((style) => (
-            <StyleCard
-              key={style.id}
-              style={style}
-              onSelect={() => onSelectStyle(style)}
-              onStart={() => onStartTimer(style.config)}
-            />
-          ))}
-        </div>
-      </div>
-    </CardContainer>
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+      {styles.map((style) => (
+        <StyleCard
+          key={style.id}
+          style={style}
+          onSelect={() => onSelectStyle(style)}
+          onStart={() => onStartTimer(style.config)}
+        />
+      ))}
+    </div>
   )
 }
 

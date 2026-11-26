@@ -2,7 +2,7 @@ import { expect, test } from 'playwright/test'
 
 test('create 3s countdown and verify idle → running → completed', async ({ page }) => {
   await page.goto('/configure')
-  await expect(page.getByRole('heading', { name: 'Configure Timer' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'New', exact: true })).toHaveAttribute('aria-selected', 'true')
 
   // Select Countdown timer type
   await page.getByText('Countdown', { exact: true }).click()

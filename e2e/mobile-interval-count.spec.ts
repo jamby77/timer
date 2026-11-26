@@ -36,6 +36,7 @@ test('interval count supports touch adjustments, direct entry and preset reload'
   await page.getByRole('button', { name: 'Save as Preset' }).tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await page.getByRole('heading', { name: 'Twelve intervals', exact: true }).tap()
   await expect(count).toHaveValue('12')
 })

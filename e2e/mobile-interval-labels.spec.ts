@@ -29,6 +29,7 @@ test('interval labels have full-width touch targets and reopen independently', a
   await page.getByRole('button', { name: 'Save as Preset' }).tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await page.getByRole('heading', { name: 'Hill repeats', exact: true }).tap()
   await expect(work).toHaveValue('Run uphill at a steady pace')
   await expect(rest).toHaveValue('Walk back to the start')

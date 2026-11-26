@@ -45,10 +45,12 @@ test('general settings survive reload, Back discards edits, and saved presets re
   await expect(completion).toHaveValue('Great session!')
   await completion.fill('Just this timer')
   await button(page, 'Cancel').tap()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await heading(page, 'Before settings').tap()
   await expect(preStart).toHaveValue('0')
   await expect(completion).toHaveValue('Time is up!')
   await button(page, 'Cancel').tap()
+  await page.getByRole('tab', { name: 'New', exact: true }).click()
   await heading(page, 'Countdown').tap()
   await expect(completion).toHaveValue('Great session!')
 })
@@ -78,7 +80,7 @@ test('new complex phases pick up phase settings while an open phase draft retain
 test('Tabata settings apply to the built-in starter and preserve a previously saved copy', async ({
   page,
 }) => {
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await heading(page, 'Tabata').tap()
   const count = page.getByLabel('Number of Intervals', { exact: true })
   await expect(count).toHaveValue('8')
