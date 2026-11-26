@@ -66,7 +66,10 @@ The following items can ship independently.
 - [x] Prepare the [Settings tab design and 320 px previews](../specs/2026-11-26-personal-defaults.md).
 - [x] Approve the personal defaults design.
 - [x] **Personal defaults.** Add Settings as the third top tab. Include shared settings, sound cues, and the existing starting values for standalone timers, Complex phases and built-in presets. Verify opening an existing preset, duplicating a phase and resuming a timer preserve their saved settings.
-- [ ] **Quick start.** Allow a saved preset to be pinned for one-tap access. Warmup and cooldown are examples a user can pin. Add search or collections once browsing a larger library becomes a practical problem.
+- [x] Preview [two recent timers side by side on a 320px phone](../specs/2026-11-26-compact-recents.md).
+- [x] Approve the compact recent timer cards.
+- [x] Implement and verify two visible cards in portrait, swipe navigation, Start and Remove.
+
 - [ ] **Share and import.** Export a versioned timer definition, including Complex phases, repeat counts and cue settings. The existing local ID alone cannot recreate it on another phone. Validate the payload, bound its size, show a preview, then allow Start or Save. Verify in a fresh browser profile, including malformed input, older versions and importing a timer with an existing name. Offer a file when a definition is too large for a practical link.
 
 ## Later candidates and boundaries

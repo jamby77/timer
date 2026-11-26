@@ -144,8 +144,8 @@ function ConfigurePageContent() {
       <div className="mx-auto max-w-7xl space-y-2 px-0 md:space-y-6 md:px-6">
         {/* Recent Timers Section */}
         <div>
-          <h5 className="text-muted-foreground invisible text-center text-base sm:block">
-            Recent Timers
+          <h5 className={recentTimers.length ? "mb-2 px-2 text-base font-semibold sm:invisible sm:mb-0" : "invisible text-base"}>
+            Recent timers
           </h5>
           <RecentTimers
             timers={recentTimers}
