@@ -228,7 +228,7 @@ test('malformed recent history does not hide usable timers after reload', async 
   await expect(page.getByRole('heading', { name: 'Broken recent timer', exact: true })).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Tabata', exact: true })).toBeVisible()
   expect(await page.evaluate(() => localStorage.getItem('recent_timers'))).toBe(stored)
-  await card.getByRole('button', { name: 'Start', exact: true }).click()
+  await card.getByRole('button', { name: 'Start Recovered recent timer', exact: true }).click()
   await page.getByRole('button', { name: 'Start timer', exact: true }).click()
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'running')
   await page.getByRole('button', { name: 'Stop timer', exact: true }).click()

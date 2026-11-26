@@ -43,18 +43,18 @@ export const RecentTimers = ({ timers, onStartTimer, onRemoveTimer }: RecentTime
   return (
     <div className="flex w-full items-center justify-center">
       <Carousel
-        className="relative min-w-0 w-full sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
+        className="relative min-w-0 w-full max-sm:px-2 sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-6xl"
         opts={{ align: 'start' }}
       >
-        <CarouselContent>
+        <CarouselContent className="max-sm:-ml-2">
           {displayTimers.map((timer) => (
-            <CarouselItem key={timer.id} className="basis-full sm:min-w-52 sm:basis-62.5 md:basis-1/3 lg:basis-1/5">
+            <CarouselItem key={timer.id} className="max-sm:basis-1/2 max-sm:pl-2 max-sm:only:basis-full sm:min-w-52 sm:basis-62.5 md:basis-1/3 lg:basis-1/5">
               <TimerCard timer={timer} onStartTimer={onStartTimer} onRemoveTimer={onRemoveTimer} />
             </CarouselItem>
           ))}
         </CarouselContent>
         {displayTimers.length > 1 && (
-          <div className="mt-2 flex justify-center gap-3 sm:contents">
+          <div className="mt-2 flex justify-center gap-3 max-sm:has-[[data-slot=carousel-next]:disabled]:has-[[data-slot=carousel-previous]:disabled]:hidden sm:contents">
             <CarouselPrevious className="max-sm:static max-sm:size-11 max-sm:translate-y-0" />
             <CarouselNext className="max-sm:static max-sm:size-11 max-sm:translate-y-0" />
           </div>
@@ -80,42 +80,35 @@ const TimerCard = ({ timer, onStartTimer, onRemoveTimer }: TimerCardProps) => {
   }
 
   return (
-    <Card className="cursor-grab py-4 active:cursor-grabbing">
-      <div className="flex items-center justify-between gap-2 px-1 max-sm:items-start md:px-4">
-        <CardTitle className="min-w-0 text-left max-sm:flex-1 max-sm:leading-snug sm:max-w-32">
+    <Card className="cursor-grab py-4 active:cursor-grabbing max-sm:h-full max-sm:rounded-[10px] max-sm:p-2.5">
+      <div className="flex items-center justify-between gap-2 px-1 max-sm:-mt-1.5 max-sm:-mr-1.5 max-sm:items-start max-sm:px-0 md:px-4">
+        <CardTitle className="min-w-0 text-left max-sm:flex-1 max-sm:self-center max-sm:leading-snug sm:max-w-32">
           <h3 className="wrap-anywhere sm:truncate">{timer.config.name}</h3>
         </CardTitle>
-        <div className="inline-flex shrink-0 items-center">
-          {/* Remove button */}
-          <Button
-            aria-label="Remove timer"
-            aria-labelledby={`remove-timer-${timer.id}`}
-            size="icon"
-            onClick={handleRemove}
-            className="rounded-full max-sm:size-11"
-            variant="destructive"
-          >
-            <X size={4} />
-            <span className="sr-only" id={`remove-timer-${timer.id}`}>
-              Remove timer
-            </span>
-          </Button>
-        </div>
+        <Button
+          aria-label="Remove timer"
+          size="icon"
+          variant="ghost"
+          onClick={handleRemove}
+          className="shrink-0 text-red-600 hover:bg-transparent hover:text-red-700 max-sm:size-11 dark:text-red-400 dark:hover:text-red-300 [&_svg]:size-4"
+        >
+          <X aria-hidden="true" />
+        </Button>
       </div>
 
-      <CardContent className="px-1 md:px-4">
+      <CardContent className="px-1 max-sm:px-0 md:px-4">
         <CardDescription>
-          <p className="truncate">{getConfigSummary(timer.config)}</p>
+          <p className="max-sm:wrap-anywhere max-sm:leading-snug sm:truncate">{getConfigSummary(timer.config)}</p>
         </CardDescription>
       </CardContent>
-      <CardFooter className="justify-between gap-2 px-1 max-sm:flex-col max-sm:items-stretch md:px-4">
+      <CardFooter className="justify-between gap-2 px-1 max-sm:grow max-sm:flex-col max-sm:items-stretch max-sm:px-0 md:px-4">
         <span className="text-muted-foreground truncate text-xs">
           {formatRelativeTime(timer.startedAt)}
         </span>
-        <CardAction className="max-sm:self-stretch">
-          <Button size="sm" className="max-sm:min-h-11 max-sm:w-full" onClick={handleStart}>
+        <CardAction className="max-sm:mt-auto max-sm:self-stretch">
+          <Button aria-label={`Start ${timer.config.name}`} size="sm" className="max-sm:min-h-11 max-sm:w-full" onClick={handleStart}>
             <PlayIcon size={4} className="fill-tm-play stroke-card" />
-            Start
+            <span className="max-sm:hidden">Start</span>
           </Button>
         </CardAction>
       </CardFooter>
