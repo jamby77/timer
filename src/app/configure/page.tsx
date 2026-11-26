@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 import { AnyTimerConfig, PredefinedStyle, RecentTimer, TimerType } from '@/types/configure'
-import { PREDEFINED_STYLES } from '@/lib/configure/presets'
+import { getStarterPresets } from '@/lib/configure/new-timer'
 import { saveTimerPreset } from '@/lib/configure/save-preset'
 import { storage } from '@/lib/configure/storage'
 import { validateTimerConfig } from '@/lib/configure/utils'
@@ -32,6 +32,12 @@ function ConfigurePageContent() {
   const [selectedPredefined, setSelectedPredefined] =
     useState<PredefinedStyle<AnyTimerConfig> | null>(null)
   const router = useRouter()
+  const [starterPresets, setStarterPresets] = useState(getStarterPresets)
+  useEffect(() => {
+    const refresh = () => setStarterPresets(getStarterPresets())
+    window.addEventListener('storage', refresh)
+    return () => window.removeEventListener('storage', refresh)
+  }, [])
   const [customPresets, setCustomPresets] = useState<PredefinedStyle<AnyTimerConfig>[]>(() =>
     storage
       .getAllPresets()
@@ -168,7 +174,7 @@ function ConfigurePageContent() {
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-8">
               <PredefinedStyles
-                styles={[...PREDEFINED_STYLES, ...customPresets]}
+                styles={[...starterPresets, ...customPresets]}
                 onSelectStyle={handleSelectPreset}
                 onStartTimer={(config) => handleStartTimer(config, true)}
               />

@@ -5,7 +5,7 @@ import { CircleX, PlayIcon, Save } from 'lucide-react'
 
 import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 
-import { TimerType, WorkRestMode } from '@/types/configure'
+import { createTimerDraft } from '@/lib/configure/new-timer'
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
 import { normalizeDraftRoundNames } from '@/lib/configure/round-names'
@@ -16,20 +16,6 @@ import { SetupBackButton } from '@/components/configure/components/shared/SetupB
 import { FormErrors } from '@/components/configure/components'
 import { CommonFields } from './CommonFields'
 
-function getName(type: TimerType) {
-  return type === TimerType.COUNTDOWN
-    ? 'Countdown'
-    : type === TimerType.STOPWATCH
-      ? 'Stopwatch'
-      : type === TimerType.INTERVAL
-        ? 'Interval'
-        : type === TimerType.WORKREST
-          ? 'Work/Rest'
-          : type === TimerType.COMPLEX
-            ? 'Complex Timer (0 phases, 0s)'
-            : 'Timer'
-}
-
 export const TimerConfigForm = ({
   type,
   initialConfig,
@@ -39,14 +25,7 @@ export const TimerConfigForm = ({
   onCancel,
 }: TimerConfigFormProps) => {
   const [errors, setErrors] = useState<string[]>([])
-  const [config, setConfig] = useState(
-    initialConfig ||
-      ({
-        type,
-        name: getName(type),
-        ...(type === TimerType.WORKREST && { restMode: WorkRestMode.RATIO, ratio: 1 }),
-      } as AnyTimerConfig)
-  )
+  const [config, setConfig] = useState(() => initialConfig ?? createTimerDraft(type))
 
   const buildFullConfig = (config: Partial<AnyTimerConfig>): AnyTimerConfig => {
     const fullConfig = normalizeDraftRoundNames({

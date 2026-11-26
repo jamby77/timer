@@ -5,6 +5,8 @@ import { Plus, Repeat2 } from 'lucide-react'
 
 import type { ComplexConfig, ComplexPhase, PhaseRepeatGroup } from '@/types/configure'
 
+import { readDefaults } from '@/lib/configure/defaults'
+import { TimerType } from '@/lib/enums'
 import { repeatGroupError } from '@/lib/configure/phase-sequence'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
@@ -187,7 +189,7 @@ export const ComplexFieldsForm = ({ config, onChange }: ComplexFieldsProps) => {
                 setRepeatDraft({
                   id: uniqueId(`repeat-${ungrouped.id}`, groups),
                   phaseIds: [ungrouped.id],
-                  count: 2,
+                  count: readDefaults(`timer:${TimerType.COMPLEX}`).repeatCount ?? 2,
                 })
               }}
             >

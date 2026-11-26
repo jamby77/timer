@@ -1,13 +1,11 @@
-import type { AnyTimerConfig, ComplexConfig } from '@/types/configure'
+import type { PhaseConfig } from '@/types/configure'
 
 import { TimerType, WorkRestMode } from '@/types/configure'
-
-export type PhaseTimerConfig = Exclude<AnyTimerConfig, ComplexConfig>
 
 export const createDefaultPhaseConfig = (
   phaseId: string,
   timerType: TimerType
-): PhaseTimerConfig => {
+): PhaseConfig => {
   const baseConfig = {
     name: '',
     id: phaseId,

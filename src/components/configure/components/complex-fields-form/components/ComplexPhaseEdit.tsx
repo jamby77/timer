@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CircleX, Save } from 'lucide-react'
 
-import type { ComplexPhase } from '@/types/configure'
+import type { ComplexPhase, PhaseConfig } from '@/types/configure'
 
 import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
@@ -11,7 +11,7 @@ import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 import { Button } from '@/components/ui/button'
 import { SetupBackButton } from '@/components/configure/components/shared/SetupBackButton'
 import ComplexBody from '@/components/configure/components/complex-fields-form/components/ComplexBody'
-import { createDefaultPhaseConfig, PhaseTimerConfig } from './complex-phase-utils'
+import { createPhaseDraft } from '@/lib/configure/new-timer'
 
 type PhaseDraft = Omit<ComplexPhase, 'order'>
 
@@ -28,30 +28,29 @@ export const ComplexPhaseEdit = (props: ComplexPhaseEditProps) => (
 const ComplexPhaseDraft = ({ phase, onSave, onCancel }: ComplexPhaseEditProps) => {
   const phaseId = phase.id
   const [draftType, setDraftType] = useState<TimerType>(phase.type)
-  const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(
-    () => phase.config as PhaseTimerConfig
-  )
+  const [draftConfig, setDraftConfig] = useState(phase.config)
   const [customName, setCustomName] = useState<string | undefined>(() =>
     phase.name && phase.name !== generateTimerName(phase.config) ? phase.name : undefined
   )
   const draftName = customName ?? generateTimerName(draftConfig)
 
-  const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
-    setDraftConfig((prev) => ({ ...prev, ...updates }) as PhaseTimerConfig)
+  const handleConfigChange = (updates: Partial<PhaseConfig>) => {
+    setDraftConfig((prev) => ({ ...prev, ...updates }) as PhaseConfig)
   }
 
   const handleTypeChange = (type: TimerType) => {
-    const nextConfig = createDefaultPhaseConfig(phaseId, type)
+    const nextConfig = createPhaseDraft(phaseId, type)
 
+    if (!customName && nextConfig.name) setCustomName(nextConfig.name)
     setDraftType(type)
     setDraftConfig(nextConfig)
   }
 
   const handleSave = () => {
-    const savedConfig: PhaseTimerConfig = normalizeDraftRoundNames({
+    const savedConfig: PhaseConfig = normalizeDraftRoundNames({
       ...draftConfig,
       name: draftName || generateTimerName(draftConfig),
-    } as PhaseTimerConfig)
+    } as PhaseConfig)
     savedConfig.id = TimerConfigHash.generateTimerId(savedConfig)
     const draft: PhaseDraft = {
       id: phaseId,
