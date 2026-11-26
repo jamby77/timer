@@ -28,14 +28,15 @@ import { WorkRestTimer } from '@/components/display/WorkRestTimer'
 import { WorkoutLimitDialog } from './WorkoutLimitDialog'
 
 interface ComplexTimerProps {
+  startsAt?: number
   config: ComplexConfig
 }
 
-export function ComplexTimer({ config }: ComplexTimerProps) {
-  return <ComplexTimerSession key={config.id} config={config} />
+export function ComplexTimer({ config, startsAt }: ComplexTimerProps) {
+  return <ComplexTimerSession key={config.id} config={config} startsAt={startsAt} />
 }
 
-function ComplexTimerSession({ config }: ComplexTimerProps) {
+function ComplexTimerSession({ config, startsAt }: ComplexTimerProps) {
   const { setTimerActive } = useTimerContext()
   const phases = useMemo(() => phaseSequence(config), [config])
 
@@ -52,7 +53,7 @@ function ComplexTimerSession({ config }: ComplexTimerProps) {
   useSaveProgress('phaseIndex', phaseIndex)
   const [phaseRun, setPhaseRun] = useState(0)
   const [isStopped, setIsStopped] = useState(false)
-  const [phaseStartsAt, setPhaseStartsAt] = useState<number>()
+  const [phaseStartsAt, setPhaseStartsAt] = useState(startsAt)
   const [isComplexRunning, setIsComplexRunning] = useState(false)
   const lastAutoAdvancedIndex = useRef<number | null>(null)
 

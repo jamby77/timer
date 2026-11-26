@@ -73,7 +73,9 @@ The following items can ship independently.
 - [x] Preview the [New and Presets setup tabs](../specs/2026-11-26-setup-tabs.md).
 - [x] Approve and implement the setup tabs. Verify touch swipes and carousel position on both tabs at 320px.
 
-- [ ] **Share and import.** Export a versioned timer definition, including Complex phases, repeat counts and cue settings. The existing local ID alone cannot recreate it on another phone. Validate the payload, bound its size, show a preview, then allow Start or Save. Verify in a fresh browser profile, including malformed input, older versions and importing a timer with an existing name. Offer a file when a definition is too large for a practical link.
+- [x] Preview [sharing from Presets and opening a timer link at 320px](../specs/2026-11-26-share-link.md).
+- [x] Approve the link sharing design.
+- [x] **Share and import by link.** Compress a versioned timer definition, including Complex phases, repeat counts and cue settings, and encode it in the URL fragment. Measure the complete URL before sharing. If it exceeds the supported length, show “Timer too large to share by link.” On opening a link, bound the decoded size, validate the settings and show a preview with Start and Save. Verify in a fresh browser profile with valid, oversized, malformed and older links, and a timer whose name already exists.
 
 ## Later candidates and boundaries
 

@@ -253,7 +253,12 @@ test.describe('mobile preset cards', () => {
       const start = card.getByRole('button', { name: 'Start', exact: true })
       const bounds = (await start.boundingBox())!
       const description = (await card.locator('[data-slot=card-description]').boundingBox())!
-      expect(bounds.width).toBeCloseTo(description.width)
+      const share = (await card.getByRole('button', { name: /share/i }).boundingBox())!
+      expect(bounds.x).toBeCloseTo(description.x)
+      expect(bounds.x + bounds.width).toBeLessThan(share.x)
+      expect(share.x + share.width).toBeCloseTo(description.x + description.width)
+      expect(share.y).toBeCloseTo(bounds.y)
+      expect(share.height).toBeGreaterThanOrEqual(44)
       expect(bounds.height).toBeGreaterThanOrEqual(44)
       if (action === 'tap') {
         await start.tap({ position: { x: bounds.width - 2, y: bounds.height / 2 } })

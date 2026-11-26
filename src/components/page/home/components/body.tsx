@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { AnyTimerConfig, TimerType } from '@/types/configure'
+import { sharedStartTime, clearSharedStart } from '@/lib/configure/start-shared-timer'
 import { storage } from '@/lib/configure/storage'
 
 import { TimerRecovery } from '@/contexts/TimerRecovery'
@@ -35,6 +36,8 @@ const TimerSession = ({ id }: { id: string | null }) => {
   const [timerConfig] = useState<AnyTimerConfig | null>(() =>
     id ? storage.getTimerConfig(id) : null
   )
+  const [startsAt] = useState(() => sharedStartTime(id))
+  useEffect(() => clearSharedStart(id), [id])
   const showInstallPrompt = process.env.NODE_ENV === 'production'
 
   useEffect(() => {
@@ -46,23 +49,23 @@ const TimerSession = ({ id }: { id: string | null }) => {
   // Render the appropriate timer based on type
   const renderTimer = () => {
     if (timerConfig.type === TimerType.COUNTDOWN) {
-      return <Timer config={timerConfig} />
+      return <Timer config={timerConfig} startsAt={startsAt} />
     }
 
     if (timerConfig.type === TimerType.STOPWATCH) {
-      return <Stopwatch config={timerConfig} />
+      return <Stopwatch config={timerConfig} startsAt={startsAt} />
     }
 
     if (timerConfig.type === TimerType.INTERVAL) {
-      return <Interval intervalConfig={timerConfig} />
+      return <Interval intervalConfig={timerConfig} startsAt={startsAt} />
     }
 
     if (timerConfig.type === TimerType.WORKREST) {
-      return <WorkRestTimer config={timerConfig} />
+      return <WorkRestTimer config={timerConfig} startsAt={startsAt} />
     }
 
     if (timerConfig.type === TimerType.COMPLEX) {
-      return <ComplexTimer config={timerConfig} />
+      return <ComplexTimer config={timerConfig} startsAt={startsAt} />
     }
 
     // Complex timer or any other unimplemented type
