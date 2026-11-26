@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import type { IntervalConfig } from '@/types/configure'
 
 import { TimerState } from '@/lib/enums'
-import { formatTime } from '@/lib/timer'
+import { formatTime, intervalDisplayTime } from '@/lib/timer/utils'
 import {
   useAutoStart,
   useIntervalTimer,
@@ -159,7 +159,7 @@ export function Interval({
     pause()
   }, [isPreStarting, pause, preStart])
 
-  const endsWithRest = timerState === TimerState.Completed && intervalConfig.skipLastRest === false
+  const endsWithRest = timerState === TimerState.Completed && intervalConfig.skipLastRest === false && intervalConfig.restDuration > 0
   const isWorkStep = currentStep?.isWork ?? !endsWithRest
   const maxTime = (isWorkStep ? intervalConfig.workDuration : intervalConfig.restDuration) * 1000
   const progress = maxTime > 0 ? ((maxTime - timeLeft) / maxTime) * 100 : 0
@@ -213,7 +213,7 @@ export function Interval({
             .join(' · ') || 'Interval Timer'
         }
         state={isPreStarting ? preStart.state : timerState}
-        time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
+        time={isPreStarting ? String(preStart.secondsLeft) : formatTime(intervalDisplayTime(intervalConfig, isWorkStep, timeLeft))}
         subtitle={roundSubtitle}
         isWork={isPreStarting ? undefined : currentStep?.isWork}
         fullscreen={isActive || isAutoStarting}

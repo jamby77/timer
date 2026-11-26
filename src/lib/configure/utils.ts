@@ -67,6 +67,8 @@ const intervalConfigSchema = baseTimerConfigSchema.extend({
     .int('Number of intervals must be an integer')
     .min(1, 'Number of intervals must be greater than 0')
     .max(1000, 'Number of intervals cannot exceed 1000'),
+  workDirection: z.enum(['up', 'down']).optional(),
+  restDirection: z.enum(['up', 'down']).optional(),
   roundNames: z.array(z.string()).max(1000).optional(),
   workLabel: z.string().optional(),
   restLabel: z.string().optional(),

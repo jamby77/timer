@@ -38,11 +38,15 @@ export interface StopwatchConfig extends TimerConfig {
   timeLimit?: number // seconds (optional)
 }
 
+export type ClockDirection = 'up' | 'down'
+
 export interface IntervalConfig extends TimerConfig {
   type: TimerType.INTERVAL
   workDuration: number // seconds
   restDuration: number // seconds
   intervals: number
+  workDirection?: ClockDirection
+  restDirection?: ClockDirection
   roundNames?: string[]
   workLabel?: string
   restLabel?: string

@@ -67,6 +67,8 @@ export class TimerConfigHash {
       case 'INTERVAL': {
         const names = normalizeRoundNames(config.roundNames, config.intervals)
         if (names) normalized.roundNames = names
+        if (config.workDirection === 'up') normalized.workDirection = 'up'
+        if (config.restDirection === 'up') normalized.restDirection = 'up'
         normalized.workDuration = config.workDuration
         normalized.restDuration = config.restDuration
         normalized.intervals = config.intervals
