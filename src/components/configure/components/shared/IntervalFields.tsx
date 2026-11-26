@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
+import { RoundNamesField } from './RoundNamesField'
 
 interface IntervalFieldsProps {
   config: Partial<IntervalConfig>
@@ -82,6 +83,13 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
           </Button>
         </div>
       </Field>
+
+      <RoundNamesField
+        count={intervals >= minIntervals && intervals <= maxIntervals ? intervals : 0}
+        names={config.roundNames}
+        workLabel={config.workLabel?.trim() || workPlaceholder}
+        onChange={(roundNames) => onChange({ roundNames })}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field>

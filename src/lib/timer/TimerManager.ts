@@ -107,6 +107,7 @@ export class TimerManager {
     const elapsed = step.duration - (this.stepEndsAt - now)
     step.onStepStateChange?.(StepState.Skip, { step, index: this.currentStepIndex, elapsed })
     this.advanceToNextStep(now)
+    this.update(now)
   }
 
   public stop(): void {
@@ -173,7 +174,8 @@ export class TimerManager {
   }
 
   private startStep(step: TimerStep, startsAt: number): void {
-    this.stepEndsAt = startsAt + Math.max(1, step.duration)
+    const minimumDuration = this.totalRepeats === 0 ? 1 : 0
+    this.stepEndsAt = startsAt + Math.max(minimumDuration, step.duration)
     step.onStart?.()
     step.onStepStateChange?.(StepState.Start, { step, index: this.currentStepIndex, elapsed: 0 })
     this.onStepChange?.(step, this.currentStepIndex)

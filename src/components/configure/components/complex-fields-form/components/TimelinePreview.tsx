@@ -39,10 +39,13 @@ function IntervalRounds({ config, start }: { config: IntervalConfig; start?: num
       {Array.from({ length: Math.min(count, config.intervals) }, (_, i) => {
         const workAt =
           start === undefined ? undefined : start + i * (config.workDuration + config.restDuration)
+        const roundName = config.roundNames?.[i]?.trim()
         const step = 'grid grid-cols-[max-content_minmax(0,1fr)_auto] gap-2 wrap-anywhere'
         return (
           <div key={i}>
-            <p className="mb-1 font-semibold">Round {i + 1}</p>
+            <p className="mb-1 font-semibold wrap-anywhere">
+              Round {i + 1}{roundName && ` · ${roundName}`}
+            </p>
             <div className={step}>
               <Timestamp seconds={workAt} />
               <span>{config.workLabel || 'Work'}</span>

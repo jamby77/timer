@@ -1,6 +1,7 @@
 import type { AnyTimerConfig } from '@/types/configure'
 
 import { WorkRestMode } from '@/types/configure'
+import { normalizeRoundNames } from '@/lib/configure/round-names'
 
 export class TimerConfigHash {
   /**
@@ -63,7 +64,9 @@ export class TimerConfigHash {
         }
         break
 
-      case 'INTERVAL':
+      case 'INTERVAL': {
+        const names = normalizeRoundNames(config.roundNames, config.intervals)
+        if (names) normalized.roundNames = names
         normalized.workDuration = config.workDuration
         normalized.restDuration = config.restDuration
         normalized.intervals = config.intervals
@@ -75,6 +78,7 @@ export class TimerConfigHash {
           normalized.restLabel = config.restLabel.trim()
         }
         break
+      }
 
       case 'WORKREST':
         if (config.autoContinue) normalized.autoContinue = true
