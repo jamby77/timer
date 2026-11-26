@@ -14,6 +14,7 @@ interface LapHistoryProps {
   laps: LapEntry[]
   lastLap?: LapEntry | null
   bestLap?: LapEntry | null
+  showSplits?: boolean
   initialExpanded?: boolean
   onClearHistory?: () => void
 }
@@ -21,26 +22,69 @@ interface LapHistoryProps {
 const CollapsedHeader = ({
   id,
   lastLapTime,
-  bestLapTime,
+  bestLabel,
+  bestLapValue,
 }: {
   id: string
   lastLapTime: string
-  bestLapTime: string
+  bestLabel: string
+  bestLapValue?: string
 }) => (
   <span id={id} className="flex flex-wrap items-center gap-2.5">
     <span className="text-accent-foreground font-medium">Last lap</span>
     <span className="text-card-foreground font-mono">{lastLapTime}</span>
-    <span>/</span>
-    <span className="text-accent-foreground font-medium">Best lap</span>
-    <span className="text-card-foreground font-mono">{bestLapTime}</span>
+    {bestLapValue && (
+      <>
+        <span>/</span>
+        <span className="text-accent-foreground font-medium">{bestLabel}</span>
+        <span className="text-card-foreground font-mono">{bestLapValue}</span>
+      </>
+    )}
   </span>
 )
+
+function SplitHistory({ laps, bestLapValue }: { laps: LapEntry[]; bestLapValue?: string }) {
+  const runs: LapEntry[][] = []
+  for (const lap of laps) {
+    if (!runs.length || (lap.split?.number ?? 1) === 1) runs.push([])
+    runs[runs.length - 1].push(lap)
+  }
+  return (
+    <div className="space-y-3 px-3 py-2">
+      {bestLapValue && (
+        <div className="flex items-baseline justify-between text-sm">
+          <span className="font-medium">Best</span>
+          <span className="text-lap-best-fg font-mono font-bold">{bestLapValue}</span>
+        </div>
+      )}
+      {runs.reverse().map((run, i) => (
+        <table key={run[0].id} aria-label={`Run ${runs.length - i}`} className="w-full text-right text-sm">
+          {runs.length > 1 && <caption className="text-left font-medium">Run {runs.length - i}</caption>}
+          <thead className="text-muted-foreground text-xs"><tr>
+            <th scope="col" className="py-2 text-left">Lap</th>
+            <th scope="col">Split</th><th scope="col">Total</th>
+          </tr></thead>
+          <tbody className="font-mono tabular-nums">
+            {run.reverse().map(lap => (
+              <tr className="border-t" key={lap.id}>
+                <th scope="row" className="py-2 text-left font-normal">{lap.split?.number ?? 1}</th>
+                <td>{formatTime(lap.lapTime)}</td>
+                <td>{formatTime(lap.split?.total ?? lap.lapTime)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ))}
+    </div>
+  )
+}
 
 export function LapHistory({
   laps,
   lastLap,
   bestLap,
   onClearHistory,
+  showSplits = false,
   initialExpanded = false,
 }: LapHistoryProps) {
   const summaryId = useId()
@@ -52,6 +96,13 @@ export function LapHistory({
   }
   if (laps.length === 0) {
     return null
+  }
+  let bestLapValue: string | undefined
+  if (bestLap && (!showSplits || laps.length > 1)) {
+    const time = formatTime(bestLap.lapTime)
+    bestLapValue = showSplits
+      ? `Lap ${bestLap.split?.number ?? 1} - ${time.replace('.', ':')}`
+      : time
   }
   return (
     <Collapsible
@@ -79,7 +130,8 @@ export function LapHistory({
             <CollapsedHeader
               id={summaryId}
               lastLapTime={formatTime(lastLap?.lapTime || 0)}
-              bestLapTime={formatTime(bestLap?.lapTime || 0)}
+              bestLabel={showSplits ? 'Best' : 'Best lap'}
+              bestLapValue={bestLapValue}
             />
           )}
           <ChevronDown aria-hidden="true" className={cn('size-4 shrink-0', isExpanded && 'rotate-180')} />
@@ -97,7 +149,9 @@ export function LapHistory({
           'animate-collapse': !isExpanded,
         })}
       >
-        {laps.length > 0 ? (
+        {showSplits ? (
+          <div><SplitHistory laps={laps} bestLapValue={bestLapValue} /></div>
+        ) : laps.length > 0 ? (
           // Expanded view - show a full list (only when laps exist)
           <div className="w-full max-w-5xl space-y-2 p-6 px-4">
             <Item className="justify-between px-4 text-lg" variant="outline">

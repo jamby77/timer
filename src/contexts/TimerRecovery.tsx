@@ -32,7 +32,13 @@ const progress = z.object({
     .optional(),
   phaseIndex: index.optional(),
   clock: z.object({ elapsed: ms, acknowledged: z.boolean() }).optional(),
-  laps: z.array(z.object({ id: z.string(), timestamp: ms, lapTime: ms })).optional(),
+  splitStart: index.optional(),
+  laps: z.array(z.object({
+    id: z.string(),
+    timestamp: ms,
+    lapTime: ms,
+    split: z.object({ number: index.positive(), total: ms }).optional(),
+  })).optional(),
 })
 type Progress = z.infer<typeof progress>
 function intervalPreview(saved: NonNullable<Progress['interval']>, config: IntervalConfig) {
@@ -146,6 +152,7 @@ export function TimerRecovery({
                 phaseIndex: current.phaseIndex,
                 clock: current.clock,
                 laps: current.laps,
+                splitStart: current.splitStart,
               }
         const content = hasRun(snapshot) ? JSON.stringify({ signature, progress: snapshot }) : null
         if (content === lastWrite) return

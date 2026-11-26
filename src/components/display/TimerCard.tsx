@@ -29,6 +29,7 @@ interface TimerCardProps {
   time: string
   children: ReactNode
   subtitle?: ReactNode
+  runningStatus?: string
   idleStatus?: string
   isPreStarting?: boolean
   isWork?: boolean
@@ -46,12 +47,14 @@ export const TimerCard = ({
   children,
   subtitle,
   idleStatus,
+  runningStatus,
   isPreStarting = false,
   isWork,
   fullscreen = false,
 }: TimerCardProps) => {
   let status = timerStatusLabels[state]
   if (state === TimerState.Idle && idleStatus) status = idleStatus
+  if (state === TimerState.Running && runningStatus) status = runningStatus
   if (state === TimerState.Running && isPreStarting) status = 'Get ready'
   const showStatusRow = Boolean(status) || state === TimerState.Running
   const lastDotIndex = time.lastIndexOf('.')
@@ -75,7 +78,7 @@ export const TimerCard = ({
       >
         {(header || !hideLabel || subtitle || showStatusRow) && (
           <CardHeader
-            className={cn('shrink-0 gap-1 px-4 text-center md:px-6', header ? 'py-1' : 'py-2')}
+            className={cn('relative shrink-0 gap-1 px-4 text-center md:px-6', header ? 'py-1' : 'py-2')}
           >
             {header}
             {!hideLabel && (
@@ -112,7 +115,7 @@ export const TimerCard = ({
           >
             <div
               className="flex items-baseline justify-center font-mono leading-none font-bold whitespace-nowrap tabular-nums"
-              style={{ fontSize: `min(${90 / characterWidth}cqw, 76cqh)` }}
+              style={{ fontSize: `min(${90 / characterWidth}cqw, var(--clock-height, 76cqh))` }}
             >
               <span>{mainTime}</span>
               {fractionalTime && <span className="text-[0.28em] opacity-70">{fractionalTime}</span>}

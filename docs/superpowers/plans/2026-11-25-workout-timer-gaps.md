@@ -46,6 +46,10 @@ The following items can ship independently.
 - [x] Approve the clock direction design.
 - [x] Implement clock direction.
 - [x] Verify clock direction in saved timers and during playback.
+- [x] Prepare the [stopwatch splits design and phone previews](../specs/2026-11-26-stopwatch-splits.md).
+- [x] Approve the stopwatch splits design.
+- [x] Implement stopwatch splits.
+- [x] Verify split timing, history and recovery.
 
 | Item | First usable version | Acceptance check |
 |---|---|---|
