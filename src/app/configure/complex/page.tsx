@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import type { ComplexConfig } from '@/types/configure'
 
 import { isComplexConfig } from '@/types/configure'
+import { createTimerDraft } from '@/lib/configure/new-timer'
 import { phaseSequence } from '@/lib/configure/phase-sequence'
 import { saveTimerPreset } from '@/lib/configure/save-preset'
 import { storage } from '@/lib/configure/storage'
@@ -80,12 +81,7 @@ function preparePresetForEditing(config: ComplexConfig): ComplexConfig {
 function ConfigureComplexTimer({ presetId }: { presetId: string | null }) {
   const router = useRouter()
   const [initial] = useState(() => {
-    const empty: Partial<ComplexConfig> = {
-      type: TimerType.COMPLEX,
-      name: 'Complex Timer (0 phases, 0s)',
-      phases: [],
-      autoAdvance: true,
-    }
+    const empty = createTimerDraft(TimerType.COMPLEX) as ComplexConfig
     if (!presetId) return { config: empty, errors: [] as string[] }
     const preset = storage.getPreset(presetId)
     if (!preset || !isComplexConfig(preset.config) || validateTimerConfig(preset.config).length) {

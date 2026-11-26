@@ -44,11 +44,62 @@ function ClockDirectionField({
 }
 
 interface IntervalFieldsProps {
+  allowUnset?: boolean
   config: Partial<IntervalConfig>
   onChange: (updates: Partial<IntervalConfig>) => void
 }
 
-export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
+function IntervalDurationFields({ config, onChange, allowUnset }: IntervalFieldsProps) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Field>
+        <FieldLabel htmlFor="workDuration">Work Duration</FieldLabel>
+        <TimePicker
+          min={allowUnset ? 0 : 1}
+          clearLabel={allowUnset ? 'Clear work duration' : undefined}
+          secondsInputId="workDuration"
+          value={config.workDuration || 0}
+          onTimeChange={(seconds) =>
+            onChange({ workDuration: allowUnset && !seconds ? undefined : seconds })
+          }
+        />
+        <ClockDirectionField
+          label="Work clock direction"
+          value={config.workDirection}
+          onChange={(workDirection) => onChange({ workDirection })}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="restDuration">Rest Duration</FieldLabel>
+        <TimePicker
+          min={0}
+          secondsInputId="restDuration"
+          value={config.restDuration || 0}
+          onTimeChange={(seconds) => onChange({ restDuration: seconds })}
+        />
+        {allowUnset && config.restDuration !== undefined && (
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 w-fit"
+            onClick={() => onChange({ restDuration: undefined })}
+          >
+            Clear rest duration
+          </Button>
+        )}
+        {(allowUnset || (config.restDuration ?? 0) > 0) && (
+          <ClockDirectionField
+            label="Rest clock direction"
+            value={config.restDirection}
+            onChange={(restDirection) => onChange({ restDirection })}
+          />
+        )}
+      </Field>
+    </div>
+  )
+}
+
+export const IntervalFields = ({ config, onChange, allowUnset = false }: IntervalFieldsProps) => {
   const intervals = config.intervals ?? 0
   const minIntervals = 1
   const maxIntervals = 1000
@@ -56,38 +107,7 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
   const restPlaceholder = 'Rest'
   return (
     <FieldGroup>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor="workDuration">Work Duration</FieldLabel>
-          <TimePicker
-            min={1}
-            secondsInputId="workDuration"
-            value={config.workDuration || 0}
-            onTimeChange={(seconds) => onChange({ workDuration: seconds })}
-          />
-          <ClockDirectionField
-            label="Work clock direction"
-            value={config.workDirection}
-            onChange={(workDirection) => onChange({ workDirection })}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="restDuration">Rest Duration</FieldLabel>
-          <TimePicker
-            min={0}
-            secondsInputId="restDuration"
-            value={config.restDuration || 0}
-            onTimeChange={(seconds) => onChange({ restDuration: seconds })}
-          />
-          {(config.restDuration ?? 0) > 0 && (
-            <ClockDirectionField
-              label="Rest clock direction"
-              value={config.restDirection}
-              onChange={(restDirection) => onChange({ restDirection })}
-            />
-          )}
-        </Field>
-      </div>
+      <IntervalDurationFields config={config} onChange={onChange} allowUnset={allowUnset} />
 
       <Field>
         <FieldLabel htmlFor="intervals">Number of Intervals</FieldLabel>
@@ -112,9 +132,11 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             max={maxIntervals}
             className="min-w-0 max-sm:min-h-11 max-sm:text-center"
             value={intervals || ''}
-            onChange={(e) => onChange({ intervals: parseInt(e.target.value) || 0 })}
+            onChange={(e) =>
+              onChange({ intervals: parseInt(e.target.value) || (allowUnset ? undefined : 0) })
+            }
             placeholder="8"
-            required
+            required={!allowUnset}
           />
           <Button
             type="button"

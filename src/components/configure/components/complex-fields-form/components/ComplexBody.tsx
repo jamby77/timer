@@ -1,4 +1,4 @@
-import { AnyTimerConfig } from '@/types/configure'
+import type { AnyTimerConfig, PhaseConfig } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
 
@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { PhaseTimerConfig } from './complex-phase-utils'
 import ComplexFields from './ComplexFields'
 
 type ComplexBodyProps = {
@@ -20,7 +19,7 @@ type ComplexBodyProps = {
   name: string
   onNameChange: (name: string) => void
   onTypeChange: (type: TimerType) => void
-  onConfigChange: (updates: Partial<PhaseTimerConfig>) => void
+  onConfigChange: (updates: Partial<PhaseConfig>) => void
 }
 
 export const ComplexBody = ({
@@ -66,7 +65,7 @@ export const ComplexBody = ({
       <ComplexFields
         type={type}
         config={config}
-        onChange={(updates) => onConfigChange(updates as Partial<PhaseTimerConfig>)}
+        onChange={(updates) => onConfigChange(updates as Partial<PhaseConfig>)}
       />
     </FieldGroup>
   )

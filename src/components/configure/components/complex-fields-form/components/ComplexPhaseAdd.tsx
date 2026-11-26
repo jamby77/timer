@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { MoveLeft } from 'lucide-react'
 
-import type { AnyTimerConfig, ComplexPhase } from '@/types/configure'
+import type { AnyTimerConfig, ComplexPhase, PhaseConfig } from '@/types/configure'
 
 import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
@@ -11,7 +11,8 @@ import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 import { Button } from '@/components/ui/button'
 import { SetupBackButton } from '@/components/configure/components/shared/SetupBackButton'
 import ComplexBody from '@/components/configure/components/complex-fields-form/components/ComplexBody'
-import { createDefaultPhaseConfig, PhaseTimerConfig } from './complex-phase-utils'
+import { readDefaults } from '@/lib/configure/defaults'
+import { createPhaseDraft } from '@/lib/configure/new-timer'
 
 type PhaseDraft = Omit<ComplexPhase, 'order'>
 
@@ -30,28 +31,28 @@ export const ComplexPhaseAdd = ({
   onCancel,
   phasesCount,
 }: ComplexPhaseAddProps) => {
-  const [draftType, setDraftType] = useState<TimerType>(TimerType.COUNTDOWN)
-  const [draftConfig, setDraftConfig] = useState<PhaseTimerConfig>(() =>
-    createDefaultPhaseConfig('', TimerType.COUNTDOWN)
+  const [draftType, setDraftType] = useState<TimerType>(() => readDefaults('new-phase').phaseType ?? TimerType.COUNTDOWN)
+  const [draftConfig, setDraftConfig] = useState<PhaseConfig>(() =>
+    createPhaseDraft('', draftType)
   )
   const [customName, setCustomName] = useState<string>()
-  const draftName = customName ?? generateTimerName(draftConfig)
+  const draftName = customName ?? (draftConfig.name || generateTimerName(draftConfig))
 
-  const handleConfigChange = (updates: Partial<PhaseTimerConfig>) => {
-    setDraftConfig((prev) => ({ ...prev, ...updates }) as PhaseTimerConfig)
+  const handleConfigChange = (updates: Partial<PhaseConfig>) => {
+    setDraftConfig((prev) => ({ ...prev, ...updates }) as PhaseConfig)
   }
 
   const handleTypeChange = (type: TimerType) => {
-    const nextConfig = createDefaultPhaseConfig('', type)
+    const nextConfig = createPhaseDraft('', type)
     setDraftConfig(nextConfig)
     setDraftType(type)
   }
 
   const draft: PhaseDraft = useMemo(() => {
-    const phaseConfig: PhaseTimerConfig = normalizeDraftRoundNames({
+    const phaseConfig: PhaseConfig = normalizeDraftRoundNames({
       ...draftConfig,
       name: draftName || generateTimerName(draftConfig),
-    } as PhaseTimerConfig)
+    } as PhaseConfig)
     const id = createPhaseId(phaseConfig)
     phaseConfig.id = TimerConfigHash.generateTimerId(phaseConfig)
 

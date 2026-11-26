@@ -13,6 +13,7 @@ import { SwitchField } from './SwitchField'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 
 interface WorkRestFieldsProps {
+  allowUnset?: boolean
   config: Partial<WorkRestConfig>
   onChange: (updates: Partial<WorkRestConfig>) => void
 }
@@ -20,6 +21,7 @@ interface WorkRestFieldsProps {
 export const WorkRestFields = ({
   config: { autoContinue = false, fixedRestDuration, maxRounds, maxWorkTime, ratio = 1, restMode = WorkRestMode.RATIO },
   onChange,
+  allowUnset = false,
 }: WorkRestFieldsProps) => {
   const modeId = useId()
   const workLimitHintId = useId()
@@ -84,10 +86,11 @@ export const WorkRestFields = ({
           <FieldLabel htmlFor="fixedRestDuration">Rest time</FieldLabel>
           <TimePicker
             max={86400}
-            min={1}
+            min={allowUnset ? 0 : 1}
+            clearLabel={allowUnset ? 'Clear fixed rest duration' : undefined}
             secondsInputId="fixedRestDuration"
             value={fixedRestDuration || 0}
-            onTimeChange={(seconds) => onChange({ fixedRestDuration: seconds })}
+            onTimeChange={(seconds) => onChange({ fixedRestDuration: allowUnset && !seconds ? undefined : seconds })}
           />
         </Field>
       )}
@@ -114,7 +117,7 @@ export const WorkRestFields = ({
             id="maxRounds"
             name="maxRounds"
             value={maxRounds || ''}
-            onChange={(e) => onChange({ maxRounds: parseInt(e.target.value) || 0 })}
+            onChange={(e) => onChange({ maxRounds: parseInt(e.target.value) || (allowUnset ? undefined : 0) })}
           >
             <NativeSelectOption value="">Select rounds</NativeSelectOption>
             {[...Array(100)].map((_, i) => (

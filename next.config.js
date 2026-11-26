@@ -18,6 +18,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
     additionalManifestEntries: [
       { url: '/', revision: precacheRevision },
       { url: '/configure', revision: precacheRevision },
+      { url: '/settings', revision: precacheRevision },
       { url: '/configure/complex', revision: precacheRevision },
     ],
   },
