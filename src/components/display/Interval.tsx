@@ -164,13 +164,17 @@ export function Interval({
   const maxTime = (isWorkStep ? intervalConfig.workDuration : intervalConfig.restDuration) * 1000
   const progress = maxTime > 0 ? ((maxTime - timeLeft) / maxTime) * 100 : 0
 
-  const getCurrentIntervalInfo = () => {
-    const workSteps =
-      timerState === TimerState.Completed
-        ? intervalConfig.intervals
-        : Math.ceil((currentStepIndex + 1) / 2)
-    return `${workSteps} of ${intervalConfig.intervals} rounds`
-  }
+  const round = timerState === TimerState.Completed
+    ? intervalConfig.intervals
+    : Math.floor(currentStepIndex / 2) + 1
+  const roundCount = `${round} of ${intervalConfig.intervals} rounds`
+  const roundName = intervalConfig.roundNames?.[round - 1]?.trim()
+  const roundSubtitle = roundName ? (
+    <span className="flex items-baseline justify-center gap-1 [contain:inline-size]">
+      <strong className="truncate" title={roundName}>{roundName}</strong>
+      <span className="shrink-0 text-[0.875em] leading-none opacity-80"> · {roundCount}</span>
+    </span>
+  ) : roundCount
 
   const showPlayButton = isPreStarting
     ? preStart.state !== TimerState.Running
@@ -210,7 +214,7 @@ export function Interval({
         }
         state={isPreStarting ? preStart.state : timerState}
         time={isPreStarting ? String(preStart.secondsLeft) : formatTime(timeLeft)}
-        subtitle={getCurrentIntervalInfo()}
+        subtitle={roundSubtitle}
         isWork={isPreStarting ? undefined : currentStep?.isWork}
         fullscreen={isActive || isAutoStarting}
       >

@@ -37,12 +37,13 @@ const progress = z.object({
 type Progress = z.infer<typeof progress>
 function intervalPreview(saved: NonNullable<Progress['interval']>, config: IntervalConfig) {
   let { index, remaining } = saved
+  if (index % 2 === 1 && config.restDuration === 0) remaining = 0
   let overdue = saved.overdueMs ?? 0
   const lastIndex = config.intervals * 2 - (config.skipLastRest === false ? 1 : 2)
   while (remaining === 0 && index < lastIndex) {
     index++
     const seconds = index % 2 === 0 ? config.workDuration : config.restDuration
-    const duration = Math.max(1, seconds * 1000)
+    const duration = Math.max(0, seconds * 1000)
     remaining = Math.max(0, duration - overdue)
     overdue = Math.max(0, overdue - duration)
   }

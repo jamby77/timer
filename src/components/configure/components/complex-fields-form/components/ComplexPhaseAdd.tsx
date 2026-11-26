@@ -5,6 +5,7 @@ import type { AnyTimerConfig, ComplexPhase } from '@/types/configure'
 
 import { TimerType } from '@/types/configure'
 import { generateTimerName } from '@/lib/configure/utils'
+import { normalizeDraftRoundNames } from '@/lib/configure/round-names'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { Button } from '@/components/ui/button'
@@ -47,10 +48,10 @@ export const ComplexPhaseAdd = ({
   }
 
   const draft: PhaseDraft = useMemo(() => {
-    const phaseConfig: PhaseTimerConfig = {
+    const phaseConfig: PhaseTimerConfig = normalizeDraftRoundNames({
       ...draftConfig,
       name: draftName || generateTimerName(draftConfig),
-    } as PhaseTimerConfig
+    } as PhaseTimerConfig)
     const id = createPhaseId(phaseConfig)
     phaseConfig.id = TimerConfigHash.generateTimerId(phaseConfig)
 

@@ -8,6 +8,7 @@ import type { AnyTimerConfig, TimerConfigFormProps } from '@/types/configure'
 import { TimerType, WorkRestMode } from '@/types/configure'
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TIMER_TYPE_LABELS } from '@/lib/enums'
+import { normalizeDraftRoundNames } from '@/lib/configure/round-names'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
 import { Button } from '@/components/ui/button'
@@ -48,12 +49,12 @@ export const TimerConfigForm = ({
   )
 
   const buildFullConfig = (config: Partial<AnyTimerConfig>): AnyTimerConfig => {
-    const fullConfig = {
+    const fullConfig = normalizeDraftRoundNames({
       ...config,
       type,
       createdAt: new Date(),
       lastUsed: new Date(),
-    } as AnyTimerConfig
+    } as AnyTimerConfig)
 
     fullConfig.id = TimerConfigHash.generateTimerId(fullConfig)
     return fullConfig

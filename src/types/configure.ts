@@ -43,6 +43,7 @@ export interface IntervalConfig extends TimerConfig {
   workDuration: number // seconds
   restDuration: number // seconds
   intervals: number
+  roundNames?: string[]
   workLabel?: string
   restLabel?: string
   skipLastRest?: boolean

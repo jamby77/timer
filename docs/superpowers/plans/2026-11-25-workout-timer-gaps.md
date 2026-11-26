@@ -39,6 +39,10 @@ This can ship using existing configurations. It is the first PR.
 
 The following items can ship independently.
 
+- [x] Prepare the [named intervals design and 320 px phone previews](../specs/2026-11-26-named-intervals.md).
+- [x] Approve the named intervals design.
+- [x] Implement and verify named intervals.
+
 | Item | First usable version | Acceptance check |
 |---|---|---|
 | Named intervals | Optional names per round in Interval and EMOM setup. Fall back to the existing Work and Rest labels. Use the names in the preview and running header. | Row → Bike → Run appears in order after skips, rest, pause and reload. Old presets retain their labels. |
