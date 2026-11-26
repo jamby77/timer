@@ -1,4 +1,13 @@
+import type { IntervalConfig } from '@/types/configure'
+
 import { TimerState } from '@/lib/enums'
+
+export function intervalDisplayTime(config: IntervalConfig, isWork: boolean, remaining: number) {
+  const direction = isWork ? config.workDirection : config.restDirection
+  if (direction !== 'up') return remaining
+  const duration = isWork ? config.workDuration : config.restDuration
+  return Math.max(0, duration * 1000 - remaining)
+}
 
 /**
  * Format time (seconds or milliseconds) to MM:SS.MS format (with 2-digit milliseconds)

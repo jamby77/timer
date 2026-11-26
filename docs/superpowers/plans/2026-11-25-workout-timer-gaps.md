@@ -42,6 +42,10 @@ The following items can ship independently.
 - [x] Prepare the [named intervals design and 320 px phone previews](../specs/2026-11-26-named-intervals.md).
 - [x] Approve the named intervals design.
 - [x] Implement and verify named intervals.
+- [x] Prepare the [clock direction design and phone previews](../specs/2026-11-26-clock-direction.md).
+- [x] Approve the clock direction design.
+- [x] Implement clock direction.
+- [x] Verify clock direction in saved timers and during playback.
 
 | Item | First usable version | Acceptance check |
 |---|---|---|

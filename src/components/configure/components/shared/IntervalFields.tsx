@@ -1,6 +1,7 @@
-import { Minus, Plus } from 'lucide-react'
+import { useId } from 'react'
+import { Check, Minus, Plus } from 'lucide-react'
 
-import type { IntervalConfig } from '@/types/configure'
+import type { ClockDirection, IntervalConfig } from '@/types/configure'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -8,6 +9,39 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { TimePicker } from '@/components/configure/components/shared/TimePicker'
 import { RoundNamesField } from './RoundNamesField'
+
+function ClockDirectionField({
+  label,
+  value = 'down',
+  onChange,
+}: {
+  label: string
+  value?: ClockDirection
+  onChange: (value: ClockDirection) => void
+}) {
+  const name = useId()
+  return (
+    <fieldset aria-label={label} className="flex gap-1 rounded-lg border p-[3px]">
+      {(['up', 'down'] as const).map((direction) => (
+        <label
+          key={direction}
+          className="has-checked:bg-secondary has-focus-visible:ring-ring relative flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1 rounded-md text-sm font-medium has-focus-visible:ring-2"
+        >
+          <input
+            type="radio"
+            name={name}
+            value={direction}
+            checked={value === direction}
+            onChange={() => onChange(direction)}
+            className="sr-only"
+          />
+          {value === direction && <Check aria-hidden="true" className="size-4" />}
+          Count {direction}
+        </label>
+      ))}
+    </fieldset>
+  )
+}
 
 interface IntervalFieldsProps {
   config: Partial<IntervalConfig>
@@ -31,6 +65,11 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             value={config.workDuration || 0}
             onTimeChange={(seconds) => onChange({ workDuration: seconds })}
           />
+          <ClockDirectionField
+            label="Work clock direction"
+            value={config.workDirection}
+            onChange={(workDirection) => onChange({ workDirection })}
+          />
         </Field>
         <Field>
           <FieldLabel htmlFor="restDuration">Rest Duration</FieldLabel>
@@ -40,6 +79,13 @@ export const IntervalFields = ({ config, onChange }: IntervalFieldsProps) => {
             value={config.restDuration || 0}
             onTimeChange={(seconds) => onChange({ restDuration: seconds })}
           />
+          {(config.restDuration ?? 0) > 0 && (
+            <ClockDirectionField
+              label="Rest clock direction"
+              value={config.restDirection}
+              onChange={(restDirection) => onChange({ restDirection })}
+            />
+          )}
         </Field>
       </div>
 

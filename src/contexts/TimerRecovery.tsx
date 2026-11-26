@@ -9,7 +9,7 @@ import type { AnyTimerConfig, IntervalConfig } from '@/types/configure'
 import { phaseSequence } from '@/lib/configure/phase-sequence'
 import { TimerPhase, TimerState } from '@/lib/enums'
 import { SoundEngine } from '@/lib/sound/SoundEngine'
-import { formatTime } from '@/lib/timer/utils'
+import { formatTime, intervalDisplayTime } from '@/lib/timer/utils'
 
 import { Button } from '@/components/ui/button'
 
@@ -178,7 +178,9 @@ export function TimerRecovery({
       : saved.interval
     const time =
       saved.prestart ??
-      interval?.remaining ??
+      (interval && activeConfig.type === 'INTERVAL'
+        ? intervalDisplayTime(activeConfig, interval.index % 2 === 0, interval.remaining)
+        : undefined) ??
       saved.workrest?.preview?.time ??
       saved.workrest?.time ??
       saved.countdown ??
