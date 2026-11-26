@@ -7,7 +7,6 @@ import type { TimerTypeSelectorProps } from '@/types/configure'
 import { TIMER_TYPE_LABELS, TimerType } from '@/lib/enums'
 import { TIMER_TYPE_ICONS } from '@/lib/timer-type-icons'
 
-import { CardContainer } from '@/components/ui'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 const TIMER_TYPES = [
@@ -45,7 +44,7 @@ const TIMER_TYPES = [
 
 export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSelectorProps) => {
   return (
-    <CardContainer>
+    <>
       <h2 className="mb-2 text-xl font-semibold sm:mb-6">Timer Type</h2>
       <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         {TIMER_TYPES.map(({ type, name, description, icon: Icon }) => (
@@ -80,6 +79,6 @@ export const TimerTypeSelector = ({ selectedTimer, onTimerSelect }: TimerTypeSel
           </Card>
         ))}
       </div>
-    </CardContainer>
+    </>
   )
 }

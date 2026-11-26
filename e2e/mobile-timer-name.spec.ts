@@ -26,7 +26,7 @@ for (const type of ['Countdown', 'Complex']) {
     await expect(name).toHaveValue(title)
     await page.getByRole('button', { name: 'Save as Preset' }).tap()
     await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
-    await page.goto('/configure')
+    await page.goto('/configure?tab=presets')
     await page.reload()
     await page.getByRole('heading', { name: title, exact: true }).tap()
     await expect(name).toHaveValue(title)

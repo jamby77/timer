@@ -41,6 +41,7 @@ test('round names fit the setup row, discard canceled edits and persist survivin
   await page.getByRole('button', { name: 'Save as Preset' }).tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await page.getByRole('heading', { name: 'Named circuit', exact: true }).tap()
   await names.tap()
   await expect(field(20)).toHaveValue('Ski')
@@ -61,7 +62,7 @@ test('round names fit the setup row, discard canceled edits and persist survivin
 })
 
 test('EMOM keeps names when reopened with zero rest', async ({ page }) => {
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await page.getByRole('heading', { name: 'EMOM (10 min)', exact: true }).tap()
   const names = page.getByRole('button', { name: /Round names/i })
   await names.tap()
@@ -97,7 +98,7 @@ test('Complex phase editor retains round names in the saved workout and its time
   await page.getByLabel(/Timer Name/).fill('Named workout')
   await page.getByRole('button', { name: 'Save as Preset' }).tap()
   await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await page.getByRole('heading', { name: 'Named workout', exact: true }).tap()
   await page.getByRole('tab', { name: 'Preview', exact: true }).tap()
   const panel = page.getByRole('tabpanel', { name: 'Preview' })

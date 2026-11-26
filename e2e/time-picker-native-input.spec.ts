@@ -17,7 +17,7 @@ for (const [field, duration] of [
       return JSON.parse(localStorage.getItem(key)!).config
     })
     expect(config.duration).toBe(duration)
-    await page.goto('/configure')
+    await page.goto('/configure?tab=presets')
     await page.reload()
     await page.getByRole('heading', { name: `Native ${field}`, exact: true }).click()
     await expect(page.locator(`input[name=${field}]`)).toHaveValue('05')
@@ -60,7 +60,7 @@ test('pasting unchanged zero validates the minimum and saves it', async ({ page,
     return JSON.parse(localStorage.getItem(key)!).config
   })
   expect(config.duration).toBe(1)
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await page.reload()
   await page.getByRole('heading', { name: 'Pasted minimum', exact: true }).click()
   await expect(seconds).toHaveValue('01')

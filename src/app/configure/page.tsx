@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 import { AnyTimerConfig, PredefinedStyle, RecentTimer, TimerType } from '@/types/configure'
@@ -11,6 +11,7 @@ import { storage } from '@/lib/configure/storage'
 import { validateTimerConfig } from '@/lib/configure/utils'
 import { TimerConfigHash } from '@/lib/timer/TimerConfigHash'
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ClientOnly } from '@/components/ClientOnly'
 import { PredefinedStyles } from '@/components/configure/PredefinedStyles'
 import { RecentTimers } from '@/components/configure/RecentTimers'
@@ -20,9 +21,11 @@ import { PageContainer } from '@/components/PageContainer'
 
 export default function ConfigurePage() {
   return (
-    <ClientOnly>
-      <ConfigurePageContent />
-    </ClientOnly>
+    <Suspense fallback={null}>
+      <ClientOnly>
+        <ConfigurePageContent />
+      </ClientOnly>
+    </Suspense>
   )
 }
 
@@ -32,6 +35,16 @@ function ConfigurePageContent() {
   const [selectedPredefined, setSelectedPredefined] =
     useState<PredefinedStyle<AnyTimerConfig> | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const setupTab = searchParams.get('tab') === 'presets' ? 'presets' : 'new'
+
+  function changeTab(value: string) {
+    const url = new URL(window.location.href)
+    if (value === 'presets') url.searchParams.set('tab', value)
+    else url.searchParams.delete('tab')
+    window.history.replaceState(null, '', url)
+  }
+
   const [starterPresets, setStarterPresets] = useState(getStarterPresets)
   useEffect(() => {
     const refresh = () => setStarterPresets(getStarterPresets())
@@ -153,34 +166,29 @@ function ConfigurePageContent() {
             onRemoveTimer={handleRemoveTimer}
           />
         </div>
-        <div className="space-y-2">
-          <h1 className="text-foreground text-center text-xl uppercase">Configure Timer</h1>
-          <p className="text-muted-foreground text-center">
-            Create custom timers or choose from a preset
-          </p>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="lg:grid lg:grid-cols-12 lg:gap-6">
-          {/* Main Column - Timer Type Selection */}
-          <div className="space-y-2 md:space-y-6 lg:col-span-8">
-            <TimerTypeSelector
-              selectedTimer={selectedTimer}
-              onTimerSelect={handleToggleSelectedTimer}
+        <Tabs value={setupTab} onValueChange={changeTab} className="bg-background mx-2 overflow-hidden rounded-lg border">
+          <TabsList aria-label="Timer setup" className="flex h-auto rounded-none p-0">
+            {(['New', 'Presets'] as const).map(label => (
+              <TabsTrigger
+                key={label}
+                value={label.toLowerCase()}
+                className="min-h-11 flex-1 rounded-none border-b border-t-2 border-t-muted font-semibold last:border-l focus-visible:-outline-offset-2 focus-visible:outline-2 data-[state=active]:border-b-transparent data-[state=active]:shadow-none"
+              >
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value="new" className="mt-0 p-2 md:p-6">
+            <TimerTypeSelector selectedTimer={selectedTimer} onTimerSelect={handleToggleSelectedTimer} />
+          </TabsContent>
+          <TabsContent value="presets" className="mt-0 p-2 md:p-6">
+            <PredefinedStyles
+              styles={[...starterPresets, ...customPresets]}
+              onSelectStyle={handleSelectPreset}
+              onStartTimer={(config) => handleStartTimer(config, true)}
             />
-          </div>
-
-          {/* Sidebar - Predefined Styles */}
-          <div className="lg:col-span-4">
-            <div className="lg:sticky lg:top-8">
-              <PredefinedStyles
-                styles={[...starterPresets, ...customPresets]}
-                onSelectStyle={handleSelectPreset}
-                onStartTimer={(config) => handleStartTimer(config, true)}
-              />
-            </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </PageContainer>
   )

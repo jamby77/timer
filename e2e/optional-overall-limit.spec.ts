@@ -27,7 +27,7 @@ test('clearing an overall limit saves and reopens an unlimited workout', async (
   const unlimited = presets.find((preset) => preset.name === 'Unlimited workout')
   expect(unlimited).toBeDefined()
   expect(unlimited.config).not.toHaveProperty('overallTimeLimit')
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await page.reload()
   await page.getByRole('heading', { name: 'Unlimited workout', exact: true }).click()
   await expect(page.locator('input[name=seconds]')).toHaveValue('00')

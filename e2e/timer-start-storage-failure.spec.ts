@@ -14,6 +14,8 @@ for (const mode of ['Countdown', 'Complex', 'preset']) {
       await page.getByRole('heading', { name: 'Countdown', exact: true }).click()
       await page.getByLabel(/Timer Name/).fill('Keep this timer')
       await page.locator('input[name=seconds]').fill('30')
+    } else {
+      await page.getByRole('tab', { name: 'Presets', exact: true }).click()
     }
     await page.evaluate(() => {
       const original = Storage.prototype.setItem
@@ -30,7 +32,8 @@ for (const mode of ['Countdown', 'Complex', 'preset']) {
       : page.getByRole('button', { name: 'Start Timer', exact: true })
     await start.click()
     await expect(page.getByText('Failed to start timer. Please try again.', { exact: true })).toBeVisible()
-    await expect(page).toHaveURL(mode === 'Complex' ? /\/configure\/complex$/ : /\/configure$/)
+    const setupPath = mode === 'Complex' ? '/configure/complex' : '/configure'
+    await expect(page).toHaveURL(mode === 'preset' ? '/configure?tab=presets' : setupPath)
     expect(errors).toEqual([])
     expect(await page.evaluate(() => localStorage.getItem('recent_timers'))).toBeNull()
     if (mode === 'Countdown') {

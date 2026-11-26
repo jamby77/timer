@@ -38,7 +38,7 @@ for (const [type, field] of [
     const cleared = await saved(page, `Cleared ${type}`)
     expect(cleared).toBeDefined()
     expect(cleared.config).not.toHaveProperty(field)
-    await page.goto('/configure')
+    await page.goto('/configure?tab=presets')
     await page.reload()
     await page.getByRole('heading', { name: `Cleared ${type}`, exact: true }).click()
     await expect(page.locator('input[name=seconds]').nth(workRest ? 1 : 0)).toHaveValue('00')
@@ -77,7 +77,7 @@ for (const type of ['Countdown', 'Stopwatch']) {
     expect((await saved(page, name)).config[type === 'Countdown' ? 'duration' : 'timeLimit']).toBe(
       type === 'Countdown' ? 1 : 86400
     )
-    await page.goto('/configure')
+    await page.goto('/configure?tab=presets')
     await page.reload()
     await page.getByRole('heading', { name, exact: true }).click()
     await expect(

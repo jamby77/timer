@@ -54,9 +54,9 @@ export const RecentTimers = ({ timers, onStartTimer, onRemoveTimer }: RecentTime
           ))}
         </CarouselContent>
         {displayTimers.length > 1 && (
-          <div className="mt-2 flex justify-center gap-3 max-sm:has-[[data-slot=carousel-next]:disabled]:has-[[data-slot=carousel-previous]:disabled]:hidden sm:contents">
-            <CarouselPrevious className="max-sm:static max-sm:size-11 max-sm:translate-y-0" />
-            <CarouselNext className="max-sm:static max-sm:size-11 max-sm:translate-y-0" />
+          <div className="hidden sm:contents">
+            <CarouselPrevious />
+            <CarouselNext />
           </div>
         )}
       </Carousel>

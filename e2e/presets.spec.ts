@@ -54,6 +54,7 @@ for (const type of ['Countdown', 'Stopwatch', 'Interval', 'Work/Rest Ratio']) {
     })
     expect(await page.evaluate(() => localStorage.getItem('recent_timers'))).toBeNull()
     await page.reload()
+    await page.getByRole('tab', { name: 'Presets', exact: true }).click()
     await page.getByRole('heading', { name, exact: true }).click()
     await expect(page.getByLabel(/Timer Name/)).toHaveValue(name)
     await expect(page.getByLabel('Completion Message')).toHaveValue('Finished!')
@@ -82,7 +83,7 @@ for (const type of ['Countdown', 'Stopwatch', 'Interval', 'Work/Rest Ratio']) {
 }
 
 test('save a built-in copy without modifying Tabata', async ({ page }) => {
-  await page.goto('/configure')
+  await page.goto('/configure?tab=presets')
   await page.waitForLoadState('networkidle')
   await page.getByRole('heading', { name: 'Tabata', exact: true }).click()
   await page.getByLabel(/Timer Name/).fill('My Tabata')
@@ -112,6 +113,7 @@ test('complex preset reloads phases and can be saved again', async ({ page }) =>
   await page.goto('/configure')
   await page.waitForLoadState('networkidle')
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await page.getByRole('heading', { name: 'Saved workout', exact: true }).click()
   await expect(page).toHaveURL(/\/configure\/complex\?preset=/)
   await page.getByRole('button', { name: 'Edit phase' }).click()
@@ -174,6 +176,7 @@ test('malformed saved presets are ignored and invalid links show an error', asyn
     )
   )
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Tabata', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Broken preset', exact: true })).toHaveCount(0)
   await page.goto('/configure/complex?preset=broken')
@@ -190,6 +193,7 @@ test('a corrupt preset does not hide valid presets after reload', async ({ page 
   const saved = await presets(page)
   await page.evaluate(() => localStorage.setItem('preset_broken', '{broken'))
   await page.reload()
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Tabata', exact: true })).toBeVisible()
   await page.getByRole('heading', { name: 'Still available', exact: true }).click()
   await expect(page.locator('input[name=seconds]')).toHaveValue('30')
@@ -226,6 +230,7 @@ test('malformed recent history does not hide usable timers after reload', async 
   const card = page.locator('[data-slot=card]').filter({ has: page.getByRole('heading', { name: 'Recovered recent timer', exact: true }) })
   await expect(card).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Broken recent timer', exact: true })).toHaveCount(0)
+  await page.getByRole('tab', { name: 'Presets', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Tabata', exact: true })).toBeVisible()
   expect(await page.evaluate(() => localStorage.getItem('recent_timers'))).toBe(stored)
   await card.getByRole('button', { name: 'Start Recovered recent timer', exact: true }).click()
@@ -243,7 +248,7 @@ test.describe('mobile preset cards', () => {
 
   test('preset Start opens the timer by edge tap and keyboard', async ({ page }) => {
     for (const action of ['tap', 'Enter', 'Space']) {
-      await page.goto('/configure')
+      await page.goto('/configure?tab=presets')
       const card = page.getByRole('group', { name: 'Tabata', exact: true })
       const start = card.getByRole('button', { name: 'Start', exact: true })
       const bounds = (await start.boundingBox())!
@@ -269,6 +274,7 @@ test.describe('mobile preset cards', () => {
     await page.getByRole('button', { name: 'Save as Preset' }).tap()
     await expect(page.getByText('Preset saved.', { exact: true })).toBeVisible()
     await page.reload()
+    await page.getByRole('tab', { name: 'Presets', exact: true }).click()
 
     const savedCard = page.getByRole('group', { name, exact: true })
     await expect(savedCard.getByText('45s countdown', { exact: true })).toHaveCount(1)
