@@ -23,7 +23,6 @@ import {
   ResetButton,
   SkipButton,
   StartButton,
-  StopButton,
 } from '@/components/ui/timer-buttons'
 import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
 import { LapHistory } from './LapHistory'
@@ -137,7 +136,6 @@ export function WorkRestTimer({
   const showStartButton = isPreStarting
     ? isPreStartPaused
     : isIdlePhase || isCompletedPhase || isPausedState
-  const showStopButton = isPreStarting ? true : isWorkPhase
   const showPauseButton = isPreStarting ? isPreStartRunning : isWorkPhase && isRunningState
 
   const fullscreen = (!isIdlePhase && !isCompletedPhase) || isPreStarting
@@ -260,7 +258,14 @@ export function WorkRestTimer({
         />
 
         {/* Main Control Buttons */}
-        <TimerControls secondary={phaseControls}>
+        <TimerControls
+          key={JSON.stringify([isPreStarting, state.phase, state.rounds, displayState])}
+          secondary={phaseControls}
+          onStop={handleStop}
+          stopLabel={isRestPhase ? 'Stop rest' : 'Stop work'}
+          stopDisabled={(isAtStart || isCompletedPhase) && !isPreStarting}
+          paused={displayState === TimerState.Paused}
+        >
           {showStartButton && (
             <>
               <StartButton
@@ -284,21 +289,6 @@ export function WorkRestTimer({
               title={isPreStarting ? 'Pause countdown' : 'Pause work'}
               label={isPreStarting ? 'Pause countdown' : 'Pause work'}
             />
-          )}
-
-          {(showStopButton || showStartButton) && (
-            <StopButton
-              disabled={(isAtStart || isCompletedPhase) && !isPreStarting}
-              onClick={handleStop}
-              title="Stop work"
-              label="Stop work"
-            />
-          )}
-
-          {isRestPhase && (
-            <>
-              <StopButton onClick={handleStop} title="Stop rest" label="Stop rest" />
-            </>
           )}
         </TimerControls>
         {!fullscreen && (

@@ -44,6 +44,7 @@ for (const [width, height, top, side, bottom] of [
       await expect(canvas).toHaveCSS('background-color', await card.evaluate(el => getComputedStyle(el).backgroundColor))
       expect(await coversEdges()).toBe(true)
       await button('Stop intervals').tap()
+      await page.getByRole('button', { name: 'End', exact: true }).tap()
       await expect(page.getByRole('navigation')).toBeVisible()
       expect(await coversEdges()).toBe(false)
       await expect(canvas).toHaveCSS('background-color', idle)

@@ -44,6 +44,7 @@ for (const complex of [false, true]) {
     await expect(ready).toBeVisible()
     await expect(stop).toBeEnabled()
     await stop.tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(ready).toBeHidden()
     if (complex) {
       await expect(page.getByRole('status')).toHaveText('Timer stopped')

@@ -176,6 +176,7 @@ export const Timer = ({
           maxTime={maxTime}
         />
         <TimerButton
+          key={String(isPreStarting)}
           phaseControls={phaseControls}
           state={isPreStarting ? preStart.state : state}
           onStart={() => handleStart()}

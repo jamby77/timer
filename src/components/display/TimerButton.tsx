@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 import { TimerState } from '@/lib/enums'
 
-import { PauseButton, ResetButton, StartButton, StopButton } from '@/components/ui/timer-buttons'
+import { PauseButton, ResetButton, StartButton } from '@/components/ui/timer-buttons'
 import { TimerControls } from './TimerControls'
 
 interface TimerButtonProps {
@@ -36,14 +36,15 @@ function TimerButton({
   }
 
   return (
-    <TimerControls secondary={phaseControls}>
+    <TimerControls
+      key={state}
+      secondary={phaseControls}
+      onStop={onReset}
+      stopLabel="Stop timer"
+      stopDisabled={!isRunning && state !== TimerState.Paused}
+      paused={state === TimerState.Paused}
+    >
       {playButton}
-      <StopButton
-        onClick={onReset}
-        disabled={!isRunning && state !== TimerState.Paused}
-        title="Stop"
-        label="Stop timer"
-      />
     </TimerControls>
   )
 }

@@ -84,6 +84,7 @@ test('stopping intervals restores the configured first duration and round', asyn
   await page.getByRole('button', { name: 'Skip current interval', exact: true }).click()
   await expect(page.getByText('2 of 3 rounds', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Stop intervals', exact: true }).click()
+  await page.getByRole('button', { name: 'End', exact: true }).click()
   await expect(page.locator('[data-timer-state]')).toHaveAttribute('data-timer-state', 'idle')
   await expect(page.getByText('1 of 3 rounds', { exact: true })).toBeVisible()
   await expect(page.locator('[data-slot="card-content"]')).toHaveText('00:30.00')

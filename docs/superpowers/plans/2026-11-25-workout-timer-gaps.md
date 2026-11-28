@@ -77,6 +77,12 @@ The following items can ship independently.
 - [x] Approve the link sharing design.
 - [x] **Share and import by link.** Compress a versioned timer definition, including Complex phases, repeat counts and cue settings, and encode it in the URL fragment. Measure the complete URL before sharing. If it exceeds the supported length, show “Timer too large to share by link.” On opening a link, bound the decoded size, validate the settings and show a preview with Start and Save. Verify in a fresh browser profile with valid, oversized, malformed and older links, and a timer whose name already exists.
 
+## Stop confirmation
+
+- [x] Preview [Stop confirmation on a 320px phone](../specs/2026-11-28-stop-confirmation.md).
+- [x] Approve the design.
+- [x] Implement and verify the Stop confirmation on a 320px phone.
+
 ## Later candidates and boundaries
 
 - A paused timeline scrubber needs clear rules for moving across manual transitions, lap history, and already-played cues. Evaluate it after the preview and repeat model are in use. A stop confirmation can be evaluated separately against accidental stops during workouts.

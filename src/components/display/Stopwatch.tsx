@@ -198,6 +198,7 @@ export function Stopwatch({
           />
         )}
         <TimerButton
+          key={String(isPreStarting)}
           phaseControls={phaseControls}
           state={isPreStarting ? preStart.state : state}
           onStart={() => handleStart()}

@@ -74,6 +74,7 @@ test('a running workout reacquires a released lock when the page becomes visible
     document.dispatchEvent(new Event('visibilitychange'))
   })
   await page.getByRole('button', { name: 'Stop timer', exact: true }).tap()
+  await page.getByRole('button', { name: 'End', exact: true }).tap()
   expect(
     await page.evaluate(() =>
       (window as unknown as { locks: WakeLockSentinel[] }).locks.map((lock) => lock.released)
