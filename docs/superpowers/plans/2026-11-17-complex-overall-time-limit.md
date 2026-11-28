@@ -7,8 +7,6 @@
 ComplexTimer owns the clock and acknowledgement; its existing Stop/restart paths
 control the whole workout. A controlled dialog leaves phase timers running.
 **Tech Stack:** React, TypeScript, Radix Dialog, Vitest, Playwright.
-**Spec:** ../specs/2026-11-17-complex-overall-limit-design.md
-
 ## Global constraints
 
 Keep phase controls and digit sizing unchanged. Exclude pauses and pre-start.

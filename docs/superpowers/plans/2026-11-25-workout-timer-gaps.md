@@ -4,11 +4,11 @@
 
 ## Design review workflow
 
-Work in the order below. Before implementing each feature, add its own design document under `docs/superpowers/specs/`, show its preview, and record the review decision here. Treat individually shippable items in sections 4 and 5 as separate features. Mark preview, approval, implementation and verification independently. For timer-screen changes, compare the digits and controls against the current layout at the same viewport and timer state.
+Work in the order below. Before implementing each feature, add its own design document under `docs/superpowers/specs/`, show its preview, and record the review decision here. Keep screenshots outside the repository and retire the design document once implementation is verified. Treat individually shippable items in sections 4 and 5 as separate features. Mark preview, approval, implementation and verification independently. For timer-screen changes, compare the digits and controls against the current layout at the same viewport and timer state.
 
 ## 1. Show the next Complex phase
 
-- [x] Prepare the [Up Next design and phone previews](../specs/2026-11-25-up-next.md). Compare digit and footer geometry with the current screen.
+- [x] Prepare the Up Next design and phone previews. Compare digit and footer geometry with the current screen.
 - [x] Approve the design before implementation.
 
 - [x] In `src/components/display/ComplexTimer.tsx`, derive the next phase from the current index and the saved phase order. Use the existing shared phase header. Display, for example, **Next: Tabata**. Include a compact duration when the duration is known. A cap on self-paced work is an upper bound, not an exact duration.
@@ -19,7 +19,7 @@ This can ship using existing configurations. It is the first PR.
 
 ## 2. Add a timeline preview
 
-- [x] Prepare the [timeline design and interactive phone mockup](../specs/2026-11-25-timeline-preview.md).
+- [x] Prepare the timeline design and interactive phone mockup.
 - [x] Approve the timeline design before implementation.
 
 - [x] Add **Preview** to Complex setup alongside the existing phase summary. Start with named phases and expand Interval rounds on demand. Show the pre-start countdown separately from timed work. Use existing duration formatting and the same interval sequencing rules as playback.
@@ -28,7 +28,7 @@ This can ship using existing configurations. It is the first PR.
 
 ## 3. Repeat a group of phases
 
-- [x] Prepare the [repeat group design and phone previews](../specs/2026-11-25-repeat-phases.md).
+- [x] Prepare the repeat group design and phone previews.
 - [x] Approve the repeat group design before implementation.
 
 - [x] Add a single level of **Repeat** in the Complex editor. Select consecutive phases, set a count, and edit the group in one place. Example: Row 45s, Rest 15s, Bike 45s, Rest 15s, repeated four times, followed by a single cooldown. This also covers repeated Tabatas and recurring rests.
@@ -39,18 +39,18 @@ This can ship using existing configurations. It is the first PR.
 
 The following items can ship independently.
 
-- [x] Prepare the [named intervals design and 320 px phone previews](../specs/2026-11-26-named-intervals.md).
+- [x] Prepare the named intervals design and 320 px phone previews.
 - [x] Approve the named intervals design.
 - [x] Implement and verify named intervals.
-- [x] Prepare the [clock direction design and phone previews](../specs/2026-11-26-clock-direction.md).
+- [x] Prepare the clock direction design and phone previews.
 - [x] Approve the clock direction design.
 - [x] Implement clock direction.
 - [x] Verify clock direction in saved timers and during playback.
-- [x] Prepare the [stopwatch splits design and phone previews](../specs/2026-11-26-stopwatch-splits.md).
+- [x] Prepare the stopwatch splits design and phone previews.
 - [x] Approve the stopwatch splits design.
 - [x] Implement stopwatch splits.
 - [x] Verify split timing, history and recovery.
-- [x] Prepare the [10s warning sound and setup preview](../specs/2026-11-26-ten-second-warning.md).
+- [x] Prepare the 10s warning sound and setup preview.
 - [x] Approve the 10s warning setup design.
 - [x] Implement and verify the 10s warning.
 
@@ -63,23 +63,23 @@ The following items can ship independently.
 
 ## 5. Reduce repeated setup and make timers portable
 
-- [x] Prepare the [Settings tab design and 320 px previews](../specs/2026-11-26-personal-defaults.md).
+- [x] Prepare the Settings tab design and 320 px previews.
 - [x] Approve the personal defaults design.
 - [x] **Personal defaults.** Add Settings as the third top tab. Include shared settings, sound cues, and the existing starting values for standalone timers, Complex phases and built-in presets. Verify opening an existing preset, duplicating a phase and resuming a timer preserve their saved settings.
-- [x] Preview [two recent timers side by side on a 320px phone](../specs/2026-11-26-compact-recents.md).
+- [x] Preview two recent timers side by side on a 320px phone.
 - [x] Approve the compact recent timer cards.
 - [x] Implement and verify two visible cards in portrait, swipe navigation, Start and Remove.
 
-- [x] Preview the [New and Presets setup tabs](../specs/2026-11-26-setup-tabs.md).
+- [x] Preview the New and Presets setup tabs.
 - [x] Approve and implement the setup tabs. Verify touch swipes and carousel position on both tabs at 320px.
 
-- [x] Preview [sharing from Presets and opening a timer link at 320px](../specs/2026-11-26-share-link.md).
+- [x] Preview sharing from Presets and opening a timer link at 320px.
 - [x] Approve the link sharing design.
 - [x] **Share and import by link.** Compress a versioned timer definition, including Complex phases, repeat counts and cue settings, and encode it in the URL fragment. Measure the complete URL before sharing. If it exceeds the supported length, show “Timer too large to share by link.” On opening a link, bound the decoded size, validate the settings and show a preview with Start and Save. Verify in a fresh browser profile with valid, oversized, malformed and older links, and a timer whose name already exists.
 
 ## Stop confirmation
 
-- [x] Preview [Stop confirmation on a 320px phone](../specs/2026-11-28-stop-confirmation.md).
+- [x] Preview Stop confirmation on a 320px phone.
 - [x] Approve the design.
 - [x] Implement and verify the Stop confirmation on a 320px phone.
 
