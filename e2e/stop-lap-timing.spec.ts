@@ -29,6 +29,7 @@ for (const type of ['COUNTDOWN', 'STOPWATCH']) {
     await button('Start timer').tap()
     await advanceWithoutFrames(2370)
     await button('Stop timer').tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(history).toContainText('00:02.37', { timeout: 1500 })
 
     await button('Start timer').tap()
@@ -36,11 +37,13 @@ for (const type of ['COUNTDOWN', 'STOPWATCH']) {
     await button('Pause timer').tap()
     await advanceWithoutFrames(5000)
     await button('Stop timer').tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(history).toContainText('00:01.32')
 
     await button('Start timer').tap()
     await advanceWithoutFrames(15000)
     await button('Stop timer').tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(history).toContainText('00:10.00')
   })
 }
@@ -79,6 +82,7 @@ for (const [scenario, elapsed, laps] of [
       await page.clock.setSystemTime(startedAt + elapsed + 20000)
     }
     await button('Stop intervals').tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(button('Expand lap history')).toContainText('Last lap' + laps[0], {
       timeout: 1500,
     })

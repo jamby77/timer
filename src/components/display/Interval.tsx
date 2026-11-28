@@ -21,7 +21,6 @@ import {
   ResetButton,
   SkipButton,
   StartButton,
-  StopButton,
 } from '@/components/ui/timer-buttons'
 import { TimerContainer } from '@/components/display/TimerContainer'
 import { TimerProgressIndicator } from '@/components/display/TimerProgressIndicator'
@@ -227,7 +226,14 @@ export function Interval({
           minTime={0}
           maxTime={maxTime}
         />
-        <TimerControls secondary={phaseControls}>
+        <TimerControls
+          key={JSON.stringify([isPreStarting, timerState, currentStepIndex])}
+          secondary={phaseControls}
+          onStop={handleStop}
+          stopLabel="Stop intervals"
+          stopDisabled={!isActive}
+          paused={(isPreStarting ? preStart.state : timerState) === TimerState.Paused}
+        >
           {showPlayButton ? (
             <StartButton
               onClick={() => handleStart()}
@@ -249,12 +255,6 @@ export function Interval({
           ) : (
             <PauseButton onClick={handlePause} title="Pause intervals" label="Pause intervals" />
           )}
-          <StopButton
-            onClick={handleStop}
-            disabled={!isActive}
-            title="Stop intervals"
-            label="Stop intervals"
-          />
         </TimerControls>
       </TimerCard>
       {!isActive && (

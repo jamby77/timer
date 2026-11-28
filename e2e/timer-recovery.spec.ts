@@ -205,6 +205,7 @@ for (const scenario of ['later work', 'later rest', 'paused', 'finished']) {
       await expect(header).toContainText('2 of 3 rounds')
       await expect(header).toContainText(scenario === 'later rest' ? 'Rest' : 'Work')
       await button('Stop intervals').tap()
+      await page.getByRole('button', { name: 'End', exact: true }).tap()
     }
     await button('Expand lap history').tap()
     const earlierLaps = scenario === 'finished' ? 2 : 1

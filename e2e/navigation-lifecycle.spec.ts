@@ -71,6 +71,7 @@ for (const type of types) {
     await pause.click()
     await expect(page.getByRole('navigation')).toBeHidden()
     await stop.click()
+    await page.getByRole('button', { name: 'End', exact: true }).click()
     await expect(page.getByRole('navigation')).toBeVisible()
     if (type === 'COMPLEX') {
       await expect(page.getByRole('status')).toHaveText('Timer stopped')
@@ -80,6 +81,7 @@ for (const type of types) {
     await start.click()
     await expect(page.getByRole('navigation')).toBeHidden()
     await stop.click()
+    await page.getByRole('button', { name: 'End', exact: true }).click()
     await expect(page.getByRole('navigation')).toBeVisible()
   })
 

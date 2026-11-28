@@ -167,6 +167,7 @@ test.describe('mobile install banner', () => {
     await page.getByRole('button', { name: 'Pause timer', exact: true }).tap()
     await expect(banner).toBeHidden()
     await page.getByRole('button', { name: 'Stop timer', exact: true }).tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(banner.getByRole('button', { name: 'Install', exact: true })).toBeVisible()
   })
 
@@ -180,6 +181,7 @@ test.describe('mobile install banner', () => {
     await page.getByRole('button', { name: 'Pause timer', exact: true }).tap()
     await expect(banner).toBeHidden()
     await page.getByRole('button', { name: 'Stop timer', exact: true }).tap()
+    await page.getByRole('button', { name: 'End', exact: true }).tap()
     await expect(banner).toBeVisible()
   })
 

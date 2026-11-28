@@ -80,6 +80,7 @@ for (const restMode of ['ratio', 'fixed']) {
       await expect(digits).toContainText('00:01')
       await finish.click()
       await page.getByRole('button', { name: 'Stop rest', exact: true }).click()
+      await page.getByRole('button', { name: 'End', exact: true }).click()
       await expect(page.getByRole('status')).toHaveText('Timer stopped')
       await expect(page.getByRole('navigation')).toBeVisible()
     })
